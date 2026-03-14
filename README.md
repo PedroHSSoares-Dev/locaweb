@@ -7,9 +7,7 @@
 
 ## Sobre o projeto
 
-O **Predictfy** é uma solução de AIOps desenvolvida para transformar dados históricos de incidentes operacionais da Locaweb em inteligência preditiva. O sistema antecipa falhas, identifica tendências, projeta o risco de violação de OLA e apoia a tomada de decisão operacional — tudo em uma dashboard interativa com três visões distintas por perfil de usuário.
-
-O projeto é continuação da marca **Predictfy**, equipe que conquistou 3º lugar (Bronze) no Challenge FIAP 2025 com a ClickBus.
+A **Predictfy** idealizou e desenvolveu uma solução de AIOps para transformar dados históricos de incidentes operacionais da Locaweb em inteligência preditiva. O sistema antecipa falhas, identifica tendências, projeta o risco de violação de OLA e apoia a tomada de decisão operacional — tudo em uma dashboard interativa com três visões distintas por perfil de usuário.
 
 ---
 
@@ -17,13 +15,11 @@ O projeto é continuação da marca **Predictfy**, equipe que conquistou 3º lug
 
 | Nome | RM | GitHub |
 |---|---|---|
-| Pedro | RM-XXXXX | [@usuario](https://github.com/usuario) |
+| Pedro | RM-562283 | [@usuario](https://github.com/usuario) |
 | — | RM-XXXXX | — |
 | — | RM-XXXXX | — |
 | — | RM-XXXXX | — |
 | — | RM-XXXXX | — |
-
-> *Preencher com os dados reais do grupo*
 
 ---
 
@@ -233,5 +229,5 @@ Os dados utilizados são propriedade da Locaweb e não estão incluídos neste r
 ---
 
 <p align="center">
-  Feito com 🔴 pela equipe <strong>Predictfy</strong> · FIAP 2026
+  Feito com muito amor e carinho pela equipe <strong>Predictfy</strong> · FIAP 2026
 </p>
