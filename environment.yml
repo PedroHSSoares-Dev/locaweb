@@ -9,6 +9,7 @@ dependencies:
   - pandas>=2.2
   - numpy>=1.26,<2.0
   - openpyxl>=3.1
+  - pyarrow>=17.0
 
   # ML base (via conda — resolução mais estável)
   - scikit-learn>=1.6
