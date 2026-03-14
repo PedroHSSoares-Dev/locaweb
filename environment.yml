@@ -3,22 +3,19 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  # Python
-  - python=3.12
-
-  # ML / Data Science
-  - prophet=1.1.5
-  - xgboost=3.2.0
-  - scikit-learn>=1.6
-  - shap>=0.51
-  - imbalanced-learn>=0.14
+  - python=3.11
 
   # Dados
   - pandas>=2.2
-  - numpy>=1.26
+  - numpy>=1.26,<2.0
   - openpyxl>=3.1
 
-  # Visualização (notebooks)
+  # ML base (via conda — resolução mais estável)
+  - scikit-learn>=1.6
+  - xgboost>=2.1
+  - imbalanced-learn>=0.12
+
+  # Visualização
   - matplotlib>=3.9
   - seaborn>=0.13
 
@@ -32,5 +29,9 @@ dependencies:
   - pip
 
   - pip:
-      # Feriados brasileiros (Prophet regressor)
+      # Prophet via pip — wheel nativa para 3.11, sem conflito com conda
+      - prophet>=1.1.5
+      # SHAP via pip — versão compatível com numpy<2
+      - shap>=0.45,<0.50
+      # Feriados brasileiros (regressor externo do Prophet)
       - holidays>=0.70
