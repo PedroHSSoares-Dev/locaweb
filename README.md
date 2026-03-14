@@ -15,7 +15,7 @@ A **Predictfy** idealizou e desenvolveu uma solução de AIOps para transformar 
 
 | Nome | RM | GitHub |
 |---|---|---|
-| Pedro | RM-562283 | [@usuario](https://github.com/usuario) |
+| Pedro | RM-562283 | [@PedroHSSoares-Dev](https://github.com/PedroHSSoares-Dev) |
 | — | RM-XXXXX | — |
 | — | RM-XXXXX | — |
 | — | RM-XXXXX | — |
