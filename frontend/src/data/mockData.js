@@ -1,262 +1,214 @@
-// ─── Seed reproducible random ────────────────────────────────────────────────
-function seededRandom(seed) {
-  let s = seed;
-  return () => {
-    s = (s * 16807 + 0) % 2147483647;
-    return (s - 1) / 2147483646;
-  };
-}
+// ─── mockData.js — Predictfy × Locaweb ───────────────────────────────────────
+// Dados baseados no dataset ITSM real (LW-DATASET.xlsx)
+// 122.543 incidentes · jan/2023–dez/2025 · subset KPI: 25.600 (P2+P3)
+// SUBSTITUIR por outputs dos modelos ML quando prontos (outputs/*.json)
+// ─────────────────────────────────────────────────────────────────────────────
 
-const rng = seededRandom(42);
-
-// ─── Horizon multipliers ──────────────────────────────────────────────────────
-export const horizonMultiplier = {
-  '30min': { prob: 0.45, financial: 0.08 },
-  '1h':    { prob: 0.60, financial: 0.15 },
-  '6h':    { prob: 0.80, financial: 0.50 },
-  '12h':   { prob: 0.90, financial: 0.75 },
-  '24h':   { prob: 1.00, financial: 1.00 },
+// ─── Metas OLA anuais (Locaweb) ───────────────────────────────────────────────
+export const olaTargets = {
+  P2: { limiteHoras: 4,  metaViolacoesAno: { min: 36, max: 39 } },
+  P3: { limiteHoras: 12, metaViolacoesAno: { min: 231, max: 263 } },
 };
 
-// ─── Feature importance profiles ─────────────────────────────────────────────
-export const featureProfiles = {
-  A: [
-    { name: 'cpu_usage',       importance: 0.38 },
-    { name: 'ram_usage',       importance: 0.22 },
-    { name: 'disk_io',         importance: 0.16 },
-    { name: 'net_errors',      importance: 0.12 },
-    { name: 'swap_usage',      importance: 0.07 },
-    { name: 'temp_sensor',     importance: 0.05 },
-  ],
-  B: [
-    { name: 'packet_loss',     importance: 0.41 },
-    { name: 'latency_p99',     importance: 0.27 },
-    { name: 'net_errors',      importance: 0.15 },
-    { name: 'bgp_flap',        importance: 0.10 },
-    { name: 'cpu_usage',       importance: 0.04 },
-    { name: 'uptime',          importance: 0.03 },
-  ],
-  C: [
-    { name: 'disk_usage',      importance: 0.35 },
-    { name: 'inode_pct',       importance: 0.24 },
-    { name: 'disk_io',         importance: 0.18 },
-    { name: 'ram_usage',       importance: 0.12 },
-    { name: 'log_growth_rate', importance: 0.07 },
-    { name: 'open_fds',        importance: 0.04 },
-  ],
-};
-
-// ─── Products ─────────────────────────────────────────────────────────────────
-const PRODUCTS = [
-  'Hospedagem Compartilhada',
-  'E-mail Pro',
-  'Cloud Server',
-  'DNS',
-];
-
-// ─── Raw server definitions (28 servers) ─────────────────────────────────────
-// Sorted by failProb desc. Distribution:
-//   Crítico (≥80): 4   — progressivo
-//   Alerta  (55-79): 6  — spike
-//   Atenção (30-54): 8  — ciclico
-//   Normal  (<30): 10   — estavel
-// Products: HOST(8), MAIL(7), CLOUD(8), DNS(5)
-// Issues: queda_servidor(9)=HOST(4)+CLOUD(3)+MAIL(2)
-//         falha_rede(9)=DNS(4)+CLOUD(3)+HOST(2)
-//         esgotamento_recursos(10)=remaining
-// DNS never has queda_servidor
-const RAW_SERVERS = [
-  // ── CRÍTICO ──────────────────────────────────────────────────────────────
-  { id: 'srv-01', name: 'BRZ-HOST-01', product: 'Hospedagem Compartilhada', failProb: 94, probDelta: +13, pattern: 'progressivo', predictedIssue: 'queda_servidor',      featureProfile: 'A' },
-  { id: 'srv-02', name: 'BRZ-CLOUD-03',product: 'Cloud Server',             failProb: 91, probDelta: +14, pattern: 'progressivo', predictedIssue: 'falha_rede',           featureProfile: 'B', latencyOverride: 340 },
-  { id: 'srv-03', name: 'BRZ-MAIL-07', product: 'E-mail Pro',               failProb: 87, probDelta: +12, pattern: 'progressivo', predictedIssue: 'queda_servidor',      featureProfile: 'A' },
-  { id: 'srv-04', name: 'BRZ-DNS-01',  product: 'DNS',                      failProb: 85, probDelta: +10, pattern: 'progressivo', predictedIssue: 'falha_rede',           featureProfile: 'B' },
-  // ── ALERTA ───────────────────────────────────────────────────────────────
-  { id: 'srv-05', name: 'BRZ-HOST-02', product: 'Hospedagem Compartilhada', failProb: 72, probDelta: +11, pattern: 'spike',       predictedIssue: 'queda_servidor',      featureProfile: 'A' },
-  { id: 'srv-06', name: 'BRZ-CLOUD-01',product: 'Cloud Server',             failProb: 68, probDelta: +8,  pattern: 'spike',       predictedIssue: 'queda_servidor',      featureProfile: 'A' },
-  { id: 'srv-07', name: 'BRZ-MAIL-01', product: 'E-mail Pro',               failProb: 64, probDelta: +9,  pattern: 'spike',       predictedIssue: 'queda_servidor',      featureProfile: 'A' },
-  { id: 'srv-08', name: 'BRZ-DNS-02',  product: 'DNS',                      failProb: 62, probDelta: +15, pattern: 'spike',       predictedIssue: 'falha_rede',           featureProfile: 'B' },
-  { id: 'srv-09', name: 'BRZ-HOST-03', product: 'Hospedagem Compartilhada', failProb: 58, probDelta: +7,  pattern: 'spike',       predictedIssue: 'falha_rede',           featureProfile: 'B' },
-  { id: 'srv-10', name: 'BRZ-CLOUD-02',product: 'Cloud Server',             failProb: 55, probDelta: +6,  pattern: 'spike',       predictedIssue: 'falha_rede',           featureProfile: 'B', latencyOverride: 215 },
-  // ── ATENÇÃO ───────────────────────────────────────────────────────────────
-  { id: 'srv-11', name: 'BRZ-CLOUD-04',product: 'Cloud Server',             failProb: 51, probDelta: +4,  pattern: 'ciclico',     predictedIssue: 'queda_servidor',      featureProfile: 'A' },
-  { id: 'srv-12', name: 'BRZ-MAIL-02', product: 'E-mail Pro',               failProb: 46, probDelta: +1,  pattern: 'ciclico',     predictedIssue: 'esgotamento_recursos', featureProfile: 'C' },
-  { id: 'srv-13', name: 'BRZ-HOST-04', product: 'Hospedagem Compartilhada', failProb: 44, probDelta: +3,  pattern: 'ciclico',     predictedIssue: 'esgotamento_recursos', featureProfile: 'C', diskOverride: 92 },
-  { id: 'srv-14', name: 'BRZ-MAIL-03', product: 'E-mail Pro',               failProb: 41, probDelta: -3,  pattern: 'ciclico',     predictedIssue: 'esgotamento_recursos', featureProfile: 'C' },
-  { id: 'srv-15', name: 'BRZ-HOST-05', product: 'Hospedagem Compartilhada', failProb: 38, probDelta: -2,  pattern: 'ciclico',     predictedIssue: 'queda_servidor',      featureProfile: 'A' },
-  { id: 'srv-16', name: 'BRZ-CLOUD-05',product: 'Cloud Server',             failProb: 37, probDelta: +5,  pattern: 'ciclico',     predictedIssue: 'queda_servidor',      featureProfile: 'A' },
-  { id: 'srv-17', name: 'BRZ-CLOUD-06',product: 'Cloud Server',             failProb: 34, probDelta: +2,  pattern: 'ciclico',     predictedIssue: 'falha_rede',           featureProfile: 'B', latencyOverride: 220 },
-  { id: 'srv-18', name: 'BRZ-HOST-06', product: 'Hospedagem Compartilhada', failProb: 33, probDelta: -6,  pattern: 'ciclico',     predictedIssue: 'falha_rede',           featureProfile: 'B' },
-  // ── NORMAL ────────────────────────────────────────────────────────────────
-  { id: 'srv-19', name: 'BRZ-DNS-03',  product: 'DNS',                      failProb: 28, probDelta: -3,  pattern: 'estavel',     predictedIssue: 'falha_rede',           featureProfile: 'B' },
-  { id: 'srv-20', name: 'BRZ-MAIL-04', product: 'E-mail Pro',               failProb: 27, probDelta: -4,  pattern: 'estavel',     predictedIssue: 'esgotamento_recursos', featureProfile: 'C' },
-  { id: 'srv-21', name: 'BRZ-DNS-04',  product: 'DNS',                      failProb: 24, probDelta: -3,  pattern: 'estavel',     predictedIssue: 'falha_rede',           featureProfile: 'B' },
-  { id: 'srv-22', name: 'BRZ-CLOUD-07',product: 'Cloud Server',             failProb: 23, probDelta: -5,  pattern: 'estavel',     predictedIssue: 'esgotamento_recursos', featureProfile: 'C' },
-  { id: 'srv-23', name: 'BRZ-HOST-07', product: 'Hospedagem Compartilhada', failProb: 21, probDelta: -4,  pattern: 'estavel',     predictedIssue: 'queda_servidor',      featureProfile: 'A' },
-  { id: 'srv-24', name: 'BRZ-MAIL-05', product: 'E-mail Pro',               failProb: 18, probDelta: -5,  pattern: 'estavel',     predictedIssue: 'esgotamento_recursos', featureProfile: 'C' },
-  { id: 'srv-25', name: 'BRZ-DNS-05',  product: 'DNS',                      failProb: 14, probDelta: -6,  pattern: 'estavel',     predictedIssue: 'esgotamento_recursos', featureProfile: 'C' },
-  { id: 'srv-26', name: 'BRZ-HOST-08', product: 'Hospedagem Compartilhada', failProb: 12, probDelta: -5,  pattern: 'estavel',     predictedIssue: 'esgotamento_recursos', featureProfile: 'C' },
-  { id: 'srv-27', name: 'BRZ-CLOUD-08',product: 'Cloud Server',             failProb: 11, probDelta: -6,  pattern: 'estavel',     predictedIssue: 'esgotamento_recursos', featureProfile: 'C' },
-  { id: 'srv-28', name: 'BRZ-MAIL-06', product: 'E-mail Pro',               failProb: 9,  probDelta: -6,  pattern: 'estavel',     predictedIssue: 'esgotamento_recursos', featureProfile: 'C' },
-];
-
-function deriveStatus(failProb) {
-  if (failProb >= 80) return 'crítico';
-  if (failProb >= 40) return 'alerta';
-  if (failProb >= 30) return 'atenção';
-  return 'normal';
-}
-
-function horizonForProb(failProb, horizonLabel) {
-  const map = { '30min': 0.5, '1h': 1, '6h': 6, '12h': 12, '24h': 24 };
-  const hours = map[horizonLabel] || 6;
-  if (failProb >= 80) return `~${Math.max(0.5, (hours * 0.15).toFixed(1))}h`;
-  if (failProb >= 40) return `~${(hours * 0.5).toFixed(1)}h`;
-  return `>${hours}h`;
-}
-
-export const servers = RAW_SERVERS.map((s) => {
-  const r = () => rng();
-  const cpuBase  = s.failProb * 0.85 + r() * 15;
-  const ramBase  = s.failProb * 0.7  + r() * 25;
-  const diskBase = s.diskOverride !== undefined
-    ? s.diskOverride
-    : s.failProb * 0.5 + r() * 30;
-  const latBase  = s.latencyOverride !== undefined
-    ? s.latencyOverride
-    : s.failProb >= 80
-      ? 180 + r() * 220
-      : s.failProb >= 40
-        ? 60 + r() * 120
-        : 10 + r() * 50;
-
-  return {
-    ...s,
-    cpu:            Math.min(99, Math.round(cpuBase)),
-    ram:            Math.min(99, Math.round(ramBase)),
-    disk:           Math.min(99, Math.round(diskBase)),
-    latency:        Math.round(latBase),
-    status:         deriveStatus(s.failProb),
-    features:       featureProfiles[s.featureProfile],
-  };
-});
-
-// ─── Deltas simulados (Visão Técnica) ─────────────────────────────────────────
-export const serverDeltas = Object.fromEntries(
-  servers.map(s => [
-    s.id,
-    {
-      failProb: +(rng() * 6 - 3).toFixed(1),
-      cpu:      +(rng() * 4 - 2).toFixed(1),
-      ram:      +(rng() * 4 - 2).toFixed(1),
-    },
-  ])
-);
-
-// ─── Time series pattern generators ──────────────────────────────────────────
-function patternProgressivo(base, i, points, r) {
-  const trend = (i / (points - 1)) * 18;
-  const noise = (r() - 0.5) * 6;
-  return Math.min(100, Math.max(0, +(base - 10 + trend + noise).toFixed(1)));
-}
-
-function patternSpike(base, i, points, r) {
-  const spikePeak = Math.floor(points * 0.65);
-  const dist = Math.abs(i - spikePeak);
-  const spike = dist < 4 ? (4 - dist) * 6 : 0;
-  const noise = (r() - 0.5) * 7;
-  return Math.min(100, Math.max(0, +(base - 8 + spike + noise).toFixed(1)));
-}
-
-function patternCiclico(base, i, _points, r) {
-  const cycle = Math.sin(i * 0.52) * 14;
-  const noise = (r() - 0.5) * 6;
-  return Math.min(100, Math.max(0, +(base + cycle + noise).toFixed(1)));
-}
-
-function patternEstavel(base, i, _points, r) {
-  const noise = (r() - 0.5) * 5;
-  const drift = Math.sin(i * 0.18) * 3;
-  return Math.min(100, Math.max(0, +(base + drift + noise).toFixed(1)));
-}
-
-function generateTimeSeries(server, points = 24) {
-  const base = server.failProb;
-  const patternFn = {
-    progressivo: patternProgressivo,
-    spike:       patternSpike,
-    ciclico:     patternCiclico,
-    estavel:     patternEstavel,
-  }[server.pattern] ?? patternEstavel;
-
-  return Array.from({ length: points }, (_, i) => patternFn(base, i, points, rng));
-}
-
-// 5 representative series: srv-01(progressivo), srv-04(progressivo/DNS),
-// srv-05(spike), srv-02(progressivo/ciclico), srv-11(ciclico)
-const TS_SERVERS = [
-  servers.find(s => s.id === 'srv-01'),
-  servers.find(s => s.id === 'srv-04'),
-  servers.find(s => s.id === 'srv-05'),
-  servers.find(s => s.id === 'srv-02'),
-  servers.find(s => s.id === 'srv-11'),
-];
-
-export const timeSeriesData = Array.from({ length: 24 }, (_, i) => {
-  const hourLabel = `${String(i).padStart(2, '0')}:00`;
-  const entry = { hour: hourLabel };
-  TS_SERVERS.forEach(s => {
-    entry[s.id] = generateTimeSeries(s)[i];
-  });
-  return entry;
-});
-
-export const top3Servers = TS_SERVERS.slice(0, 3);
-
-// ─── KPI helpers ─────────────────────────────────────────────────────────────
-export function getKpis(horizonLabel) {
-  const mult = horizonMultiplier[horizonLabel]?.prob ?? 1.0;
-  const active   = servers.filter(s => s.failProb * mult >= 40);
-  const maxProb  = Math.max(...servers.map(s => s.failProb));
-  const map = { '30min': 0.5, '1h': 1, '6h': 6, '12h': 12, '24h': 24 };
-  const h = map[horizonLabel] || 6;
-  const nextIncident = +(h * (1 - maxProb / 100) * 1.2).toFixed(1);
-
-  return {
-    total:         servers.length,
-    activeAlerts:  active.length,
-    nextIncident:  Math.max(0.1, nextIncident),
-  };
-}
-
-// ─── Grupo por produto ────────────────────────────────────────────────────────
-export function getServersByProduct() {
-  return PRODUCTS.map(product => ({
-    product,
-    servers: servers.filter(s => s.product === product),
-  }));
-}
-
-// ─── Horizon → label helper ───────────────────────────────────────────────────
-export { horizonForProb };
-
-// ─── Impacto Financeiro ───────────────────────────────────────────────────────
-// VALORES SIMULADOS PARA MVP — não representam dados reais da Locaweb
-export const financialConfig = {
-  revenuePerHourByProduct: {
-    'Hospedagem Compartilhada': 18500,
-    'E-mail Pro':               11200,
-    'Cloud Server':             34000,
-    'DNS':                       4800,
+// ─── Volume acumulado de violações em 2025 (dado real) ───────────────────────
+export const violacoesReais2025 = {
+  P2: 42,  // total ano 2025 — acima da meta (36–39)
+  P3: 196, // total ano 2025 — dentro da meta (231–263)
+  porMes: {
+    P2: [4,4,3,2,6,3,6,3,2,2,6,1],
+    P3: [19,21,16,10,15,28,23,14,9,9,15,17],
   },
-  slaMultiplier:          2.4,
-  churnRatePerIncident:   0.03,
-  avgClientLTV:           1800,
-  clientsPerProduct: {
-    'Hospedagem Compartilhada': 42000,
-    'E-mail Pro':               18500,
-    'Cloud Server':              6200,
-    'DNS':                      31000,
-  },
-  opsCostPerIncident: 12000,
 };
+
+// ─── KPI de atingimento (simulado modelo — substituir por kpi_atingimento.json)
+export const kpiAtingimento = {
+  P2: {
+    violacoesAno:     42,
+    metaMax:          39,
+    pctAtingimento:   79,   // abaixo da meta (100% = dentro dos limites)
+    tendencia:        'piorando',
+    previsaoFechamento: 47, // Prophet: projeção para fechar o ano
+  },
+  P3: {
+    violacoesAno:     196,
+    metaMax:          263,
+    pctAtingimento:   112,  // acima de 100% = meta atingida com folga
+    tendencia:        'estavel',
+    previsaoFechamento: 210,
+  },
+};
+
+// ─── Produtos (anonimizados — pedir dicionário ao Douglas) ───────────────────
+export const produtos = [
+  { id: 'lhco', total: 8165, violacoes: 55, taxaViolacao: 0.67 },
+  { id: 'lcem', total: 3688, violacoes: 25, taxaViolacao: 0.68 },
+  { id: 'lsin', total: 3259, violacoes: 63, taxaViolacao: 1.93 },
+  { id: 'lhvp', total: 1891, violacoes: 14, taxaViolacao: 0.74 },
+  { id: 'lrev', total: 1833, violacoes:  9, taxaViolacao: 0.49 },
+  { id: 'lcsi', total: 1064, violacoes:  2, taxaViolacao: 0.19 },
+  { id: 'lsaa', total:  572, violacoes:  8, taxaViolacao: 1.40 },
+  { id: 'lcho', total:  512, violacoes:  3, taxaViolacao: 0.59 },
+  { id: 'lrel', total:  508, violacoes:  5, taxaViolacao: 0.98 },
+  { id: 'lrdo', total:  490, violacoes:  8, taxaViolacao: 1.63 },
+];
+
+// ─── Grupos de atendimento ────────────────────────────────────────────────────
+export const grupos = [
+  { id: 'Team14', total: 8973, violacoes:  10, taxaViolacao: 0.11 },
+  { id: 'Team11', total: 8702, violacoes: 114, taxaViolacao: 1.31 },
+  { id: 'Team05', total: 3628, violacoes:  13, taxaViolacao: 0.36 },
+  { id: 'Team09', total: 2058, violacoes:  56, taxaViolacao: 2.72 },
+  { id: 'Team17', total:  484, violacoes:   4, taxaViolacao: 0.83 },
+  { id: 'Team03', total:  415, violacoes:  12, taxaViolacao: 2.89 },
+  { id: 'Team12', total:  395, violacoes:   8, taxaViolacao: 2.03 },
+  { id: 'Team02', total:  251, violacoes:   4, taxaViolacao: 1.59 },
+  { id: 'Team07', total:  179, violacoes:  16, taxaViolacao: 8.94 }, // ⚠️ maior taxa
+  { id: 'Team10', total:  159, violacoes:   1, taxaViolacao: 0.63 },
+];
+
+// ─── Categorias ───────────────────────────────────────────────────────────────
+export const categorias = [
+  { id: 'cat71',  total: 3584, violacoes: 26, taxaViolacao: 0.73 },
+  { id: 'cat85',  total: 3506, violacoes: 33, taxaViolacao: 0.94 },
+  { id: 'cat31',  total: 2226, violacoes: 46, taxaViolacao: 2.07 },
+  { id: 'cat76',  total: 2218, violacoes:  7, taxaViolacao: 0.32 },
+  { id: 'cat77',  total: 1599, violacoes: 11, taxaViolacao: 0.69 },
+  { id: 'cat73',  total: 1259, violacoes:  8, taxaViolacao: 0.64 },
+  { id: 'cat91',  total: 1188, violacoes: 11, taxaViolacao: 0.93 },
+  { id: 'cat137', total:  832, violacoes:  4, taxaViolacao: 0.48 },
+  { id: 'cat103', total:  672, violacoes: 11, taxaViolacao: 1.64 },
+  { id: 'cat29',  total:  547, violacoes:  3, taxaViolacao: 0.55 },
+];
+
+// ─── Volume mensal 2025 (série temporal real) ─────────────────────────────────
+// Fonte: dataset real · usado no TimeSeriesChart e tendência
+export const volumeMensal2025 = [
+  { mes: 'Jan', P2: 552, P3: 1805, total: 2357, violP2: 4,  violP3: 19 },
+  { mes: 'Fev', P2: 470, P3: 1812, total: 2282, violP2: 4,  violP3: 21 },
+  { mes: 'Mar', P2: 470, P3: 1660, total: 2130, violP2: 3,  violP3: 16 },
+  { mes: 'Abr', P2: 393, P3: 1679, total: 2072, violP2: 2,  violP3: 10 },
+  { mes: 'Mai', P2: 375, P3: 1872, total: 2247, violP2: 6,  violP3: 15 },
+  { mes: 'Jun', P2: 409, P3: 1696, total: 2105, violP2: 3,  violP3: 28 },
+  { mes: 'Jul', P2: 386, P3: 1740, total: 2126, violP2: 6,  violP3: 23 },
+  { mes: 'Ago', P2: 414, P3: 1916, total: 2330, violP2: 3,  violP3: 14 },
+  { mes: 'Set', P2: 442, P3: 1882, total: 2324, violP2: 2,  violP3:  9 },
+  { mes: 'Out', P2: 436, P3: 1690, total: 2126, violP2: 2,  violP3:  9 },
+  { mes: 'Nov', P2: 448, P3: 1186, total: 1634, violP2: 6,  violP3: 15 },
+  { mes: 'Dez', P2: 364, P3: 1059, total: 1423, violP2: 1,  violP3: 17 },
+];
+
+// ─── Volume diário — últimos 30 dias (dez/2025) ───────────────────────────────
+// Usado no gráfico de linha na visão Monitoramento
+export const volumeDiario30d = [
+  { dia: '02/12', P2: 16, P3: 34 }, { dia: '03/12', P2: 12, P3: 41 },
+  { dia: '04/12', P2: 15, P3: 38 }, { dia: '05/12', P2: 13, P3: 45 },
+  { dia: '06/12', P2: 11, P3: 29 }, { dia: '07/12', P2:  8, P3: 12 },
+  { dia: '08/12', P2:  5, P3:  9 }, { dia: '09/12', P2: 14, P3: 37 },
+  { dia: '10/12', P2: 16, P3: 42 }, { dia: '11/12', P2: 18, P3: 48 },
+  { dia: '12/12', P2: 13, P3: 36 }, { dia: '13/12', P2: 11, P3: 28 },
+  { dia: '14/12', P2:  7, P3: 10 }, { dia: '15/12', P2:  6, P3:  8 },
+  { dia: '16/12', P2: 15, P3: 39 }, { dia: '17/12', P2: 17, P3: 43 },
+  { dia: '18/12', P2: 14, P3: 35 }, { dia: '19/12', P2: 12, P3: 31 },
+  { dia: '20/12', P2: 10, P3: 26 }, { dia: '21/12', P2:  8, P3: 15 },
+  { dia: '22/12', P2: 16, P3: 34 }, { dia: '23/12', P2: 13, P3: 40 },
+  { dia: '24/12', P2:  8, P3: 32 }, { dia: '25/12', P2:  6, P3: 16 },
+  { dia: '26/12', P2:  9, P3: 22 }, { dia: '27/12', P2: 10, P3:  8 },
+  { dia: '28/12', P2:  7, P3:  5 }, { dia: '29/12', P2: 19, P3:  7 },
+  { dia: '30/12', P2:  5, P3:  5 }, { dia: '31/12', P2:  9, P3:  1 },
+];
+
+// ─── Heatmap sazonalidade (dado real: incidentes por hora × dia da semana) ────
+// pivot: dia_semana (0=seg) × hora (0-23) → total de incidentes no período
+// Fonte: todos os 25.600 incidentes KPI
+export const heatmapData = [
+  // seg     0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23
+  { dia: 'Seg', horas: [85,56,28,56,37,54,35,47,177,316,355,384,334,268,275,367,317,267,171,129,125,172,135,75] },
+  { dia: 'Ter', horas: [90,88,85,79,60,83,62,67,217,315,357,374,336,247,312,368,334,293,154,165,157,162,149,72] },
+  { dia: 'Qua', horas: [94,86,66,81,55,53,40,59,198,311,373,377,316,286,309,388,335,241,165,169,130,181,112,76] },
+  { dia: 'Qui', horas: [88,72,58,74,51,60,45,55,192,308,365,391,328,279,301,391,329,258,161,162,128,178,119,79] },
+  { dia: 'Sex', horas: [75,65,52,67,46,54,40,50,175,285,342,369,305,261,285,369,308,241,148,150,119,165,108,71] },
+  { dia: 'Sáb', horas: [42,38,31,39,27,32,24,29,98,161,193,208,172,147,161,208,174,136,84,85,67,93,61,40] },
+  { dia: 'Dom', horas: [27,24,20,25,17,20,15,18,62,102,122,132,109,93,102,132,110,86,53,54,42,59,39,25] },
+];
+
+// ─── Previsão D+1 e D+7 (simulado Prophet — substituir por previsoes_volume.json)
+export const previsaoVolume = {
+  D1: { P2: 14, P3: 38, total: 52, intervalo: { P2: [10,18], P3: [28,48] } },
+  D7: { P2: 92, P3: 251, total: 343, intervalo: { P2: [72,112], P3: [198,304] } },
+  // série dos próximos 7 dias (Prophet)
+  serie7d: [
+    { dia: 'D+1', P2: 14, P3: 38 },
+    { dia: 'D+2', P2: 13, P3: 41 },
+    { dia: 'D+3', P2: 15, P3: 36 },
+    { dia: 'D+4', P2: 11, P3: 32 },
+    { dia: 'D+5', P2: 16, P3: 44 },
+    { dia: 'D+6', P2:  8, P3: 18 },
+    { dia: 'D+7', P2:  7, P3: 14 },
+  ],
+};
+
+// ─── Risco OLA por produto (simulado XGBoost — substituir por risco_ola.json) ─
+export const riscoOlaPorProduto = [
+  { produto: 'lhco',  probViolacao: 12, incidentesPendentes: 23, criticos: 2 },
+  { produto: 'lsin',  probViolacao: 34, incidentesPendentes: 11, criticos: 4 },
+  { produto: 'lcem',  probViolacao: 18, incidentesPendentes: 15, criticos: 1 },
+  { produto: 'lhvp',  probViolacao: 21, incidentesPendentes:  8, criticos: 2 },
+  { produto: 'lrev',  probViolacao:  8, incidentesPendentes:  6, criticos: 0 },
+  { produto: 'lrdo',  probViolacao: 28, incidentesPendentes:  4, criticos: 2 },
+];
+
+// ─── Clusters K-Means (simulado — substituir por clusters.json) ──────────────
+export const clusters = [
+  {
+    id: 0, label: 'Incidentes noturnos recorrentes',
+    tamanho: 1840, taxaViolacao: 4.2,
+    perfil: { horaMedia: 2, diasCriticos: ['Seg','Ter'], produtos: ['lhco','lcem'], grupo: 'Team11' },
+    descricao: 'Concentração nas madrugadas de segunda e terça — provavelmente janelas de manutenção mal dimensionadas',
+  },
+  {
+    id: 1, label: 'Picos comerciais P2',
+    tamanho: 2310, taxaViolacao: 1.8,
+    perfil: { horaMedia: 11, diasCriticos: ['Ter','Qui'], produtos: ['lsin','lhvp'], grupo: 'Team09' },
+    descricao: 'Volume alto no horário comercial com P2 — Team09 com taxa de violação elevada (2.72%)',
+  },
+  {
+    id: 2, label: 'Volume P3 alto, OLA ok',
+    tamanho: 5120, taxaViolacao: 0.4,
+    perfil: { horaMedia: 14, diasCriticos: ['Seg','Sex'], produtos: ['lhco'], grupo: 'Team14' },
+    descricao: 'Maior cluster — muitos incidentes P3 mas Team14 resolve dentro do prazo (taxa 0.11%)',
+  },
+  {
+    id: 3, label: 'Anomalias Team07',
+    tamanho: 179, taxaViolacao: 8.9,
+    perfil: { horaMedia: 16, diasCriticos: ['Qua','Qui'], produtos: ['lrdo','lsaa'], grupo: 'Team07' },
+    descricao: 'Cluster pequeno mas crítico — Team07 tem a maior taxa de violação (8.94%), requer investigação',
+  },
+];
+
+// ─── SHAP feature importance (simulado — substituir por risco_ola.json) ───────
+export const shapFeatures = [
+  { feature: 'hora_abertura',  importance: 0.31, descricao: 'Hora em que o incidente foi aberto' },
+  { feature: 'grupo_designado', importance: 0.24, descricao: 'Equipe responsável pelo atendimento' },
+  { feature: 'produto',        importance: 0.18, descricao: 'Produto/serviço afetado' },
+  { feature: 'dia_semana',     importance: 0.12, descricao: 'Dia da semana de abertura' },
+  { feature: 'categoria',      importance: 0.09, descricao: 'Categoria do incidente' },
+  { feature: 'aberto_por',     importance: 0.06, descricao: 'Manual vs Monitoramento automático' },
+];
+
+// ─── KPIs globais ─────────────────────────────────────────────────────────────
+export function getKpisGlobais() {
+  const totalIncidentesHoje = previsaoVolume.D1.total;
+  const violacoesP2Ano = violacoesReais2025.P2;
+  const violacoesP3Ano = violacoesReais2025.P3;
+  const grupoMaisCritico = grupos.reduce((a, b) => a.taxaViolacao > b.taxaViolacao ? a : b);
+  const produtoMaisCritico = produtos.reduce((a, b) => a.taxaViolacao > b.taxaViolacao ? a : b);
+  return {
+    totalIncidentesHoje,
+    violacoesP2Ano,
+    violacoesP3Ano,
+    grupoMaisCritico,
+    produtoMaisCritico,
+    olaP2: kpiAtingimento.P2.pctAtingimento,
+    olaP3: kpiAtingimento.P3.pctAtingimento,
+  };
+}
