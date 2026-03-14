@@ -1,2 +1,35 @@
+# ── Claude Code (configurações locais) ───────────────────
 .claude/
-avaliacoes/
+
+# ── Dados — nunca commitar o dataset real ─────────────────
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# ── Modelos treinados — arquivos grandes, regeneráveis ────
+models_saved/*
+!models_saved/.gitkeep
+
+# ── Python ────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+.venv/
+venv/
+*.egg-info/
+.ipynb_checkpoints/
+
+# ── Node / Frontend ───────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+
+# ── Sistema ───────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Segredos ──────────────────────────────────────────────
+.env
+*.env
