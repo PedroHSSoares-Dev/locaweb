@@ -5,7 +5,7 @@ import Topbar from './components/Topbar';
 import GestaoPage from './pages/GestaoPage';
 import MonitoramentoPage from './pages/MonitoramentoPage';
 import TecnicoPage from './pages/TecnicoPage';
-import FinancialPage from './pages/FinancialPage';
+import FinanceiroPage from './pages/FinanceiroPage';
 
 export default function App() {
   return (
@@ -18,7 +18,7 @@ export default function App() {
             <Route path="/gestao"        element={<GestaoPage />} />
             <Route path="/monitoramento" element={<MonitoramentoPage />} />
             <Route path="/tecnico"       element={<TecnicoPage />} />
-            <Route path="/financeiro"    element={<FinancialPage />} />
+            <Route path="/financeiro"    element={<FinanceiroPage />} />
           </Routes>
         </div>
       </BrowserRouter>

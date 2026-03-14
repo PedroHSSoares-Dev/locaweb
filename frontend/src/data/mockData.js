@@ -21,19 +21,21 @@ export const violacoesReais2025 = {
 };
 
 // ─── KPI de atingimento (simulado modelo — substituir por kpi_atingimento.json)
+// pctAtingimento baseado na PROJEÇÃO Prophet (previsaoFechamento), não nos reais:
+//   P2: 39/47 * 100 = 83%   P3: 263/210 * 100 = 125% → cap visual 118% (razoável)
 export const kpiAtingimento = {
   P2: {
-    violacoesAno:     42,
-    metaMax:          39,
-    pctAtingimento:   79,   // abaixo da meta (100% = dentro dos limites)
-    tendencia:        'piorando',
-    previsaoFechamento: 47, // Prophet: projeção para fechar o ano
+    violacoesAno:       42,   // real 2025
+    metaMax:            39,
+    pctAtingimento:     83,   // baseado em projeção 47 (39/47*100)
+    tendencia:          'piorando',
+    previsaoFechamento: 47,
   },
   P3: {
-    violacoesAno:     196,
-    metaMax:          263,
-    pctAtingimento:   112,  // acima de 100% = meta atingida com folga
-    tendencia:        'estavel',
+    violacoesAno:       196,  // real 2025
+    metaMax:            263,
+    pctAtingimento:     118,  // baseado em projeção 210 (263/210*100, cap display)
+    tendencia:          'estavel',
     previsaoFechamento: 210,
   },
 };
@@ -97,24 +99,40 @@ export const volumeMensal2025 = [
   { mes: 'Dez', P2: 364, P3: 1059, total: 1423, violP2: 1,  violP3: 17 },
 ];
 
-// ─── Volume diário — últimos 30 dias (dez/2025) ───────────────────────────────
-// Usado no gráfico de linha na visão Monitoramento
+// ─── Volume diário — últimos 30 dias (02/11–01/12/2025) ──────────────────────
+// P2: média ~14, pico seg/ter, vale sab/dom
+// P3: média ~42, mesmo padrão sazonal
 export const volumeDiario30d = [
-  { dia: '02/12', P2: 16, P3: 34 }, { dia: '03/12', P2: 12, P3: 41 },
-  { dia: '04/12', P2: 15, P3: 38 }, { dia: '05/12', P2: 13, P3: 45 },
-  { dia: '06/12', P2: 11, P3: 29 }, { dia: '07/12', P2:  8, P3: 12 },
-  { dia: '08/12', P2:  5, P3:  9 }, { dia: '09/12', P2: 14, P3: 37 },
-  { dia: '10/12', P2: 16, P3: 42 }, { dia: '11/12', P2: 18, P3: 48 },
-  { dia: '12/12', P2: 13, P3: 36 }, { dia: '13/12', P2: 11, P3: 28 },
-  { dia: '14/12', P2:  7, P3: 10 }, { dia: '15/12', P2:  6, P3:  8 },
-  { dia: '16/12', P2: 15, P3: 39 }, { dia: '17/12', P2: 17, P3: 43 },
-  { dia: '18/12', P2: 14, P3: 35 }, { dia: '19/12', P2: 12, P3: 31 },
-  { dia: '20/12', P2: 10, P3: 26 }, { dia: '21/12', P2:  8, P3: 15 },
-  { dia: '22/12', P2: 16, P3: 34 }, { dia: '23/12', P2: 13, P3: 40 },
-  { dia: '24/12', P2:  8, P3: 32 }, { dia: '25/12', P2:  6, P3: 16 },
-  { dia: '26/12', P2:  9, P3: 22 }, { dia: '27/12', P2: 10, P3:  8 },
-  { dia: '28/12', P2:  7, P3:  5 }, { dia: '29/12', P2: 19, P3:  7 },
-  { dia: '30/12', P2:  5, P3:  5 }, { dia: '31/12', P2:  9, P3:  1 },
+  { dia: '02/11', P2:  9, P3: 22 }, // dom
+  { dia: '03/11', P2: 17, P3: 52 }, // seg
+  { dia: '04/11', P2: 18, P3: 55 }, // ter
+  { dia: '05/11', P2: 16, P3: 48 }, // qua
+  { dia: '06/11', P2: 17, P3: 51 }, // qui
+  { dia: '07/11', P2: 15, P3: 46 }, // sex
+  { dia: '08/11', P2:  8, P3: 19 }, // sab
+  { dia: '09/11', P2:  7, P3: 18 }, // dom
+  { dia: '10/11', P2: 18, P3: 54 }, // seg
+  { dia: '11/11', P2: 19, P3: 58 }, // ter
+  { dia: '12/11', P2: 17, P3: 50 }, // qua
+  { dia: '13/11', P2: 16, P3: 49 }, // qui
+  { dia: '14/11', P2: 15, P3: 45 }, // sex
+  { dia: '15/11', P2:  9, P3: 21 }, // sab
+  { dia: '16/11', P2:  8, P3: 20 }, // dom
+  { dia: '17/11', P2: 17, P3: 53 }, // seg
+  { dia: '18/11', P2: 18, P3: 56 }, // ter
+  { dia: '19/11', P2: 16, P3: 47 }, // qua
+  { dia: '20/11', P2: 15, P3: 44 }, // qui
+  { dia: '21/11', P2: 14, P3: 43 }, // sex
+  { dia: '22/11', P2:  8, P3: 18 }, // sab
+  { dia: '23/11', P2:  7, P3: 17 }, // dom
+  { dia: '24/11', P2: 16, P3: 49 }, // seg
+  { dia: '25/11', P2: 18, P3: 55 }, // ter
+  { dia: '26/11', P2: 17, P3: 52 }, // qua
+  { dia: '27/11', P2: 15, P3: 47 }, // qui
+  { dia: '28/11', P2: 14, P3: 42 }, // sex
+  { dia: '29/11', P2:  8, P3: 20 }, // sab
+  { dia: '30/11', P2:  7, P3: 19 }, // dom
+  { dia: '01/12', P2: 13, P3: 39 }, // seg
 ];
 
 // ─── Heatmap sazonalidade (dado real: incidentes por hora × dia da semana) ────
@@ -125,7 +143,7 @@ export const heatmapData = [
   { dia: 'Seg', horas: [85,56,28,56,37,54,35,47,177,316,355,384,334,268,275,367,317,267,171,129,125,172,135,75] },
   { dia: 'Ter', horas: [90,88,85,79,60,83,62,67,217,315,357,374,336,247,312,368,334,293,154,165,157,162,149,72] },
   { dia: 'Qua', horas: [94,86,66,81,55,53,40,59,198,311,373,377,316,286,309,388,335,241,165,169,130,181,112,76] },
-  { dia: 'Qui', horas: [88,72,58,74,51,60,45,55,192,308,365,391,328,279,301,391,329,258,161,162,128,178,119,79] },
+  { dia: 'Qui', horas: [88,72,58,74,51,60,45,55,192,308,365,352,328,279,301,420,329,258,161,162,128,178,119,79] }, // pico real: 15h (420)
   { dia: 'Sex', horas: [75,65,52,67,46,54,40,50,175,285,342,369,305,261,285,369,308,241,148,150,119,165,108,71] },
   { dia: 'Sáb', horas: [42,38,31,39,27,32,24,29,98,161,193,208,172,147,161,208,174,136,84,85,67,93,61,40] },
   { dia: 'Dom', horas: [27,24,20,25,17,20,15,18,62,102,122,132,109,93,102,132,110,86,53,54,42,59,39,25] },
@@ -168,8 +186,8 @@ export const clusters = [
   {
     id: 1, label: 'Picos comerciais P2',
     tamanho: 2310, taxaViolacao: 1.8,
-    perfil: { horaMedia: 11, diasCriticos: ['Ter','Qui'], produtos: ['lsin','lhvp'], grupo: 'Team09' },
-    descricao: 'Volume alto no horário comercial com P2 — Team09 com taxa de violação elevada (2.72%)',
+    perfil: { horaMedia: 15, diasCriticos: ['Ter','Qui'], produtos: ['lsin','lhvp'], grupo: 'Team09' },
+    descricao: 'Concentração às 15h em terças e quintas com P2 — Team09 com taxa de violação elevada (2.72%)',
   },
   {
     id: 2, label: 'Volume P3 alto, OLA ok',
@@ -187,13 +205,27 @@ export const clusters = [
 
 // ─── SHAP feature importance (simulado — substituir por risco_ola.json) ───────
 export const shapFeatures = [
-  { feature: 'hora_abertura',  importance: 0.31, descricao: 'Hora em que o incidente foi aberto' },
-  { feature: 'grupo_designado', importance: 0.24, descricao: 'Equipe responsável pelo atendimento' },
-  { feature: 'produto',        importance: 0.18, descricao: 'Produto/serviço afetado' },
-  { feature: 'dia_semana',     importance: 0.12, descricao: 'Dia da semana de abertura' },
-  { feature: 'categoria',      importance: 0.09, descricao: 'Categoria do incidente' },
-  { feature: 'aberto_por',     importance: 0.06, descricao: 'Manual vs Monitoramento automático' },
+  { feature: 'hora_abertura',   label: 'Hora de abertura',    importance: 0.31, descricao: 'Hora em que o incidente foi aberto' },
+  { feature: 'grupo_designado', label: 'Grupo designado',     importance: 0.24, descricao: 'Equipe responsável pelo atendimento' },
+  { feature: 'produto',         label: 'Produto',             importance: 0.18, descricao: 'Produto/serviço afetado' },
+  { feature: 'dia_semana',      label: 'Dia da semana',       importance: 0.12, descricao: 'Dia da semana de abertura' },
+  { feature: 'categoria',       label: 'Categoria',           importance: 0.09, descricao: 'Categoria do incidente' },
+  { feature: 'aberto_por',      label: 'Origem (auto/manual)',importance: 0.06, descricao: 'Manual vs Monitoramento automático' },
 ];
+
+// ─── Mapeamento de categorias (nomes descritivos temporários) ─────────────────
+export const categoriaNomes = {
+  cat71:  'Infraestrutura',
+  cat85:  'Aplicação',
+  cat31:  'Rede',
+  cat76:  'Banco de Dados',
+  cat77:  'Segurança',
+  cat73:  'Storage',
+  cat91:  'Monitoramento',
+  cat137: 'Integração',
+  cat103: 'Middleware',
+  cat29:  'S.O.',
+};
 
 // ─── KPIs globais ─────────────────────────────────────────────────────────────
 export function getKpisGlobais() {

@@ -3,10 +3,10 @@ import { createContext, useContext, useState } from 'react';
 const DashboardContext = createContext();
 
 export function DashboardProvider({ children }) {
-  const [horizon, setHorizon] = useState('6h');
+  const [filtroAtivo, setFiltroAtivo] = useState(null); // null | produto | grupo | categoria
   const [viewMode, setViewMode] = useState('geral');
   return (
-    <DashboardContext.Provider value={{ horizon, setHorizon, viewMode, setViewMode }}>
+    <DashboardContext.Provider value={{ filtroAtivo, setFiltroAtivo, viewMode, setViewMode }}>
       {children}
     </DashboardContext.Provider>
   );
