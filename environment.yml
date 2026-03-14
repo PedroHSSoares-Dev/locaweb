@@ -1,0 +1,36 @@
+name: predictfy-locaweb
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  # Python
+  - python=3.12
+
+  # ML / Data Science
+  - prophet=1.1.5
+  - xgboost=3.2.0
+  - scikit-learn>=1.6
+  - shap>=0.51
+  - imbalanced-learn>=0.14
+
+  # Dados
+  - pandas>=2.2
+  - numpy>=1.26
+  - openpyxl>=3.1
+
+  # Visualização (notebooks)
+  - matplotlib>=3.9
+  - seaborn>=0.13
+
+  # Notebooks
+  - jupyterlab
+  - ipykernel
+
+  # Utilitários
+  - python-dotenv>=1.0
+  - requests>=2.32
+  - pip
+
+  - pip:
+      # Feriados brasileiros (Prophet regressor)
+      - holidays>=0.70
