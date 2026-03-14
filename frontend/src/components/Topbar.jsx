@@ -1,10 +1,17 @@
 import { useEffect, useState } from 'react';
-import { LayoutGrid, TrendingUp } from 'lucide-react';
-import { servers } from '../data/mockData';
+import { NavLink, useLocation } from 'react-router-dom';
+import { BarChart2, LayoutGrid, Terminal, TrendingUp } from 'lucide-react';
+import { servers, horizonMultiplier } from '../data/mockData';
+import { useDashboard } from '../context/DashboardContext';
 
 const HORIZONS = ['30min', '1h', '6h', '12h', '24h'];
 
-const atRiskCount = servers.filter(s => s.failProb >= 40).length;
+const TABS = [
+  { to: '/gestao',        label: 'Gestão',            Icon: BarChart2  },
+  { to: '/monitoramento', label: 'Monitoramento',      Icon: LayoutGrid },
+  { to: '/tecnico',       label: 'Técnico',            Icon: Terminal   },
+  { to: '/financeiro',    label: 'Impacto Financeiro', Icon: TrendingUp },
+];
 
 function GlobalStatusBadge() {
   const maxProb = Math.max(...servers.map(s => s.failProb));
@@ -12,33 +19,29 @@ function GlobalStatusBadge() {
   const label = maxProb >= 80 ? 'CRÍTICO' : maxProb >= 40 ? 'ALERTA' : 'NORMAL';
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: 6,
+      padding: '4px 10px', borderRadius: 4,
+      background: `${color}18`,
+      border: `1px solid ${color}44`,
+      fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600,
+      color, letterSpacing: '0.08em',
+    }}>
       <span style={{
-        display: 'inline-flex', alignItems: 'center', gap: 6,
-        padding: '4px 10px', borderRadius: 4,
-        background: `${color}18`,
-        border: `1px solid ${color}44`,
-        fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600,
-        color, letterSpacing: '0.08em',
-      }}>
-        <span style={{
-          width: 6, height: 6, borderRadius: '50%',
-          background: color,
-          boxShadow: `0 0 6px ${color}`,
-          animation: maxProb >= 40 ? 'pulse-glow 2s ease-in-out infinite' : 'none',
-        }} />
-        SISTEMA {label}
-      </span>
-    </div>
+        width: 6, height: 6, borderRadius: '50%',
+        background: color,
+        boxShadow: `0 0 6px ${color}`,
+        animation: maxProb >= 40 ? 'pulse-glow 2s ease-in-out infinite' : 'none',
+      }} />
+      SISTEMA {label}
+    </span>
   );
 }
 
-export default function Topbar({
-  horizon, setHorizon,
-  viewMode, setViewMode,
-  activePage, onNavigate,
-}) {
+export default function Topbar() {
+  const { horizon, setHorizon } = useDashboard();
   const [tick, setTick] = useState(0);
+  const location = useLocation();
 
   useEffect(() => {
     const id = setInterval(() => setTick(t => t + 1), 1000);
@@ -48,10 +51,9 @@ export default function Topbar({
   const now = new Date();
   const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-  const NAV_TABS = [
-    { id: 'dashboard', label: 'Monitoramento', Icon: LayoutGrid },
-    { id: 'financial', label: 'Impacto Financeiro', Icon: TrendingUp },
-  ];
+  // Badge: servers at risk adjusted by current horizon
+  const mult = horizonMultiplier[horizon]?.prob ?? 1.0;
+  const atRiskCount = servers.filter(s => s.failProb * mult >= 40).length;
 
   return (
     <header style={{
@@ -66,8 +68,7 @@ export default function Topbar({
     }}>
 
       {/* Left: logo + nav tabs */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 0, flexShrink: 0, height: '100%' }}>
-        {/* Logo */}
+      <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0, height: '100%' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginRight: 24 }}>
           <span style={{
             fontFamily: 'var(--font-mono)', fontWeight: 700,
@@ -86,116 +87,60 @@ export default function Topbar({
           </span>
         </div>
 
-        {/* Separator */}
-        <div style={{
-          width: 1, height: 20,
-          background: 'var(--border-md)',
-          marginRight: 20,
-        }} />
+        <div style={{ width: 1, height: 20, background: 'var(--border-md)', marginRight: 20 }} />
 
-        {/* Nav tabs */}
         <nav style={{ display: 'flex', alignItems: 'stretch', height: '100%', gap: 2 }}>
-          {NAV_TABS.map(({ id, label, Icon }) => {
-            const isActive = activePage === id;
-            const showBadge = id === 'financial' && viewMode === 'tecnica';
-            return (
-              <button
-                key={id}
-                onClick={() => onNavigate(id)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 7,
-                  padding: '0 14px',
-                  height: '100%',
-                  fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 500,
-                  color: isActive ? 'var(--text-pri)' : 'var(--text-sec)',
-                  background: 'transparent',
-                  borderBottom: isActive ? '2px solid var(--red)' : '2px solid transparent',
-                  transition: 'color 0.15s ease, border-color 0.15s ease',
-                  position: 'relative',
-                }}
-                onMouseEnter={e => {
-                  if (!isActive) e.currentTarget.style.color = 'var(--text-pri)';
-                }}
-                onMouseLeave={e => {
-                  if (!isActive) e.currentTarget.style.color = 'var(--text-sec)';
-                }}
-              >
-                <Icon size={13} strokeWidth={isActive ? 2.2 : 1.8} />
-                {label}
-                {showBadge && (
-                  <span style={{
-                    fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
-                    color: '#fff',
-                    background: 'var(--red)',
-                    borderRadius: 10,
-                    padding: '1px 5px',
-                    lineHeight: 1.4,
-                    marginLeft: 2,
-                  }}>
-                    {atRiskCount}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+          {TABS.map(({ to, label, Icon }) => (
+            <NavLink
+              key={to}
+              to={to}
+              className={({ isActive }) => isActive ? 'tab tab-active' : 'tab'}
+            >
+              <Icon size={13} />
+              {label}
+              {to === '/tecnico' && atRiskCount > 0 && (
+                <span style={{
+                  fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
+                  color: '#fff', background: 'var(--red)',
+                  borderRadius: 10, padding: '1px 5px',
+                  lineHeight: 1.4, marginLeft: 2,
+                }}>
+                  {atRiskCount}
+                </span>
+              )}
+            </NavLink>
+          ))}
         </nav>
       </div>
 
-      {/* Center: controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-        {/* Horizon selector */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <span style={{
-            fontFamily: 'var(--font-mono)', fontSize: 10,
-            color: 'var(--text-muted)', letterSpacing: '0.1em',
-            marginRight: 6,
-          }}>
-            HORIZONTE
-          </span>
-          <div style={{
-            display: 'flex', gap: 2,
-            background: 'var(--surface2)', borderRadius: 6,
-            padding: 2, border: '1px solid var(--border)',
-          }}>
-            {HORIZONS.map(h => (
-              <button
-                key={h}
-                onClick={() => setHorizon(h)}
-                style={{
-                  padding: '3px 10px', borderRadius: 4,
-                  fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 500,
-                  transition: 'all 0.15s ease',
-                  background: horizon === h ? 'var(--red)' : 'transparent',
-                  color: horizon === h ? '#fff' : 'var(--text-sec)',
-                  letterSpacing: '0.04em',
-                }}
-              >
-                {h}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* View toggle */}
+      {/* Center: horizon selector */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span style={{
+          fontFamily: 'var(--font-mono)', fontSize: 10,
+          color: 'var(--text-muted)', letterSpacing: '0.1em',
+          marginRight: 4,
+        }}>
+          HORIZONTE
+        </span>
         <div style={{
           display: 'flex', gap: 2,
           background: 'var(--surface2)', borderRadius: 6,
           padding: 2, border: '1px solid var(--border)',
         }}>
-          {['geral', 'tecnica'].map(mode => (
+          {HORIZONS.map(h => (
             <button
-              key={mode}
-              onClick={() => setViewMode(mode)}
+              key={h}
+              onClick={() => setHorizon(h)}
               style={{
-                padding: '3px 12px', borderRadius: 4,
-                fontFamily: 'var(--font-sans)', fontSize: 11, fontWeight: 500,
+                padding: '3px 10px', borderRadius: 4,
+                fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 500,
                 transition: 'all 0.15s ease',
-                background: viewMode === mode ? 'var(--surface3)' : 'transparent',
-                color: viewMode === mode ? 'var(--text-pri)' : 'var(--text-sec)',
-                border: viewMode === mode ? '1px solid var(--border-md)' : '1px solid transparent',
+                background: horizon === h ? 'var(--red)' : 'transparent',
+                color: horizon === h ? '#fff' : 'var(--text-sec)',
+                letterSpacing: '0.04em',
               }}
             >
-              {mode === 'geral' ? 'Visão Geral' : 'Visão Técnica'}
+              {h}
             </button>
           ))}
         </div>
