@@ -13,13 +13,13 @@ A **Predictfy** idealizou e desenvolveu uma solução de AIOps para transformar 
 
 ## Integrantes
 
-| Nome | RM | GitHub |
-|---|---|---|
+| Nome  | RM        | GitHub                                                     |
+| ----- | --------- | ---------------------------------------------------------- |
 | Pedro | RM-562283 | [@PedroHSSoares-Dev](https://github.com/PedroHSSoares-Dev) |
-| — | RM-XXXXX | — |
-| — | RM-XXXXX | — |
-| — | RM-XXXXX | — |
-| — | RM-XXXXX | — |
+| —     | RM-XXXXX  | —                                                          |
+| —     | RM-XXXXX  | —                                                          |
+| —     | RM-XXXXX  | —                                                          |
+| —     | RM-XXXXX  | —                                                          |
 
 ---
 
@@ -53,14 +53,14 @@ JSONs estáticos (outputs/)
 
 ## Stack tecnológica
 
-| Camada | Tecnologia |
-|---|---|
-| Modelos ML | Prophet · XGBoost · scikit-learn · SHAP |
-| Dados | pandas · numpy · openpyxl |
-| Frontend | React + Vite · Recharts · react-router-dom · lucide-react |
-| Chatbot | Gemini 2.5 Flash (LLM 1) · Gemini 2.5 Pro (LLM 2) |
-| Deploy | Vercel (frontend) · GitHub Actions (pipeline ML) |
-| Entregável FIAP | Power BI |
+| Camada          | Tecnologia                                                |
+| --------------- | --------------------------------------------------------- |
+| Modelos ML      | Prophet · XGBoost · scikit-learn · SHAP                   |
+| Dados           | pandas · numpy · openpyxl                                 |
+| Frontend        | React + Vite · Recharts · react-router-dom · lucide-react |
+| Chatbot         | Gemini 2.5 Flash (LLM 1) · Gemini 2.5 Pro (LLM 2)         |
+| Deploy          | Vercel (frontend) · GitHub Actions (pipeline ML)          |
+| Entregável FIAP | Power BI                                                  |
 
 ---
 
@@ -119,7 +119,7 @@ predictfy-locaweb/
 ### 1. Clonar o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/predictfy-locaweb.git
+git clone https://github.com/PedroHSSoares-Dev/locaweb.git
 cd predictfy-locaweb
 ```
 
@@ -165,30 +165,30 @@ npm run dev
 
 ## Dashboard — visões disponíveis
 
-| Rota | Público-alvo | Conteúdo |
-|---|---|---|
-| `/gestao` | Gestores | Saúde geral da infra · R$ em risco · tendência global |
-| `/monitoramento` | Geral | Heatmap de risco · alertas · série temporal |
-| `/tecnico` | DevOps / SRE | Métricas brutas · drill-down · SHAP values |
-| `/financeiro` | Gestores | Exposição financeira · projeção de KPI anual |
+| Rota             | Público-alvo | Conteúdo                                              |
+| ---------------- | ------------ | ----------------------------------------------------- |
+| `/gestao`        | Gestores     | Saúde geral da infra · R$ em risco · tendência global |
+| `/monitoramento` | Geral        | Heatmap de risco · alertas · série temporal           |
+| `/tecnico`       | DevOps / SRE | Métricas brutas · drill-down · SHAP values            |
+| `/financeiro`    | Gestores     | Exposição financeira · projeção de KPI anual          |
 
 
 ---
 
 ## Modelos de ML
 
-| Modelo | Objetivo | Output |
-|---|---|---|
-| **Prophet** | Prever volume de incidentes D+1 e D+7 | Volume por prioridade (P2 e P3) com intervalo de confiança |
-| **XGBoost** | Classificar risco de violação de OLA por incidente | Probabilidade 0–100% + SHAP feature importance |
-| **K-Means** | Identificar clusters de padrões recorrentes | Perfis de incidentes por produto · hora · grupo |
+| Modelo      | Objetivo                                           | Output                                                     |
+| ----------- | -------------------------------------------------- | ---------------------------------------------------------- |
+| **Prophet** | Prever volume de incidentes D+1 e D+7              | Volume por prioridade (P2 e P3) com intervalo de confiança |
+| **XGBoost** | Classificar risco de violação de OLA por incidente | Probabilidade 0–100% + SHAP feature importance             |
+| **K-Means** | Identificar clusters de padrões recorrentes        | Perfis de incidentes por produto · hora · grupo            |
 
 ### KPIs monitorados
 
 | Prioridade | Prazo de resolução (OLA) | Meta 100% (violações/ano) |
-|---|---|---|
-| P2 — Alta | até 4h | 36 a 39 violações |
-| P3 — Média | até 12h | 231 a 263 violações |
+| ---------- | ------------------------ | ------------------------- |
+| P2 — Alta  | até 4h                   | 36 a 39 violações         |
+| P3 — Média | até 12h                  | 231 a 263 violações       |
 
 ---
 
@@ -207,17 +207,6 @@ O chatbot integrado à dashboard usa duas LLMs em cascata:
 
 - **GitHub Actions** executa `pipeline.py` periodicamente, atualiza os JSONs e faz deploy automático via Vercel
 - **Webhook de alerta** dispara notificação quando o risco de OLA ultrapassa o threshold configurado em `.env`
-
----
-
-## Entregáveis FIAP
-
-| Item | Formato | Status |
-|---|---|---|
-| Apresentação executiva | PowerPoint | Sprint 1 · 12/04/2026 |
-| Arquitetura + EDA + protótipos | PowerPoint | Sprint 2 · 17/05/2026 |
-| MVP funcional | Link da aplicação | Sprint 3 |
-| Apresentação final + pitch | Banca Locaweb + YouTube | Sprint 4 · NEXT 2026 |
 
 ---
 
