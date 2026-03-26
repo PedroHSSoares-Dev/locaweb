@@ -1,0 +1,28 @@
+# Sobe apenas a API — frontend roda separado via npm run dev
+# Uso:
+#   docker compose up --build   # primeira vez
+#   docker compose up           # depois
+#   docker compose down         # parar
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      # Código da API — mudanças refletidas sem rebuild (--reload detecta)
+      - ./api:/app/api
+      # Monta outputs/ como volume — novos JSONs gerados pelos notebooks
+      # são vistos pelo container imediatamente (cache TTL 60s)
+      - ./outputs:/app/outputs:ro
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
