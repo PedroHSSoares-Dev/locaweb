@@ -3,7 +3,21 @@ import {
   Cell, LabelList,
 } from 'recharts';
 import { Terminal, AlertTriangle, Activity, Users } from 'lucide-react';
-import { grupos, shapFeatures, clusters, categorias, categoriaNomes } from '../data/mockData';
+import { grupos, shapFeatures, categorias, categoriaNomes } from '../data/mockData';
+import { useApi } from '../hooks/useApi';
+import SemDados from '../components/SemDados';
+
+// ─── Skeleton loading placeholder ─────────────────────────────────────────────
+function Skeleton({ height = 80 }) {
+  return (
+    <div style={{
+      height,
+      background: 'var(--surface2)',
+      borderRadius: 8,
+      opacity: 0.7,
+    }} />
+  );
+}
 
 // ─── KPI Card ─────────────────────────────────────────────────────────────────
 function KpiCard({ label, value, sub, color, Icon, delay = 0 }) {
@@ -171,12 +185,25 @@ function ClusterCard({ cluster }) {
 }
 
 export default function TecnicoPage() {
-  // Sort groups by taxaViolacao desc
-  const gruposOrdenados = [...grupos].sort((a, b) => b.taxaViolacao - a.taxaViolacao);
-  const shapOrdenado = [...shapFeatures].sort((a, b) => b.importance - a.importance);
-  const maxImportance = shapOrdenado[0]?.importance ?? 1;
+  // ── Dados de modelo via API ────────────────────────────────────────────────
+  const { data: clustersApiData, loading: clustersLoading, disponivel: clustersDisponivel } = useApi('/clusters');
+  const { data: riscoApiData,    loading: riscoLoading,    disponivel: riscoDisponivel    } = useApi('/risco');
 
-  // Top 5 categories for cross-table
+  // SHAP: usa API se disponível, senão fallback para mockData (simulado)
+  const shapData = (riscoDisponivel && riscoApiData?.shap_features)
+    ? riscoApiData.shap_features
+    : shapFeatures;
+  const isShapSimulado = !riscoDisponivel;
+
+  // Clusters: usa API se disponível
+  const clustersData = (clustersDisponivel && clustersApiData?.clusters)
+    ? clustersApiData.clusters
+    : null;
+
+  // Dados históricos (mockData — referência imutável do dataset)
+  const gruposOrdenados = [...grupos].sort((a, b) => b.taxaViolacao - a.taxaViolacao);
+  const shapOrdenado = [...shapData].sort((a, b) => b.importance - a.importance);
+  const maxImportance = shapOrdenado[0]?.importance ?? 1;
   const topCats = categorias.slice(0, 5);
 
   return (
@@ -271,8 +298,10 @@ export default function TecnicoPage() {
 
       {/* ── SEÇÃO 3: SHAP Feature Importance ─────────────────────────────── */}
       <ChartCard
-        title="Feature importance — modelo XGBoost OLA (simulado)"
-        sub="Substituído por SHAP real após treinamento · outputs/risco_ola.json"
+        title={`Feature importance — modelo XGBoost OLA${isShapSimulado ? ' (simulado)' : ''}`}
+        sub={isShapSimulado
+          ? 'Valores simulados · substituído por SHAP real após treinar o notebook 04'
+          : 'SHAP real — outputs/risco_ola.json'}
       >
         <ResponsiveContainer width="100%" height={shapOrdenado.length * 36 + 20}>
           <BarChart
@@ -316,15 +345,23 @@ export default function TecnicoPage() {
       <div>
         <div style={{ marginBottom: 14 }}>
           <div style={{ fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13, color: 'var(--text-pri)' }}>
-            Clusters de padrões de incidentes (K-Means simulado)
+            Clusters de padrões de incidentes (K-Means)
           </div>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-sec)', marginTop: 3 }}>
-            Substituído por outputs/clusters.json após treinamento · Cluster 3 (Team07) é o mais crítico
+            {clustersDisponivel
+              ? 'outputs/clusters.json · Cluster 3 (Team07) é o mais crítico'
+              : 'outputs/clusters.json · execute o notebook 05 para gerar'}
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          {clusters.map(c => <ClusterCard key={c.id} cluster={c} />)}
-        </div>
+        {clustersLoading ? (
+          <Skeleton height={320} />
+        ) : !clustersDisponivel ? (
+          <SemDados mensagem="Modelo K-Means ainda não treinado — execute o notebook 05" />
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            {clustersData.map(c => <ClusterCard key={c.id} cluster={c} />)}
+          </div>
+        )}
       </div>
 
       {/* ── SEÇÃO 5: Tabela grupos × categorias ───────────────────────────── */}
@@ -364,7 +401,6 @@ export default function TecnicoPage() {
                     color: g.id === 'Team07' ? 'var(--red)' : 'var(--text-pri)',
                   }}>{g.id}</td>
                   {topCats.map((c, ci) => {
-                    // Simulate cross rate: blend group + category rate
                     const rate = +((g.taxaViolacao * 0.6 + c.taxaViolacao * 0.4) * (0.8 + (gi * ci % 5) * 0.08)).toFixed(2);
                     const alpha = Math.min(rate / 8, 1);
                     return (

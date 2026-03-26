@@ -7,8 +7,23 @@ import {
 import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle } from 'lucide-react';
 import {
   volumeMensal2025, produtos, kpiAtingimento,
-  previsaoVolume, violacoesReais2025, olaTargets,
+  violacoesReais2025, olaTargets,
 } from '../data/mockData';
+import { useApi } from '../hooks/useApi';
+import SemDados from '../components/SemDados';
+
+// ─── Skeleton loading placeholder ─────────────────────────────────────────────
+function Skeleton({ height = 80, style = {} }) {
+  return (
+    <div style={{
+      height,
+      background: 'var(--surface2)',
+      borderRadius: 8,
+      opacity: 0.7,
+      ...style,
+    }} />
+  );
+}
 
 // ─── Shared tooltip ───────────────────────────────────────────────────────────
 function ChartTooltip({ active, payload, label, formatter }) {
@@ -144,11 +159,15 @@ function Gauge({ label, pct, color, sub }) {
 
 export default function GestaoPage() {
   const navigate = useNavigate();
-  const p2 = kpiAtingimento.P2;
-  const p3 = kpiAtingimento.P3;
-  const p2Crítico = violacoesReais2025.P2 > olaTargets.P2.metaViolacoesAno.max;
 
-  // Top 8 produtos para o gráfico horizontal
+  // ── Dados de modelo via API ────────────────────────────────────────────────
+  const { data: previsoes, loading: prevLoading, disponivel: prevDisponivel } = useApi('/previsoes');
+  const { data: kpiData,   loading: kpiLoading,  disponivel: kpiDisponivel  } = useApi('/kpi');
+
+  // Fallback para mockData enquanto kpi_atingimento.json não existe
+  const p2 = kpiDisponivel ? kpiData.P2 : kpiAtingimento.P2;
+  const p3 = kpiDisponivel ? kpiData.P3 : kpiAtingimento.P3;
+
   const produtosTop8 = [...produtos].slice(0, 8);
 
   return (
@@ -212,41 +231,49 @@ export default function GestaoPage() {
         </div>
       </div>
 
-      {/* ── SEÇÃO 2: 4 KPI Cards ──────────────────────────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
-        <KpiCard
-          label="Previsão D+1"
-          value={`${previsaoVolume.D1.total}`}
-          sub={`P2: ${previsaoVolume.D1.P2} · P3: ${previsaoVolume.D1.P3} incidentes`}
-          color="var(--orange)"
-          Icon={AlertTriangle}
-          delay={0}
-        />
-        <KpiCard
-          label="Previsão D+7"
-          value={`${previsaoVolume.D7.total}`}
-          sub="incidentes · próxima semana"
-          color="var(--yellow)"
-          Icon={TrendingUp}
-          delay={50}
-        />
-        <KpiCard
-          label="Atingimento P2"
-          value={`${p2.pctAtingimento}%`}
-          sub={`projeção: ${p2.previsaoFechamento} violações`}
-          color="var(--red)"
-          Icon={TrendingDown}
-          delay={100}
-        />
-        <KpiCard
-          label="Atingimento P3"
-          value={`${p3.pctAtingimento}%`}
-          sub={`projeção: ${p3.previsaoFechamento} violações`}
-          color="var(--green)"
-          Icon={CheckCircle}
-          delay={150}
-        />
-      </div>
+      {/* ── SEÇÃO 2: 4 KPI Cards — previsões da API ───────────────────────── */}
+      {prevLoading ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+          {[0, 1, 2, 3].map(i => <Skeleton key={i} height={112} />)}
+        </div>
+      ) : !prevDisponivel ? (
+        <SemDados mensagem="Previsão Prophet não disponível — execute o notebook 03" />
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+          <KpiCard
+            label="Previsão D+1"
+            value={`${Math.round(previsoes.total.D1.yhat)}`}
+            sub={`P2: ${Math.round(previsoes.p2.D1.yhat)} · P3: ${Math.round(previsoes.p3.D1.yhat)} incidentes`}
+            color="var(--orange)"
+            Icon={AlertTriangle}
+            delay={0}
+          />
+          <KpiCard
+            label="Previsão D+7"
+            value={`${Math.round(previsoes.total.D7.yhat)}`}
+            sub="incidentes · próxima semana"
+            color="var(--yellow)"
+            Icon={TrendingUp}
+            delay={50}
+          />
+          <KpiCard
+            label="Atingimento P2"
+            value={`${p2.pctAtingimento}%`}
+            sub={`projeção: ${p2.previsaoFechamento} violações`}
+            color="var(--red)"
+            Icon={TrendingDown}
+            delay={100}
+          />
+          <KpiCard
+            label="Atingimento P3"
+            value={`${p3.pctAtingimento}%`}
+            sub={`projeção: ${p3.previsaoFechamento} violações`}
+            color="var(--green)"
+            Icon={CheckCircle}
+            delay={150}
+          />
+        </div>
+      )}
 
       {/* ── SEÇÃO 3: Violações mensais 2025 ───────────────────────────────── */}
       <ChartCard>
@@ -380,32 +407,39 @@ export default function GestaoPage() {
         </div>
       </ChartCard>
 
-      {/* ── SEÇÃO 6: Projeção de atingimento ─────────────────────────────── */}
+      {/* ── SEÇÃO 6: Projeção de atingimento (kpi API + fallback mockData) ── */}
       <ChartCard>
         <SectionHead
           title="Projeção de atingimento — baseado no Prophet"
           sub="Estimativa de fechamento de ano com base na série histórica · não confundir com os valores reais do topo"
         />
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 64, padding: '8px 0' }}>
-          <Gauge
-            label="KPI P2"
-            pct={p2.pctAtingimento}
-            color="var(--red)"
-            sub={`Projeção: ${p2.previsaoFechamento} violações`}
-          />
-          <Gauge
-            label="KPI P3"
-            pct={p3.pctAtingimento}
-            color="var(--green)"
-            sub={`Projeção: ${p3.previsaoFechamento} violações`}
-          />
-        </div>
-        <div style={{
-          textAlign: 'center', marginTop: 12,
-          fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)',
-        }}>
-          Projeção de fechamento: P2 = {p2.previsaoFechamento} violações · P3 = {p3.previsaoFechamento} violações
-        </div>
+        {kpiLoading ? (
+          <Skeleton height={200} />
+        ) : (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 64, padding: '8px 0' }}>
+              <Gauge
+                label="KPI P2"
+                pct={p2.pctAtingimento}
+                color="var(--red)"
+                sub={`Projeção: ${p2.previsaoFechamento} violações`}
+              />
+              <Gauge
+                label="KPI P3"
+                pct={p3.pctAtingimento}
+                color="var(--green)"
+                sub={`Projeção: ${p3.previsaoFechamento} violações`}
+              />
+            </div>
+            <div style={{
+              textAlign: 'center', marginTop: 12,
+              fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)',
+            }}>
+              Projeção de fechamento: P2 = {p2.previsaoFechamento} violações · P3 = {p3.previsaoFechamento} violações
+              {!kpiDisponivel && ' · usando estimativas mockData (nb07 pendente)'}
+            </div>
+          </>
+        )}
       </ChartCard>
 
     </main>
