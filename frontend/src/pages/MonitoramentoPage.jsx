@@ -281,6 +281,13 @@ function SystemLog() {
   );
 }
 
+// ─── Utils ────────────────────────────────────────────────────────────────────
+// Converte "2026-01-15" → "15/01" (mesmo formato DD/MM do histórico diário)
+function fmtDia(ds) {
+  const [, mes, dia] = ds.split('-');
+  return `${dia}/${mes}`;
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function MonitoramentoPage() {
   const [panelItem, setPanelItem] = useState(null);
@@ -299,8 +306,10 @@ export default function MonitoramentoPage() {
       : [];
     const prev = (serieDisponivel && serieData?.serie)
       ? serieData.serie.map(d => ({
-          dia: d.ds.slice(5).replace('-', '/'), // "2026-01-01" → "01/01"
-          P2: d.P2, P3: d.P3, tipo: 'previsao',
+          dia:  fmtDia(d.ds),   // "2026-01-15" → "15/01" (igual ao histórico)
+          P2:   d.P2 ?? 0,
+          P3:   d.P3 ?? 0,
+          tipo: 'previsao',
         }))
       : [];
     return [...hist, ...prev];
@@ -310,6 +319,17 @@ export default function MonitoramentoPage() {
   const d1Total = d1Disponivel ? d1Data.total : null;
   const d1P2    = d1Disponivel ? d1Data.p2    : null;
   const d1P3    = d1Disponivel ? d1Data.p3    : null;
+
+  // Modelo ativo — campo modelo_usado retornado pela API
+  const modeloAtivo = d1Disponivel ? (d1Data?.modelo_usado ?? 'prophet_original') : null;
+  const maeAtivo    = d1Disponivel ? (d1Data?.mae ?? null) : null;
+
+  const MODELO_META = {
+    'lstm_v2':             { label: 'LSTM V2',         cor: 'var(--teal)'      },
+    'prophet_mc_ensemble': { label: 'PROPHET MC',       cor: 'var(--orange)'   },
+    'prophet_original':    { label: 'PROPHET ORIGINAL', cor: 'var(--text-sec)' },
+  };
+  const modeloMeta = MODELO_META[modeloAtivo] ?? { label: 'MODELO ATIVO', cor: 'var(--text-sec)' };
 
   // Tabela de risco — usa API se disponível, senão sem dados
   const riscoList = riscoDisponivel ? riscoData.produtos : null;
@@ -329,7 +349,32 @@ export default function MonitoramentoPage() {
       <main style={{ flex: 1, padding: '20px 28px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>
 
         {/* ── MODULE 01: D+1 Forecast Metrics ───────────────────────────── */}
-        <Module n={1} title="Métricas de Previsão D+1" sub="PROPHET-ENSEMBLE · previsão de volume para o próximo dia">
+        <Module
+          n={1}
+          title="Métricas de Previsão D+1"
+          sub={
+            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{
+                fontFamily: 'var(--font-mono)', fontSize: 10,
+                color: modeloMeta.cor,
+                background: `${modeloMeta.cor}18`,
+                border: `1px solid ${modeloMeta.cor}44`,
+                borderRadius: 3, padding: '1px 7px',
+                letterSpacing: '0.08em',
+              }}>
+                {modeloMeta.label}
+              </span>
+              {maeAtivo && (
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)' }}>
+                  MAE: {typeof maeAtivo === 'number' ? maeAtivo.toFixed(2) : maeAtivo}
+                </span>
+              )}
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-sec)' }}>
+                previsão de volume para o próximo dia
+              </span>
+            </span>
+          }
+        >
           {d1Loading ? (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
               {[0, 1, 2, 3].map(i => <Skeleton key={i} height={130} />)}
@@ -338,10 +383,34 @@ export default function MonitoramentoPage() {
             <SemDados mensagem="Previsão Prophet indisponível — execute o notebook 03" />
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
-              <KpiCard label="Total Incidentes D+1"    value={d1Total}  sub="Previsão ensemble Prophet"           color="var(--orange)" delay={0}   />
-              <KpiCard label="P2 Estimado em Aberto"  value={d1P2}    sub="Alta prioridade · OLA ≤ 4h"          color="var(--red)"    delay={60}  />
-              <KpiCard label="P3 Estimado em Aberto"  value={d1P3}    sub="Média prioridade · OLA ≤ 12h"        color="var(--yellow)" delay={120} />
-              <KpiCard label="Grupo Crítico"          value="Team07"  sub="8,94% de taxa de violação"           color="var(--red)"    delay={180} />
+              <KpiCard
+                label="Total Incidentes D+1"
+                value={d1Total}
+                sub={`Previsão ${modeloMeta.label}`}
+                color="var(--orange)"
+                delay={0}
+              />
+              <KpiCard
+                label="P2 Estimado em Aberto"
+                value={d1P2 ?? '—'}
+                sub={d1P2 != null ? 'Alta prioridade · OLA ≤ 4h' : 'Indisponível neste modelo'}
+                color="var(--red)"
+                delay={60}
+              />
+              <KpiCard
+                label="P3 Estimado em Aberto"
+                value={d1P3 ?? '—'}
+                sub={d1P3 != null ? 'Média prioridade · OLA ≤ 12h' : 'Indisponível neste modelo'}
+                color="var(--yellow)"
+                delay={120}
+              />
+              <KpiCard
+                label="Grupo Crítico"
+                value="Team07"
+                sub="8,94% de taxa de violação"
+                color="var(--red)"
+                delay={180}
+              />
             </div>
           )}
         </Module>
@@ -350,7 +419,10 @@ export default function MonitoramentoPage() {
         <Module
           n={2}
           title="Volume de Incidentes — Série Temporal"
-          sub="MOTOR PREDITIVO: PROPHET-ENSEMBLE // MAE: 17.06 · reais Dez/2025 + previsão Jan/2026"
+          sub={modeloAtivo
+            ? `MOTOR PREDITIVO: ${modeloMeta.label}${maeAtivo ? ` // MAE: ${typeof maeAtivo === 'number' ? maeAtivo.toFixed(2) : maeAtivo}` : ''} · reais Dez/2025 + previsão Jan/2026`
+            : 'MOTOR PREDITIVO: PROPHET-ENSEMBLE // MAE: 17.06 · reais Dez/2025 + previsão Jan/2026'
+          }
         >
           {historicoLoading ? (
             <Skeleton height={380} />
