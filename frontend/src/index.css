@@ -1,21 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
 :root {
-  --bg: #0a0a0a;
-  --surface1: #111111;
-  --surface2: #181818;
-  --surface3: #1f1f1f;
-  --border: rgba(255, 255, 255, 0.07);
-  --border-md: rgba(255, 255, 255, 0.13);
-  --red: #E8002D;
-  --red-hover: #ff1744;
-  --red-dim: rgba(232, 0, 45, 0.10);
-  --orange: #ff6d00;
-  --yellow: #ffea00;
-  --green: #00e676;
-  --text-pri: #f0f0f0;
-  --text-sec: #888888;
-  --text-muted: #444444;
-  --font-mono: 'IBM Plex Mono', monospace;
-  --font-sans: 'IBM Plex Sans', sans-serif;
+  /* Backgrounds */
+  --bg:       #080808;
+  --surface1: #0e0e0e;
+  --surface2: #141414;
+  --surface3: #1a1a1a;
+  --surface4: #202020;
+
+  /* Borders */
+  --border:    rgba(255,255,255,0.06);
+  --border-md: rgba(255,255,255,0.11);
+  --border-hi: rgba(255,255,255,0.18);
+
+  /* Semantic colors */
+  --red:    #ff2d55;
+  --orange: #ff9f0a;
+  --green:  #30d158;
+  --teal:   #5ac8fa;
+  --purple: #bf5af2;
+  --yellow: #ffd60a;
+
+  /* Dim variants */
+  --red-dim:    rgba(255,45,85,0.12);
+  --orange-dim: rgba(255,159,10,0.12);
+  --green-dim:  rgba(48,209,88,0.12);
+  --teal-dim:   rgba(90,200,250,0.10);
+
+  /* Typography */
+  --text-pri:   #f2f2f7;
+  --text-sec:   #8e8e93;
+  --text-muted: #636366;
+  --text-teal:  #5ac8fa;
+
+  /* Fonts */
+  --font-mono: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+  --font-sans: 'IBM Plex Sans', 'Inter', sans-serif;
 }
 
 *, *::before, *::after {
@@ -25,7 +45,7 @@
 }
 
 html {
-  font-size: 14px;
+  font-size: 15px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -41,11 +61,10 @@ body {
 #root {
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   width: 100%;
   max-width: 100%;
-  text-align: left;
-  border-inline: none;
+  overflow: hidden;
 }
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -53,85 +72,49 @@ body {
 ::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
-/* Animations */
-@keyframes pulse-ring {
-  0% { transform: scale(0.85); opacity: 1; }
-  100% { transform: scale(2.2); opacity: 0; }
+/* ── Animations ─────────────────────────────────────────────────────────────── */
+
+@keyframes scan {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
 }
 
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(232, 0, 45, 0.4); }
-  50% { box-shadow: 0 0 0 6px rgba(232, 0, 45, 0); }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateX(20px); }
-  to { opacity: 1; transform: translateX(0); }
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
 }
 
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes slideInRight {
-  from { opacity: 0; transform: translateX(40px); }
-  to { opacity: 1; transform: translateX(0); }
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes blink {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+  50%       { opacity: 0; }
 }
 
-@keyframes ticker {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+/* ── Skeleton scan ──────────────────────────────────────────────────────────── */
+
+.skeleton {
+  background: linear-gradient(90deg,
+    var(--surface3) 25%,
+    var(--surface4) 50%,
+    var(--surface3) 75%
+  );
+  background-size: 200% 100%;
+  animation: scan 1.5s ease infinite;
+  border-radius: 3px;
 }
 
-@keyframes progressFill {
-  from { width: 0%; }
-  to { width: var(--target-width); }
-}
-
-.pulse-critical {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-.fade-in-up {
-  animation: fadeInUp 0.35s ease both;
-}
+/* ── Utility ────────────────────────────────────────────────────────────────── */
 
 button { cursor: pointer; border: none; background: none; font-family: inherit; }
 
-.page-enter {
-  animation: pageIn 0.22s ease forwards;
-}
-@keyframes pageIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Nav tabs (Topbar) */
-.tab {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 0 14px;
-  height: 100%;
-  font-family: var(--font-sans);
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-sec);
-  text-decoration: none;
-  border-bottom: 2px solid transparent;
-  transition: color 0.15s ease, border-color 0.15s ease;
-  white-space: nowrap;
-}
-.tab:hover {
-  color: var(--text-pri);
-}
-.tab-active {
-  color: var(--text-pri);
-  border-bottom: 2px solid var(--red);
-}
+.page-enter  { animation: pageIn   0.22s ease forwards; }
+.fade-in-up  { animation: fadeInUp 0.35s ease both; }

@@ -1,48 +1,39 @@
 /**
- * SemDados — Fallback para quando dados de modelo não estão disponíveis.
- * Exibido enquanto notebooks pendentes não gerarem seus outputs/*.json.
+ * SemDados — fallback terminal-style quando modelo não disponível.
  */
 export default function SemDados({ mensagem }) {
   return (
     <div style={{
-      minHeight: 120,
+      minHeight: 150,
       background: 'var(--surface2)',
-      borderRadius: 8,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 8,
-      padding: '24px 16px',
+      border: '1px solid var(--border)',
+      borderRadius: 6,
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      gap: 10, padding: '28px 20px',
     }}>
       <div style={{
-        width: 36, height: 36,
-        borderRadius: '50%',
-        background: 'var(--surface3)',
-        border: '1px solid var(--border)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
         fontFamily: 'var(--font-mono)',
-        fontSize: 16,
-        color: 'var(--text-muted)',
-      }}>—</div>
+        fontSize: 24, color: 'var(--text-sec)', lineHeight: 1,
+      }}>▣</div>
       <div style={{
-        fontFamily: 'var(--font-sans)',
-        fontSize: 12,
-        fontWeight: 500,
-        color: 'var(--text-muted)',
-      }}>Sem dados disponíveis</div>
+        fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700,
+        color: 'var(--text-sec)', letterSpacing: '0.12em', textTransform: 'uppercase',
+      }}>MODELO NÃO TREINADO</div>
       {mensagem && (
         <div style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: 10,
-          color: 'var(--text-muted)',
-          opacity: 0.7,
-          textAlign: 'center',
-          maxWidth: 280,
+          fontFamily: 'var(--font-mono)', fontSize: 10,
+          color: 'var(--text-sec)',
+          textAlign: 'center', maxWidth: 280, letterSpacing: '0.04em',
         }}>{mensagem}</div>
       )}
+      <div style={{
+        marginTop: 4,
+        fontFamily: 'var(--font-mono)', fontSize: 10,
+        color: 'var(--text-sec)',
+        border: '1px solid var(--border-md)', borderRadius: 3,
+        padding: '3px 10px', letterSpacing: '0.08em',
+      }}>[EXECUTAR_NOTEBOOK]</div>
     </div>
   );
 }

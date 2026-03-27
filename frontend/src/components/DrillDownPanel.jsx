@@ -112,7 +112,7 @@ export default function DrillDownPanel({ item, onClose }) {
               }}>
                 {name}
               </div>
-              <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--text-muted)' }}>
+              <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--text-sec)' }}>
                 {item.produto ? 'Produto' : 'Grupo de atendimento'}
               </div>
             </div>
@@ -143,7 +143,7 @@ export default function DrillDownPanel({ item, onClose }) {
                 flex: 1, background: 'var(--surface2)', border: '1px solid var(--border)',
                 borderRadius: 6, padding: '10px 12px',
               }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', marginBottom: 4 }}>{s.label}</div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-sec)', marginBottom: 4 }}>{s.label}</div>
                 <div style={{
                   fontFamily: 'var(--font-mono)', fontSize: 18, fontWeight: 700,
                   color: s.color ?? 'var(--text-pri)', lineHeight: 1,
@@ -159,8 +159,8 @@ export default function DrillDownPanel({ item, onClose }) {
           {/* Distribuição por hora */}
           <div>
             <div style={{
-              fontFamily: 'var(--font-mono)', fontSize: 10,
-              color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 12,
+              fontFamily: 'var(--font-mono)', fontSize: 11,
+              color: 'var(--text-sec)', letterSpacing: '0.12em', marginBottom: 12,
             }}>
               DISTRIBUIÇÃO POR HORA DO DIA
             </div>
@@ -190,8 +190,8 @@ export default function DrillDownPanel({ item, onClose }) {
           {/* Top 3 clusters */}
           <div>
             <div style={{
-              fontFamily: 'var(--font-mono)', fontSize: 10,
-              color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 12,
+              fontFamily: 'var(--font-mono)', fontSize: 11,
+              color: 'var(--text-sec)', letterSpacing: '0.12em', marginBottom: 12,
             }}>
               TOP 3 CLUSTERS RELACIONADOS
             </div>
@@ -217,7 +217,7 @@ export default function DrillDownPanel({ item, onClose }) {
                     <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, fontWeight: 600, color: 'var(--text-sec)', marginBottom: 4 }}>
                       {c.label}
                     </div>
-                    <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                    <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--text-sec)', lineHeight: 1.4 }}>
                       {c.descricao}
                     </div>
                   </div>

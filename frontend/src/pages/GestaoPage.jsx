@@ -12,99 +12,150 @@ import {
 import { useApi } from '../hooks/useApi';
 import SemDados from '../components/SemDados';
 
-// ─── Skeleton loading placeholder ─────────────────────────────────────────────
-function Skeleton({ height = 80, style = {} }) {
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+function Skeleton({ height = 80 }) {
+  return <div className="skeleton" style={{ height }} />;
+}
+
+// ─── Page header ──────────────────────────────────────────────────────────────
+function PageHeader({ title, sub }) {
   return (
     <div style={{
-      height,
-      background: 'var(--surface2)',
-      borderRadius: 8,
-      opacity: 0.7,
-      ...style,
-    }} />
+      padding: '16px 28px',
+      borderBottom: '1px solid var(--border)',
+      background: 'var(--surface1)',
+      marginBottom: 0,
+      flexShrink: 0,
+      position: 'sticky',
+      top: 0,
+      zIndex: 10,
+    }}>
+      <div style={{
+        fontFamily: 'var(--font-mono)', fontSize: 18, fontWeight: 600,
+        color: 'var(--text-pri)', letterSpacing: '0.08em', textTransform: 'uppercase',
+      }}>{title}</div>
+      <div style={{
+        fontFamily: 'var(--font-mono)', fontSize: 11,
+        color: 'var(--text-sec)', marginTop: 3, letterSpacing: '0.08em',
+      }}>{sub}</div>
+    </div>
   );
 }
 
-// ─── Shared tooltip ───────────────────────────────────────────────────────────
-function ChartTooltip({ active, payload, label, formatter }) {
-  if (!active || !payload?.length) return null;
+// ─── Module card ──────────────────────────────────────────────────────────────
+function Module({ n, title, sub, action, children, noPad = false }) {
   return (
     <div style={{
-      background: 'var(--surface3)', border: '1px solid var(--border-md)',
-      borderRadius: 6, padding: '8px 12px',
+      background: 'var(--surface2)', border: '1px solid var(--border)',
+      borderRadius: 6, overflow: 'hidden',
     }}>
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)', marginBottom: 6 }}>
-        {label}
-      </div>
-      {payload.map((p, i) => (
-        <div key={i} style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: p.color || p.fill, marginBottom: 2 }}>
-          {p.name}: {formatter ? formatter(p.value) : p.value}
+      <div style={{
+        padding: '10px 16px', borderBottom: '1px solid var(--border)',
+        display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
+      }}>
+        <div>
+          <div style={{
+            fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)',
+            letterSpacing: '0.16em', marginBottom: 3,
+          }}>MODULE {String(n).padStart(2, '0')}</div>
+          <div style={{
+            fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 600,
+            color: 'var(--text-pri)', textTransform: 'uppercase', letterSpacing: '0.04em',
+          }}>{title}</div>
+          {sub && (
+            <div style={{
+              fontFamily: 'var(--font-mono)', fontSize: 11,
+              color: 'var(--text-sec)', marginTop: 3,
+            }}>{sub}</div>
+          )}
         </div>
-      ))}
+        {action}
+      </div>
+      <div style={noPad ? {} : { padding: '20px 24px 24px' }}>{children}</div>
     </div>
   );
 }
 
 // ─── KPI card ─────────────────────────────────────────────────────────────────
-function KpiCard({ label, value, sub, color, Icon, delay = 0 }) {
+function KpiCard({ label, value, sub, color, delay = 0 }) {
   return (
     <div style={{
-      background: 'var(--surface1)',
-      border: `1px solid ${color}33`,
+      background: 'var(--surface3)',
+      border: '1px solid var(--border)',
       borderTop: `2px solid ${color}`,
-      borderRadius: 8, padding: '18px 22px',
-      display: 'flex', flexDirection: 'column', gap: 10,
+      borderRadius: 6, padding: '20px 24px',
+      minHeight: 120,
+      display: 'flex', flexDirection: 'column', gap: 8,
       animation: `fadeInUp 0.4s ease ${delay}ms both`,
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{
-          fontFamily: 'var(--font-sans)', fontSize: 11, fontWeight: 500,
-          color: 'var(--text-sec)', textTransform: 'uppercase', letterSpacing: '0.07em',
-        }}>{label}</span>
-        <span style={{
-          width: 34, height: 34, borderRadius: 8, display: 'flex',
-          alignItems: 'center', justifyContent: 'center',
-          background: `${color}18`, color,
-        }}>
-          <Icon size={16} strokeWidth={1.8} />
-        </span>
-      </div>
       <div style={{
-        fontFamily: 'var(--font-mono)', fontSize: 28, fontWeight: 700,
-        color, lineHeight: 1, letterSpacing: '-0.02em',
+        fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
+        color: 'var(--text-sec)', textTransform: 'uppercase', letterSpacing: '0.14em',
+      }}>{label}</div>
+      <div style={{
+        fontFamily: 'var(--font-mono)', fontSize: 32, fontWeight: 400,
+        color: 'var(--text-pri)', lineHeight: 1,
       }}>{value}</div>
       {sub && (
-        <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--text-sec)' }}>{sub}</div>
+        <div style={{
+          fontFamily: 'var(--font-mono)', fontSize: 11,
+          color: 'var(--text-sec)', letterSpacing: '0.04em',
+        }}>{sub}</div>
       )}
     </div>
   );
 }
 
-// ─── Section heading ──────────────────────────────────────────────────────────
-function SectionHead({ title, sub }) {
-  return (
-    <div style={{ marginBottom: 14 }}>
-      <div style={{ fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13, color: 'var(--text-pri)' }}>
-        {title}
-      </div>
-      {sub && (
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-sec)', marginTop: 3 }}>
-          {sub}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Chart card wrapper ───────────────────────────────────────────────────────
-function ChartCard({ children, style }) {
+// ─── Status banner (P2 / P3) ──────────────────────────────────────────────────
+function StatusBanner({ priority, violations, metaMin, metaMax, ola }) {
+  const ok = violations <= metaMax;
+  const color = ok ? 'var(--green)' : 'var(--red)';
+  const dimBg = ok ? 'var(--green-dim)' : 'var(--red-dim)';
   return (
     <div style={{
-      background: 'var(--surface1)', border: '1px solid var(--border)',
-      borderRadius: 8, padding: '18px 20px',
-      ...style,
+      background: dimBg, border: `1px solid ${color}`,
+      borderRadius: 6, padding: '18px 22px',
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      animation: 'fadeInUp 0.3s ease both',
     }}>
-      {children}
+      <div>
+        <div style={{
+          fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700,
+          color: 'var(--text-sec)', letterSpacing: '0.12em',
+          textTransform: 'uppercase', marginBottom: 6,
+        }}>KPI {priority} · OLA {ola}</div>
+        <div style={{
+          fontFamily: 'var(--font-mono)', fontSize: 36, fontWeight: 400,
+          color, lineHeight: 1,
+        }}>{violations} <span style={{ fontSize: 14, opacity: 0.7 }}>violações</span></div>
+        <div style={{
+          fontFamily: 'var(--font-mono)', fontSize: 11,
+          color: 'var(--text-sec)', marginTop: 6,
+        }}>META: {metaMin}–{metaMax} · ANO 2025</div>
+      </div>
+      <span style={{
+        fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
+        color, background: dimBg, border: `1px solid ${color}`,
+        borderRadius: 3, padding: '4px 10px', letterSpacing: '0.1em',
+      }}>{ok ? 'DENTRO DA META' : 'ACIMA DA META'}</span>
+    </div>
+  );
+}
+
+// ─── Chart tooltip ────────────────────────────────────────────────────────────
+function ChartTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div style={{
+      background: 'var(--surface3)', border: '1px solid var(--border-md)',
+      borderRadius: 4, padding: '8px 12px',
+    }}>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-sec)', marginBottom: 6 }}>{label}</div>
+      {payload.map((p, i) => (
+        <div key={i} style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: p.color || p.fill, marginBottom: 2 }}>
+          {p.name}: {p.value}
+        </div>
+      ))}
     </div>
   );
 }
@@ -113,7 +164,7 @@ function ChartCard({ children, style }) {
 function Gauge({ label, pct, color, sub }) {
   const capped = Math.min(pct, 100);
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
       <div style={{ position: 'relative', width: 160, height: 160 }}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
@@ -124,8 +175,8 @@ function Gauge({ label, pct, color, sub }) {
               startAngle={90} endAngle={-270}
               dataKey="value" strokeWidth={0}
             >
-              <Cell fill={color} fillOpacity={0.85} />
-              <Cell fill="var(--surface3)" />
+              <Cell fill={color} fillOpacity={0.9} />
+              <Cell fill="var(--surface4)" />
             </Pie>
           </PieChart>
         </ResponsiveContainer>
@@ -134,29 +185,40 @@ function Gauge({ label, pct, color, sub }) {
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         }}>
           <div style={{
-            fontFamily: 'var(--font-mono)', fontSize: 26, fontWeight: 700,
+            fontFamily: 'var(--font-mono)', fontSize: 26, fontWeight: 400,
             color, lineHeight: 1,
           }}>{pct}%</div>
-          <div style={{ fontFamily: 'var(--font-sans)', fontSize: 9, color: 'var(--text-sec)', marginTop: 3 }}>
-            atingimento
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)', marginTop: 3 }}>
+            ATINGIMENTO
           </div>
         </div>
       </div>
-      <div style={{ fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 12, color: 'var(--text-pri)' }}>
-        {label}
-      </div>
+      <div style={{
+        fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600,
+        color: 'var(--text-pri)', letterSpacing: '0.06em', textTransform: 'uppercase',
+      }}>{label}</div>
       {sub && (
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-sec)', textAlign: 'center' }}>
-          {sub}
-        </div>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-sec)', textAlign: 'center' }}>{sub}</div>
       )}
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', textAlign: 'center' }}>
-        baseado em previsão Prophet
-      </div>
     </div>
   );
 }
 
+// ─── Legend row ───────────────────────────────────────────────────────────────
+function Legend({ items }) {
+  return (
+    <div style={{ display: 'flex', gap: 16, marginTop: 8, justifyContent: 'flex-end' }}>
+      {items.map(([c, l]) => (
+        <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          <div style={{ width: 8, height: 8, borderRadius: 2, background: c, opacity: 0.85 }} />
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-sec)' }}>{l}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 export default function GestaoPage() {
   const navigate = useNavigate();
 
@@ -170,278 +232,191 @@ export default function GestaoPage() {
 
   const produtosTop8 = [...produtos].slice(0, 8);
 
+  const axisProps = {
+    tick: { fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--text-muted)' },
+    tickLine: false,
+  };
+
   return (
-    <main style={{
-      flex: 1, padding: '20px 24px 40px',
-      display: 'flex', flexDirection: 'column', gap: 16,
-      maxWidth: 1600, width: '100%', margin: '0 auto',
-    }}>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <PageHeader
+        title="Centro de Gestão"
+        sub="CENTRAL OPERACIONAL AIOPS // NODE: PREDICTFY-01"
+      />
 
-      {/* ── SEÇÃO 1: Banner de status KPI ─────────────────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      <main style={{ flex: 1, padding: '20px 28px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>
 
-        {/* P2 — crítico */}
-        <div style={{
-          background: 'var(--red-dim)', border: '1px solid var(--red)',
-          borderRadius: 8, padding: '20px 24px',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          animation: 'fadeInUp 0.3s ease both',
-        }}>
-          <div>
-            <div style={{ fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 13, color: 'var(--text-sec)', marginBottom: 6 }}>
-              KPI P2 — Alta Prioridade
-            </div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 36, fontWeight: 700, color: 'var(--red)', lineHeight: 1 }}>
-              42 violações
-            </div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)', marginTop: 6 }}>
-              Meta: 36–39 violações · ano 2025
-            </div>
+        {/* ── MODULE 01: OLA Status ──────────────────────────────────────── */}
+        <Module n={1} title="Status de OLA" sub="Contagem de violações no ano vs meta anual · 2025">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <StatusBanner
+              priority="P2" violations={violacoesReais2025.P2}
+              metaMin={olaTargets.P2.metaViolacoesAno.min}
+              metaMax={olaTargets.P2.metaViolacoesAno.max}
+              ola="≤ 4h"
+            />
+            <StatusBanner
+              priority="P3" violations={violacoesReais2025.P3}
+              metaMin={olaTargets.P3.metaViolacoesAno.min}
+              metaMax={olaTargets.P3.metaViolacoesAno.max}
+              ola="≤ 12h"
+            />
           </div>
-          <span style={{
-            fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
-            color: 'var(--red)', background: 'var(--red-dim)', border: '1px solid var(--red)',
-            borderRadius: 4, padding: '4px 10px', letterSpacing: '0.1em',
-          }}>ACIMA DA META</span>
-        </div>
+        </Module>
 
-        {/* P3 — ok */}
-        <div style={{
-          background: 'rgba(0,230,118,0.06)', border: '1px solid var(--green)',
-          borderRadius: 8, padding: '20px 24px',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          animation: 'fadeInUp 0.35s ease both',
-        }}>
-          <div>
-            <div style={{ fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 13, color: 'var(--text-sec)', marginBottom: 6 }}>
-              KPI P3 — Média Prioridade
+        {/* ── MODULE 02: Predictive Forecast ────────────────────────────── */}
+        <Module n={2} title="Previsão Preditiva" sub="PROPHET-ENSEMBLE · Volume de incidentes D+1 e D+7">
+          {prevLoading ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+              {[0, 1, 2, 3].map(i => <Skeleton key={i} height={130} />)}
             </div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 36, fontWeight: 700, color: 'var(--green)', lineHeight: 1 }}>
-              196 violações
-            </div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)', marginTop: 6 }}>
-              Meta: 231–263 violações · ano 2025
-            </div>
-          </div>
-          <span style={{
-            fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
-            color: 'var(--green)', background: 'rgba(0,230,118,0.10)', border: '1px solid var(--green)',
-            borderRadius: 4, padding: '4px 10px', letterSpacing: '0.1em',
-          }}>DENTRO DA META</span>
-        </div>
-      </div>
-
-      {/* ── SEÇÃO 2: 4 KPI Cards — previsões da API ───────────────────────── */}
-      {prevLoading ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
-          {[0, 1, 2, 3].map(i => <Skeleton key={i} height={112} />)}
-        </div>
-      ) : !prevDisponivel ? (
-        <SemDados mensagem="Previsão Prophet não disponível — execute o notebook 03" />
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
-          <KpiCard
-            label="Previsão D+1"
-            value={`${Math.round(previsoes.total.D1.yhat)}`}
-            sub={`P2: ${Math.round(previsoes.p2.D1.yhat)} · P3: ${Math.round(previsoes.p3.D1.yhat)} incidentes`}
-            color="var(--orange)"
-            Icon={AlertTriangle}
-            delay={0}
-          />
-          <KpiCard
-            label="Previsão D+7"
-            value={`${Math.round(previsoes.total.D7.yhat)}`}
-            sub="incidentes · próxima semana"
-            color="var(--yellow)"
-            Icon={TrendingUp}
-            delay={50}
-          />
-          <KpiCard
-            label="Atingimento P2"
-            value={`${p2.pctAtingimento}%`}
-            sub={`projeção: ${p2.previsaoFechamento} violações`}
-            color="var(--red)"
-            Icon={TrendingDown}
-            delay={100}
-          />
-          <KpiCard
-            label="Atingimento P3"
-            value={`${p3.pctAtingimento}%`}
-            sub={`projeção: ${p3.previsaoFechamento} violações`}
-            color="var(--green)"
-            Icon={CheckCircle}
-            delay={150}
-          />
-        </div>
-      )}
-
-      {/* ── SEÇÃO 3: Violações mensais 2025 ───────────────────────────────── */}
-      <ChartCard>
-        <SectionHead
-          title="Violações de OLA por mês — 2025"
-          sub="P2 (≤4h) e P3 (≤12h) · linha de referência = meta mensal P2"
-        />
-        <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={volumeMensal2025} margin={{ top: 10, right: 16, bottom: 0, left: -10 }} barGap={4}>
-            <CartesianGrid stroke="rgba(255,255,255,0.04)" strokeDasharray="3 3" vertical={false} />
-            <XAxis
-              dataKey="mes"
-              tick={{ fontFamily: 'var(--font-mono)', fontSize: 10, fill: 'var(--text-muted)' }}
-              tickLine={false} axisLine={{ stroke: 'var(--border)' }}
-            />
-            <YAxis
-              tick={{ fontFamily: 'var(--font-mono)', fontSize: 10, fill: 'var(--text-muted)' }}
-              tickLine={false} axisLine={false}
-            />
-            <Tooltip
-              content={<ChartTooltip />}
-              cursor={{ fill: 'rgba(255,255,255,0.03)' }}
-            />
-            <ReferenceLine
-              y={3.25}
-              stroke="var(--red)"
-              strokeDasharray="4 4"
-              strokeOpacity={0.5}
-              label={{ value: 'meta P2/mês', position: 'right', fill: 'var(--red)', fontSize: 9, fontFamily: 'var(--font-mono)' }}
-            />
-            <Bar dataKey="violP2" name="P2 violações" fill="var(--red)"    fillOpacity={0.8} radius={[2,2,0,0]} />
-            <Bar dataKey="violP3" name="P3 violações" fill="var(--orange)" fillOpacity={0.8} radius={[2,2,0,0]} />
-          </BarChart>
-        </ResponsiveContainer>
-        <div style={{ display: 'flex', gap: 16, marginTop: 8, justifyContent: 'flex-end' }}>
-          {[['var(--red)', 'P2 violações'], ['var(--orange)', 'P3 violações']].map(([c, l]) => (
-            <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <div style={{ width: 8, height: 8, borderRadius: 2, background: c, opacity: 0.8 }} />
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)' }}>{l}</span>
-            </div>
-          ))}
-        </div>
-      </ChartCard>
-
-      {/* ── SEÇÃO 4: Volume total por produto (horizontal) ────────────────── */}
-      <ChartCard>
-        <SectionHead
-          title="Volume e Violações por Produto"
-          sub="Clique na barra para ver detalhes em Monitoramento"
-        />
-        <ResponsiveContainer width="100%" height={240}>
-          <BarChart
-            data={produtosTop8}
-            layout="vertical"
-            margin={{ top: 4, right: 16, bottom: 4, left: 20 }}
-            barSize={10}
-            onClick={d => { if (d?.activeLabel) navigate('/monitoramento'); }}
-            style={{ cursor: 'pointer' }}
-          >
-            <XAxis
-              type="number"
-              tick={{ fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--text-muted)' }}
-              tickLine={false} axisLine={{ stroke: 'var(--border)' }}
-            />
-            <YAxis
-              type="category" dataKey="id" width={40}
-              tick={{ fontFamily: 'var(--font-mono)', fontSize: 10, fill: 'var(--text-sec)' }}
-              tickLine={false} axisLine={false}
-            />
-            <Tooltip
-              content={({ active, payload, label }) => {
-                if (!active || !payload?.length) return null;
-                const d = payload[0]?.payload;
-                return (
-                  <div style={{
-                    background: 'var(--surface3)', border: '1px solid var(--border-md)',
-                    borderRadius: 6, padding: '8px 12px',
-                  }}>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)', marginBottom: 6 }}>{label}</div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#60a5fa', marginBottom: 2 }}>total: {d?.total}</div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--red)' }}>violações: {d?.violacoes} ({d?.taxaViolacao}%)</div>
-                  </div>
-                );
-              }}
-              cursor={{ fill: 'rgba(255,255,255,0.03)' }}
-            />
-            <Bar dataKey="total"    name="Total"     fill="#60a5fa" fillOpacity={0.7} radius={[0,3,3,0]} />
-            <Bar dataKey="violacoes" name="Violações" fill="var(--red)" fillOpacity={0.8} radius={[0,3,3,0]} />
-          </BarChart>
-        </ResponsiveContainer>
-        <div style={{ display: 'flex', gap: 16, marginTop: 8, justifyContent: 'flex-end' }}>
-          {[['#60a5fa', 'Total'], ['var(--red)', 'Violações']].map(([c, l]) => (
-            <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <div style={{ width: 8, height: 8, borderRadius: 2, background: c, opacity: 0.8 }} />
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)' }}>{l}</span>
-            </div>
-          ))}
-        </div>
-      </ChartCard>
-
-      {/* ── SEÇÃO 5: Tendência de volume mensal ──────────────────────────── */}
-      <ChartCard>
-        <SectionHead
-          title="Evolução mensal de incidentes KPI — 2025"
-          sub="P2 e P3 · apenas incidentes Alta e Média prioridade"
-        />
-        <ResponsiveContainer width="100%" height={200}>
-          <LineChart data={volumeMensal2025} margin={{ top: 8, right: 16, bottom: 0, left: -10 }}>
-            <CartesianGrid stroke="rgba(255,255,255,0.04)" strokeDasharray="3 3" vertical={false} />
-            <XAxis
-              dataKey="mes"
-              tick={{ fontFamily: 'var(--font-mono)', fontSize: 10, fill: 'var(--text-muted)' }}
-              tickLine={false} axisLine={{ stroke: 'var(--border)' }}
-            />
-            <YAxis
-              tick={{ fontFamily: 'var(--font-mono)', fontSize: 10, fill: 'var(--text-muted)' }}
-              tickLine={false} axisLine={false}
-            />
-            <Tooltip content={<ChartTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.08)', strokeWidth: 1 }} />
-            <Line type="monotone" dataKey="P2" name="P2" stroke="var(--red)"    strokeWidth={2} dot={{ r: 3, fill: 'var(--red)', stroke: 'var(--bg)', strokeWidth: 2 }} />
-            <Line type="monotone" dataKey="P3" name="P3" stroke="var(--orange)" strokeWidth={2} dot={{ r: 3, fill: 'var(--orange)', stroke: 'var(--bg)', strokeWidth: 2 }} />
-          </LineChart>
-        </ResponsiveContainer>
-        <div style={{ display: 'flex', gap: 16, marginTop: 8, justifyContent: 'flex-end' }}>
-          {[['var(--red)', 'P2'], ['var(--orange)', 'P3']].map(([c, l]) => (
-            <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <div style={{ width: 8, height: 8, borderRadius: 2, background: c }} />
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)' }}>{l}</span>
-            </div>
-          ))}
-        </div>
-      </ChartCard>
-
-      {/* ── SEÇÃO 6: Projeção de atingimento (kpi API + fallback mockData) ── */}
-      <ChartCard>
-        <SectionHead
-          title="Projeção de atingimento — baseado no Prophet"
-          sub="Estimativa de fechamento de ano com base na série histórica · não confundir com os valores reais do topo"
-        />
-        {kpiLoading ? (
-          <Skeleton height={200} />
-        ) : (
-          <>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 64, padding: '8px 0' }}>
-              <Gauge
-                label="KPI P2"
-                pct={p2.pctAtingimento}
-                color="var(--red)"
+          ) : !prevDisponivel ? (
+            <SemDados mensagem="Previsão Prophet indisponível — execute o notebook 03" />
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+              <KpiCard
+                label="Total Incidentes D+1"
+                value={Math.round(previsoes.total.D1.yhat)}
+                sub={`P2: ${Math.round(previsoes.p2.D1.yhat)} · P3: ${Math.round(previsoes.p3.D1.yhat)}`}
+                color="var(--orange)"
+                delay={0}
+              />
+              <KpiCard
+                label="Total Incidentes D+7"
+                value={Math.round(previsoes.total.D7.yhat)}
+                sub="Previsão horizonte 7 dias"
+                color="var(--yellow)"
+                delay={60}
+              />
+              <KpiCard
+                label="Atingimento P2"
+                value={`${p2.pctAtingimento}%`}
                 sub={`Projeção: ${p2.previsaoFechamento} violações`}
+                color="var(--red)"
+                delay={120}
               />
-              <Gauge
-                label="KPI P3"
-                pct={p3.pctAtingimento}
-                color="var(--green)"
+              <KpiCard
+                label="Atingimento P3"
+                value={`${p3.pctAtingimento}%`}
                 sub={`Projeção: ${p3.previsaoFechamento} violações`}
+                color="var(--green)"
+                delay={180}
               />
             </div>
-            <div style={{
-              textAlign: 'center', marginTop: 12,
-              fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)',
-            }}>
-              Projeção de fechamento: P2 = {p2.previsaoFechamento} violações · P3 = {p3.previsaoFechamento} violações
-              {!kpiDisponivel && ' · usando estimativas mockData (nb07 pendente)'}
-            </div>
-          </>
-        )}
-      </ChartCard>
+          )}
+        </Module>
 
-    </main>
+        {/* ── MODULE 03: Monthly Violations ─────────────────────────────── */}
+        <Module
+          n={3}
+          title="Violações Mensais 2025"
+          sub="P2 (≤4h) e P3 (≤12h) · linha tracejada = meta mensal P2"
+        >
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={volumeMensal2025} margin={{ top: 10, right: 16, bottom: 0, left: -10 }} barGap={4}>
+              <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="mes" {...axisProps} axisLine={{ stroke: 'var(--border)' }} />
+              <YAxis {...axisProps} axisLine={false} />
+              <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
+              <ReferenceLine
+                y={3.25} stroke="var(--red)" strokeDasharray="4 4" strokeOpacity={0.5}
+                label={{ value: 'Meta P2/mês', position: 'right', fill: 'var(--red)', fontSize: 9, fontFamily: 'var(--font-mono)' }}
+              />
+              <Bar dataKey="violP2" name="Violações P2" fill="var(--red)"    fillOpacity={0.8} radius={[2,2,0,0]} />
+              <Bar dataKey="violP3" name="Violações P3" fill="var(--orange)" fillOpacity={0.8} radius={[2,2,0,0]} />
+            </BarChart>
+          </ResponsiveContainer>
+          <Legend items={[['var(--red)', 'Violações P2'], ['var(--orange)', 'Violações P3']]} />
+        </Module>
+
+        {/* ── MODULE 04: Volume by Product ──────────────────────────────── */}
+        <Module
+          n={4}
+          title="Volume por Produto"
+          sub="Clique na barra para detalhar em Monitoramento · top 8 produtos"
+        >
+          <ResponsiveContainer width="100%" height={420}>
+            <BarChart
+              data={produtosTop8} layout="vertical"
+              margin={{ top: 4, right: 16, bottom: 4, left: 20 }}
+              barSize={10}
+              onClick={d => { if (d?.activeLabel) navigate('/monitoramento'); }}
+              style={{ cursor: 'pointer' }}
+            >
+              <XAxis type="number" {...axisProps} axisLine={{ stroke: 'var(--border)' }} />
+              <YAxis
+                type="category" dataKey="id" width={44}
+                tick={{ fontFamily: 'var(--font-mono)', fontSize: 10, fill: 'var(--text-sec)' }}
+                tickLine={false} axisLine={false}
+              />
+              <Tooltip
+                content={({ active, payload, label }) => {
+                  if (!active || !payload?.length) return null;
+                  const d = payload[0]?.payload;
+                  return (
+                    <div style={{
+                      background: 'var(--surface3)', border: '1px solid var(--border-md)',
+                      borderRadius: 4, padding: '8px 12px',
+                    }}>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-sec)', marginBottom: 6 }}>{label}</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--teal)', marginBottom: 2 }}>total: {d?.total}</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--red)' }}>violações: {d?.violacoes} ({d?.taxaViolacao}%)</div>
+                    </div>
+                  );
+                }}
+                cursor={{ fill: 'rgba(255,255,255,0.03)' }}
+              />
+              <Bar dataKey="total"     name="Total"     fill="var(--teal)" fillOpacity={0.65} radius={[0,3,3,0]} />
+              <Bar dataKey="violacoes" name="Violações" fill="var(--red)"  fillOpacity={0.85} radius={[0,3,3,0]} />
+            </BarChart>
+          </ResponsiveContainer>
+          <Legend items={[['var(--teal)', 'Total'], ['var(--red)', 'Violações']]} />
+        </Module>
+
+        {/* ── MODULE 05: Monthly Trend ───────────────────────────────────── */}
+        <Module
+          n={5}
+          title="Tendência Mensal de Incidentes"
+          sub="P2 e P3 · apenas incidentes KPI (prioridade Alta e Média)"
+        >
+          <ResponsiveContainer width="100%" height={280}>
+            <LineChart data={volumeMensal2025} margin={{ top: 8, right: 16, bottom: 0, left: -10 }}>
+              <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="mes" {...axisProps} axisLine={{ stroke: 'var(--border)' }} />
+              <YAxis {...axisProps} axisLine={false} />
+              <Tooltip content={<ChartTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.08)', strokeWidth: 1 }} />
+              <Line type="monotone" dataKey="P2" name="P2" stroke="var(--red)"    strokeWidth={2} dot={{ r: 3, fill: 'var(--red)',    stroke: 'var(--bg)', strokeWidth: 2 }} />
+              <Line type="monotone" dataKey="P3" name="P3" stroke="var(--orange)" strokeWidth={2} dot={{ r: 3, fill: 'var(--orange)', stroke: 'var(--bg)', strokeWidth: 2 }} />
+            </LineChart>
+          </ResponsiveContainer>
+          <Legend items={[['var(--red)', 'P2'], ['var(--orange)', 'P3']]} />
+        </Module>
+
+        {/* ── MODULE 06: KPI Projection ─────────────────────────────────── */}
+        <Module
+          n={6}
+          title="Projeção de Atingimento de KPI"
+          sub={`ESTIMATIVA BASEADA EM PROPHET${!kpiDisponivel ? ' · usando estimativas simuladas (nb07 pendente)' : ''}`}
+        >
+          {kpiLoading ? (
+            <Skeleton height={200} />
+          ) : (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 64, padding: '8px 0' }}>
+                <Gauge label="KPI P2" pct={p2.pctAtingimento} color="var(--red)"   sub={`Projeção: ${p2.previsaoFechamento} violações`} />
+                <Gauge label="KPI P3" pct={p3.pctAtingimento} color="var(--green)" sub={`Projeção: ${p3.previsaoFechamento} violações`} />
+              </div>
+              <div style={{
+                textAlign: 'center', marginTop: 10,
+                fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-sec)', letterSpacing: '0.04em',
+              }}>
+                PREVISÃO FINAL: P2 = {p2.previsaoFechamento} violações · P3 = {p3.previsaoFechamento} violações
+              </div>
+            </>
+          )}
+        </Module>
+
+      </main>
+    </div>
   );
 }

@@ -1,25 +1,38 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './index.css';
 import { DashboardProvider } from './context/DashboardContext';
-import Topbar from './components/Topbar';
+import Sidebar from './components/Sidebar';
 import GestaoPage from './pages/GestaoPage';
 import MonitoramentoPage from './pages/MonitoramentoPage';
 import TecnicoPage from './pages/TecnicoPage';
-import FinanceiroPage from './pages/FinanceiroPage';
-
 export default function App() {
   return (
     <DashboardProvider>
       <BrowserRouter>
-        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-          <Topbar />
-          <Routes>
-            <Route path="/" element={<Navigate to="/gestao" replace />} />
-            <Route path="/gestao"        element={<GestaoPage />} />
-            <Route path="/monitoramento" element={<MonitoramentoPage />} />
-            <Route path="/tecnico"       element={<TecnicoPage />} />
-            <Route path="/financeiro"    element={<FinanceiroPage />} />
-          </Routes>
+        <div style={{
+          display: 'flex',
+          height: '100vh',
+          width: '100%',
+          overflow: 'hidden',
+        }}>
+          <Sidebar />
+          <div style={{
+            flex: 1,
+            minWidth: 0,
+            marginLeft: 220,
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100vh',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+          }}>
+            <Routes>
+              <Route path="/" element={<Navigate to="/gestao" replace />} />
+              <Route path="/gestao"        element={<GestaoPage />} />
+              <Route path="/monitoramento" element={<MonitoramentoPage />} />
+              <Route path="/tecnico"       element={<TecnicoPage />} />
+            </Routes>
+          </div>
         </div>
       </BrowserRouter>
     </DashboardProvider>
