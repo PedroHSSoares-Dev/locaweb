@@ -41,7 +41,9 @@ def load_json(filename: str) -> Optional[Any]:
 
 
 _MODEL_FILES = [
-    "previsoes_volume.json",
+    "previsoes_volume.json",         # Prophet original — baseline
+    "previsoes_volume_mc.json",      # Prophet Monte Carlo ensemble adaptativo
+    "previsoes_lstm.json",           # LSTM v2 — modelo principal
     "risco_ola.json",
     "clusters.json",
     "kpi_atingimento.json",

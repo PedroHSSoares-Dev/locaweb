@@ -89,32 +89,46 @@ class PrevisaoCompletaResponse(BaseModel):
 class PrevisaoD1Response(BaseModel):
     """Resumo do D+1 para KPI cards do dashboard."""
     disponivel: bool = Field(True, example=True)
-    total: int = Field(..., example=37, description="Total de incidentes previstos para amanhã (P2 + P3)")
-    p2: int = Field(..., example=14, description="Incidentes P2 previstos (prioridade alta, OLA ≤ 4h)")
-    p3: int = Field(..., example=25, description="Incidentes P3 previstos (prioridade média, OLA ≤ 12h)")
+    total: int = Field(..., example=69, description="Total de incidentes previstos para amanhã")
+    p2: Optional[int] = Field(None, example=15, description="Incidentes P2 previstos — None quando LSTM (só total)")
+    p3: Optional[int] = Field(None, example=54, description="Incidentes P3 previstos — None quando LSTM (só total)")
+    modelo_usado: str = Field(..., example="lstm_v2", description="Modelo ativo: lstm_v2 | prophet_mc_ensemble | prophet_original")
+    mae: Optional[float] = Field(None, example=13.15, description="MAE holdout do modelo (disponível apenas para LSTM)")
 
 
 class PrevisaoD7Response(BaseModel):
     """Resumo do D+7 para KPI cards do dashboard."""
     disponivel: bool = Field(True, example=True)
-    total: int = Field(..., example=37, description="Total de incidentes previstos em 7 dias (P2 + P3)")
-    p2: int = Field(..., example=16, description="Incidentes P2 previstos (prioridade alta, OLA ≤ 4h)")
-    p3: int = Field(..., example=26, description="Incidentes P3 previstos (prioridade média, OLA ≤ 12h)")
+    total: int = Field(..., example=65, description="Total de incidentes previstos em 7 dias")
+    p2: Optional[int] = Field(None, example=15, description="Incidentes P2 previstos — None quando LSTM (só total)")
+    p3: Optional[int] = Field(None, example=50, description="Incidentes P3 previstos — None quando LSTM (só total)")
+    modelo_usado: str = Field(..., example="lstm_v2", description="Modelo ativo: lstm_v2 | prophet_mc_ensemble | prophet_original")
+    mae: Optional[float] = Field(None, example=13.15, description="MAE holdout do modelo (disponível apenas para LSTM)")
 
 
 class PrevisaoDia(BaseModel):
     """Um ponto da série formatada para o gráfico de área do dashboard."""
     dia: str = Field(..., example="01/01", description="Label do eixo X no formato DD/MM")
     ds: str = Field(..., example="2026-01-01", description="Data ISO 8601")
-    total: int = Field(..., example=37, description="Volume total previsto (P2 + P3)")
-    P2: int = Field(..., example=14, description="Incidentes P2 previstos")
-    P3: int = Field(..., example=25, description="Incidentes P3 previstos")
+    total: int = Field(..., example=69, description="Volume total previsto")
+    P2: Optional[int] = Field(None, example=15, description="Incidentes P2 previstos — None quando LSTM")
+    P3: Optional[int] = Field(None, example=54, description="Incidentes P3 previstos — None quando LSTM")
 
 
 class PrevisaoSerieResponse(BaseModel):
     """Série D+1 a D+7 formatada para o gráfico de área do MonitoramentoPage."""
     disponivel: bool = Field(True, example=True)
+    modelo_usado: str = Field(..., example="lstm_v2")
     serie: list[PrevisaoDia]
+
+
+class ModelosDisponiveisResponse(BaseModel):
+    """Status de disponibilidade dos modelos de previsão e hierarquia ativa."""
+    lstm: bool = Field(..., description="previsoes_lstm.json presente em outputs/")
+    prophet_mc: bool = Field(..., description="previsoes_volume_mc.json presente em outputs/")
+    prophet_original: bool = Field(..., description="previsoes_volume.json presente em outputs/")
+    modelo_ativo: str = Field(..., example="lstm_v2", description="Modelo sendo usado pelos endpoints /previsoes/*")
+    mae_modelo_ativo: Optional[float] = Field(None, example=13.15, description="MAE holdout do modelo ativo (só LSTM tem)")
 
 
 # ────────────────────────────────────────────────────────────────────────────────
@@ -209,13 +223,15 @@ class KpiResponse(BaseModel):
 # ────────────────────────────────────────────────────────────────────────────────
 
 class ContextD1D7(BaseModel):
-    total: int = Field(..., example=37)
-    p2: int = Field(..., example=14)
-    p3: int = Field(..., example=25)
+    total: int = Field(..., example=69)
+    p2: Optional[int] = Field(None, example=15, description="None quando LSTM (só prevê total)")
+    p3: Optional[int] = Field(None, example=54, description="None quando LSTM (só prevê total)")
 
 
 class ContextPrevisoes(BaseModel):
     disponivel: bool
+    modelo_ativo: Optional[str] = Field(None, example="lstm_v2")
+    mae_92_dias: Optional[float] = Field(None, example=13.15)
     D1: Optional[ContextD1D7] = None
     D7: Optional[ContextD1D7] = None
 

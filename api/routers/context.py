@@ -51,24 +51,45 @@ def get_context():
 
     Nunca retorna erro — campos indisponíveis ficam com `disponivel: false`.
     """
-    previsoes_data = load_json("previsoes_volume.json")
-    risco_data     = load_json("risco_ola.json")
-    clusters_data  = load_json("clusters.json")
-    kpi_data       = load_json("kpi_atingimento.json")
+    risco_data    = load_json("risco_ola.json")
+    clusters_data = load_json("clusters.json")
+    kpi_data      = load_json("kpi_atingimento.json")
 
-    # ── Previsões ──────────────────────────────────────────────────────────────
-    if previsoes_data:
+    # ── Previsões — LSTM v2 > Prophet MC > Prophet Original ────────────────────
+    lstm_data = load_json("previsoes_lstm.json")
+    mc_data   = load_json("previsoes_volume_mc.json")
+    orig_data = load_json("previsoes_volume.json")
+
+    if lstm_data:
         previsoes_ctx = {
-            "disponivel": True,
+            "disponivel":   True,
+            "modelo_ativo": "lstm_v2",
+            "mae_92_dias":  lstm_data["mae_holdout_92_dias"],
+            "D1": {"total": _round_pos(lstm_data["serie"][0]["total"]), "p2": None, "p3": None},
+            "D7": {"total": _round_pos(lstm_data["serie"][6]["total"]), "p2": None, "p3": None},
+        }
+    elif mc_data:
+        previsoes_ctx = {
+            "disponivel":   True,
+            "modelo_ativo": "prophet_mc_ensemble",
+            "mae_92_dias":  None,
+            "D1": {"total": mc_data["d1"]["total"], "p2": mc_data["d1"]["p2"], "p3": mc_data["d1"]["p3"]},
+            "D7": {"total": mc_data["d7"]["total"], "p2": mc_data["d7"]["p2"], "p3": mc_data["d7"]["p3"]},
+        }
+    elif orig_data:
+        previsoes_ctx = {
+            "disponivel":   True,
+            "modelo_ativo": "prophet_original",
+            "mae_92_dias":  None,
             "D1": {
-                "total": _round_pos(previsoes_data["total"]["D1"]["yhat"]),
-                "p2":    _round_pos(previsoes_data["p2"]["D1"]["yhat"]),
-                "p3":    _round_pos(previsoes_data["p3"]["D1"]["yhat"]),
+                "total": _round_pos(orig_data["total"]["D1"]["yhat"]),
+                "p2":    _round_pos(orig_data["p2"]["D1"]["yhat"]),
+                "p3":    _round_pos(orig_data["p3"]["D1"]["yhat"]),
             },
             "D7": {
-                "total": _round_pos(previsoes_data["total"]["D7"]["yhat"]),
-                "p2":    _round_pos(previsoes_data["p2"]["D7"]["yhat"]),
-                "p3":    _round_pos(previsoes_data["p3"]["D7"]["yhat"]),
+                "total": _round_pos(orig_data["total"]["D7"]["yhat"]),
+                "p2":    _round_pos(orig_data["p2"]["D7"]["yhat"]),
+                "p3":    _round_pos(orig_data["p3"]["D7"]["yhat"]),
             },
         }
     else:

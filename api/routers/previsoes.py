@@ -1,43 +1,90 @@
+"""
+previsoes.py — Endpoints de previsão de volume de incidentes.
+
+Hierarquia de modelos (melhor → fallback):
+  1. LSTM v2 early stopping  (MAE holdout = 13.15)
+  2. Prophet MC ensemble     (MAE holdout = 23.80)
+  3. Prophet original v5+v6  (MAE CV     = 17.06)
+
+Todos os endpoints tentam na ordem acima e usam o primeiro disponível.
+"""
 from typing import Union
 from fastapi import APIRouter
 from api.schemas import (
-    PrevisaoCompletaResponse, PrevisaoD1Response, PrevisaoD7Response,
+    ModelosDisponiveisResponse,
+    PrevisaoD1Response, PrevisaoD7Response,
     PrevisaoSerieResponse, NaoDisponivel,
 )
 from api.services.data_loader import load_json
 
-router = APIRouter(tags=["Previsões Prophet"])
+router = APIRouter(tags=["Previsões"])
 
-_NOT_TRAINED = {"disponivel": False, "mensagem": "Modelo Prophet ainda não treinado"}
+_NOT_TRAINED = {"disponivel": False, "mensagem": "Nenhum modelo de previsão disponível"}
 
 
 def _round_pos(v: float) -> int:
     return round(max(v, 0))
 
 
+def _carregar_melhor_modelo() -> tuple[str | None, dict | None]:
+    """
+    Carrega o melhor modelo disponível em ordem de hierarquia.
+    Retorna (nome_modelo, dados) ou (None, None) se nenhum disponível.
+    """
+    lstm = load_json("previsoes_lstm.json")
+    if lstm:
+        return "lstm_v2", lstm
+    mc = load_json("previsoes_volume_mc.json")
+    if mc:
+        return "prophet_mc_ensemble", mc
+    orig = load_json("previsoes_volume.json")
+    if orig:
+        return "prophet_original", orig
+    return None, None
+
+
+@router.get(
+    "/previsoes/modelos",
+    response_model=ModelosDisponiveisResponse,
+    summary="Status de disponibilidade dos modelos de previsão",
+)
+def get_modelos():
+    """
+    Retorna quais modelos de previsão estão disponíveis e qual está sendo usado
+    ativamente pelos endpoints `/previsoes/d1`, `/previsoes/d7` e `/previsoes/serie`.
+
+    **Hierarquia:** LSTM v2 (MAE=13.15) > Prophet MC (MAE=23.80) > Prophet Original (MAE=17.06 CV)
+    """
+    modelo_ativo, data = _carregar_melhor_modelo()
+    mae = data.get("mae_holdout_92_dias") if modelo_ativo == "lstm_v2" and data else None
+    return {
+        "lstm":             load_json("previsoes_lstm.json")      is not None,
+        "prophet_mc":       load_json("previsoes_volume_mc.json") is not None,
+        "prophet_original": load_json("previsoes_volume.json")    is not None,
+        "modelo_ativo":     modelo_ativo or "nenhum",
+        "mae_modelo_ativo": mae,
+    }
+
+
 @router.get(
     "/previsoes",
-    response_model=Union[PrevisaoCompletaResponse, NaoDisponivel],
-    summary="JSON completo do modelo Prophet",
+    summary="JSON completo do melhor modelo disponível",
 )
 def get_previsoes():
     """
-    Retorna toda a estrutura do JSON do modelo Prophet ensemble, incluindo:
+    Retorna o JSON completo do melhor modelo disponível com campo `modelo_usado`.
 
-    - Série D+1 a D+7 com intervalo de confiança por horizonte
-    - MAE de cross-validation (janela inicial de 180 dias)
-    - Metadados do modelo (versão, data de geração, abordagem)
-    - Três séries independentes: **total**, **P2** e **P3**
+    **Hierarquia:** LSTM v2 > Prophet MC > Prophet Original.
 
-    O modelo usa ensemble v5+v6 — o melhor modelo é selecionado
-    por horizonte com base no MAE da cross-validation.
+    A estrutura do JSON varia por modelo — use `/previsoes/d1`, `/previsoes/d7`
+    e `/previsoes/serie` para respostas normalizadas e compatíveis com o dashboard.
 
-    Retorna `disponivel: false` se `outputs/previsoes_volume.json` não existir.
+    Retorna `disponivel: false` se nenhum modelo estiver disponível.
     """
-    data = load_json("previsoes_volume.json")
+    modelo_ativo, data = _carregar_melhor_modelo()
     if data is None:
         return _NOT_TRAINED
-    return {"disponivel": True, **data}
+    return {"disponivel": True, "modelo_usado": modelo_ativo, **data}
 
 
 @router.get(
@@ -47,27 +94,48 @@ def get_previsoes():
 )
 def get_d1():
     """
-    Retorna o volume previsto de incidentes para **D+1** (amanhã) em formato
-    resumido — ideal para os KPI cards do dashboard.
+    Retorna o volume previsto de incidentes para **D+1** (amanhã).
 
-    - **total**: soma de P2 + P3 previstos
-    - **p2**: incidentes de prioridade Alta (OLA ≤ 4h)
-    - **p3**: incidentes de prioridade Média (OLA ≤ 12h)
+    - **LSTM v2** (ativo se disponível): prevê apenas `total`. `p2` e `p3` retornam `null`.
+    - **Prophet MC**: prevê `total`, `p2` e `p3`.
+    - **Prophet original**: prevê `total`, `p2` e `p3`.
 
-    Os valores são arredondados para inteiro e floored em 0 (nunca negativo).
+    O campo `modelo_usado` indica qual modelo gerou a previsão.
+    O campo `mae` contém o MAE holdout (apenas LSTM tem este valor).
 
-    Retorna `disponivel: false` se o modelo Prophet ainda não foi treinado
-    (`outputs/previsoes_volume.json` não encontrado).
+    Retorna `disponivel: false` se nenhum modelo estiver disponível.
     """
-    data = load_json("previsoes_volume.json")
-    if data is None:
-        return _NOT_TRAINED
-    return {
-        "disponivel": True,
-        "total": _round_pos(data["total"]["D1"]["yhat"]),
-        "p2":    _round_pos(data["p2"]["D1"]["yhat"]),
-        "p3":    _round_pos(data["p3"]["D1"]["yhat"]),
-    }
+    lstm = load_json("previsoes_lstm.json")
+    if lstm:
+        return {
+            "disponivel":   True,
+            "total":        _round_pos(lstm["serie"][0]["total"]),
+            "p2":           None,
+            "p3":           None,
+            "modelo_usado": "lstm_v2",
+            "mae":          lstm["mae_holdout_92_dias"],
+        }
+    mc = load_json("previsoes_volume_mc.json")
+    if mc:
+        return {
+            "disponivel":   True,
+            "total":        mc["d1"]["total"],
+            "p2":           mc["d1"]["p2"],
+            "p3":           mc["d1"]["p3"],
+            "modelo_usado": "prophet_mc_ensemble",
+            "mae":          None,
+        }
+    orig = load_json("previsoes_volume.json")
+    if orig:
+        return {
+            "disponivel":   True,
+            "total":        _round_pos(orig["total"]["D1"]["yhat"]),
+            "p2":           _round_pos(orig["p2"]["D1"]["yhat"]),
+            "p3":           _round_pos(orig["p3"]["D1"]["yhat"]),
+            "modelo_usado": "prophet_original",
+            "mae":          None,
+        }
+    return _NOT_TRAINED
 
 
 @router.get(
@@ -77,26 +145,43 @@ def get_d1():
 )
 def get_d7():
     """
-    Retorna o volume previsto de incidentes para **D+7** (7 dias à frente)
-    em formato resumido — ideal para os KPI cards do dashboard.
+    Retorna o volume previsto de incidentes para **D+7** (7 dias à frente).
 
-    - **total**: soma de P2 + P3 previstos
-    - **p2**: incidentes de prioridade Alta (OLA ≤ 4h)
-    - **p3**: incidentes de prioridade Média (OLA ≤ 12h)
+    Mesma lógica de fallback do `/previsoes/d1` — LSTM > MC > Original.
 
-    Os valores são arredondados para inteiro e floored em 0 (nunca negativo).
-
-    Retorna `disponivel: false` se o modelo Prophet ainda não foi treinado.
+    Retorna `disponivel: false` se nenhum modelo estiver disponível.
     """
-    data = load_json("previsoes_volume.json")
-    if data is None:
-        return _NOT_TRAINED
-    return {
-        "disponivel": True,
-        "total": _round_pos(data["total"]["D7"]["yhat"]),
-        "p2":    _round_pos(data["p2"]["D7"]["yhat"]),
-        "p3":    _round_pos(data["p3"]["D7"]["yhat"]),
-    }
+    lstm = load_json("previsoes_lstm.json")
+    if lstm:
+        return {
+            "disponivel":   True,
+            "total":        _round_pos(lstm["serie"][6]["total"]),
+            "p2":           None,
+            "p3":           None,
+            "modelo_usado": "lstm_v2",
+            "mae":          lstm["mae_holdout_92_dias"],
+        }
+    mc = load_json("previsoes_volume_mc.json")
+    if mc:
+        return {
+            "disponivel":   True,
+            "total":        mc["d7"]["total"],
+            "p2":           mc["d7"]["p2"],
+            "p3":           mc["d7"]["p3"],
+            "modelo_usado": "prophet_mc_ensemble",
+            "mae":          None,
+        }
+    orig = load_json("previsoes_volume.json")
+    if orig:
+        return {
+            "disponivel":   True,
+            "total":        _round_pos(orig["total"]["D7"]["yhat"]),
+            "p2":           _round_pos(orig["p2"]["D7"]["yhat"]),
+            "p3":           _round_pos(orig["p3"]["D7"]["yhat"]),
+            "modelo_usado": "prophet_original",
+            "mae":          None,
+        }
+    return _NOT_TRAINED
 
 
 @router.get(
@@ -109,33 +194,56 @@ def get_serie():
     Retorna a série completa **D+1 a D+7** formatada para o gráfico de área
     do MonitoramentoPage.
 
-    Cada ponto contém:
-    - **dia**: label do eixo X no formato `DD/MM` (ex.: `01/01`)
-    - **ds**: data ISO 8601 para cálculos no frontend
-    - **total**, **P2**, **P3**: volumes inteiros arredondados
+    - **LSTM v2**: `P2` e `P3` retornam `null` (modelo prevê apenas total).
+    - **Prophet MC / Original**: `P2` e `P3` preenchidos.
 
-    A coluna `dia` usa o mesmo formato do histórico diário (`DD/MM`), permitindo
-    que o Recharts distribua os pontos uniformemente no eixo X sem gap.
+    O campo `modelo_usado` indica a fonte dos dados.
 
-    **Nota sobre sábados e domingos:** o modelo aplica *floor* no percentil 10
-    histórico de janeiro para evitar previsões negativas em fins de semana.
-
-    Retorna `disponivel: false` se o modelo Prophet ainda não foi treinado.
+    Retorna `disponivel: false` se nenhum modelo estiver disponível.
     """
-    data = load_json("previsoes_volume.json")
-    if data is None:
-        return _NOT_TRAINED
-    serie = []
-    for t, p2, p3 in zip(
-        data["total"]["serie_7d"],
-        data["p2"]["serie_7d"],
-        data["p3"]["serie_7d"],
-    ):
-        serie.append({
-            "dia": t["horizonte"],
-            "ds":  t["ds"],
-            "total": _round_pos(t["yhat"]),
-            "P2":    _round_pos(p2["yhat"]),
-            "P3":    _round_pos(p3["yhat"]),
-        })
-    return {"disponivel": True, "serie": serie}
+    lstm = load_json("previsoes_lstm.json")
+    if lstm:
+        serie = [
+            {
+                "dia":   p["horizonte"],
+                "ds":    p["ds"],
+                "total": _round_pos(p["total"]),
+                "P2":    None,
+                "P3":    None,
+            }
+            for p in lstm["serie"]
+        ]
+        return {"disponivel": True, "modelo_usado": "lstm_v2", "serie": serie}
+
+    mc = load_json("previsoes_volume_mc.json")
+    if mc:
+        serie = [
+            {
+                "dia":   p["horizonte"],
+                "ds":    p["ds"],
+                "total": _round_pos(p["total"]),
+                "P2":    _round_pos(p["P2"]),
+                "P3":    _round_pos(p["P3"]),
+            }
+            for p in mc["serie"]
+        ]
+        return {"disponivel": True, "modelo_usado": "prophet_mc_ensemble", "serie": serie}
+
+    orig = load_json("previsoes_volume.json")
+    if orig:
+        serie = []
+        for t, p2, p3 in zip(
+            orig["total"]["serie_7d"],
+            orig["p2"]["serie_7d"],
+            orig["p3"]["serie_7d"],
+        ):
+            serie.append({
+                "dia":   t["horizonte"],
+                "ds":    t["ds"],
+                "total": _round_pos(t["yhat"]),
+                "P2":    _round_pos(p2["yhat"]),
+                "P3":    _round_pos(p3["yhat"]),
+            })
+        return {"disponivel": True, "modelo_usado": "prophet_original", "serie": serie}
+
+    return _NOT_TRAINED

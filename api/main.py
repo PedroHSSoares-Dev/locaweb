@@ -26,12 +26,21 @@ app = FastAPI(
 API AIOps para previsão de incidentes e monitoramento de OLA em operações ITSM.
 
 ### Modelos disponíveis
-| Modelo | Status | Notebook |
-|---|---|---|
-| **Prophet ensemble** (v5+v6) — Volume D+1 a D+7 | ✅ Disponível | `03_prophet_volume` |
-| **XGBoost** — Risco de violação de OLA | ⏳ Pendente | `04_xgboost_ola` |
-| **K-Means** — Segmentação de incidentes | ⏳ Pendente | `05_kmeans_clusters` |
-| **KPI Projection** — Projeção anual de meta | ⏳ Pendente | `07_kpi_projection` |
+| Modelo | Status | MAE holdout | Notebook |
+|---|---|---|---|
+| **LSTM v2** (early stopping) — Volume D+1 a D+7 | ✅ Disponível | 13.15 | `03d_lstm` |
+| **Prophet MC** (ensemble adaptativo) — Volume D+1 a D+7 | ✅ Disponível | 23.80 | `03c_prophet_monte_carlo` |
+| **Prophet original** (ensemble v5+v6) — Volume D+1 a D+7 | ✅ Disponível | 17.06 (CV) | `03_prophet_volume` |
+| **XGBoost** — Risco de violação de OLA | ⏳ Pendente | — | `04_xgboost_ola` |
+| **K-Means** — Segmentação de incidentes | ⏳ Pendente | — | `05_kmeans_clusters` |
+| **KPI Projection** — Projeção anual de meta | ⏳ Pendente | — | `07_kpi_projection` |
+
+### Hierarquia de modelos ativos
+Os endpoints `/previsoes/*` usam automaticamente o melhor modelo disponível:
+
+**LSTM v2 (MAE=13.15) > Prophet MC Ensemble (MAE=23.80) > Prophet Original (MAE=17.06 CV)**
+
+Use `GET /api/previsoes/modelos` para verificar qual modelo está ativo e quais estão disponíveis.
 
 ### Prioridades ITSM — Locaweb
 | Prioridade | OLA | Meta anual de violações (2025) |
