@@ -4,44 +4,72 @@
   "arquitetura": "LSTM 2 camadas hidden=128 dropout=0.3 lookback=30",
   "treino": "2023-01-01 a 2025-09-30 (998 dias Monte Carlo + real)",
   "holdout": "2025-10-01 a 2025-12-31 (92 dias 100% real)",
-  "mae_holdout_92_dias": 13.15,
+  "mae_holdout_92_dias": {
+    "total": 13.15,
+    "p2": 4.38,
+    "p3": 11.63
+  },
   "mae_prophet_92_dias": 23.8,
   "melhora_pct_vs_prophet": 44.8,
+  "d1": {
+    "total": 69,
+    "p2": 13,
+    "p3": 57
+  },
+  "d7": {
+    "total": 65,
+    "p2": 11,
+    "p3": 50
+  },
   "serie": [
     {
       "ds": "2026-01-01",
       "horizonte": "D+1",
-      "total": 69.1
+      "total": 69.1,
+      "P2": 12.8,
+      "P3": 57.4
     },
     {
       "ds": "2026-01-02",
       "horizonte": "D+2",
-      "total": 61.1
+      "total": 61.1,
+      "P2": 11.4,
+      "P3": 58.1
     },
     {
       "ds": "2026-01-03",
       "horizonte": "D+3",
-      "total": 56.5
+      "total": 56.5,
+      "P2": 9.9,
+      "P3": 44.1
     },
     {
       "ds": "2026-01-04",
       "horizonte": "D+4",
-      "total": 26.0
+      "total": 26.0,
+      "P2": 9.3,
+      "P3": 16.8
     },
     {
       "ds": "2026-01-05",
       "horizonte": "D+5",
-      "total": 19.0
+      "total": 19.0,
+      "P2": 9.8,
+      "P3": 23.0
     },
     {
       "ds": "2026-01-06",
       "horizonte": "D+6",
-      "total": 67.2
+      "total": 67.2,
+      "P2": 10.6,
+      "P3": 47.5
     },
     {
       "ds": "2026-01-07",
       "horizonte": "D+7",
-      "total": 65.0
+      "total": 65.0,
+      "P2": 11.0,
+      "P3": 50.3
     }
   ]
 }
