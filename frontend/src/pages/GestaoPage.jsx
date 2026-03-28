@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -11,6 +12,7 @@ import {
 } from '../data/mockData';
 import { useApi } from '../hooks/useApi';
 import SemDados from '../components/SemDados';
+import PeriodoToggle from '../components/PeriodoToggle';
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 function Skeleton({ height = 80 }) {
@@ -18,7 +20,7 @@ function Skeleton({ height = 80 }) {
 }
 
 // ─── Page header ──────────────────────────────────────────────────────────────
-function PageHeader({ title, sub }) {
+function PageHeader({ title, sub, rightSlot }) {
   return (
     <div style={{
       padding: '16px 28px',
@@ -29,15 +31,21 @@ function PageHeader({ title, sub }) {
       position: 'sticky',
       top: 0,
       zIndex: 10,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
     }}>
-      <div style={{
-        fontFamily: 'var(--font-mono)', fontSize: 18, fontWeight: 600,
-        color: 'var(--text-pri)', letterSpacing: '0.08em', textTransform: 'uppercase',
-      }}>{title}</div>
-      <div style={{
-        fontFamily: 'var(--font-mono)', fontSize: 11,
-        color: 'var(--text-sec)', marginTop: 3, letterSpacing: '0.08em',
-      }}>{sub}</div>
+      <div>
+        <div style={{
+          fontFamily: 'var(--font-mono)', fontSize: 18, fontWeight: 600,
+          color: 'var(--text-pri)', letterSpacing: '0.08em', textTransform: 'uppercase',
+        }}>{title}</div>
+        <div style={{
+          fontFamily: 'var(--font-mono)', fontSize: 11,
+          color: 'var(--text-sec)', marginTop: 3, letterSpacing: '0.08em',
+        }}>{sub}</div>
+      </div>
+      {rightSlot && <div>{rightSlot}</div>}
     </div>
   );
 }
@@ -218,19 +226,44 @@ function Legend({ items }) {
   );
 }
 
+// ─── Filtro de período ────────────────────────────────────────────────────────
+const PERIODO_LABELS = {
+  'MÊS':       'Dez/2025',
+  'TRIMESTRE': 'Q4 2025 · Out–Dez',
+  'ANO':       'Jan–Dez 2025',
+};
+
+function filtrarPorPeriodo(dados, periodo) {
+  if (periodo === 'MÊS')       return dados.slice(11, 12);
+  if (periodo === 'TRIMESTRE') return dados.slice(9, 12);
+  return dados;
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function GestaoPage() {
   const navigate = useNavigate();
+  const [periodo, setPeriodo] = useState('ANO');
 
   // ── Dados de modelo via API ────────────────────────────────────────────────
-  const { data: previsoes, loading: prevLoading, disponivel: prevDisponivel } = useApi('/previsoes');
-  const { data: kpiData,   loading: kpiLoading,  disponivel: kpiDisponivel  } = useApi('/kpi');
+  const { data: d1Data, loading: d1Loading, disponivel: d1Disponivel } = useApi('/previsoes/d1');
+  const { data: d7Data,                     disponivel: d7Disponivel } = useApi('/previsoes/d7');
+  const { data: kpiData, loading: kpiLoading, disponivel: kpiDisponivel } = useApi('/kpi');
+
+  const prevLoading    = d1Loading;
+  const prevDisponivel = d1Disponivel;
 
   // Fallback para mockData enquanto kpi_atingimento.json não existe
   const p2 = kpiDisponivel ? kpiData.P2 : kpiAtingimento.P2;
   const p3 = kpiDisponivel ? kpiData.P3 : kpiAtingimento.P3;
 
-  const produtosTop8 = [...produtos].slice(0, 8);
+  const dadosFiltrados = filtrarPorPeriodo(volumeMensal2025, periodo);
+
+  const fatorPeriodo = periodo === 'MÊS' ? 1 / 12 : periodo === 'TRIMESTRE' ? 3 / 12 : 1;
+  const produtosFiltrados = [...produtos].slice(0, 8).map(p => ({
+    ...p,
+    total:     Math.round(p.total     * fatorPeriodo),
+    violacoes: Math.round(p.violacoes * fatorPeriodo),
+  }));
 
   const axisProps = {
     tick: { fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--text-muted)' },
@@ -242,6 +275,7 @@ export default function GestaoPage() {
       <PageHeader
         title="Centro de Gestão"
         sub="CENTRAL OPERACIONAL AIOPS // NODE: PREDICTFY-01"
+        rightSlot={<PeriodoToggle value={periodo} onChange={setPeriodo} />}
       />
 
       <main style={{ flex: 1, padding: '20px 28px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -265,7 +299,7 @@ export default function GestaoPage() {
         </Module>
 
         {/* ── MODULE 02: Predictive Forecast ────────────────────────────── */}
-        <Module n={2} title="Previsão Preditiva" sub="PROPHET-ENSEMBLE · Volume de incidentes D+1 e D+7">
+        <Module n={2} title="Previsão Preditiva" sub={d1Disponivel ? `${(d1Data.modelo_usado ?? 'modelo').toUpperCase()} · Volume de incidentes D+1 e D+7` : 'MOTOR PREDITIVO · Volume de incidentes D+1 e D+7'}>
           {prevLoading ? (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
               {[0, 1, 2, 3].map(i => <Skeleton key={i} height={130} />)}
@@ -276,14 +310,14 @@ export default function GestaoPage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
               <KpiCard
                 label="Total Incidentes D+1"
-                value={Math.round(previsoes.total.D1.yhat)}
-                sub={`P2: ${Math.round(previsoes.p2.D1.yhat)} · P3: ${Math.round(previsoes.p3.D1.yhat)}`}
+                value={d1Data.total ?? '—'}
+                sub={d1Data.p2 != null ? `P2: ${d1Data.p2} · P3: ${d1Data.p3}` : `Modelo: ${d1Data.modelo_usado}`}
                 color="var(--orange)"
                 delay={0}
               />
               <KpiCard
                 label="Total Incidentes D+7"
-                value={Math.round(previsoes.total.D7.yhat)}
+                value={d7Disponivel ? (d7Data.total ?? '—') : '—'}
                 sub="Previsão horizonte 7 dias"
                 color="var(--yellow)"
                 delay={60}
@@ -310,10 +344,10 @@ export default function GestaoPage() {
         <Module
           n={3}
           title="Violações Mensais 2025"
-          sub="P2 (≤4h) e P3 (≤12h) · linha tracejada = meta mensal P2"
+          sub={`P2 (≤4h) e P3 (≤12h) · linha tracejada = meta mensal P2 · ${PERIODO_LABELS[periodo]}`}
         >
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={volumeMensal2025} margin={{ top: 10, right: 16, bottom: 0, left: -10 }} barGap={4}>
+            <BarChart data={dadosFiltrados} margin={{ top: 10, right: 16, bottom: 0, left: -10 }} barGap={4}>
               <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="mes" {...axisProps} axisLine={{ stroke: 'var(--border)' }} />
               <YAxis {...axisProps} axisLine={false} />
@@ -333,11 +367,11 @@ export default function GestaoPage() {
         <Module
           n={4}
           title="Volume por Produto"
-          sub="Clique na barra para detalhar em Monitoramento · top 8 produtos"
+          sub={`Clique na barra para detalhar em Monitoramento · top 8 produtos · ${PERIODO_LABELS[periodo]}`}
         >
           <ResponsiveContainer width="100%" height={420}>
             <BarChart
-              data={produtosTop8} layout="vertical"
+              data={produtosFiltrados} layout="vertical"
               margin={{ top: 4, right: 16, bottom: 4, left: 20 }}
               barSize={10}
               onClick={d => { if (d?.activeLabel) navigate('/monitoramento'); }}
@@ -377,10 +411,10 @@ export default function GestaoPage() {
         <Module
           n={5}
           title="Tendência Mensal de Incidentes"
-          sub="P2 e P3 · apenas incidentes KPI (prioridade Alta e Média)"
+          sub={`P2 e P3 · apenas incidentes KPI (prioridade Alta e Média) · ${PERIODO_LABELS[periodo]}`}
         >
           <ResponsiveContainer width="100%" height={280}>
-            <LineChart data={volumeMensal2025} margin={{ top: 8, right: 16, bottom: 0, left: -10 }}>
+            <LineChart data={dadosFiltrados} margin={{ top: 8, right: 16, bottom: 0, left: -10 }}>
               <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="mes" {...axisProps} axisLine={{ stroke: 'var(--border)' }} />
               <YAxis {...axisProps} axisLine={false} />

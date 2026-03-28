@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   Cell, LabelList,
@@ -6,6 +7,7 @@ import { Terminal, AlertTriangle, Activity, Users } from 'lucide-react';
 import { grupos, shapFeatures, categorias, categoriaNomes } from '../data/mockData';
 import { useApi } from '../hooks/useApi';
 import SemDados from '../components/SemDados';
+import PeriodoToggle from '../components/PeriodoToggle';
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 function Skeleton({ height = 80 }) {
@@ -13,7 +15,7 @@ function Skeleton({ height = 80 }) {
 }
 
 // ─── Page header ──────────────────────────────────────────────────────────────
-function PageHeader({ title, sub }) {
+function PageHeader({ title, sub, rightSlot }) {
   return (
     <div style={{
       padding: '16px 28px',
@@ -24,15 +26,21 @@ function PageHeader({ title, sub }) {
       position: 'sticky',
       top: 0,
       zIndex: 10,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
     }}>
-      <div style={{
-        fontFamily: 'var(--font-mono)', fontSize: 18, fontWeight: 600,
-        color: 'var(--text-pri)', letterSpacing: '0.08em', textTransform: 'uppercase',
-      }}>{title}</div>
-      <div style={{
-        fontFamily: 'var(--font-mono)', fontSize: 11,
-        color: 'var(--text-sec)', marginTop: 3, letterSpacing: '0.08em',
-      }}>{sub}</div>
+      <div>
+        <div style={{
+          fontFamily: 'var(--font-mono)', fontSize: 18, fontWeight: 600,
+          color: 'var(--text-pri)', letterSpacing: '0.08em', textTransform: 'uppercase',
+        }}>{title}</div>
+        <div style={{
+          fontFamily: 'var(--font-mono)', fontSize: 11,
+          color: 'var(--text-sec)', marginTop: 3, letterSpacing: '0.08em',
+        }}>{sub}</div>
+      </div>
+      {rightSlot && <div>{rightSlot}</div>}
     </div>
   );
 }
@@ -208,6 +216,8 @@ function ClusterCard({ cluster }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function TecnicoPage() {
+  const [periodo, setPeriodo] = useState('ANO');
+
   // ── Dados de modelo via API ────────────────────────────────────────────────
   const { data: clustersApiData, loading: clustersLoading, disponivel: clustersDisponivel } = useApi('/clusters');
   const { data: riscoApiData,    loading: riscoLoading,    disponivel: riscoDisponivel    } = useApi('/risco');
@@ -239,6 +249,7 @@ export default function TecnicoPage() {
       <PageHeader
         title="Centro Técnico"
         sub="MÉTRICAS DEVOPS/SRE // EXPLICABILIDADE DO MODELO // ANÁLISE DE CLUSTERS"
+        rightSlot={<PeriodoToggle value={periodo} onChange={setPeriodo} />}
       />
 
       <main style={{ flex: 1, padding: '20px 28px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>

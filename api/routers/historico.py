@@ -3,8 +3,8 @@ historico.py — Serve dados históricos estáticos derivados do dataset real.
 Imutáveis — não vêm de JSON de modelo.
 Volume diário: dezembro/2025 (02/12–31/12) extraído do LW-DATASET.xlsx.
 """
-from typing import Union
-from fastapi import APIRouter
+from typing import Optional, Union
+from fastapi import APIRouter, Query
 from api.schemas import HistoricoMensalItem, HistoricoDiarioItem, HeatmapItem
 
 router = APIRouter(tags=["Histórico ITSM"])
@@ -76,10 +76,17 @@ _HEATMAP_DATA = [
     response_model=list[HistoricoMensalItem],
     summary="Série mensal de incidentes e violações — 2025",
 )
-def get_historico_mensal():
+def get_historico_mensal(
+    periodo: Optional[str] = Query("ano", description="Filtro temporal: mes | trimestre | ano"),
+):
     """
     Retorna a série mensal real de **2025** com volume de incidentes KPI (P2 e P3)
     e contagem de violações de OLA por mês.
+
+    **Filtro `periodo`:**
+    - `ano` (padrão): todos os 12 meses (Jan–Dez)
+    - `trimestre`: últimos 3 meses (Out, Nov, Dez — Q4 2025)
+    - `mes`: apenas o último mês disponível (Dez)
 
     **Dados extraídos diretamente do LW-DATASET.xlsx** — 122.543 incidentes reais.
 
@@ -91,6 +98,10 @@ def get_historico_mensal():
 
     Usado nos gráficos de tendência mensal e barras de violação do GestaoPage.
     """
+    if periodo == "mes":
+        return _VOLUME_MENSAL_2025[-1:]
+    if periodo == "trimestre":
+        return _VOLUME_MENSAL_2025[-3:]
     return _VOLUME_MENSAL_2025
 
 
@@ -99,10 +110,16 @@ def get_historico_mensal():
     response_model=list[HistoricoDiarioItem],
     summary="Volume diário — dezembro/2025 (02/12–31/12)",
 )
-def get_historico_diario():
+def get_historico_diario(
+    periodo: Optional[str] = Query("ano", description="Filtro temporal: mes | trimestre | ano"),
+):
     """
     Retorna o volume diário real de incidentes KPI de **02/12 a 31/12/2025**
     (30 dias imediatamente anteriores à janela de previsão do Prophet).
+
+    **Filtro `periodo`:**
+    - `mes` ou `ano` (padrão): todos os 30 dias disponíveis (dados só cobrem Dez)
+    - `trimestre`: todos os 30 dias disponíveis (idem — dados cobrem apenas Dez)
 
     **Por que dezembro?**
     A previsão Prophet começa em **01/01/2026**. Para que o gráfico de área

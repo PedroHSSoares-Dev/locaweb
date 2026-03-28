@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef } from 'react';
+import PeriodoToggle from '../components/PeriodoToggle';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid, ReferenceLine,
@@ -14,7 +15,7 @@ function Skeleton({ height = 80 }) {
 }
 
 // ─── Page header ──────────────────────────────────────────────────────────────
-function PageHeader({ title, sub }) {
+function PageHeader({ title, sub, rightSlot }) {
   return (
     <div style={{
       padding: '16px 28px',
@@ -25,15 +26,21 @@ function PageHeader({ title, sub }) {
       position: 'sticky',
       top: 0,
       zIndex: 10,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
     }}>
-      <div style={{
-        fontFamily: 'var(--font-mono)', fontSize: 18, fontWeight: 600,
-        color: 'var(--text-pri)', letterSpacing: '0.08em', textTransform: 'uppercase',
-      }}>{title}</div>
-      <div style={{
-        fontFamily: 'var(--font-mono)', fontSize: 11,
-        color: 'var(--text-sec)', marginTop: 3, letterSpacing: '0.08em',
-      }}>{sub}</div>
+      <div>
+        <div style={{
+          fontFamily: 'var(--font-mono)', fontSize: 18, fontWeight: 600,
+          color: 'var(--text-pri)', letterSpacing: '0.08em', textTransform: 'uppercase',
+        }}>{title}</div>
+        <div style={{
+          fontFamily: 'var(--font-mono)', fontSize: 11,
+          color: 'var(--text-sec)', marginTop: 3, letterSpacing: '0.08em',
+        }}>{sub}</div>
+      </div>
+      {rightSlot && <div>{rightSlot}</div>}
     </div>
   );
 }
@@ -291,6 +298,7 @@ function fmtDia(ds) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function MonitoramentoPage() {
   const [panelItem, setPanelItem] = useState(null);
+  const [periodo, setPeriodo] = useState('ANO');
 
   // ── Dados de modelo via API ────────────────────────────────────────────────
   const { data: d1Data,           loading: d1Loading,       disponivel: d1Disponivel       } = useApi('/previsoes/d1');
@@ -344,6 +352,7 @@ export default function MonitoramentoPage() {
       <PageHeader
         title="Centro de Monitoramento"
         sub="CENTRAL OPERACIONAL AIOPS // NODE: PREDICTFY-01"
+        rightSlot={<PeriodoToggle value={periodo} onChange={setPeriodo} />}
       />
 
       <main style={{ flex: 1, padding: '20px 28px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>
