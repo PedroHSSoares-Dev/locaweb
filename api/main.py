@@ -33,7 +33,7 @@ API AIOps para previsão de incidentes e monitoramento de OLA em operações ITS
 | **Prophet original** (ensemble v5+v6) — Volume D+1 a D+7 | ✅ Disponível | 17.06 (CV) | `03_prophet_volume` |
 | **XGBoost** — Risco de violação de OLA | ⏳ Pendente | — | `04_xgboost_ola` |
 | **K-Means** — Segmentação de incidentes | ⏳ Pendente | — | `05_kmeans_clusters` |
-| **KPI Projection** — Projeção anual de meta | ⏳ Pendente | — | `07_kpi_projection` |
+| **KPI OLA** (SPC — média + 1σ) | ✅ Disponível | — | `07_kpi_projection` |
 
 ### Hierarquia de modelos ativos
 Os endpoints `/previsoes/*` usam automaticamente o melhor modelo disponível:
@@ -45,8 +45,8 @@ Use `GET /api/previsoes/modelos` para verificar qual modelo está ativo e quais 
 ### Prioridades ITSM — Locaweb
 | Prioridade | OLA | Meta anual de violações (2025) |
 |---|---|---|
-| **P2** (Alta) | ≤ 4h | 36–39 violações |
-| **P3** (Média) | ≤ 12h | 231–263 violações |
+| **P2** (Alta) | ≤ 4h | 63 violações (SPC) |
+| **P3** (Média) | ≤ 12h | 280 violações (SPC) |
 
 ### Resultado real 2025
 | Prioridade | Violações reais | Status |

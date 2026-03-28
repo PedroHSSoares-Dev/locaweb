@@ -200,22 +200,28 @@ class RiscoGruposResponse(BaseModel):
 # ────────────────────────────────────────────────────────────────────────────────
 
 class KpiPrioridade(BaseModel):
-    """Projeção de atingimento da meta anual de OLA para uma prioridade."""
-    pctAtingimento: int = Field(
-        ..., example=83,
-        description="Percentual de atingimento da meta (100% = dentro da meta)",
-    )
-    previsaoFechamento: int = Field(
-        ..., example=47,
-        description="Violações projetadas ao final do ano",
-    )
+    """KPI de atingimento de OLA por prioridade — calculado via SPC (média + 1σ)."""
+    violacoesAno:    int   = Field(..., example=42,  description="Total de violações no período")
+    metaAnual:       int   = Field(..., example=63,  description="Meta derivada via SPC (média + 1σ × meses)")
+    metaMensal:      float = Field(..., example=5.2, description="Meta mensal (média + 1σ)")
+    pctUtilizado:    float = Field(..., example=66.7, description="% da cota utilizada (real/meta × 100)")
+    margemRestante:  int   = Field(..., example=21,  description="Violações restantes antes de atingir a meta")
+    tendencia:       str   = Field(..., example="dentro_da_meta")
+    olaHoras:        int   = Field(..., example=4)
+    pctAtingimento:  int   = Field(..., example=100, description="Para o gauge: 100 = dentro da meta, <100 = acima")
+    mesesAnomalos:   list[str] = Field(default=[], example=["Mai", "Jul", "Nov"])
+    periodo_filtro:  Optional[str] = Field(None, example="ano")
 
 
 class KpiResponse(BaseModel):
-    """Projeção de atingimento das metas anuais de OLA — P2 e P3."""
-    disponivel: bool = Field(True, example=True)
-    P2: KpiPrioridade = Field(..., description="P2 — meta 36–39 violações/ano")
-    P3: KpiPrioridade = Field(..., description="P3 — meta 231–263 violações/ano")
+    """KPI de atingimento das metas de OLA — P2 e P3 via metodologia SPC."""
+    disponivel:     bool            = Field(True,  example=True)
+    metodologia:    Optional[str]   = Field(None,  example="SPC — meta derivada da distribuição histórica")
+    gerado_em:      Optional[str]   = Field(None,  example="2026-03-28")
+    periodo_filtro: Optional[str]   = Field(None,  example="ano")
+    P2:             KpiPrioridade   = Field(...,   description="P2 — meta SPC 63 violações/ano")
+    P3:             KpiPrioridade   = Field(...,   description="P3 — meta SPC 280 violações/ano")
+    por_mes:        Optional[dict]  = Field(None,  description="Violações mensais por prioridade")
 
 
 # ────────────────────────────────────────────────────────────────────────────────

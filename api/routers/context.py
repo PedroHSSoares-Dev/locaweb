@@ -123,9 +123,24 @@ def get_context():
     # ── KPI ────────────────────────────────────────────────────────────────────
     if kpi_data:
         kpi_ctx = {
-            "disponivel": True,
-            "P2": kpi_data.get("P2"),
-            "P3": kpi_data.get("P3"),
+            "disponivel":  True,
+            "metodologia": kpi_data.get("metodologia"),
+            "P2": {
+                "violacoesAno":   kpi_data["P2"]["violacoesAno"],
+                "metaAnual":      kpi_data["P2"]["metaAnual"],
+                "pctUtilizado":   kpi_data["P2"]["pctUtilizado"],
+                "margemRestante": kpi_data["P2"]["margemRestante"],
+                "tendencia":      kpi_data["P2"]["tendencia"],
+                "mesesAnomalos":  kpi_data["P2"].get("mesesAnomalos", []),
+            },
+            "P3": {
+                "violacoesAno":   kpi_data["P3"]["violacoesAno"],
+                "metaAnual":      kpi_data["P3"]["metaAnual"],
+                "pctUtilizado":   kpi_data["P3"]["pctUtilizado"],
+                "margemRestante": kpi_data["P3"]["margemRestante"],
+                "tendencia":      kpi_data["P3"]["tendencia"],
+                "mesesAnomalos":  kpi_data["P3"].get("mesesAnomalos", []),
+            },
         }
     else:
         kpi_ctx = {"disponivel": False}
