@@ -247,7 +247,10 @@ export default function GestaoPage() {
   // ── Dados de modelo via API ────────────────────────────────────────────────
   const { data: d1Data, loading: d1Loading, disponivel: d1Disponivel } = useApi('/previsoes/d1');
   const { data: d7Data,                     disponivel: d7Disponivel } = useApi('/previsoes/d7');
-  const { data: kpiData, loading: kpiLoading, disponivel: kpiDisponivel } = useApi('/kpi');
+  const PERIODO_API = { 'MÊS': 'mes', 'TRIMESTRE': 'trimestre', 'ANO': 'ano' };
+  const { data: kpiData, loading: kpiLoading, disponivel: kpiDisponivel } = useApi('/kpi', {
+    periodo: PERIODO_API[periodo] ?? 'ano',
+  });
 
   const prevLoading    = d1Loading;
   const prevDisponivel = d1Disponivel;
@@ -281,18 +284,21 @@ export default function GestaoPage() {
       <main style={{ flex: 1, padding: '20px 28px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>
 
         {/* ── MODULE 01: OLA Status ──────────────────────────────────────── */}
-        <Module n={1} title="Status de OLA" sub="Contagem de violações no ano vs meta anual · 2025">
+        <Module n={1} title="Status de OLA"
+          sub={`Contagem de violações vs meta SPC · ${PERIODO_LABELS[periodo]}`}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <StatusBanner
-              priority="P2" violations={violacoesReais2025.P2}
-              metaMin={olaTargets.P2.metaViolacoesAno.min}
-              metaMax={olaTargets.P2.metaViolacoesAno.max}
+              priority="P2"
+              violations={kpiDisponivel ? (p2.violacoesAno ?? violacoesReais2025.P2) : violacoesReais2025.P2}
+              metaMin={kpiDisponivel ? Math.round((p2.metaAnual ?? 63) * 0.9) : olaTargets.P2.metaViolacoesAno.min}
+              metaMax={kpiDisponivel ? (p2.metaAnual ?? 63) : olaTargets.P2.metaViolacoesAno.max}
               ola="≤ 4h"
             />
             <StatusBanner
-              priority="P3" violations={violacoesReais2025.P3}
-              metaMin={olaTargets.P3.metaViolacoesAno.min}
-              metaMax={olaTargets.P3.metaViolacoesAno.max}
+              priority="P3"
+              violations={kpiDisponivel ? (p3.violacoesAno ?? violacoesReais2025.P3) : violacoesReais2025.P3}
+              metaMin={kpiDisponivel ? Math.round((p3.metaAnual ?? 280) * 0.9) : olaTargets.P3.metaViolacoesAno.min}
+              metaMax={kpiDisponivel ? (p3.metaAnual ?? 280) : olaTargets.P3.metaViolacoesAno.max}
               ola="≤ 12h"
             />
           </div>
@@ -426,26 +432,79 @@ export default function GestaoPage() {
           <Legend items={[['var(--red)', 'P2'], ['var(--orange)', 'P3']]} />
         </Module>
 
-        {/* ── MODULE 06: KPI Projection ─────────────────────────────────── */}
+        {/* ── MODULE 06: KPI Atingimento OLA ───────────────────────────────── */}
         <Module
           n={6}
-          title="Projeção de Atingimento de KPI"
-          sub={`ESTIMATIVA BASEADA EM PROPHET${!kpiDisponivel ? ' · usando estimativas simuladas (nb07 pendente)' : ''}`}
+          title="Atingimento de KPI OLA"
+          sub={kpiDisponivel
+            ? `METODOLOGIA SPC · ${PERIODO_LABELS[periodo]}`
+            : `ESTIMATIVAS SIMULADAS · nb07 pendente · ${PERIODO_LABELS[periodo]}`
+          }
         >
           {kpiLoading ? (
             <Skeleton height={200} />
           ) : (
             <>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 64, padding: '8px 0' }}>
-                <Gauge label="KPI P2" pct={p2.pctAtingimento} color="var(--red)"   sub={`Projeção: ${p2.previsaoFechamento} violações`} />
-                <Gauge label="KPI P3" pct={p3.pctAtingimento} color="var(--green)" sub={`Projeção: ${p3.previsaoFechamento} violações`} />
+                <Gauge
+                  label="KPI P2"
+                  pct={p2.pctAtingimento ?? 83}
+                  color={p2.tendencia === 'dentro_da_meta' ? 'var(--green)' : p2.tendencia === 'atencao' ? 'var(--orange)' : 'var(--red)'}
+                  sub={kpiDisponivel
+                    ? `${p2.violacoesAno ?? p2.previsaoFechamento} viol. · meta: ${p2.metaAnual ?? 63} · margem: ${p2.margemRestante >= 0 ? '+' : ''}${p2.margemRestante ?? 0}`
+                    : `Projeção: ${p2.previsaoFechamento} violações`
+                  }
+                />
+                <Gauge
+                  label="KPI P3"
+                  pct={p3.pctAtingimento ?? 118}
+                  color={p3.tendencia === 'dentro_da_meta' ? 'var(--green)' : p3.tendencia === 'atencao' ? 'var(--orange)' : 'var(--red)'}
+                  sub={kpiDisponivel
+                    ? `${p3.violacoesAno ?? p3.previsaoFechamento} viol. · meta: ${p3.metaAnual ?? 280} · margem: ${p3.margemRestante >= 0 ? '+' : ''}${p3.margemRestante ?? 0}`
+                    : `Projeção: ${p3.previsaoFechamento} violações`
+                  }
+                />
               </div>
+
               <div style={{
                 textAlign: 'center', marginTop: 10,
-                fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-sec)', letterSpacing: '0.04em',
+                fontFamily: 'var(--font-mono)', fontSize: 11,
+                color: 'var(--text-sec)', letterSpacing: '0.04em',
               }}>
-                PREVISÃO FINAL: P2 = {p2.previsaoFechamento} violações · P3 = {p3.previsaoFechamento} violações
+                {kpiDisponivel
+                  ? `P2: ${p2.pctUtilizado ?? 66.7}% da cota utilizada · P3: ${p3.pctUtilizado ?? 73.6}% da cota utilizada`
+                  : `PREVISÃO FINAL: P2 = ${p2.previsaoFechamento} violações · P3 = ${p3.previsaoFechamento} violações`
+                }
               </div>
+
+              {kpiDisponivel && (p2.mesesAnomalos?.length > 0 || p3.mesesAnomalos?.length > 0) && (
+                <div style={{
+                  marginTop: 14, padding: '10px 16px',
+                  background: 'var(--surface3)', borderRadius: 6,
+                  border: '1px solid var(--border)',
+                  display: 'flex', gap: 24, justifyContent: 'center',
+                }}>
+                  {[['P2', p2.mesesAnomalos, 'var(--red)'], ['P3', p3.mesesAnomalos, 'var(--orange)']].map(([label, meses, cor]) =>
+                    meses?.length > 0 && (
+                      <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)' }}>
+                          ANOMALIAS {label}:
+                        </span>
+                        <div style={{ display: 'flex', gap: 4 }}>
+                          {meses.map(m => (
+                            <span key={m} style={{
+                              fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
+                              color: cor, background: `${cor}18`,
+                              border: `1px solid ${cor}44`,
+                              borderRadius: 3, padding: '1px 6px',
+                            }}>{m}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  )}
+                </div>
+              )}
             </>
           )}
         </Module>
