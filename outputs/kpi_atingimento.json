@@ -1,0 +1,65 @@
+{
+  "modelo": "kpi_ola_atingimento",
+  "gerado_em": "2026-03-28",
+  "metodologia": "SPC — meta derivada da distribuição histórica: média mensal + 1 desvio padrão",
+  "periodo": "2025-01-01 a 2025-12-31",
+  "P2": {
+    "violacoesAno": 42,
+    "metaAnual": 63,
+    "metaMensal": 5.2,
+    "pctUtilizado": 66.7,
+    "margemRestante": 21,
+    "tendencia": "dentro_da_meta",
+    "olaHoras": 4,
+    "pctAtingimento": 100,
+    "mesesAnomalos": [
+      "Mai",
+      "Jul",
+      "Nov"
+    ]
+  },
+  "P3": {
+    "violacoesAno": 206,
+    "metaAnual": 280,
+    "metaMensal": 23.4,
+    "pctUtilizado": 73.6,
+    "margemRestante": 74,
+    "tendencia": "dentro_da_meta",
+    "olaHoras": 12,
+    "pctAtingimento": 100,
+    "mesesAnomalos": [
+      "Jun",
+      "Jul"
+    ]
+  },
+  "por_mes": {
+    "P2": {
+      "1": 4,
+      "2": 4,
+      "3": 3,
+      "4": 2,
+      "5": 6,
+      "6": 3,
+      "7": 6,
+      "8": 3,
+      "9": 2,
+      "10": 2,
+      "11": 6,
+      "12": 1
+    },
+    "P3": {
+      "1": 19,
+      "2": 23,
+      "3": 18,
+      "4": 11,
+      "5": 15,
+      "6": 29,
+      "7": 24,
+      "8": 14,
+      "9": 9,
+      "10": 9,
+      "11": 15,
+      "12": 20
+    }
+  }
+}
