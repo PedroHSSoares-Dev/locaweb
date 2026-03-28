@@ -306,7 +306,7 @@ export default function MonitoramentoPage() {
       : [];
     const prev = (serieDisponivel && serieData?.serie)
       ? serieData.serie.map(d => ({
-          dia:  fmtDia(d.ds),   // "2026-01-15" → "15/01" (igual ao histórico)
+          dia:  d.dia ?? fmtDia(d.ds),   // usar campo 'dia' se existir (Prophet), senão converter 'ds' (LSTM)
           P2:   d.P2 ?? 0,
           P3:   d.P3 ?? 0,
           tipo: 'previsao',
@@ -352,27 +352,9 @@ export default function MonitoramentoPage() {
         <Module
           n={1}
           title="Métricas de Previsão D+1"
-          sub={
-            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{
-                fontFamily: 'var(--font-mono)', fontSize: 10,
-                color: modeloMeta.cor,
-                background: `${modeloMeta.cor}18`,
-                border: `1px solid ${modeloMeta.cor}44`,
-                borderRadius: 3, padding: '1px 7px',
-                letterSpacing: '0.08em',
-              }}>
-                {modeloMeta.label}
-              </span>
-              {maeAtivo && (
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)' }}>
-                  MAE: {typeof maeAtivo === 'number' ? maeAtivo.toFixed(2) : maeAtivo}
-                </span>
-              )}
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-sec)' }}>
-                previsão de volume para o próximo dia
-              </span>
-            </span>
+          sub={modeloAtivo
+            ? `${modeloMeta.label}${maeAtivo ? ` · MAE: ${typeof maeAtivo === 'number' ? maeAtivo.toFixed(2) : maeAtivo}` : ''} · previsão de volume para o próximo dia`
+            : 'PROPHET-ENSEMBLE · previsão de volume para o próximo dia'
           }
         >
           {d1Loading ? (
@@ -385,7 +367,7 @@ export default function MonitoramentoPage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
               <KpiCard
                 label="Total Incidentes D+1"
-                value={d1Total}
+                value={d1Total ?? '—'}
                 sub={`Previsão ${modeloMeta.label}`}
                 color="var(--orange)"
                 delay={0}

@@ -56,7 +56,8 @@ def get_modelos():
     **Hierarquia:** LSTM v2 (MAE=13.15) > Prophet MC (MAE=23.80) > Prophet Original (MAE=17.06 CV)
     """
     modelo_ativo, data = _carregar_melhor_modelo()
-    mae = data.get("mae_holdout_92_dias") if modelo_ativo == "lstm_v2" and data else None
+    mae_raw = data.get("mae_holdout_92_dias") if modelo_ativo == "lstm_v2" and data else None
+    mae = mae_raw["total"] if isinstance(mae_raw, dict) else mae_raw
     return {
         "lstm":             load_json("previsoes_lstm.json")      is not None,
         "prophet_mc":       load_json("previsoes_volume_mc.json") is not None,
@@ -107,13 +108,15 @@ def get_d1():
     """
     lstm = load_json("previsoes_lstm.json")
     if lstm:
+        mae_raw = lstm["mae_holdout_92_dias"]
+        mae_val = mae_raw["total"] if isinstance(mae_raw, dict) else float(mae_raw)
         return {
             "disponivel":   True,
             "total":        _round_pos(lstm["serie"][0]["total"]),
-            "p2":           None,
-            "p3":           None,
+            "p2":           _round_pos(lstm["serie"][0]["P2"]),
+            "p3":           _round_pos(lstm["serie"][0]["P3"]),
             "modelo_usado": "lstm_v2",
-            "mae":          lstm["mae_holdout_92_dias"],
+            "mae":          mae_val,
         }
     mc = load_json("previsoes_volume_mc.json")
     if mc:
@@ -153,13 +156,15 @@ def get_d7():
     """
     lstm = load_json("previsoes_lstm.json")
     if lstm:
+        mae_raw = lstm["mae_holdout_92_dias"]
+        mae_val = mae_raw["total"] if isinstance(mae_raw, dict) else float(mae_raw)
         return {
             "disponivel":   True,
             "total":        _round_pos(lstm["serie"][6]["total"]),
-            "p2":           None,
-            "p3":           None,
+            "p2":           _round_pos(lstm["serie"][6]["P2"]),
+            "p3":           _round_pos(lstm["serie"][6]["P3"]),
             "modelo_usado": "lstm_v2",
-            "mae":          lstm["mae_holdout_92_dias"],
+            "mae":          mae_val,
         }
     mc = load_json("previsoes_volume_mc.json")
     if mc:
@@ -208,8 +213,8 @@ def get_serie():
                 "dia":   p["horizonte"],
                 "ds":    p["ds"],
                 "total": _round_pos(p["total"]),
-                "P2":    None,
-                "P3":    None,
+                "P2":    _round_pos(p["P2"]) if p.get("P2") is not None else None,
+                "P3":    _round_pos(p["P3"]) if p.get("P3") is not None else None,
             }
             for p in lstm["serie"]
         ]
