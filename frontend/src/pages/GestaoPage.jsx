@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -13,6 +13,61 @@ import {
 import { useApi } from '../hooks/useApi';
 import SemDados from '../components/SemDados';
 import PeriodoToggle from '../components/PeriodoToggle';
+
+// ─── Identidade visual P2 / P3 ────────────────────────────────────────────────
+const COR_P2     = 'var(--teal)';
+const COR_P3     = '#ffcc00';
+const COR_P2_DIM = 'rgba(90,200,250,0.15)';
+const COR_P3_DIM = 'rgba(255,204,0,0.15)';
+
+// ─── Hook: animação de número com easing easeOutExpo ─────────────────────────
+function useCountUp(target, duration = 1000) {
+  const [value, setValue] = useState(target);
+  const rafRef  = useRef(null);
+  const prevRef = useRef(target);
+
+  useEffect(() => {
+    if (target == null) { setValue(null); return; }
+    const from  = prevRef.current ?? target;
+    const start = performance.now();
+    cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(function tick(now) {
+      const elapsed = now - start;
+      const t    = Math.min(elapsed / duration, 1);
+      const ease = t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+      setValue(Math.round(from + (target - from) * ease));
+      if (t < 1) rafRef.current = requestAnimationFrame(tick);
+      else prevRef.current = target;
+    });
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [target, duration]);
+
+  return value;
+}
+
+function useCountUpFloat(target, duration = 1000) {
+  const [value, setValue] = useState(target);
+  const rafRef  = useRef(null);
+  const prevRef = useRef(target);
+
+  useEffect(() => {
+    if (target == null) { setValue(null); return; }
+    const from  = prevRef.current ?? target;
+    const start = performance.now();
+    cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(function tick(now) {
+      const elapsed = now - start;
+      const t    = Math.min(elapsed / duration, 1);
+      const ease = t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+      setValue(+(from + (target - from) * ease).toFixed(1));
+      if (t < 1) rafRef.current = requestAnimationFrame(tick);
+      else prevRef.current = target;
+    });
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [target, duration]);
+
+  return value;
+}
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 function Skeleton({ height = 80 }) {
@@ -115,8 +170,10 @@ function KpiCard({ label, value, sub, color, delay = 0 }) {
 }
 
 // ─── Status banner (P2 / P3) ──────────────────────────────────────────────────
-function StatusBanner({ priority, violations, metaMin, metaMax, ola }) {
-  const ok = violations <= metaMax;
+function StatusBanner({ priority, violations, metaMin, metaMax, ola, pctUtilizado }) {
+  const animViolations = useCountUp(violations);
+  const animPct        = useCountUpFloat(pctUtilizado);
+  const ok    = violations <= metaMax;
   const color = ok ? 'var(--green)' : 'var(--red)';
   const dimBg = ok ? 'var(--green-dim)' : 'var(--red-dim)';
   return (
@@ -124,7 +181,7 @@ function StatusBanner({ priority, violations, metaMin, metaMax, ola }) {
       background: dimBg, border: `1px solid ${color}`,
       borderRadius: 6, padding: '18px 22px',
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      animation: 'fadeInUp 0.3s ease both',
+      transition: 'background 0.3s ease, border-color 0.3s ease',
     }}>
       <div>
         <div style={{
@@ -132,10 +189,23 @@ function StatusBanner({ priority, violations, metaMin, metaMax, ola }) {
           color: 'var(--text-sec)', letterSpacing: '0.12em',
           textTransform: 'uppercase', marginBottom: 6,
         }}>KPI {priority} · OLA {ola}</div>
-        <div style={{
-          fontFamily: 'var(--font-mono)', fontSize: 36, fontWeight: 400,
-          color, lineHeight: 1,
-        }}>{violations} <span style={{ fontSize: 14, opacity: 0.7 }}>violações</span></div>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+          <div style={{
+            fontFamily: 'var(--font-mono)', fontSize: 36, fontWeight: 400,
+            color, lineHeight: 1,
+          }}>{animViolations}</div>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, color, opacity: 0.7 }}>
+            violações
+          </span>
+          {animPct != null && (
+            <span style={{
+              fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 600,
+              color, opacity: 0.85, marginLeft: 4,
+            }}>
+              · {animPct}% da cota
+            </span>
+          )}
+        </div>
         <div style={{
           fontFamily: 'var(--font-mono)', fontSize: 11,
           color: 'var(--text-sec)', marginTop: 6,
@@ -145,6 +215,7 @@ function StatusBanner({ priority, violations, metaMin, metaMax, ola }) {
         fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
         color, background: dimBg, border: `1px solid ${color}`,
         borderRadius: 3, padding: '4px 10px', letterSpacing: '0.1em',
+        transition: 'color 0.3s ease, border-color 0.3s ease',
       }}>{ok ? 'DENTRO DA META' : 'ACIMA DA META'}</span>
     </div>
   );
@@ -153,17 +224,23 @@ function StatusBanner({ priority, violations, metaMin, metaMax, ola }) {
 // ─── Chart tooltip ────────────────────────────────────────────────────────────
 function ChartTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
+  const limiarP2 = 5.2;
+  const limiarP3 = 23.4;
   return (
     <div style={{
       background: 'var(--surface3)', border: '1px solid var(--border-md)',
       borderRadius: 4, padding: '8px 12px',
     }}>
       <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-sec)', marginBottom: 6 }}>{label}</div>
-      {payload.map((p, i) => (
-        <div key={i} style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: p.color || p.fill, marginBottom: 2 }}>
-          {p.name}: {p.value}
-        </div>
-      ))}
+      {payload.filter(p => p.value != null).map((p, i) => {
+        const limiar = p.dataKey === 'violP2' ? limiarP2 : limiarP3;
+        const acima  = p.value > limiar;
+        return (
+          <div key={i} style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: acima ? 'var(--red)' : (p.color || p.fill), marginBottom: 2 }}>
+            {p.name}: {p.value}{acima ? ' ⚠ acima do limiar' : ''}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -243,6 +320,7 @@ function filtrarPorPeriodo(dados, periodo) {
 export default function GestaoPage() {
   const navigate = useNavigate();
   const [periodo, setPeriodo] = useState('ANO');
+  const [filtroViolacoes, setFiltroViolacoes] = useState('AMBOS');
 
   // ── Dados de modelo via API ────────────────────────────────────────────────
   const { data: d1Data, loading: d1Loading, disponivel: d1Disponivel } = useApi('/previsoes/d1');
@@ -260,6 +338,14 @@ export default function GestaoPage() {
   const p3 = kpiDisponivel ? kpiData.P3 : kpiAtingimento.P3;
 
   const dadosFiltrados = filtrarPorPeriodo(volumeMensal2025, periodo);
+
+  const dadosGrafico03 = dadosFiltrados.map(d => ({
+    mes:         d.mes,
+    violP2:      filtroViolacoes !== 'P3' ? d.violP2 : null,
+    violP3:      filtroViolacoes !== 'P2' ? d.violP3 : null,
+    _violP2orig: d.violP2,
+    _violP3orig: d.violP3,
+  }));
 
   const fatorPeriodo = periodo === 'MÊS' ? 1 / 12 : periodo === 'TRIMESTRE' ? 3 / 12 : 1;
   const produtosFiltrados = [...produtos].slice(0, 8).map(p => ({
@@ -292,6 +378,7 @@ export default function GestaoPage() {
               violations={kpiDisponivel ? (p2.violacoesAno ?? violacoesReais2025.P2) : violacoesReais2025.P2}
               metaMin={kpiDisponivel ? Math.round((p2.metaAnual ?? 63) * 0.9) : olaTargets.P2.metaViolacoesAno.min}
               metaMax={kpiDisponivel ? (p2.metaAnual ?? 63) : olaTargets.P2.metaViolacoesAno.max}
+              pctUtilizado={kpiDisponivel ? p2.pctUtilizado : null}
               ola="≤ 4h"
             />
             <StatusBanner
@@ -299,6 +386,7 @@ export default function GestaoPage() {
               violations={kpiDisponivel ? (p3.violacoesAno ?? violacoesReais2025.P3) : violacoesReais2025.P3}
               metaMin={kpiDisponivel ? Math.round((p3.metaAnual ?? 280) * 0.9) : olaTargets.P3.metaViolacoesAno.min}
               metaMax={kpiDisponivel ? (p3.metaAnual ?? 280) : olaTargets.P3.metaViolacoesAno.max}
+              pctUtilizado={kpiDisponivel ? p3.pctUtilizado : null}
               ola="≤ 12h"
             />
           </div>
@@ -350,23 +438,83 @@ export default function GestaoPage() {
         <Module
           n={3}
           title="Violações Mensais 2025"
-          sub={`P2 (≤4h) e P3 (≤12h) · linha tracejada = meta mensal P2 · ${PERIODO_LABELS[periodo]}`}
+          sub={`P2 (≤4h) e P3 (≤12h) · linha = meta mensal SPC · ${PERIODO_LABELS[periodo]}`}
+          action={
+            <div style={{ display: 'flex', background: 'var(--surface3)', border: '1px solid var(--border)', borderRadius: 6, padding: 2, gap: 2 }}>
+              {['P2', 'P3', 'AMBOS'].map(op => {
+                const ativo    = filtroViolacoes === op;
+                const corAtiva = op === 'P2' ? COR_P2 : op === 'P3' ? COR_P3 : 'var(--text-pri)';
+                const bgAtiva  = op === 'P2' ? COR_P2_DIM : op === 'P3' ? COR_P3_DIM : 'rgba(255,255,255,0.1)';
+                return (
+                  <button
+                    key={op}
+                    onClick={() => setFiltroViolacoes(op)}
+                    style={{
+                      fontFamily: 'var(--font-mono)', fontSize: 9,
+                      fontWeight: ativo ? 700 : 400,
+                      letterSpacing: '0.1em',
+                      color: ativo ? corAtiva : 'var(--text-sec)',
+                      background: ativo ? bgAtiva : 'transparent',
+                      border: ativo ? `1px solid ${corAtiva}` : '1px solid transparent',
+                      borderRadius: 4,
+                      padding: '3px 10px', cursor: 'pointer',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    {op}
+                  </button>
+                );
+              })}
+            </div>
+          }
         >
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={dadosFiltrados} margin={{ top: 10, right: 16, bottom: 0, left: -10 }} barGap={4}>
+            <BarChart data={dadosGrafico03} margin={{ top: 10, right: 16, bottom: 0, left: -10 }} barGap={4}>
               <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="mes" {...axisProps} axisLine={{ stroke: 'var(--border)' }} />
               <YAxis {...axisProps} axisLine={false} />
               <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
-              <ReferenceLine
-                y={3.25} stroke="var(--red)" strokeDasharray="4 4" strokeOpacity={0.5}
-                label={{ value: 'Meta P2/mês', position: 'right', fill: 'var(--red)', fontSize: 9, fontFamily: 'var(--font-mono)' }}
-              />
-              <Bar dataKey="violP2" name="Violações P2" fill="var(--red)"    fillOpacity={0.8} radius={[2,2,0,0]} />
-              <Bar dataKey="violP3" name="Violações P3" fill="var(--orange)" fillOpacity={0.8} radius={[2,2,0,0]} />
+              {(filtroViolacoes === 'P2' || filtroViolacoes === 'AMBOS') && (
+                <ReferenceLine
+                  y={kpiDisponivel ? p2.metaMensal : 3.25}
+                  stroke={COR_P2} strokeDasharray="4 4" strokeOpacity={0.6}
+                />
+              )}
+              {(filtroViolacoes === 'P3' || filtroViolacoes === 'AMBOS') && (
+                <ReferenceLine
+                  y={kpiDisponivel ? p3.metaMensal : 21.9}
+                  stroke={COR_P3} strokeDasharray="4 4" strokeOpacity={0.6}
+                />
+              )}
+              <Bar
+                dataKey="violP2" name="Violações P2"
+                radius={[2,2,0,0]}
+                isAnimationActive animationBegin={0} animationDuration={500} animationEasing="ease-out"
+              >
+                {dadosGrafico03.map((entry, index) => {
+                  const limiar     = kpiDisponivel ? p2.metaMensal : 3.25;
+                  const ultrapassou = entry._violP2orig > limiar;
+                  return <Cell key={index} fill={ultrapassou ? 'var(--red)' : COR_P2} fillOpacity={0.85} />;
+                })}
+              </Bar>
+              <Bar
+                dataKey="violP3" name="Violações P3"
+                radius={[2,2,0,0]}
+                isAnimationActive animationBegin={0} animationDuration={500} animationEasing="ease-out"
+              >
+                {dadosGrafico03.map((entry, index) => {
+                  const limiar     = kpiDisponivel ? p3.metaMensal : 21.9;
+                  const ultrapassou = entry._violP3orig > limiar;
+                  return <Cell key={index} fill={ultrapassou ? 'var(--red)' : COR_P3} fillOpacity={0.85} />;
+                })}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
-          <Legend items={[['var(--red)', 'Violações P2'], ['var(--orange)', 'Violações P3']]} />
+          <Legend items={[
+            ...(filtroViolacoes !== 'P3' ? [[COR_P2,         'P2 — dentro do limiar']] : []),
+            ...(filtroViolacoes !== 'P2' ? [[COR_P3,         'P3 — dentro do limiar']] : []),
+            [['var(--red)', 'Acima do limiar SPC']],
+          ]} />
         </Module>
 
         {/* ── MODULE 04: Volume by Product ──────────────────────────────── */}
