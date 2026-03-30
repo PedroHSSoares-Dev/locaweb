@@ -418,15 +418,21 @@ export default function GestaoPage() {
               />
               <KpiCard
                 label="Atingimento P2"
-                value={`${p2.pctAtingimento}%`}
-                sub={`Projeção: ${p2.previsaoFechamento} violações`}
+                value={`${p2.pctAtingimento ?? 100}%`}
+                sub={kpiDisponivel
+                  ? `${p2.violacoesAno} viol. · meta ${p2.metaAnual} · margem ${p2.margemRestante >= 0 ? '+' : ''}${p2.margemRestante}`
+                  : `Meta: ${olaTargets.P2.metaViolacoesAno.max} violações/ano`
+                }
                 color="var(--red)"
                 delay={120}
               />
               <KpiCard
                 label="Atingimento P3"
-                value={`${p3.pctAtingimento}%`}
-                sub={`Projeção: ${p3.previsaoFechamento} violações`}
+                value={`${p3.pctAtingimento ?? 100}%`}
+                sub={kpiDisponivel
+                  ? `${p3.violacoesAno} viol. · meta ${p3.metaAnual} · margem ${p3.margemRestante >= 0 ? '+' : ''}${p3.margemRestante}`
+                  : `Meta: ${olaTargets.P3.metaViolacoesAno.max} violações/ano`
+                }
                 color="var(--green)"
                 delay={180}
               />
