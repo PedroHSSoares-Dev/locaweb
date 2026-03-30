@@ -1,4 +1,7 @@
+import { useBreakpoint } from '../hooks/useBreakpoint';
+
 export default function PeriodoToggle({ value, onChange }) {
+  const { isMobile } = useBreakpoint();
   const opcoes = ['MÊS', 'TRIMESTRE', 'ANO'];
   return (
     <div style={{
@@ -17,14 +20,14 @@ export default function PeriodoToggle({ value, onChange }) {
             onClick={() => onChange(op)}
             style={{
               fontFamily: 'var(--font-mono)',
-              fontSize: 10,
+              fontSize: isMobile ? 9 : 10,
               fontWeight: ativo ? 700 : 400,
               letterSpacing: '0.1em',
               color: ativo ? 'var(--bg)' : 'var(--text-sec)',
               background: ativo ? 'var(--text-pri)' : 'transparent',
               border: 'none',
               borderRadius: 6,
-              padding: '5px 14px',
+              padding: isMobile ? '4px 8px' : '5px 14px',
               cursor: 'pointer',
               transition: 'all 0.15s',
             }}

@@ -11,6 +11,7 @@ import {
   violacoesReais2025, olaTargets,
 } from '../data/mockData';
 import { useApi } from '../hooks/useApi';
+import { useBreakpoint } from '../hooks/useBreakpoint';
 import SemDados from '../components/SemDados';
 import PeriodoToggle from '../components/PeriodoToggle';
 
@@ -76,9 +77,10 @@ function Skeleton({ height = 80 }) {
 
 // ─── Page header ──────────────────────────────────────────────────────────────
 function PageHeader({ title, sub, rightSlot }) {
+  const { isMobile } = useBreakpoint();
   return (
     <div style={{
-      padding: '16px 28px',
+      padding: isMobile ? '12px 16px 12px 56px' : '16px 28px',
       borderBottom: '1px solid var(--border)',
       background: 'var(--surface1)',
       marginBottom: 0,
@@ -92,15 +94,17 @@ function PageHeader({ title, sub, rightSlot }) {
     }}>
       <div>
         <div style={{
-          fontFamily: 'var(--font-mono)', fontSize: 18, fontWeight: 600,
+          fontFamily: 'var(--font-mono)', fontSize: isMobile ? 13 : 18, fontWeight: 600,
           color: 'var(--text-pri)', letterSpacing: '0.08em', textTransform: 'uppercase',
         }}>{title}</div>
-        <div style={{
-          fontFamily: 'var(--font-mono)', fontSize: 11,
-          color: 'var(--text-sec)', marginTop: 3, letterSpacing: '0.08em',
-        }}>{sub}</div>
+        {!isMobile && sub && (
+          <div style={{
+            fontFamily: 'var(--font-mono)', fontSize: 11,
+            color: 'var(--text-sec)', marginTop: 3, letterSpacing: '0.08em',
+          }}>{sub}</div>
+        )}
       </div>
-      {rightSlot && <div>{rightSlot}</div>}
+      {!isMobile && rightSlot && <div>{rightSlot}</div>}
     </div>
   );
 }
@@ -322,6 +326,7 @@ function filtrarPorPeriodo(dados, periodo) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function GestaoPage() {
   const navigate = useNavigate();
+  const { isMobile, isTablet } = useBreakpoint();
   const [periodo, setPeriodo] = useState('ANO');
   const [filtroViolacoes, setFiltroViolacoes] = useState('AMBOS');
 
@@ -370,12 +375,18 @@ export default function GestaoPage() {
         rightSlot={<PeriodoToggle value={periodo} onChange={setPeriodo} />}
       />
 
-      <main style={{ flex: 1, padding: '20px 28px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <main style={{ flex: 1, padding: isMobile ? '12px 12px 40px' : '20px 28px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+        {isMobile && (
+          <div style={{ padding: '0 0 4px' }}>
+            <PeriodoToggle value={periodo} onChange={setPeriodo} />
+          </div>
+        )}
 
         {/* ── MODULE 01: OLA Status ──────────────────────────────────────── */}
         <Module n={1} title="Violações vs Meta"
           sub={`Contagem de violações vs meta SPC · ${PERIODO_LABELS[periodo]}`}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12 }}>
             <StatusBanner
               priority="P2"
               violations={kpiDisponivel ? (p2.violacoesAno ?? violacoesReais2025.P2) : violacoesReais2025.P2}
@@ -396,7 +407,7 @@ export default function GestaoPage() {
         </Module>
 
         {/* ── MODULE 02 + 03: KPI + Previsão (lado a lado) ─────────────────── */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile || isTablet ? '1fr' : '1fr 1fr', gap: 24 }}>
 
           {/* ── MODULE 02: KPI Atingimento OLA ──────────────────────────────── */}
           <Module
@@ -411,7 +422,7 @@ export default function GestaoPage() {
               <Skeleton height={200} />
             ) : (
               <>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 64, padding: '8px 0' }}>
+                <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: 'center', justifyContent: 'center', gap: isMobile ? 24 : 64, padding: '8px 0' }}>
                   <Gauge
                     label="KPI P2"
                     size={120}

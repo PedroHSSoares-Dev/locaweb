@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef } from 'react';
 import PeriodoToggle from '../components/PeriodoToggle';
+import { useBreakpoint } from '../hooks/useBreakpoint';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid, ReferenceLine,
@@ -16,9 +17,10 @@ function Skeleton({ height = 80 }) {
 
 // ─── Page header ──────────────────────────────────────────────────────────────
 function PageHeader({ title, sub, rightSlot }) {
+  const { isMobile } = useBreakpoint();
   return (
     <div style={{
-      padding: '16px 28px',
+      padding: isMobile ? '12px 16px 12px 56px' : '16px 28px',
       borderBottom: '1px solid var(--border)',
       background: 'var(--surface1)',
       marginBottom: 0,
@@ -32,15 +34,17 @@ function PageHeader({ title, sub, rightSlot }) {
     }}>
       <div>
         <div style={{
-          fontFamily: 'var(--font-mono)', fontSize: 18, fontWeight: 600,
+          fontFamily: 'var(--font-mono)', fontSize: isMobile ? 13 : 18, fontWeight: 600,
           color: 'var(--text-pri)', letterSpacing: '0.08em', textTransform: 'uppercase',
         }}>{title}</div>
-        <div style={{
-          fontFamily: 'var(--font-mono)', fontSize: 11,
-          color: 'var(--text-sec)', marginTop: 3, letterSpacing: '0.08em',
-        }}>{sub}</div>
+        {!isMobile && sub && (
+          <div style={{
+            fontFamily: 'var(--font-mono)', fontSize: 11,
+            color: 'var(--text-sec)', marginTop: 3, letterSpacing: '0.08em',
+          }}>{sub}</div>
+        )}
       </div>
-      {rightSlot && <div>{rightSlot}</div>}
+      {!isMobile && rightSlot && <div>{rightSlot}</div>}
     </div>
   );
 }
@@ -110,6 +114,7 @@ function KpiCard({ label, value, sub, color, delay = 0 }) {
 
 // ─── Heatmap SVG custom ───────────────────────────────────────────────────────
 function Heatmap({ data }) {
+  const { isMobile } = useBreakpoint();
   const [tooltip, setTooltip] = useState(null);
   const wrapperRef = useRef(null);
 
@@ -129,7 +134,7 @@ function Heatmap({ data }) {
     return { maxVal, totalPorDia, totalPorHora, mediaHora, rankMap };
   }, [data]);
 
-  const cellW = 28, cellH = 28, labelW = 36;
+  const cellW = isMobile ? 20 : 28, cellH = isMobile ? 20 : 28, labelW = 36;
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const showHours = [0, 6, 12, 18, 23];
   const svgW = labelW + 24 * cellW + 8;
@@ -297,6 +302,7 @@ function fmtDia(ds) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function MonitoramentoPage() {
+  const { isMobile } = useBreakpoint();
   const [panelItem, setPanelItem] = useState(null);
   const [periodo, setPeriodo] = useState('ANO');
 
@@ -355,7 +361,13 @@ export default function MonitoramentoPage() {
         rightSlot={<PeriodoToggle value={periodo} onChange={setPeriodo} />}
       />
 
-      <main style={{ flex: 1, padding: '20px 28px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <main style={{ flex: 1, padding: isMobile ? '12px 12px 40px' : '20px 28px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+        {isMobile && (
+          <div style={{ padding: '0 0 4px' }}>
+            <PeriodoToggle value={periodo} onChange={setPeriodo} />
+          </div>
+        )}
 
         {/* ── MODULE 01: D+1 Forecast Metrics ───────────────────────────── */}
         <Module
@@ -367,13 +379,13 @@ export default function MonitoramentoPage() {
           }
         >
           {d1Loading ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 12 }}>
               {[0, 1, 2, 3].map(i => <Skeleton key={i} height={130} />)}
             </div>
           ) : !d1Disponivel ? (
             <SemDados mensagem="Previsão Prophet indisponível — execute o notebook 03" />
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 12 }}>
               <KpiCard
                 label="Total Incidentes D+1"
                 value={d1Total ?? '—'}
@@ -416,12 +428,12 @@ export default function MonitoramentoPage() {
           }
         >
           {historicoLoading ? (
-            <Skeleton height={380} />
+            <Skeleton height={isMobile ? 220 : 380} />
           ) : !historicoDisponivel ? (
             <SemDados mensagem="Dados históricos indisponíveis" />
           ) : (
             <>
-              <ResponsiveContainer width="100%" height={380}>
+              <ResponsiveContainer width="100%" height={isMobile ? 220 : 380}>
                 <AreaChart data={volumeComPrevisao} margin={{ top: 8, right: 16, bottom: 0, left: -10 }}>
                   <defs>
                     <linearGradient id="gradP2" x1="0" y1="0" x2="0" y2="1">

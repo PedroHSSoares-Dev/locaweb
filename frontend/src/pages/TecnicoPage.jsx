@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useBreakpoint } from '../hooks/useBreakpoint';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   Cell, LabelList,
@@ -16,9 +17,10 @@ function Skeleton({ height = 80 }) {
 
 // ─── Page header ──────────────────────────────────────────────────────────────
 function PageHeader({ title, sub, rightSlot }) {
+  const { isMobile } = useBreakpoint();
   return (
     <div style={{
-      padding: '16px 28px',
+      padding: isMobile ? '12px 16px 12px 56px' : '16px 28px',
       borderBottom: '1px solid var(--border)',
       background: 'var(--surface1)',
       marginBottom: 0,
@@ -32,15 +34,17 @@ function PageHeader({ title, sub, rightSlot }) {
     }}>
       <div>
         <div style={{
-          fontFamily: 'var(--font-mono)', fontSize: 18, fontWeight: 600,
+          fontFamily: 'var(--font-mono)', fontSize: isMobile ? 13 : 18, fontWeight: 600,
           color: 'var(--text-pri)', letterSpacing: '0.08em', textTransform: 'uppercase',
         }}>{title}</div>
-        <div style={{
-          fontFamily: 'var(--font-mono)', fontSize: 11,
-          color: 'var(--text-sec)', marginTop: 3, letterSpacing: '0.08em',
-        }}>{sub}</div>
+        {!isMobile && sub && (
+          <div style={{
+            fontFamily: 'var(--font-mono)', fontSize: 11,
+            color: 'var(--text-sec)', marginTop: 3, letterSpacing: '0.08em',
+          }}>{sub}</div>
+        )}
       </div>
-      {rightSlot && <div>{rightSlot}</div>}
+      {!isMobile && rightSlot && <div>{rightSlot}</div>}
     </div>
   );
 }
@@ -216,6 +220,7 @@ function ClusterCard({ cluster }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function TecnicoPage() {
+  const { isMobile } = useBreakpoint();
   const [periodo, setPeriodo] = useState('ANO');
 
   // ── Dados de modelo via API ────────────────────────────────────────────────
@@ -252,11 +257,17 @@ export default function TecnicoPage() {
         rightSlot={<PeriodoToggle value={periodo} onChange={setPeriodo} />}
       />
 
-      <main style={{ flex: 1, padding: '20px 28px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <main style={{ flex: 1, padding: isMobile ? '12px 12px 40px' : '20px 28px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+        {isMobile && (
+          <div style={{ padding: '0 0 4px' }}>
+            <PeriodoToggle value={periodo} onChange={setPeriodo} />
+          </div>
+        )}
 
         {/* ── MODULE 01: System Metrics ──────────────────────────────────── */}
         <Module n={1} title="Indicadores Operacionais" sub="Dataset KPI 2025 · apenas incidentes P2 + P3">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 12 }}>
             <KpiCard label="Total Incidentes KPI (2025)" value="25.600" sub="P2 + P3 · Jan–Dez 2025"         color="var(--text-muted)" delay={0}   />
             <KpiCard label="Taxa de Violação P2"         value="0.81%"  sub="42 violações / 5.159 inc."    color="var(--red)"        delay={60}  />
             <KpiCard label="Taxa de Violação P3"         value="0.96%"  sub="196 violações / 20.097 inc."  color="var(--orange)"     delay={120} />
@@ -361,7 +372,7 @@ export default function TecnicoPage() {
           ) : !clustersDisponivel ? (
             <SemDados mensagem="Modelo K-Means não treinado — execute o notebook 05" />
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12 }}>
               {clustersData.map(c => <ClusterCard key={c.id} cluster={c} />)}
             </div>
           )}
