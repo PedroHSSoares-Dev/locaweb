@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { violacoesReais2025, olaTargets } from '../data/mockData';
+import { useApi } from '../hooks/useApi';
 import LogoPredictfy from './LogoPredictfy';
 import { LayoutDashboard, Activity, Server } from 'lucide-react';
 
@@ -16,6 +16,8 @@ const SIDEBAR_COLLAPSED = 52;
 export default function Sidebar() {
   const [clock, setClock] = useState('');
   const [collapsed, setCollapsed] = useState(false);
+
+  const { data: kpiData, disponivel: kpiDisponivel } = useApi('/kpi');
 
   useEffect(() => {
     const tick = () => setClock(new Date().toLocaleTimeString('pt-BR', {
@@ -33,7 +35,13 @@ export default function Sidebar() {
     );
   }, [collapsed]);
 
-  const p2Critical = violacoesReais2025.P2 > olaTargets.P2.metaViolacoesAno.max;
+  const p2Critical = kpiDisponivel
+    ? kpiData?.P2?.tendencia === 'critico' || kpiData?.P2?.margemRestante < 0
+    : false;
+  const p3Critical = kpiDisponivel
+    ? kpiData?.P3?.tendencia === 'critico' || kpiData?.P3?.margemRestante < 0
+    : false;
+
   const w = collapsed ? SIDEBAR_COLLAPSED : SIDEBAR_FULL;
 
   return (
@@ -190,8 +198,22 @@ export default function Sidebar() {
           <div style={{
             fontFamily: 'var(--font-mono)', fontSize: 10,
             color: 'var(--red)', letterSpacing: '0.06em',
-            marginLeft: 34 // Mantém o alerta alinhado com o texto
+            marginLeft: 34, animation: 'pulse-dot 2s ease infinite',
           }}>⚠ KPI P2 CRÍTICO</div>
+        )}
+        {!collapsed && p3Critical && (
+          <div style={{
+            fontFamily: 'var(--font-mono)', fontSize: 10,
+            color: 'var(--red)', letterSpacing: '0.06em',
+            marginLeft: 34, animation: 'pulse-dot 2s ease infinite',
+          }}>⚠ KPI P3 CRÍTICO</div>
+        )}
+        {!collapsed && kpiDisponivel && !p2Critical && !p3Critical && (
+          <div style={{
+            fontFamily: 'var(--font-mono)', fontSize: 10,
+            color: 'var(--green)', letterSpacing: '0.06em',
+            marginLeft: 34,
+          }}>✓ KPI DENTRO DA META</div>
         )}
       </div>
     </aside>
