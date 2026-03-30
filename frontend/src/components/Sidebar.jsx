@@ -1,18 +1,20 @@
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { violacoesReais2025, olaTargets } from '../data/mockData';
+import LogoPredictfy from './LogoPredictfy';
+import { LayoutDashboard, Activity, Server } from 'lucide-react';
 
 const NAV = [
-  { to: '/gestao',        label: 'GESTÃO',       icon: '▣' },
-  { to: '/monitoramento', label: 'MONITORAMENTO', icon: '◈' },
-  { to: '/tecnico',       label: 'TÉCNICO',       icon: '▦' },
+  { to: '/gestao', label: 'GESTÃO', icon: <LayoutDashboard size={18} /> },
+  { to: '/monitoramento', label: 'MONITORAMENTO', icon: <Activity size={18} /> },
+  { to: '/tecnico', label: 'TÉCNICO', icon: <Server size={18} /> },
 ];
 
-const SIDEBAR_FULL      = 220;
+const SIDEBAR_FULL = 220;
 const SIDEBAR_COLLAPSED = 52;
 
 export default function Sidebar() {
-  const [clock,     setClock]     = useState('');
+  const [clock, setClock] = useState('');
   const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
@@ -59,15 +61,23 @@ export default function Sidebar() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: collapsed ? 'center' : 'flex-start',
-          gap: 10,
+          gap: collapsed ? 0 : 10, // <-- ALTERE AQUI: Remova o "10" e coloque esta condição
           userSelect: 'none',
           transition: 'padding 0.25s ease',
         }}
       >
-        <span style={{
-          fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700,
-          color: 'var(--teal)', flexShrink: 0,
-        }}>⬡</span>
+        {/* --- LOGO SVG AQUI --- */}
+        <div style={{
+          width: 24,             // Largura fixa para a "coluna" do ícone
+          height: 24,
+          color: 'var(--teal)',
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center' // Centraliza o SVG dentro dos 24px
+        }}>
+          <LogoPredictfy />
+        </div>
 
         <div style={{
           overflow: 'hidden',
@@ -112,7 +122,14 @@ export default function Sidebar() {
               whiteSpace: 'nowrap',
             })}
           >
-            <span style={{ fontSize: 14, flexShrink: 0 }}>{icon}</span>
+            <div style={{
+              width: 24, // Exatamente a mesma largura do wrapper da Logo
+              display: 'flex',
+              justifyContent: 'center', // Alinha perfeitamente ao centro da coluna
+              flexShrink: 0
+            }}>
+              {icon}
+            </div>
             <span style={{
               opacity: collapsed ? 0 : 1,
               width: collapsed ? 0 : 'auto',
@@ -133,12 +150,24 @@ export default function Sidebar() {
         gap: 6,
         transition: 'padding 0.25s ease',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{
-            width: 7, height: 7, borderRadius: '50%',
-            background: 'var(--green)', display: 'inline-block',
-            animation: 'pulse-dot 2s ease infinite', flexShrink: 0,
-          }} />
+        {/* Usamos a mesma lógica de gap do Nav: 0 quando colapsado, 10 quando aberto */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: collapsed ? 0 : 10 }}>
+
+          {/* Wrapper de 24px para centralizar a bolinha no mesmo eixo dos ícones */}
+          <div style={{
+            width: 24,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexShrink: 0
+          }}>
+            <span style={{
+              width: 7, height: 7, borderRadius: '50%',
+              background: 'var(--green)', display: 'inline-block',
+              animation: 'pulse-dot 2s ease infinite', flexShrink: 0,
+            }} />
+          </div>
+
           <span style={{
             fontFamily: 'var(--font-mono)', fontSize: 11,
             color: 'var(--green)', letterSpacing: '0.1em',
@@ -149,15 +178,19 @@ export default function Sidebar() {
             whiteSpace: 'nowrap',
           }}>ONLINE</span>
         </div>
+
         {!collapsed && (
           <div style={{
             fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-sec)',
+            marginLeft: 34 // 24px do wrapper + 10px do gap para alinhar com o texto de cima
           }}>{clock}</div>
         )}
+
         {!collapsed && p2Critical && (
           <div style={{
             fontFamily: 'var(--font-mono)', fontSize: 10,
             color: 'var(--red)', letterSpacing: '0.06em',
+            marginLeft: 34 // Mantém o alerta alinhado com o texto
           }}>⚠ KPI P2 CRÍTICO</div>
         )}
       </div>
