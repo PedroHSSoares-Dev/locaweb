@@ -5,6 +5,9 @@ import Sidebar from './components/Sidebar';
 import GestaoPage from './pages/GestaoPage';
 import MonitoramentoPage from './pages/MonitoramentoPage';
 import TecnicoPage from './pages/TecnicoPage';
+
+import { Analytics } from "@vercel/analytics/react"
+
 export default function App() {
   return (
     <DashboardProvider>
@@ -35,6 +38,7 @@ export default function App() {
             </Routes>
           </div>
         </div>
+        <Analytics />
       </BrowserRouter>
     </DashboardProvider>
   );
