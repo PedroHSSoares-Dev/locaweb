@@ -373,7 +373,7 @@ export default function GestaoPage() {
       <main style={{ flex: 1, padding: '20px 28px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>
 
         {/* ── MODULE 01: OLA Status ──────────────────────────────────────── */}
-        <Module n={1} title="Status de OLA"
+        <Module n={1} title="Violações vs Meta"
           sub={`Contagem de violações vs meta SPC · ${PERIODO_LABELS[periodo]}`}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <StatusBanner
@@ -401,7 +401,7 @@ export default function GestaoPage() {
           {/* ── MODULE 02: KPI Atingimento OLA ──────────────────────────────── */}
           <Module
             n={2}
-            title="Atingimento de KPI OLA"
+            title="Cota OLA Utilizada"
             sub={kpiDisponivel
               ? `METODOLOGIA SPC · ${PERIODO_LABELS[periodo]}`
               : `ESTIMATIVAS SIMULADAS · nb07 pendente · ${PERIODO_LABELS[periodo]}`
@@ -484,7 +484,7 @@ export default function GestaoPage() {
           </Module>
 
           {/* ── MODULE 03: Previsão Preditiva ─────────────────────────────── */}
-          <Module n={3} title="Previsão Preditiva" sub={d1Disponivel ? `${(d1Data.modelo_usado ?? 'modelo').toUpperCase()} · Volume de incidentes D+1 e D+7` : 'MOTOR PREDITIVO · Volume de incidentes D+1 e D+7'}>
+          <Module n={3} title="Volume Previsto" sub={d1Disponivel ? `${(d1Data.modelo_usado ?? 'modelo').toUpperCase()} · Volume de incidentes D+1 e D+7` : 'MOTOR PREDITIVO · Volume de incidentes D+1 e D+7'}>
             {prevLoading ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {[0, 1].map(i => <Skeleton key={i} height={130} />)}
@@ -516,7 +516,7 @@ export default function GestaoPage() {
         {/* ── MODULE 04: Violações Mensais ──────────────────────────────── */}
         <Module
             n={4}
-            title="Violações Mensais 2025"
+            title="Histórico de Violações"
             sub={`P2 (≤4h) e P3 (≤12h) · linha = meta mensal SPC · ${PERIODO_LABELS[periodo]}`}
             action={
               <div style={{ display: 'flex', background: 'var(--surface3)', border: '1px solid var(--border)', borderRadius: 6, padding: 2, gap: 2 }}>
@@ -599,7 +599,7 @@ export default function GestaoPage() {
           {/* ── MODULE 05: Volume por Produto ─────────────────────────────── */}
           <Module
             n={5}
-            title="Volume por Produto"
+            title="Incidentes por Produto"
             sub={`Clique na barra para detalhar em Monitoramento · top 8 produtos · ${PERIODO_LABELS[periodo]}`}
           >
             <ResponsiveContainer width="100%" height={420}>
@@ -643,7 +643,7 @@ export default function GestaoPage() {
           {/* ── MODULE 06: Tendência Mensal ───────────────────────────────── */}
           <Module
             n={6}
-            title="Tendência Mensal de Incidentes"
+            title="Tendência Mensal"
             sub={`P2 e P3 · apenas incidentes KPI (prioridade Alta e Média) · ${PERIODO_LABELS[periodo]}`}
           >
             <ResponsiveContainer width="100%" height={280}>

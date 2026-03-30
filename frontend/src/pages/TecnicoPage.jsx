@@ -255,7 +255,7 @@ export default function TecnicoPage() {
       <main style={{ flex: 1, padding: '20px 28px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>
 
         {/* ── MODULE 01: System Metrics ──────────────────────────────────── */}
-        <Module n={1} title="Métricas do Sistema" sub="Dataset KPI 2025 · apenas incidentes P2 + P3">
+        <Module n={1} title="Indicadores Operacionais" sub="Dataset KPI 2025 · apenas incidentes P2 + P3">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
             <KpiCard label="Total Incidentes KPI (2025)" value="25.600" sub="P2 + P3 · Jan–Dez 2025"         color="var(--text-muted)" delay={0}   />
             <KpiCard label="Taxa de Violação P2"         value="0.81%"  sub="42 violações / 5.159 inc."    color="var(--red)"        delay={60}  />
@@ -310,7 +310,7 @@ export default function TecnicoPage() {
         {/* ── MODULE 03: XGBoost Feature Importance ─────────────────────── */}
         <Module
           n={3}
-          title={`Importância de Features XGBoost${isShapSimulado ? ' · SIMULADO' : ''}`}
+          title={`Fatores de Risco de Violação${isShapSimulado ? ' · SIMULADO' : ''}`}
           sub={isShapSimulado
             ? 'Valores simulados · substituídos por SHAP real após executar notebook 04'
             : 'Valores SHAP reais — outputs/risco_ola.json'}

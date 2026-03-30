@@ -360,7 +360,7 @@ export default function MonitoramentoPage() {
         {/* ── MODULE 01: D+1 Forecast Metrics ───────────────────────────── */}
         <Module
           n={1}
-          title="Métricas de Previsão D+1"
+          title="Previsão do Próximo Dia"
           sub={modeloAtivo
             ? `${modeloMeta.label}${maeAtivo ? ` · MAE: ${typeof maeAtivo === 'number' ? maeAtivo.toFixed(2) : maeAtivo}` : ''} · previsão de volume para o próximo dia`
             : 'PROPHET-ENSEMBLE · previsão de volume para o próximo dia'
@@ -519,7 +519,7 @@ export default function MonitoramentoPage() {
         {/* ── MODULE 04: Predicted SLA Breaches ─────────────────────────── */}
         <Module
           n={4}
-          title="Violações de OLA Previstas"
+          title="Risco de Violação por Produto"
           sub={riscoDisponivel ? 'ATRIBUIÇÃO DE RISCO EM TEMPO REAL POR PRODUTO · XGBoost' : 'XGBOOST PENDENTE · execute o notebook 04'}
           noPad
         >
