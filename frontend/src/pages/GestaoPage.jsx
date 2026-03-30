@@ -392,57 +392,114 @@ export default function GestaoPage() {
           </div>
         </Module>
 
-        {/* ── MODULE 02: Predictive Forecast ────────────────────────────── */}
-        <Module n={2} title="Previsão Preditiva" sub={d1Disponivel ? `${(d1Data.modelo_usado ?? 'modelo').toUpperCase()} · Volume de incidentes D+1 e D+7` : 'MOTOR PREDITIVO · Volume de incidentes D+1 e D+7'}>
+        {/* ── MODULE 02: KPI Atingimento OLA ───────────────────────────────── */}
+        <Module
+          n={2}
+          title="Atingimento de KPI OLA"
+          sub={kpiDisponivel
+            ? `METODOLOGIA SPC · ${PERIODO_LABELS[periodo]}`
+            : `ESTIMATIVAS SIMULADAS · nb07 pendente · ${PERIODO_LABELS[periodo]}`
+          }
+        >
+          {kpiLoading ? (
+            <Skeleton height={200} />
+          ) : (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 64, padding: '8px 0' }}>
+                <Gauge
+                  label="KPI P2"
+                  pct={p2.pctAtingimento ?? 83}
+                  color={p2.tendencia === 'dentro_da_meta' ? 'var(--green)' : p2.tendencia === 'atencao' ? 'var(--orange)' : 'var(--red)'}
+                  sub={kpiDisponivel
+                    ? `${p2.violacoesAno ?? p2.previsaoFechamento} viol. · meta: ${p2.metaAnual ?? 63} · margem: ${p2.margemRestante >= 0 ? '+' : ''}${p2.margemRestante ?? 0}`
+                    : `Projeção: ${p2.previsaoFechamento} violações`
+                  }
+                />
+                <Gauge
+                  label="KPI P3"
+                  pct={p3.pctAtingimento ?? 118}
+                  color={p3.tendencia === 'dentro_da_meta' ? 'var(--green)' : p3.tendencia === 'atencao' ? 'var(--orange)' : 'var(--red)'}
+                  sub={kpiDisponivel
+                    ? `${p3.violacoesAno ?? p3.previsaoFechamento} viol. · meta: ${p3.metaAnual ?? 280} · margem: ${p3.margemRestante >= 0 ? '+' : ''}${p3.margemRestante ?? 0}`
+                    : `Projeção: ${p3.previsaoFechamento} violações`
+                  }
+                />
+              </div>
+
+              <div style={{
+                textAlign: 'center', marginTop: 10,
+                fontFamily: 'var(--font-mono)', fontSize: 11,
+                color: 'var(--text-sec)', letterSpacing: '0.04em',
+              }}>
+                {kpiDisponivel
+                  ? `P2: ${p2.pctUtilizado ?? 66.7}% da cota utilizada · P3: ${p3.pctUtilizado ?? 73.6}% da cota utilizada`
+                  : `PREVISÃO FINAL: P2 = ${p2.previsaoFechamento} violações · P3 = ${p3.previsaoFechamento} violações`
+                }
+              </div>
+
+              {kpiDisponivel && (p2.mesesAnomalos?.length > 0 || p3.mesesAnomalos?.length > 0) && (
+                <div style={{
+                  marginTop: 14, padding: '10px 16px',
+                  background: 'var(--surface3)', borderRadius: 6,
+                  border: '1px solid var(--border)',
+                  display: 'flex', gap: 24, justifyContent: 'center',
+                }}>
+                  {[['P2', p2.mesesAnomalos, 'var(--red)'], ['P3', p3.mesesAnomalos, 'var(--orange)']].map(([label, meses, cor]) =>
+                    meses?.length > 0 && (
+                      <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)' }}>
+                          ANOMALIAS {label}:
+                        </span>
+                        <div style={{ display: 'flex', gap: 4 }}>
+                          {meses.map(m => (
+                            <span key={m} style={{
+                              fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
+                              color: cor, background: `${cor}18`,
+                              border: `1px solid ${cor}44`,
+                              borderRadius: 3, padding: '1px 6px',
+                            }}>{m}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </Module>
+
+        {/* ── MODULE 03: Previsão Preditiva ─────────────────────────────── */}
+        <Module n={3} title="Previsão Preditiva" sub={d1Disponivel ? `${(d1Data.modelo_usado ?? 'modelo').toUpperCase()} · Volume de incidentes D+1 e D+7` : 'MOTOR PREDITIVO · Volume de incidentes D+1 e D+7'}>
           {prevLoading ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
-              {[0, 1, 2, 3].map(i => <Skeleton key={i} height={130} />)}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              {[0, 1].map(i => <Skeleton key={i} height={130} />)}
             </div>
           ) : !prevDisponivel ? (
-            <SemDados mensagem="Previsão Prophet indisponível — execute o notebook 03" />
+            <SemDados mensagem="Previsão indisponível — execute o notebook 03" />
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <KpiCard
                 label="Total Incidentes D+1"
-                value={d1Data.total ?? '—'}
-                sub={d1Data.p2 != null ? `P2: ${d1Data.p2} · P3: ${d1Data.p3}` : `Modelo: ${d1Data.modelo_usado}`}
+                value={d1Data?.total ?? '—'}
+                sub={d1Disponivel ? (d1Data.p2 != null ? `P2: ${d1Data.p2} · P3: ${d1Data.p3}` : 'LSTM indisponível') : 'LSTM indisponível'}
                 color="var(--orange)"
                 delay={0}
               />
               <KpiCard
                 label="Total Incidentes D+7"
-                value={d7Disponivel ? (d7Data.total ?? '—') : '—'}
+                value={d7Disponivel ? (d7Data?.total ?? '—') : '—'}
                 sub="Previsão horizonte 7 dias"
                 color="var(--yellow)"
                 delay={60}
-              />
-              <KpiCard
-                label="Cota P2 Utilizada"
-                value={kpiDisponivel ? `${p2.pctUtilizado}%` : `${kpiAtingimento.P2.pctAtingimento}%`}
-                sub={kpiDisponivel
-                  ? `${p2.violacoesAno} viol. · meta ${p2.metaAnual} · margem ${p2.margemRestante >= 0 ? '+' : ''}${p2.margemRestante}`
-                  : `Meta: ${olaTargets.P2.metaViolacoesAno.max} violações/ano`
-                }
-                color={kpiDisponivel && p2.tendencia !== 'dentro_da_meta' ? 'var(--red)' : 'var(--teal)'}
-                delay={120}
-              />
-              <KpiCard
-                label="Cota P3 Utilizada"
-                value={kpiDisponivel ? `${p3.pctUtilizado}%` : `${kpiAtingimento.P3.pctAtingimento}%`}
-                sub={kpiDisponivel
-                  ? `${p3.violacoesAno} viol. · meta ${p3.metaAnual} · margem ${p3.margemRestante >= 0 ? '+' : ''}${p3.margemRestante}`
-                  : `Meta: ${olaTargets.P3.metaViolacoesAno.max} violações/ano`
-                }
-                color={kpiDisponivel && p3.tendencia !== 'dentro_da_meta' ? 'var(--red)' : 'var(--green)'}
-                delay={180}
               />
             </div>
           )}
         </Module>
 
-        {/* ── MODULE 03: Monthly Violations ─────────────────────────────── */}
+        {/* ── MODULE 04: Violações Mensais ──────────────────────────────── */}
         <Module
-          n={3}
+          n={4}
           title="Violações Mensais 2025"
           sub={`P2 (≤4h) e P3 (≤12h) · linha = meta mensal SPC · ${PERIODO_LABELS[periodo]}`}
           action={
@@ -523,9 +580,9 @@ export default function GestaoPage() {
           ]} />
         </Module>
 
-        {/* ── MODULE 04: Volume by Product ──────────────────────────────── */}
+        {/* ── MODULE 05: Volume por Produto ─────────────────────────────── */}
         <Module
-          n={4}
+          n={5}
           title="Volume por Produto"
           sub={`Clique na barra para detalhar em Monitoramento · top 8 produtos · ${PERIODO_LABELS[periodo]}`}
         >
@@ -567,9 +624,9 @@ export default function GestaoPage() {
           <Legend items={[['var(--teal)', 'Total'], ['var(--red)', 'Violações']]} />
         </Module>
 
-        {/* ── MODULE 05: Monthly Trend ───────────────────────────────────── */}
+        {/* ── MODULE 06: Tendência Mensal ───────────────────────────────── */}
         <Module
-          n={5}
+          n={6}
           title="Tendência Mensal de Incidentes"
           sub={`P2 e P3 · apenas incidentes KPI (prioridade Alta e Média) · ${PERIODO_LABELS[periodo]}`}
         >
@@ -586,82 +643,6 @@ export default function GestaoPage() {
           <Legend items={[['var(--red)', 'P2'], ['var(--orange)', 'P3']]} />
         </Module>
 
-        {/* ── MODULE 06: KPI Atingimento OLA ───────────────────────────────── */}
-        <Module
-          n={6}
-          title="Atingimento de KPI OLA"
-          sub={kpiDisponivel
-            ? `METODOLOGIA SPC · ${PERIODO_LABELS[periodo]}`
-            : `ESTIMATIVAS SIMULADAS · nb07 pendente · ${PERIODO_LABELS[periodo]}`
-          }
-        >
-          {kpiLoading ? (
-            <Skeleton height={200} />
-          ) : (
-            <>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 64, padding: '8px 0' }}>
-                <Gauge
-                  label="KPI P2"
-                  pct={p2.pctAtingimento ?? 83}
-                  color={p2.tendencia === 'dentro_da_meta' ? 'var(--green)' : p2.tendencia === 'atencao' ? 'var(--orange)' : 'var(--red)'}
-                  sub={kpiDisponivel
-                    ? `${p2.violacoesAno ?? p2.previsaoFechamento} viol. · meta: ${p2.metaAnual ?? 63} · margem: ${p2.margemRestante >= 0 ? '+' : ''}${p2.margemRestante ?? 0}`
-                    : `Projeção: ${p2.previsaoFechamento} violações`
-                  }
-                />
-                <Gauge
-                  label="KPI P3"
-                  pct={p3.pctAtingimento ?? 118}
-                  color={p3.tendencia === 'dentro_da_meta' ? 'var(--green)' : p3.tendencia === 'atencao' ? 'var(--orange)' : 'var(--red)'}
-                  sub={kpiDisponivel
-                    ? `${p3.violacoesAno ?? p3.previsaoFechamento} viol. · meta: ${p3.metaAnual ?? 280} · margem: ${p3.margemRestante >= 0 ? '+' : ''}${p3.margemRestante ?? 0}`
-                    : `Projeção: ${p3.previsaoFechamento} violações`
-                  }
-                />
-              </div>
-
-              <div style={{
-                textAlign: 'center', marginTop: 10,
-                fontFamily: 'var(--font-mono)', fontSize: 11,
-                color: 'var(--text-sec)', letterSpacing: '0.04em',
-              }}>
-                {kpiDisponivel
-                  ? `P2: ${p2.pctUtilizado ?? 66.7}% da cota utilizada · P3: ${p3.pctUtilizado ?? 73.6}% da cota utilizada`
-                  : `PREVISÃO FINAL: P2 = ${p2.previsaoFechamento} violações · P3 = ${p3.previsaoFechamento} violações`
-                }
-              </div>
-
-              {kpiDisponivel && (p2.mesesAnomalos?.length > 0 || p3.mesesAnomalos?.length > 0) && (
-                <div style={{
-                  marginTop: 14, padding: '10px 16px',
-                  background: 'var(--surface3)', borderRadius: 6,
-                  border: '1px solid var(--border)',
-                  display: 'flex', gap: 24, justifyContent: 'center',
-                }}>
-                  {[['P2', p2.mesesAnomalos, 'var(--red)'], ['P3', p3.mesesAnomalos, 'var(--orange)']].map(([label, meses, cor]) =>
-                    meses?.length > 0 && (
-                      <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)' }}>
-                          ANOMALIAS {label}:
-                        </span>
-                        <div style={{ display: 'flex', gap: 4 }}>
-                          {meses.map(m => (
-                            <span key={m} style={{
-                              fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
-                              color: cor, background: `${cor}18`,
-                              border: `1px solid ${cor}44`,
-                              borderRadius: 3, padding: '1px 6px',
-                            }}>{m}</span>
-                          ))}
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
-              )}
-            </>
-          )}
-        </Module>
 
       </main>
     </div>

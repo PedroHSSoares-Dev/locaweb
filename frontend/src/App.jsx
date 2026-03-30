@@ -19,12 +19,13 @@ export default function App() {
           <div style={{
             flex: 1,
             minWidth: 0,
-            marginLeft: 220,
+            marginLeft: 'var(--sidebar-width)',
             display: 'flex',
             flexDirection: 'column',
             height: '100vh',
             overflowY: 'auto',
             overflowX: 'hidden',
+            transition: 'margin-left 0.25s cubic-bezier(0.4,0,0.2,1)',
           }}>
             <Routes>
               <Route path="/" element={<Navigate to="/gestao" replace />} />
