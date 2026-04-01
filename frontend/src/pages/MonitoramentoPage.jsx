@@ -245,54 +245,6 @@ function Heatmap({ data }) {
   );
 }
 
-// ─── System Log ───────────────────────────────────────────────────────────────
-const LOG_ENTRIES = [
-  { time: '04:31:05', level: 'INFO', msg: 'PROPHET_ENGINE: Forecast D+1 generated. MAE: 17.06' },
-  { time: '04:31:05', level: 'INFO', msg: 'API_HEALTH: All endpoints operational. TTL: 60s' },
-  { time: '04:30:44', level: 'WARN', msg: 'CACHE_INVALIDATED: previsoes_volume.json updated' },
-  { time: '04:30:12', level: 'INFO', msg: 'FLOOR_APPLIED: Sat 03/01 yhat=-7.4 → floor=29' },
-  { time: '04:29:58', level: 'INFO', msg: 'MODEL_LOADED: prophet_ensemble_v5v6 initialized' },
-  { time: '04:29:41', level: 'INFO', msg: 'CACHE_HIT: previsoes_volume.json · age: 18s' },
-];
-
-function SystemLog() {
-  return (
-    <div style={{
-      background: 'var(--surface1)', border: '1px solid var(--border)',
-      borderRadius: 6, overflow: 'hidden',
-    }}>
-      <div style={{
-        padding: '10px 16px', borderBottom: '1px solid var(--border)',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      }}>
-        <span style={{
-          fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600,
-          color: 'var(--text-sec)', letterSpacing: '0.1em', textTransform: 'uppercase',
-        }}>LOG DO SISTEMA</span>
-        <span style={{
-          fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--green)',
-          display: 'flex', alignItems: 'center', gap: 6,
-        }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--green)', display: 'inline-block', animation: 'pulse-dot 2s ease infinite' }} />
-          LIVE_OPS
-        </span>
-      </div>
-      <div style={{
-        fontFamily: 'var(--font-mono)', fontSize: 11,
-        background: 'var(--bg)', padding: '10px 16px',
-        display: 'flex', flexDirection: 'column', gap: 5,
-      }}>
-        {LOG_ENTRIES.map((e, i) => (
-          <div key={i} style={{ display: 'flex', gap: 14 }}>
-            <span style={{ color: 'var(--teal)', flexShrink: 0 }}>[{e.time}]</span>
-            <span style={{ color: e.level === 'WARN' ? 'var(--orange)' : 'var(--text-sec)' }}>{e.msg}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 // ─── Utils ────────────────────────────────────────────────────────────────────
 // Converte "2026-01-15" → "15/01" (mesmo formato DD/MM do histórico diário)
 function fmtDia(ds) {
@@ -639,10 +591,6 @@ export default function MonitoramentoPage() {
             </>
           )}
         </Module>
-
-        {/* ── System Log ────────────────────────────────────────────────── */}
-        <SystemLog />
-
       </main>
 
       {panelItem && (
