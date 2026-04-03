@@ -25,6 +25,7 @@ function AppInner() {
         overflowY: 'auto',
         overflowX: 'hidden',
         transition: 'margin-left 0.25s cubic-bezier(0.4,0,0.2,1)',
+        background: 'var(--bg)',
       }}>
             <Routes>
               <Route path="/" element={<Navigate to="/gestao" replace />} />

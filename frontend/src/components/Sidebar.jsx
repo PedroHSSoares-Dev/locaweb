@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
 import { useBreakpoint } from '../hooks/useBreakpoint';
 import LogoPredictfy from './LogoPredictfy';
@@ -144,11 +144,23 @@ function SidebarInner({ collapsed, onToggle, clock, p2Critical, p3Critical, kpiD
 // ─── Sidebar principal ────────────────────────────────────────────────────────
 export default function Sidebar() {
   const { isMobile, isTablet } = useBreakpoint();
+  const location = useLocation();
   const [clock, setClock]         = useState('');
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    const w = window.innerWidth;
+    const isTab = w >= 768 && w < 1024;
+    const sidebarW = w < 768 ? 0 : isTab ? SIDEBAR_COLLAPSED : SIDEBAR_FULL;
+    document.documentElement.style.setProperty('--sidebar-width', `${sidebarW}px`);
+    return isTab;
+  });
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const { data: kpiData, disponivel: kpiDisponivel } = useApi('/kpi');
+
+  // Fechar sidebar mobile ao navegar
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
 
   // Tablet → colapsar; desktop → expandir
   useEffect(() => {
