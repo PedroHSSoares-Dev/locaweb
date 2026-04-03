@@ -1,0 +1,118 @@
+{
+  "modelo": "kmeans_tgv_k4",
+  "gerado_em": "2026-04-03",
+  "metodologia": "TGV (Temporalidade, Gravidade, Volume) — RFM adaptado para ITSM",
+  "k": 4,
+  "silhouette": 0.6084,
+  "clusters": [
+    {
+      "id": 0,
+      "label": "Operação Comercial de Alta Demanda",
+      "descricao": "Incidentes concentrados no horário comercial (seg–sex, 8h–18h) com altíssimo volume. Equipes Team11 e Team14 dominam. Taxa de violação baixa (0.7%) — operação bem dimensionada.",
+      "tamanho": 10951,
+      "taxaViolacao": 0.7,
+      "score_T": 0.14,
+      "score_G": 0.252,
+      "score_V": 0.974,
+      "perfil": {
+        "horaMedia": 13,
+        "diasCriticos": [
+          "Seg",
+          "Ter",
+          "Qua",
+          "Qui",
+          "Sex"
+        ],
+        "produtos": [
+          "lhco",
+          "lcem",
+          "lsin"
+        ],
+        "grupo": "Team11",
+        "pctP2": 11.7,
+        "duracaoMediana": 1.0,
+        "pctFds": 0.0
+      }
+    },
+    {
+      "id": 1,
+      "label": "Operação Comercial de Baixo Volume",
+      "descricao": "Incidentes no horário comercial mas em equipes de menor porte (Team05, Team09). Maior proporção de P2 (24.4%) e duração mediana de 2.2h — risco moderado (1.3% de violação).",
+      "tamanho": 4779,
+      "taxaViolacao": 1.3,
+      "score_T": 0.14,
+      "score_G": 0.295,
+      "score_V": 0.244,
+      "perfil": {
+        "horaMedia": 13,
+        "diasCriticos": [
+          "Ter",
+          "Qua",
+          "Qui"
+        ],
+        "produtos": [
+          "lcem",
+          "lsin",
+          "lhco"
+        ],
+        "grupo": "Team05",
+        "pctP2": 24.4,
+        "duracaoMediana": 2.2,
+        "pctFds": 0.0
+      }
+    },
+    {
+      "id": 2,
+      "label": "Operação Fora do Horário — Alto Volume",
+      "descricao": "Incidentes noturnos, madrugada e fins de semana (40% FDS) com volume elevado. Apesar do horário crítico, Team14 mantém baixa taxa de violação (0.6%) — equipe bem preparada.",
+      "tamanho": 6463,
+      "taxaViolacao": 0.6,
+      "score_T": 0.578,
+      "score_G": 0.279,
+      "score_V": 0.987,
+      "perfil": {
+        "horaMedia": 21,
+        "diasCriticos": [
+          "Sáb",
+          "Dom"
+        ],
+        "produtos": [
+          "lhco",
+          "lsin",
+          "lhvp"
+        ],
+        "grupo": "Team14",
+        "pctP2": 26.7,
+        "duracaoMediana": 1.0,
+        "pctFds": 39.6
+      }
+    },
+    {
+      "id": 3,
+      "label": "Operação Crítica Fora do Horário",
+      "descricao": "Cluster mais crítico — incidentes noturnos e fins de semana em equipes menores (Team05, Team09). Maior taxa de violação do dataset (2.1%), P2 elevado (33.9%). Requer atenção imediata.",
+      "tamanho": 2813,
+      "taxaViolacao": 2.1,
+      "score_T": 0.582,
+      "score_G": 0.31,
+      "score_V": 0.226,
+      "perfil": {
+        "horaMedia": 21,
+        "diasCriticos": [
+          "Sáb",
+          "Dom",
+          "Sex"
+        ],
+        "produtos": [
+          "lcem",
+          "lhco",
+          "lsin"
+        ],
+        "grupo": "Team05",
+        "pctP2": 33.9,
+        "duracaoMediana": 1.7,
+        "pctFds": 34.5
+      }
+    }
+  ]
+}
