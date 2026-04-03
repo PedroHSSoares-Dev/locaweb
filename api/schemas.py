@@ -283,6 +283,34 @@ class ContextResponse(BaseModel):
 # Clusters K-Means (notebook 05 — pendente)
 # ────────────────────────────────────────────────────────────────────────────────
 
+class ClusterPerfil(BaseModel):
+    horaMedia:      int
+    diasCriticos:   list[str]
+    produtos:       list[str]
+    grupo:          str
+    pctP2:          Optional[float] = None
+    duracaoMediana: Optional[float] = None
+    pctFds:         Optional[float] = None
+
+
+class ClusterItem(BaseModel):
+    id:           int
+    label:        str
+    descricao:    str
+    tamanho:      int
+    taxaViolacao: float
+    score_T:      float
+    score_G:      float
+    score_V:      float
+    perfil:       ClusterPerfil
+
+
 class ClustersResponse(BaseModel):
     """Segmentação K-Means de padrões de incidentes — disponível após notebook 05."""
-    disponivel: bool = Field(True, example=True)
+    disponivel:  bool                    = Field(True, example=True)
+    modelo:      Optional[str]           = None
+    gerado_em:   Optional[str]           = None
+    metodologia: Optional[str]           = None
+    k:           Optional[int]           = None
+    silhouette:  Optional[float]         = None
+    clusters:    Optional[list[ClusterItem]] = None
