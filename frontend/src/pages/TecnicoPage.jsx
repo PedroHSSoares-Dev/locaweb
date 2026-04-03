@@ -3,7 +3,6 @@ import { useBreakpoint } from '../hooks/useBreakpoint';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   Cell, LabelList,
-  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Legend,
 } from 'recharts';
 import { Terminal, AlertTriangle, Activity, Users } from 'lucide-react';
 import { grupos, shapFeatures, categorias, categoriaNomes } from '../data/mockData';
@@ -143,6 +142,113 @@ function ShapTooltip({ active, payload }) {
       <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--text-pri)', marginBottom: 4 }}>{d?.descricao}</div>
       <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: 'var(--red)' }}>
         {(d?.importance * 100).toFixed(0)}%
+      </div>
+    </div>
+  );
+}
+
+// ─── Cluster Heatmap ──────────────────────────────────────────────────────────
+function ClusterHeatmap({ clusters }) {
+  const CORES = ['#5ac8fa', '#ffcc00', '#ff9f0a', '#ff2d55'];
+
+  const COLUNAS = [
+    { label: 'Temporalidade',  key: c => c.score_T,                fmt: v => `${(v*100).toFixed(0)}%`,  cor: '#5ac8fa' },
+    { label: 'Gravidade',      key: c => c.score_G,                fmt: v => `${(v*100).toFixed(0)}%`,  cor: '#ff9f0a' },
+    { label: 'Volume',         key: c => c.score_V,                fmt: v => `${(v*100).toFixed(0)}%`,  cor: '#5ac8fa' },
+    { label: 'Violação OLA',   key: c => c.taxaViolacao / 5,       fmt: v => `${(v*5).toFixed(1)}%`,    cor: '#ff2d55' },
+    { label: 'P2 %',           key: c => (c.perfil.pctP2 ?? 0)/100, fmt: v => `${(v*100).toFixed(0)}%`, cor: '#ff9f0a' },
+    { label: 'Fds %',          key: c => (c.perfil.pctFds ?? 0)/100,fmt: v => `${(v*100).toFixed(0)}%`, cor: '#ffcc00' },
+  ];
+
+  const normalizados = COLUNAS.map(col => {
+    const vals = clusters.map(c => col.key(c));
+    const min  = Math.min(...vals);
+    const max  = Math.max(...vals);
+    return clusters.map(c => max === min ? 0.5 : (col.key(c) - min) / (max - min));
+  });
+
+  return (
+    <div style={{ overflowX: 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 560 }}>
+        <thead>
+          <tr style={{ background: 'var(--surface3)' }}>
+            <th style={{
+              padding: '8px 14px', textAlign: 'left',
+              fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
+              color: 'var(--text-muted)', letterSpacing: '0.12em',
+              borderBottom: '1px solid var(--border)', width: 140,
+            }}>CLUSTER</th>
+            {COLUNAS.map(col => (
+              <th key={col.label} style={{
+                padding: '8px 10px', textAlign: 'center',
+                fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
+                color: 'var(--text-sec)', letterSpacing: '0.1em', textTransform: 'uppercase',
+                borderBottom: '1px solid var(--border)',
+              }}>{col.label}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {clusters.map((c, ri) => (
+            <tr key={c.id} style={{
+              borderBottom: ri < clusters.length - 1 ? '1px solid var(--border)' : 'none',
+            }}>
+              <td style={{ padding: '10px 14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ width: 3, height: 32, borderRadius: 2, background: CORES[ri], flexShrink: 0 }} />
+                  <div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: CORES[ri], fontWeight: 700, letterSpacing: '0.1em' }}>C{c.id}</div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-pri)', fontWeight: 600, maxWidth: 120, lineHeight: 1.3 }}>
+                      {c.label.split('—')[0].trim()}
+                    </div>
+                  </div>
+                </div>
+              </td>
+              {COLUNAS.map((col, ci) => {
+                const norm  = normalizados[ci][ri];
+                const valor = col.fmt(col.key(c));
+                const alpha = 0.08 + norm * 0.45;
+                const isMax = normalizados[ci].indexOf(Math.max(...normalizados[ci])) === ri;
+                return (
+                  <td key={col.label} style={{
+                    padding: '10px 10px', textAlign: 'center',
+                    background: `${col.cor}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`,
+                    position: 'relative',
+                  }}>
+                    <div style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: isMax ? 12 : 11,
+                      fontWeight: isMax ? 700 : 400,
+                      color: norm > 0.6 ? 'var(--text-pri)' : 'var(--text-sec)',
+                    }}>{valor}</div>
+                    {isMax && (
+                      <div style={{
+                        position: 'absolute', top: 4, right: 4,
+                        width: 4, height: 4, borderRadius: '50%',
+                        background: col.cor,
+                      }} />
+                    )}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <div style={{
+        marginTop: 10, display: 'flex', alignItems: 'center', gap: 6,
+        fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)',
+        justifyContent: 'flex-end',
+      }}>
+        <span>INTENSIDADE:</span>
+        {[0, 1, 2, 3].map(i => (
+          <div key={i} style={{
+            width: 20, height: 10, borderRadius: 2,
+            background: `rgba(90,200,250,${0.08 + i * 0.14})`,
+          }} />
+        ))}
+        <span>MAIOR</span>
       </div>
     </div>
   );
@@ -404,57 +510,15 @@ export default function TecnicoPage() {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
-              {/* ── Radar Chart TGV ─────────────────────────────────────── */}
+              {/* ── Heatmap TGV ─────────────────────────────────────────── */}
               <div>
                 <div style={{
                   fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)',
                   letterSpacing: '0.14em', marginBottom: 12, textTransform: 'uppercase',
                 }}>
-                  COMPARAÇÃO TGV — TEMPORALIDADE · GRAVIDADE · VOLUME
+                  COMPARAÇÃO TGV — TEMPORALIDADE · GRAVIDADE · VOLUME · VIOLAÇÃO
                 </div>
-                <ResponsiveContainer width="100%" height={300}>
-                  <RadarChart
-                    data={[
-                      { axis: 'Temporalidade (T)', ...Object.fromEntries((clustersData ?? []).map(c => [`C${c.id}`, +(c.score_T * 100).toFixed(1)])) },
-                      { axis: 'Gravidade (G)',     ...Object.fromEntries((clustersData ?? []).map(c => [`C${c.id}`, +(c.score_G * 100).toFixed(1)])) },
-                      { axis: 'Volume (V)',        ...Object.fromEntries((clustersData ?? []).map(c => [`C${c.id}`, +(c.score_V * 100).toFixed(1)])) },
-                    ]}
-                    cx="50%" cy="50%"
-                    outerRadius={100}
-                  >
-                    <PolarGrid stroke="var(--border)" />
-                    <PolarAngleAxis
-                      dataKey="axis"
-                      tick={{ fontFamily: 'var(--font-mono)', fontSize: 10, fill: 'var(--text-sec)' }}
-                    />
-                    <PolarRadiusAxis
-                      angle={90} domain={[0, 100]}
-                      tick={{ fontFamily: 'var(--font-mono)', fontSize: 8, fill: 'var(--text-muted)' }}
-                      tickCount={4}
-                    />
-                    {(clustersData ?? []).map((c, i) => (
-                      <Radar
-                        key={c.id}
-                        name={`C${c.id} — ${c.label}`}
-                        dataKey={`C${c.id}`}
-                        stroke={CLUSTER_CORES[i]}
-                        fill={CLUSTER_CORES[i]}
-                        fillOpacity={0.12}
-                        strokeWidth={2}
-                      />
-                    ))}
-                    <Legend
-                      wrapperStyle={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-sec)' }}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        background: 'var(--surface3)', border: '1px solid var(--border-md)',
-                        borderRadius: 4, fontFamily: 'var(--font-mono)', fontSize: 11,
-                      }}
-                      formatter={(value, name) => [`${value}`, name]}
-                    />
-                  </RadarChart>
-                </ResponsiveContainer>
+                <ClusterHeatmap clusters={clustersData} />
               </div>
 
               <div style={{ height: 1, background: 'var(--border)' }} />
