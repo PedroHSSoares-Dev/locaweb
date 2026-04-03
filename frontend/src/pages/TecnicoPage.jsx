@@ -3,6 +3,7 @@ import { useBreakpoint } from '../hooks/useBreakpoint';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   Cell, LabelList,
+  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Legend,
 } from 'recharts';
 import { Terminal, AlertTriangle, Activity, Users } from 'lucide-react';
 import { grupos, shapFeatures, categorias, categoriaNomes } from '../data/mockData';
@@ -148,25 +149,27 @@ function ShapTooltip({ active, payload }) {
 }
 
 // ─── Cluster card ─────────────────────────────────────────────────────────────
-function ClusterCard({ cluster }) {
-  const isCritical = cluster.taxaViolacao > 5;
-  const badgeColor =
+function ClusterCard({ cluster, accentColor }) {
+  const badgeColor = accentColor ?? (
     cluster.taxaViolacao > 5 ? 'var(--red)' :
     cluster.taxaViolacao > 2 ? 'var(--orange)' :
-                                'var(--green)';
+                                'var(--green)'
+  );
+  const isCritical = cluster.taxaViolacao > 2;
 
   return (
     <div style={{
       background: 'var(--surface3)',
-      border: `1px solid ${isCritical ? 'var(--red)' : 'var(--border)'}`,
+      border: `1px solid ${isCritical ? badgeColor + '66' : 'var(--border)'}`,
+      borderTop: `2px solid ${badgeColor}`,
       borderRadius: 6, padding: '16px 18px',
       display: 'flex', flexDirection: 'column', gap: 10,
       animation: `fadeInUp 0.4s ease ${cluster.id * 80}ms both`,
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{
           fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
-          color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase',
+          color: badgeColor, letterSpacing: '0.12em',
         }}>CLUSTER {cluster.id}</span>
         <span style={{
           fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
@@ -177,19 +180,44 @@ function ClusterCard({ cluster }) {
       </div>
 
       <div style={{
-        fontFamily: 'var(--font-mono)', fontWeight: 600, fontSize: 13,
+        fontFamily: 'var(--font-mono)', fontWeight: 600, fontSize: 12,
         color: 'var(--text-pri)', textTransform: 'uppercase', letterSpacing: '0.04em',
       }}>{cluster.label}</div>
 
-      <div style={{ display: 'flex', gap: 20 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
         {[
-          { l: 'TAMANHO',    v: cluster.tamanho.toLocaleString('pt-BR') },
+          { l: 'T', v: cluster.score_T },
+          { l: 'G', v: cluster.score_G },
+          { l: 'V', v: cluster.score_V },
+        ].map(({ l, v }) => (
+          <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{
+              fontFamily: 'var(--font-mono)', fontSize: 9,
+              color: 'var(--text-muted)', width: 10, flexShrink: 0,
+            }}>{l}</span>
+            <div style={{ flex: 1, height: 4, background: 'var(--surface4)', borderRadius: 2 }}>
+              <div style={{
+                width: `${v * 100}%`, height: '100%',
+                background: badgeColor, borderRadius: 2, opacity: 0.8,
+              }} />
+            </div>
+            <span style={{
+              fontFamily: 'var(--font-mono)', fontSize: 9,
+              color: 'var(--text-sec)', width: 32, textAlign: 'right', flexShrink: 0,
+            }}>{(v * 100).toFixed(0)}%</span>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', gap: 16 }}>
+        {[
+          { l: 'TAMANHO',   v: cluster.tamanho.toLocaleString('pt-BR') },
           { l: 'HORA PICO', v: `${cluster.perfil.horaMedia}h` },
           { l: 'GRUPO',     v: cluster.perfil.grupo },
         ].map(({ l, v }) => (
           <div key={l}>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-sec)', letterSpacing: '0.1em', marginBottom: 3 }}>{l}</div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 600, color: 'var(--text-pri)' }}>{v}</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', letterSpacing: '0.1em', marginBottom: 2 }}>{l}</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600, color: 'var(--text-pri)' }}>{v}</div>
           </div>
         ))}
       </div>
@@ -198,7 +226,7 @@ function ClusterCard({ cluster }) {
         {cluster.descricao}
       </div>
 
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
         {cluster.perfil.diasCriticos.map(d => (
           <span key={d} style={{
             fontFamily: 'var(--font-mono)', fontSize: 9,
@@ -209,8 +237,8 @@ function ClusterCard({ cluster }) {
         {cluster.perfil.produtos.map(p => (
           <span key={p} style={{
             fontFamily: 'var(--font-mono)', fontSize: 9,
-            color: 'var(--orange)', background: 'var(--orange-dim)',
-            border: '1px solid rgba(255,159,10,0.2)', borderRadius: 3, padding: '2px 6px',
+            color: badgeColor, background: `${badgeColor}12`,
+            border: `1px solid ${badgeColor}33`, borderRadius: 3, padding: '2px 6px',
           }}>{p}</span>
         ))}
       </div>
@@ -219,6 +247,8 @@ function ClusterCard({ cluster }) {
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
+const CLUSTER_CORES = ['#5ac8fa', '#ffcc00', '#ff9f0a', '#ff2d55'];
+
 export default function TecnicoPage() {
   const { isMobile } = useBreakpoint();
   const [periodo, setPeriodo] = useState('ANO');
@@ -364,16 +394,78 @@ export default function TecnicoPage() {
           n={4}
           title="Análise de Clusters"
           sub={clustersDisponivel
-            ? 'K-MEANS · outputs/clusters.json · Cluster 3 (Team07) mais crítico'
-            : 'K-MEANS · execute o notebook 05 para gerar dados de cluster'}
+            ? `K-MEANS TGV · K=4 · Silhouette=0.608 · ${clustersData.length} clusters identificados`
+            : 'K-MEANS TGV · execute o notebook 05 para gerar dados de cluster'}
         >
           {clustersLoading ? (
             <Skeleton height={320} />
           ) : !clustersDisponivel ? (
             <SemDados mensagem="Modelo K-Means não treinado — execute o notebook 05" />
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12 }}>
-              {clustersData.map(c => <ClusterCard key={c.id} cluster={c} />)}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+              {/* ── Radar Chart TGV ─────────────────────────────────────── */}
+              <div>
+                <div style={{
+                  fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)',
+                  letterSpacing: '0.14em', marginBottom: 12, textTransform: 'uppercase',
+                }}>
+                  COMPARAÇÃO TGV — TEMPORALIDADE · GRAVIDADE · VOLUME
+                </div>
+                <ResponsiveContainer width="100%" height={300}>
+                  <RadarChart
+                    data={[
+                      { axis: 'Temporalidade (T)', ...Object.fromEntries(clustersData.map(c => [`C${c.id}`, +(c.score_T * 100).toFixed(1)])) },
+                      { axis: 'Gravidade (G)',     ...Object.fromEntries(clustersData.map(c => [`C${c.id}`, +(c.score_G * 100).toFixed(1)])) },
+                      { axis: 'Volume (V)',        ...Object.fromEntries(clustersData.map(c => [`C${c.id}`, +(c.score_V * 100).toFixed(1)])) },
+                    ]}
+                    cx="50%" cy="50%"
+                    outerRadius={100}
+                  >
+                    <PolarGrid stroke="var(--border)" />
+                    <PolarAngleAxis
+                      dataKey="axis"
+                      tick={{ fontFamily: 'var(--font-mono)', fontSize: 10, fill: 'var(--text-sec)' }}
+                    />
+                    <PolarRadiusAxis
+                      angle={90} domain={[0, 100]}
+                      tick={{ fontFamily: 'var(--font-mono)', fontSize: 8, fill: 'var(--text-muted)' }}
+                      tickCount={4}
+                    />
+                    {clustersData.map((c, i) => (
+                      <Radar
+                        key={c.id}
+                        name={`C${c.id} — ${c.label}`}
+                        dataKey={`C${c.id}`}
+                        stroke={CLUSTER_CORES[i]}
+                        fill={CLUSTER_CORES[i]}
+                        fillOpacity={0.12}
+                        strokeWidth={2}
+                      />
+                    ))}
+                    <Legend
+                      wrapperStyle={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-sec)' }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        background: 'var(--surface3)', border: '1px solid var(--border-md)',
+                        borderRadius: 4, fontFamily: 'var(--font-mono)', fontSize: 11,
+                      }}
+                      formatter={(value, name) => [`${value}`, name]}
+                    />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div style={{ height: 1, background: 'var(--border)' }} />
+
+              {/* ── Cluster Cards ────────────────────────────────────────── */}
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12 }}>
+                {clustersData.map((c, i) => (
+                  <ClusterCard key={c.id} cluster={c} accentColor={CLUSTER_CORES[i]} />
+                ))}
+              </div>
+
             </div>
           )}
         </Module>
