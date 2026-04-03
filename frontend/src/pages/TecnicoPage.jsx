@@ -186,9 +186,9 @@ function ClusterCard({ cluster, accentColor }) {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
         {[
-          { l: 'T', v: cluster.score_T },
-          { l: 'G', v: cluster.score_G },
-          { l: 'V', v: cluster.score_V },
+          { l: 'T', v: cluster.score_T ?? 0 },
+          { l: 'G', v: cluster.score_G ?? 0 },
+          { l: 'V', v: cluster.score_V ?? 0 },
         ].map(({ l, v }) => (
           <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{
@@ -393,7 +393,7 @@ export default function TecnicoPage() {
         <Module
           n={4}
           title="Análise de Clusters"
-          sub={clustersDisponivel
+          sub={clustersDisponivel && clustersData
             ? `K-MEANS TGV · K=4 · Silhouette=0.608 · ${clustersData.length} clusters identificados`
             : 'K-MEANS TGV · execute o notebook 05 para gerar dados de cluster'}
         >
@@ -415,9 +415,9 @@ export default function TecnicoPage() {
                 <ResponsiveContainer width="100%" height={300}>
                   <RadarChart
                     data={[
-                      { axis: 'Temporalidade (T)', ...Object.fromEntries(clustersData.map(c => [`C${c.id}`, +(c.score_T * 100).toFixed(1)])) },
-                      { axis: 'Gravidade (G)',     ...Object.fromEntries(clustersData.map(c => [`C${c.id}`, +(c.score_G * 100).toFixed(1)])) },
-                      { axis: 'Volume (V)',        ...Object.fromEntries(clustersData.map(c => [`C${c.id}`, +(c.score_V * 100).toFixed(1)])) },
+                      { axis: 'Temporalidade (T)', ...Object.fromEntries((clustersData ?? []).map(c => [`C${c.id}`, +(c.score_T * 100).toFixed(1)])) },
+                      { axis: 'Gravidade (G)',     ...Object.fromEntries((clustersData ?? []).map(c => [`C${c.id}`, +(c.score_G * 100).toFixed(1)])) },
+                      { axis: 'Volume (V)',        ...Object.fromEntries((clustersData ?? []).map(c => [`C${c.id}`, +(c.score_V * 100).toFixed(1)])) },
                     ]}
                     cx="50%" cy="50%"
                     outerRadius={100}
@@ -432,7 +432,7 @@ export default function TecnicoPage() {
                       tick={{ fontFamily: 'var(--font-mono)', fontSize: 8, fill: 'var(--text-muted)' }}
                       tickCount={4}
                     />
-                    {clustersData.map((c, i) => (
+                    {(clustersData ?? []).map((c, i) => (
                       <Radar
                         key={c.id}
                         name={`C${c.id} — ${c.label}`}
@@ -461,7 +461,7 @@ export default function TecnicoPage() {
 
               {/* ── Cluster Cards ────────────────────────────────────────── */}
               <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12 }}>
-                {clustersData.map((c, i) => (
+                {(clustersData ?? []).map((c, i) => (
                   <ClusterCard key={c.id} cluster={c} accentColor={CLUSTER_CORES[i]} />
                 ))}
               </div>
