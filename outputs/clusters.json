@@ -1,0 +1,60 @@
+{
+  "modelo": "kmeans_segmentacao",
+  "gerado_em": "2026-04-05",
+  "versao": "v1",
+  "k": 2,
+  "metricas": {
+    "inertia": 235826.03,
+    "silhouette_score": 0.2437,
+    "features_usadas": 11,
+    "total_incidentes": 25600,
+    "pca_variancia_2d": 0.3692
+  },
+  "features_clustering": [
+    "hora",
+    "dia_semana",
+    "mes",
+    "periodo_dia",
+    "is_horario_comercial",
+    "is_fim_de_semana",
+    "prioridade_bin",
+    "lag_1d",
+    "rolling_7d",
+    "produto_freq",
+    "grupo_freq"
+  ],
+  "clusters": [
+    {
+      "id": 0,
+      "nome": "Alto Risco de Violação",
+      "tamanho": 19423,
+      "pct_total": 75.87,
+      "taxa_violacao_pct": 15.785,
+      "total_violacoes": 3066,
+      "perfil": {
+        "hora_media": 14.1,
+        "dia_semana_medio": 2.0,
+        "prioridade_p2_pct": 16.3,
+        "horario_comercial_pct": 83.2,
+        "fim_de_semana_pct": 0.0,
+        "periodo_dia_predominante": "tarde"
+      }
+    },
+    {
+      "id": 1,
+      "nome": "Fim de Semana / Fora do Comercial",
+      "tamanho": 6177,
+      "pct_total": 24.13,
+      "taxa_violacao_pct": 9.373,
+      "total_violacoes": 579,
+      "perfil": {
+        "hora_media": 7.9,
+        "dia_semana_medio": 4.0,
+        "prioridade_p2_pct": 32.2,
+        "horario_comercial_pct": 0.0,
+        "fim_de_semana_pct": 58.2,
+        "periodo_dia_predominante": "madrugada"
+      }
+    }
+  ]
+}

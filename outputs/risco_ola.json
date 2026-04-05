@@ -1,0 +1,134 @@
+{
+  "modelo": "xgboost_ola_risk",
+  "gerado_em": "2026-04-05",
+  "versao": "v1",
+  "abordagem": "XGBoost + Base + threshold otimizado por F1",
+  "threshold_otimizado": 0.5528,
+  "scale_pos_weight": 6,
+  "metricas": {
+    "recall_violacao": 0.4309,
+    "precision_violacao": 0.4301,
+    "f1_violacao": 0.4305,
+    "roc_auc": 0.8373,
+    "pr_auc": 0.4704,
+    "tp": 237,
+    "fp": 314,
+    "fn": 313,
+    "tn": 4256,
+    "total_teste": 5120,
+    "violacoes_reais": 550,
+    "violacoes_capturadas": 237
+  },
+  "feature_importance_shap": [
+    {
+      "rank": 1,
+      "feature": "prioridade_bin",
+      "shap_mean_abs": 0.675725
+    },
+    {
+      "rank": 2,
+      "feature": "grupo_freq",
+      "shap_mean_abs": 0.53389
+    },
+    {
+      "rank": 3,
+      "feature": "subcategoria_enc",
+      "shap_mean_abs": 0.472805
+    },
+    {
+      "rank": 4,
+      "feature": "aberto_por_enc",
+      "shap_mean_abs": 0.457377
+    },
+    {
+      "rank": 5,
+      "feature": "produto_freq",
+      "shap_mean_abs": 0.298766
+    },
+    {
+      "rank": 6,
+      "feature": "rolling_7d",
+      "shap_mean_abs": 0.26982
+    },
+    {
+      "rank": 7,
+      "feature": "categoria_enc",
+      "shap_mean_abs": 0.179186
+    },
+    {
+      "rank": 8,
+      "feature": "grupo_enc",
+      "shap_mean_abs": 0.146474
+    },
+    {
+      "rank": 9,
+      "feature": "produto_enc",
+      "shap_mean_abs": 0.137067
+    },
+    {
+      "rank": 10,
+      "feature": "hora",
+      "shap_mean_abs": 0.135794
+    },
+    {
+      "rank": 11,
+      "feature": "semana_ano",
+      "shap_mean_abs": 0.135635
+    },
+    {
+      "rank": 12,
+      "feature": "rolling_30d",
+      "shap_mean_abs": 0.132505
+    },
+    {
+      "rank": 13,
+      "feature": "mes",
+      "shap_mean_abs": 0.114973
+    },
+    {
+      "rank": 14,
+      "feature": "lag_7d",
+      "shap_mean_abs": 0.093129
+    },
+    {
+      "rank": 15,
+      "feature": "mes_cos",
+      "shap_mean_abs": 0.088214
+    }
+  ],
+  "risco_por_prioridade": {
+    "P3": {
+      "media_prob": 0.2816,
+      "pct_alto_risco": 14.17,
+      "n_incidentes": 3881
+    },
+    "P2": {
+      "media_prob": 0.0387,
+      "pct_alto_risco": 0.08,
+      "n_incidentes": 1239
+    }
+  },
+  "distribuicao_risco": {
+    "baixo": {
+      "count": 3006,
+      "pct": 58.71,
+      "limite_inferior": 0.0,
+      "limite_superior": 0.2,
+      "violacoes_reais": 83
+    },
+    "medio": {
+      "count": 1563,
+      "pct": 30.53,
+      "limite_inferior": 0.2,
+      "limite_superior": 0.5528439879417419,
+      "violacoes_reais": 230
+    },
+    "alto": {
+      "count": 551,
+      "pct": 10.76,
+      "limite_inferior": 0.5528439879417419,
+      "limite_superior": 1.0,
+      "violacoes_reais": 237
+    }
+  }
+}
