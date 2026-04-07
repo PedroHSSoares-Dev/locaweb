@@ -345,104 +345,6 @@ function ClusterHeatmap({ clusters }) {
   );
 }
 
-// ─── Cluster card ─────────────────────────────────────────────────────────────
-function ClusterCard({ cluster, accentColor }) {
-  const badgeColor = accentColor ?? (
-    cluster.taxaViolacao > 5 ? 'var(--red)' :
-    cluster.taxaViolacao > 2 ? 'var(--orange)' :
-                                'var(--green)'
-  );
-  const isCritical = cluster.taxaViolacao > 2;
-
-  return (
-    <div style={{
-      background: 'var(--surface3)',
-      border: `1px solid ${isCritical ? badgeColor + '66' : 'var(--border)'}`,
-      borderTop: `2px solid ${badgeColor}`,
-      borderRadius: 6, padding: '16px 18px',
-      display: 'flex', flexDirection: 'column', gap: 10,
-      animation: `fadeInUp 0.4s ease ${cluster.id * 80}ms both`,
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{
-          fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
-          color: badgeColor, letterSpacing: '0.12em',
-        }}>CLUSTER {cluster.id}</span>
-        <span style={{
-          fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
-          color: badgeColor, background: `${badgeColor}18`,
-          border: `1px solid ${badgeColor}44`,
-          borderRadius: 3, padding: '2px 8px', letterSpacing: '0.08em',
-        }}>{cluster.taxaViolacao}% VIOLAÇÃO</span>
-      </div>
-
-      <div style={{
-        fontFamily: 'var(--font-mono)', fontWeight: 600, fontSize: 12,
-        color: 'var(--text-pri)', textTransform: 'uppercase', letterSpacing: '0.04em',
-      }}>{cluster.label}</div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-        {[
-          { l: 'T', v: cluster.score_T ?? 0 },
-          { l: 'G', v: cluster.score_G ?? 0 },
-          { l: 'V', v: cluster.score_V ?? 0 },
-        ].map(({ l, v }) => (
-          <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{
-              fontFamily: 'var(--font-mono)', fontSize: 9,
-              color: 'var(--text-muted)', width: 10, flexShrink: 0,
-            }}>{l}</span>
-            <div style={{ flex: 1, height: 4, background: 'var(--surface4)', borderRadius: 2 }}>
-              <div style={{
-                width: `${v * 100}%`, height: '100%',
-                background: badgeColor, borderRadius: 2, opacity: 0.8,
-              }} />
-            </div>
-            <span style={{
-              fontFamily: 'var(--font-mono)', fontSize: 9,
-              color: 'var(--text-sec)', width: 32, textAlign: 'right', flexShrink: 0,
-            }}>{(v * 100).toFixed(0)}%</span>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ display: 'flex', gap: 16 }}>
-        {[
-          { l: 'TAMANHO',   v: cluster.tamanho.toLocaleString('pt-BR') },
-          { l: 'HORA PICO', v: `${cluster.perfil.horaMedia}h` },
-          { l: 'GRUPO',     v: cluster.perfil.grupo },
-        ].map(({ l, v }) => (
-          <div key={l}>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', letterSpacing: '0.1em', marginBottom: 2 }}>{l}</div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600, color: 'var(--text-pri)' }}>{v}</div>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--text-sec)', lineHeight: 1.55 }}>
-        {cluster.descricao}
-      </div>
-
-      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-        {cluster.perfil.diasCriticos.map(d => (
-          <span key={d} style={{
-            fontFamily: 'var(--font-mono)', fontSize: 9,
-            color: 'var(--text-muted)', background: 'var(--surface4)',
-            border: '1px solid var(--border)', borderRadius: 3, padding: '2px 6px',
-          }}>{d}</span>
-        ))}
-        {cluster.perfil.produtos.map(p => (
-          <span key={p} style={{
-            fontFamily: 'var(--font-mono)', fontSize: 9,
-            color: badgeColor, background: `${badgeColor}12`,
-            border: `1px solid ${badgeColor}33`, borderRadius: 3, padding: '2px 6px',
-          }}>{p}</span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 const CLUSTER_CORES = ['#5ac8fa', '#ffcc00', '#ff9f0a', '#ff2d55'];
 
@@ -599,28 +501,14 @@ export default function TecnicoPage() {
           ) : !clustersDisponivel ? (
             <SemDados mensagem="Modelo K-Means não treinado — execute o notebook 05" />
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-
-              {/* ── Heatmap TGV ─────────────────────────────────────────── */}
-              <div>
-                <div style={{
-                  fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)',
-                  letterSpacing: '0.14em', marginBottom: 12, textTransform: 'uppercase',
-                }}>
-                  COMPARAÇÃO TGV — TEMPORALIDADE · GRAVIDADE · VOLUME · VIOLAÇÃO
-                </div>
-                <ClusterHeatmap clusters={clustersData} />
+            <div>
+              <div style={{
+                fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)',
+                letterSpacing: '0.14em', marginBottom: 12, textTransform: 'uppercase',
+              }}>
+                COMPARAÇÃO TGV — TEMPORALIDADE · GRAVIDADE · VOLUME · VIOLAÇÃO
               </div>
-
-              <div style={{ height: 1, background: 'var(--border)' }} />
-
-              {/* ── Cluster Cards ────────────────────────────────────────── */}
-              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12 }}>
-                {(clustersData ?? []).map((c, i) => (
-                  <ClusterCard key={c.id} cluster={c} accentColor={CLUSTER_CORES[i]} />
-                ))}
-              </div>
-
+              <ClusterHeatmap clusters={clustersData} />
             </div>
           )}
         </Module>
