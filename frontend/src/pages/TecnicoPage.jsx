@@ -435,6 +435,266 @@ function ClusterCard({ cluster, accentColor }) {
   );
 }
 
+// ─── Cluster Quadrant (Gartner-style scatter com retângulos proporcionais) ────
+function ClusterQuadrant({ clusters }) {
+  const [hovered, setHovered] = useState(null);
+  const [tooltip, setTooltip] = useState(null);
+  const wrapperRef = useRef(null);
+
+  const CORES = ['#5ac8fa', '#ffcc00', '#ff9f0a', '#ff2d55'];
+  const maxTamanho = Math.max(...clusters.map(c => c.tamanho));
+
+  function getRect(cluster) {
+    const minSize = 60;
+    const maxSize = 180;
+    const size = minSize + ((cluster.tamanho / maxTamanho) * (maxSize - minSize));
+    const xPct = ((cluster.score_T - 0.10) / (0.62 - 0.10)) * 60 + 5;
+    const yPct = (1 - ((cluster.score_V - 0.20) / (1.00 - 0.20))) * 65 + 5;
+    return { xPct, yPct, size };
+  }
+
+  function handleMouseEnter(e, cluster) {
+    if (!wrapperRef.current) return;
+    const wrap = wrapperRef.current.getBoundingClientRect();
+    const rect = e.currentTarget.getBoundingClientRect();
+    setHovered(cluster.id);
+    setTooltip({
+      x: rect.left - wrap.left + rect.width / 2,
+      y: rect.top  - wrap.top,
+      cluster,
+    });
+  }
+
+  return (
+    <div style={{ display: 'flex', gap: 16 }}>
+
+      {/* ── Scatter Quadrant ─────────────────────────────────────────────── */}
+      <div ref={wrapperRef} style={{
+        flex: '0 0 65%',
+        position: 'relative',
+        height: 400,
+        background: 'var(--surface1)',
+        border: '1px solid var(--border)',
+        borderRadius: 6,
+        overflow: 'hidden',
+      }}>
+        {/* Grade dos quadrantes */}
+        <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1, background: 'var(--border)', opacity: 0.5 }} />
+        <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: 1, background: 'var(--border)', opacity: 0.5 }} />
+
+        {/* Labels dos quadrantes */}
+        {[
+          { label: 'COMERCIAL · ALTO VOL',      x: '4%',  y: '4%'  },
+          { label: 'FORA HORÁRIO · ALTO VOL',   x: '52%', y: '4%'  },
+          { label: 'COMERCIAL · BAIXO VOL',     x: '4%',  y: '88%' },
+          { label: 'FORA HORÁRIO · BAIXO VOL',  x: '52%', y: '88%' },
+        ].map(({ label, x, y }) => (
+          <div key={label} style={{
+            position: 'absolute', left: x, top: y,
+            fontFamily: 'var(--font-mono)', fontSize: 8,
+            color: 'var(--text-muted)', letterSpacing: '0.1em',
+            pointerEvents: 'none',
+          }}>{label}</div>
+        ))}
+
+        {/* Label eixo Y */}
+        <div style={{
+          position: 'absolute', left: 8, top: '50%',
+          transform: 'translateY(-50%) rotate(-90deg)',
+          transformOrigin: 'left center',
+          fontFamily: 'var(--font-mono)', fontSize: 8,
+          color: 'var(--text-muted)', letterSpacing: '0.1em',
+          pointerEvents: 'none', whiteSpace: 'nowrap',
+        }}>VOLUME (BAIXO → ALTO)</div>
+
+        {/* Label eixo X */}
+        <div style={{
+          position: 'absolute', bottom: 8, left: '50%',
+          transform: 'translateX(-50%)',
+          fontFamily: 'var(--font-mono)', fontSize: 8,
+          color: 'var(--text-muted)', letterSpacing: '0.1em',
+          pointerEvents: 'none', whiteSpace: 'nowrap',
+        }}>TEMPORALIDADE (COMERCIAL → FORA DO HORÁRIO)</div>
+
+        {/* Retângulos dos clusters */}
+        {clusters.map((c, i) => {
+          const { xPct, yPct, size } = getRect(c);
+          const cor        = CORES[i];
+          const isHovered  = hovered === c.id;
+          const isCritical = c.taxaViolacao > 2;
+
+          return (
+            <div
+              key={c.id}
+              onMouseEnter={e => handleMouseEnter(e, c)}
+              onMouseLeave={() => { setHovered(null); setTooltip(null); }}
+              style={{
+                position: 'absolute',
+                left: `${xPct}%`, top: `${yPct}%`,
+                width: size, height: size,
+                transform: 'translate(-50%, -50%)',
+                background: `${cor}${isHovered ? '33' : '18'}`,
+                border: `${isCritical ? 2 : 1}px solid ${cor}${isHovered ? 'ff' : '88'}`,
+                borderRadius: 4,
+                cursor: 'crosshair',
+                transition: 'all 0.2s ease',
+                display: 'flex', flexDirection: 'column',
+                alignItems: 'center', justifyContent: 'center', gap: 2,
+                zIndex: isHovered ? 10 : i + 1,
+                boxShadow: isCritical ? `0 0 ${isHovered ? 16 : 8}px ${cor}44` : 'none',
+              }}
+            >
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: cor, fontWeight: 700, letterSpacing: '0.1em' }}>C{c.id}</div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: size > 100 ? 16 : 12, fontWeight: 700, color: 'var(--text-pri)' }}>
+                {c.tamanho >= 1000 ? `${(c.tamanho / 1000).toFixed(1)}k` : c.tamanho}
+              </div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: isCritical ? 'var(--red)' : 'var(--green)', fontWeight: 700 }}>
+                {c.taxaViolacao}% viol.
+              </div>
+              {isCritical && (
+                <div style={{
+                  position: 'absolute', top: -6, right: -6,
+                  width: 12, height: 12, borderRadius: '50%',
+                  background: 'var(--red)', border: '2px solid var(--bg)',
+                  animation: 'pulse-dot 2s ease infinite',
+                }} />
+              )}
+            </div>
+          );
+        })}
+
+        {/* Tooltip */}
+        {tooltip && (() => {
+          const TWIDTH = 220;
+          const wrapW  = wrapperRef.current?.getBoundingClientRect().width ?? 500;
+          const left   = Math.max(4, Math.min(tooltip.x - TWIDTH / 2, wrapW - TWIDTH - 4));
+          const top    = tooltip.y < 200 ? tooltip.y + 60 : tooltip.y - 180;
+          const c      = tooltip.cluster;
+          const cor    = CORES[c.id];
+          return (
+            <div style={{
+              position: 'absolute', left, top, width: TWIDTH,
+              pointerEvents: 'none', zIndex: 50,
+              background: 'var(--surface2)',
+              border: `1px solid ${cor}66`,
+              borderRadius: 6, padding: '10px 12px',
+              boxShadow: '0 8px 28px rgba(0,0,0,0.65)',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700, color: cor }}>
+                  C{c.id} — {c.label.split('—')[0].trim()}
+                </span>
+                <span style={{
+                  fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
+                  color: c.taxaViolacao > 2 ? 'var(--red)' : 'var(--green)',
+                }}>{c.taxaViolacao}% VIOL.</span>
+              </div>
+              <div style={{ height: '0.5px', background: 'var(--border)', marginBottom: 8 }} />
+              {[
+                { l: 'incidentes',     v: c.tamanho.toLocaleString('pt-BR'),   col: 'var(--text-pri)' },
+                { l: 'hora pico',      v: `${c.perfil.horaMedia}h`,             col: 'var(--text-sec)' },
+                { l: 'grupo',          v: c.perfil.grupo,                       col: cor },
+                { l: 'fins de semana', v: `${c.perfil.pctFds ?? 0}%`,           col: 'var(--text-sec)' },
+                { l: 'P2 (alta)',      v: `${c.perfil.pctP2 ?? 0}%`,            col: (c.perfil.pctP2 ?? 0) > 25 ? 'var(--orange)' : 'var(--text-sec)' },
+                { l: 'duração med.',   v: `${c.perfil.duracaoMediana ?? 0}h`,   col: 'var(--text-sec)' },
+                { l: 'descrição',      v: c.descricao,                          col: 'var(--text-muted)' },
+              ].map(({ l, v, col }) => (
+                <div key={l} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 4 }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', flexShrink: 0 }}>{l}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: col, fontWeight: 600, textAlign: 'right', maxWidth: 130 }}>{v}</span>
+                </div>
+              ))}
+              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}>
+                {c.perfil.diasCriticos.map(d => (
+                  <span key={d} style={{
+                    fontFamily: 'var(--font-mono)', fontSize: 8,
+                    color: cor, background: `${cor}18`,
+                    border: `1px solid ${cor}33`,
+                    borderRadius: 3, padding: '1px 5px',
+                  }}>{d}</span>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+      </div>
+
+      {/* ── Painel direito ───────────────────────────────────────────────── */}
+      <div style={{ flex: '0 0 calc(35% - 16px)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+
+        {/* Alerta */}
+        <div style={{
+          background: 'rgba(255,45,85,0.08)',
+          border: '1px solid var(--red)',
+          borderLeft: '3px solid var(--red)',
+          borderRadius: 6, padding: '12px 14px',
+        }}>
+          <div style={{
+            fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
+            color: 'var(--red)', letterSpacing: '0.12em', marginBottom: 6,
+          }}>⚠ ALERTA: TEAM05</div>
+          <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--text-sec)', lineHeight: 1.5 }}>
+            Risco operacional aumenta <strong style={{ color: 'var(--red)' }}>3× fora do horário comercial</strong>.
+            C3 viola {clusters.find(c => c.id === 3)?.taxaViolacao}% vs C1 viola {clusters.find(c => c.id === 1)?.taxaViolacao}% — mesma equipe, contextos opostos.
+          </div>
+          <div style={{
+            display: 'flex', gap: 8, marginTop: 8,
+            fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-muted)',
+          }}>
+            <span>SEVERITY: CRITICAL</span>
+            <span>·</span>
+            <span>TAG: OUT_OF_HOURS</span>
+          </div>
+        </div>
+
+        {/* Metrics Score */}
+        <div style={{
+          background: 'var(--surface2)',
+          border: '1px solid var(--border)',
+          borderRadius: 6, padding: '12px 14px', flex: 1,
+        }}>
+          <div style={{
+            fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
+            color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 10,
+          }}>CLUSTER METRICS SCORE</div>
+
+          {[...clusters].sort((a, b) => b.taxaViolacao - a.taxaViolacao).map(c => {
+            const cor = CORES[c.id];
+            return (
+              <div key={c.id} style={{ marginBottom: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5, alignItems: 'baseline' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: cor, fontWeight: 700 }}>
+                    C{c.id} — {c.label.split(' ').slice(0, 2).join(' ')}
+                  </span>
+                  <span style={{
+                    fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
+                    color: c.taxaViolacao > 2 ? 'var(--red)' : c.taxaViolacao > 1.2 ? 'var(--orange)' : 'var(--green)',
+                  }}>{c.taxaViolacao}%</span>
+                </div>
+                {[
+                  { l: 'T', v: c.score_T },
+                  { l: 'G', v: c.score_G },
+                  { l: 'V', v: c.score_V },
+                ].map(({ l, v }) => (
+                  <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-muted)', width: 8, flexShrink: 0 }}>{l}</span>
+                    <div style={{ flex: 1, height: 3, background: 'var(--surface4)', borderRadius: 2 }}>
+                      <div style={{ width: `${v * 100}%`, height: '100%', background: cor, borderRadius: 2, opacity: 0.8 }} />
+                    </div>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-muted)', width: 24, textAlign: 'right' }}>
+                      {(v * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function TecnicoPage() {
   const { isMobile } = useBreakpoint();
@@ -581,23 +841,15 @@ export default function TecnicoPage() {
           n={4}
           title="Análise de Clusters"
           sub={clustersDisponivel && clustersData
-            ? `K-MEANS TGV · K=4 · Silhouette=0.608 · ${clustersData.length} clusters identificados`
+            ? `K-MEANS TGV · K=4 · Silhouette=0.608 · Temporalidade × Volume`
             : 'K-MEANS TGV · execute o notebook 05 para gerar dados de cluster'}
         >
           {clustersLoading ? (
-            <Skeleton height={320} />
+            <Skeleton height={400} />
           ) : !clustersDisponivel ? (
             <SemDados mensagem="Modelo K-Means não treinado — execute o notebook 05" />
           ) : (
-            <div>
-              <div style={{
-                fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)',
-                letterSpacing: '0.14em', marginBottom: 12, textTransform: 'uppercase',
-              }}>
-                COMPARAÇÃO TGV — TEMPORALIDADE · GRAVIDADE · VOLUME · VIOLAÇÃO
-              </div>
-              <ClusterHeatmap clusters={clustersData} />
-            </div>
+            <ClusterQuadrant clusters={clustersData} />
           )}
         </Module>
 
