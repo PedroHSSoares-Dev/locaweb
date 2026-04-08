@@ -444,9 +444,23 @@ function ClusterQuadrant({ clusters }) {
   const CORES = ['#5ac8fa', '#ffcc00', '#ff9f0a', '#ff2d55'];
   const maxTamanho = Math.max(...clusters.map(c => c.tamanho));
 
-  // C0 → topo-esq (comercial+alto), C2 → topo-dir (fora+alto)
-  // C1 → baixo-esq (comercial+baixo), C3 → baixo-dir (fora+baixo)
-  const QUADRANTE_LABEL = {
+  // Ancoragem: cada retângulo "cresce para fora" a partir do centro da grade
+  const ALIGN = {
+    0: { alignItems: 'flex-end',   justifyContent: 'flex-end'   }, // topo-esq  → canto inf-dir
+    2: { alignItems: 'flex-end',   justifyContent: 'flex-start'  }, // topo-dir  → canto inf-esq
+    1: { alignItems: 'flex-start', justifyContent: 'flex-end'   }, // baixo-esq → canto sup-dir
+    3: { alignItems: 'flex-start', justifyContent: 'flex-start'  }, // baixo-dir → canto sup-esq
+  };
+
+  // Label no canto oposto ao retângulo dentro da célula
+  const LABEL_POS = {
+    0: { top: 8,      left: 8,      bottom: 'auto', right: 'auto' },
+    2: { top: 8,      left: 'auto', bottom: 'auto', right: 8      },
+    1: { top: 'auto', left: 8,      bottom: 8,      right: 'auto' },
+    3: { top: 'auto', left: 'auto', bottom: 8,      right: 8      },
+  };
+
+  const LABEL_TEXT = {
     0: 'COMERCIAL · ALTO VOL',
     1: 'COMERCIAL · BAIXO VOL',
     2: 'FORA HORÁRIO · ALTO VOL',
@@ -498,28 +512,27 @@ function ClusterQuadrant({ clusters }) {
           const size       = getRectSize(c.tamanho);
           const isCritical = c.taxaViolacao > 2;
           const isHov      = hovered === id;
-          const isTopRow   = id === 0 || id === 2;
-          const isLeftCol  = id === 0 || id === 1;
 
           return (
             <div key={id} style={{
               display: 'flex',
-              alignItems:     isTopRow   ? 'flex-end'   : 'flex-start',  // ancora no centro
-              justifyContent: isLeftCol  ? 'flex-end'   : 'flex-start',
-              padding: 16,
+              alignItems:     ALIGN[id].alignItems,
+              justifyContent: ALIGN[id].justifyContent,
+              padding: 8,
               position: 'relative',
+              overflow: 'hidden',
             }}>
               {/* Label do quadrante — canto oposto ao retângulo */}
               <div style={{
                 position: 'absolute',
-                top:    isTopRow  ? 'auto' : 8,
-                bottom: isTopRow  ? 8      : 'auto',
-                left:   isLeftCol ? 'auto' : 10,
-                right:  isLeftCol ? 10     : 'auto',
+                top:    LABEL_POS[id].top,
+                left:   LABEL_POS[id].left,
+                bottom: LABEL_POS[id].bottom,
+                right:  LABEL_POS[id].right,
                 fontFamily: 'var(--font-mono)', fontSize: 8,
                 color: 'var(--text-muted)', letterSpacing: '0.08em',
                 pointerEvents: 'none',
-              }}>{QUADRANTE_LABEL[id]}</div>
+              }}>{LABEL_TEXT[id]}</div>
 
               {/* Retângulo do cluster */}
               <div
@@ -567,11 +580,12 @@ function ClusterQuadrant({ clusters }) {
         {/* Label eixo Y */}
         <div style={{
           position: 'absolute', left: 6, top: '50%',
-          transform: 'translateY(-50%) rotate(-90deg)',
-          transformOrigin: 'center center',
+          transform: 'translateY(-50%) rotate(180deg)',
+          writingMode: 'vertical-rl',
+          textOrientation: 'mixed',
           fontFamily: 'var(--font-mono)', fontSize: 8,
           color: 'var(--text-muted)', letterSpacing: '0.1em',
-          whiteSpace: 'nowrap', pointerEvents: 'none',
+          pointerEvents: 'none', userSelect: 'none',
         }}>VOLUME ↑ ALTO</div>
 
         {/* Label eixo X */}
