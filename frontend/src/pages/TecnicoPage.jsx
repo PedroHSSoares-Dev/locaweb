@@ -439,10 +439,18 @@ function ClusterCard({ cluster, accentColor }) {
 function ClusterQuadrant({ clusters, selected, onToggle }) {
   const [hovered, setHovered] = useState(null);
   const [tooltip, setTooltip] = useState(null);
-  const [activeItem, setActiveItem] = useState(null);
+  const [activeKeys, setActiveKeys] = useState(new Set());
   const wrapperRef = useRef(null);
 
-  useEffect(() => { setActiveItem(null); }, [selected]);
+  useEffect(() => { setActiveKeys(new Set()); }, [selected]);
+
+  function toggleKey(key) {
+    setActiveKeys(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  }
 
   const CORES = ['#5ac8fa', '#ffcc00', '#ff9f0a', '#ff2d55'];
   const maxTamanho = Math.max(...clusters.map(c => c.tamanho));
@@ -872,15 +880,21 @@ function ClusterQuadrant({ clusters, selected, onToggle }) {
         const selClusters = selIds.map(id => ({ c: clusters.find(cl => cl.id === id), cor: CORES[id] })).filter(x => x.c);
         const [a, b] = selClusters;
         const METRICS = [
-          { l: 'INCIDENTES',     get: c => c.tamanho,                   fmt: v => v.toLocaleString('pt-BR'), unit: ''  },
-          { l: 'VIOLAÇÃO OLA',   get: c => c.taxaViolacao,              fmt: v => `${v}`,                    unit: '%' },
-          { l: 'P2 (ALTA)',      get: c => c.perfil.pctP2 ?? 0,         fmt: v => `${v}`,                    unit: '%' },
-          { l: 'FINS DE SEMANA', get: c => c.perfil.pctFds ?? 0,        fmt: v => `${v}`,                    unit: '%' },
-          { l: 'DUR. MEDIANA',   get: c => c.perfil.duracaoMediana ?? 0, fmt: v => `${v}`,                   unit: 'h' },
-          { l: 'HORA PICO',      get: c => c.perfil.horaMedia,          fmt: v => `${v}`,                    unit: 'h' },
+          { l: 'INCIDENTES',     get: c => c.tamanho,                    fmt: v => v.toLocaleString('pt-BR'), unit: ''  },
+          { l: 'VIOLAÇÃO OLA',   get: c => c.taxaViolacao,               fmt: v => `${v}`,                    unit: '%' },
+          { l: 'P2 (ALTA)',      get: c => c.perfil.pctP2 ?? 0,          fmt: v => `${v}`,                    unit: '%' },
+          { l: 'FINS DE SEMANA', get: c => c.perfil.pctFds ?? 0,         fmt: v => `${v}`,                    unit: '%' },
+          { l: 'DUR. MEDIANA',   get: c => c.perfil.duracaoMediana ?? 0, fmt: v => `${v}`,                    unit: 'h' },
+          { l: 'HORA PICO',      get: c => c.perfil.horaMedia,           fmt: v => `${v}`,                    unit: 'h' },
         ];
+        const ALL_DIAS  = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+        const TGV_KEYS  = new Set(['score_T', 'score_G', 'score_V']);
+        const MET_KEYS  = new Set(METRICS.map(m => m.l));
+        const activeDias   = ALL_DIAS.filter(d => activeKeys.has(d));
+        const hasActiveMet = [...activeKeys].some(k => MET_KEYS.has(k));
+        const hasActiveTgv = [...activeKeys].some(k => TGV_KEYS.has(k));
+        const hasActiveDia = activeDias.length > 0;
         const showDiff = selClusters.length === 2;
-        const diaAtivo = activeItem?.type === 'dia' ? activeItem.key : null;
         return (
           <div style={{
             marginTop: 12,
@@ -892,21 +906,27 @@ function ClusterQuadrant({ clusters, selected, onToggle }) {
             animation: 'fadeInUp 0.2s ease both',
           }}>
             {/* Header */}
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.12em', marginBottom: activeItem ? 8 : 14 }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.12em', marginBottom: activeKeys.size > 0 ? 8 : 14 }}>
               COMPARAÇÃO — {selIds.length} CLUSTERS SELECIONADOS
             </div>
 
-            {/* Indicador de item ativo */}
-            {activeItem && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, fontFamily: 'var(--font-mono)', fontSize: 9 }}>
+            {/* Indicador de itens ativos */}
+            {activeKeys.size > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, fontFamily: 'var(--font-mono)', fontSize: 9, flexWrap: 'wrap' }}>
                 <span style={{ color: 'var(--text-muted)' }}>DESTACANDO:</span>
-                <span style={{ color: 'var(--text-pri)', fontWeight: 700 }}>
-                  {activeItem.type === 'dia' ? `DIA ${activeItem.key}` : activeItem.key}
-                </span>
+                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                  {[...activeKeys].map(k => (
+                    <span
+                      key={k}
+                      onClick={() => toggleKey(k)}
+                      style={{ color: 'var(--text-pri)', fontWeight: 700, cursor: 'pointer', background: 'var(--surface3)', border: '1px solid var(--border)', borderRadius: 3, padding: '1px 6px' }}
+                    >{MET_KEYS.has(k) ? k : TGV_KEYS.has(k) ? k.replace('score_', '') : `DIA ${k}`} ✕</span>
+                  ))}
+                </div>
                 <button
-                  onClick={() => setActiveItem(null)}
+                  onClick={() => setActiveKeys(new Set())}
                   style={{ background: 'transparent', border: '1px solid var(--border)', borderRadius: 3, padding: '1px 6px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: 8, cursor: 'pointer' }}
-                >✕</button>
+                >LIMPAR</button>
               </div>
             )}
 
@@ -915,8 +935,8 @@ function ClusterQuadrant({ clusters, selected, onToggle }) {
 
               {/* Coluna por cluster */}
               {selClusters.map(({ c, cor }) => {
-                const colOpacity = diaAtivo
-                  ? (c.perfil.diasCriticos.includes(diaAtivo) ? 1 : 0.25)
+                const colOpacity = hasActiveDia
+                  ? (activeDias.some(d => c.perfil.diasCriticos.includes(d)) ? 1 : 0.25)
                   : 1;
                 return (
                   <div key={c.id} style={{ display: 'flex', flexDirection: 'column', gap: 8, opacity: colOpacity, transition: 'opacity 0.2s ease' }}>
@@ -926,18 +946,18 @@ function ClusterQuadrant({ clusters, selected, onToggle }) {
 
                     {/* Cards de métrica clicáveis */}
                     {METRICS.map(m => {
-                      const val     = m.get(c);
-                      const isActive = activeItem?.key === m.l;
+                      const val      = m.get(c);
+                      const isActive = activeKeys.has(m.l);
                       return (
                         <div
                           key={m.l}
-                          onClick={() => setActiveItem(prev => prev?.key === m.l ? null : { type: 'metric', key: m.l })}
+                          onClick={() => toggleKey(m.l)}
                           style={{
                             background: 'var(--surface3)',
                             border: `1px solid ${isActive ? cor : 'var(--border)'}`,
                             borderRadius: 4, padding: '8px 12px',
                             cursor: 'pointer',
-                            opacity: activeItem?.type === 'metric' && !isActive ? 0.3 : 1,
+                            opacity: hasActiveMet && !isActive ? 0.3 : 1,
                             transition: 'opacity 0.15s, border-color 0.15s',
                           }}
                         >
@@ -951,12 +971,12 @@ function ClusterQuadrant({ clusters, selected, onToggle }) {
                     <div style={{ marginTop: 4 }}>
                       {[{ l: 'T', v: c.score_T }, { l: 'G', v: c.score_G }, { l: 'V', v: c.score_V }].map(({ l, v }) => {
                         const tgvKey   = `score_${l}`;
-                        const isActive = activeItem?.key === tgvKey;
+                        const isActive = activeKeys.has(tgvKey);
                         return (
                           <div
                             key={l}
-                            onClick={() => setActiveItem(prev => prev?.key === tgvKey ? null : { type: 'tgv', key: tgvKey })}
-                            style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5, cursor: 'pointer', opacity: activeItem?.type === 'tgv' && !isActive ? 0.3 : 1, transition: 'opacity 0.15s' }}
+                            onClick={() => toggleKey(tgvKey)}
+                            style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5, cursor: 'pointer', opacity: hasActiveTgv && !isActive ? 0.3 : 1, transition: 'opacity 0.15s' }}
                           >
                             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: isActive ? cor : 'var(--text-muted)', width: 8, fontWeight: isActive ? 700 : 400 }}>{l}</span>
                             <div style={{ flex: 1, height: isActive ? 6 : 4, background: 'var(--surface4)', borderRadius: 2, transition: 'height 0.15s' }}>
@@ -970,17 +990,17 @@ function ClusterQuadrant({ clusters, selected, onToggle }) {
 
                     {/* Dias críticos clicáveis */}
                     <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-                      {['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'].map(d => {
+                      {ALL_DIAS.map(d => {
                         const isCrit   = c.perfil.diasCriticos.includes(d);
-                        const isActive = activeItem?.key === d;
+                        const isActive = activeKeys.has(d);
                         return (
                           <span
                             key={d}
-                            onClick={() => setActiveItem(prev => prev?.key === d ? null : { type: 'dia', key: d })}
+                            onClick={() => toggleKey(d)}
                             style={{
                               fontFamily: 'var(--font-mono)', fontSize: 8,
                               cursor: 'pointer',
-                              opacity: activeItem?.type === 'dia' && !isActive ? 0.2 : 1,
+                              opacity: hasActiveDia && !isActive ? 0.2 : 1,
                               color: isCrit ? cor : isActive ? 'var(--text-pri)' : 'var(--text-muted)',
                               background: isCrit ? `${cor}20` : isActive ? 'var(--surface3)' : 'var(--surface4)',
                               border: `1px solid ${isCrit ? cor + '55' : isActive ? 'var(--border-md)' : 'var(--border)'}`,
@@ -1003,16 +1023,16 @@ function ClusterQuadrant({ clusters, selected, onToggle }) {
                     DIFF C{a.c.id} → C{b.c.id}
                   </div>
                   {METRICS.map(m => {
-                    const diff    = m.get(b.c) - m.get(a.c);
-                    const isAbove = diff > 0;
-                    const isZero  = Math.abs(diff) < 0.01;
-                    const isActive = activeItem?.key === m.l;
+                    const diff     = m.get(b.c) - m.get(a.c);
+                    const isAbove  = diff > 0;
+                    const isZero   = Math.abs(diff) < 0.01;
+                    const isActive = activeKeys.has(m.l);
                     return (
                       <div key={m.l} style={{
                         background: 'var(--surface3)',
                         border: `1px solid ${isZero ? 'var(--border)' : isAbove ? 'var(--red)33' : 'var(--green)33'}`,
                         borderRadius: 4, padding: '8px 12px',
-                        opacity: activeItem?.type === 'metric' && !isActive ? 0.3 : 1,
+                        opacity: hasActiveMet && !isActive ? 0.3 : 1,
                         transition: 'opacity 0.15s',
                       }}>
                         <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-muted)', letterSpacing: '0.1em', marginBottom: 2 }}>{m.l}</div>
