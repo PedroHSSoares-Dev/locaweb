@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useBreakpoint } from '../hooks/useBreakpoint';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -436,11 +436,13 @@ function ClusterCard({ cluster, accentColor }) {
 }
 
 // ─── Cluster Quadrant (Gartner-style scatter com retângulos proporcionais) ────
-function ClusterQuadrant({ clusters }) {
+function ClusterQuadrant({ clusters, selected, onToggle }) {
   const [hovered, setHovered] = useState(null);
   const [tooltip, setTooltip] = useState(null);
-  const [selected, setSelected] = useState(null);
+  const [activeItem, setActiveItem] = useState(null);
   const wrapperRef = useRef(null);
+
+  useEffect(() => { setActiveItem(null); }, [selected]);
 
   const CORES = ['#5ac8fa', '#ffcc00', '#ff9f0a', '#ff2d55'];
   const maxTamanho = Math.max(...clusters.map(c => c.tamanho));
@@ -514,6 +516,8 @@ function ClusterQuadrant({ clusters }) {
           const size       = getRectSize(c.tamanho);
           const isCritical = c.taxaViolacao > 2;
           const isHov      = hovered === id;
+          const isSel      = selected.has(id);
+          const dimmed     = selected.size > 0 && !isSel;
 
           return (
             <div key={id} style={{
@@ -523,6 +527,8 @@ function ClusterQuadrant({ clusters }) {
               padding: 8,
               position: 'relative',
               overflow: 'hidden',
+              opacity: dimmed ? 0.25 : 1,
+              transition: 'opacity 0.2s',
             }}>
               {/* Label do quadrante — canto oposto ao retângulo */}
               <div style={{
@@ -541,11 +547,11 @@ function ClusterQuadrant({ clusters }) {
                 <div
                   onMouseEnter={e => handleMouseEnter(e, c)}
                   onMouseLeave={() => { setHovered(null); setTooltip(null); }}
-                  onClick={() => setSelected(selected === id ? null : id)}
+                  onClick={() => onToggle(id)}
                   style={{
                     width: size, height: size,
-                    background: `${cor}${isHov || selected === id ? '30' : '15'}`,
-                    border: `${isCritical ? 2 : 1}px solid ${cor}${isHov || selected === id ? 'ff' : '77'}`,
+                    background: `${cor}${isHov || isSel ? '30' : '15'}`,
+                    border: `${isCritical ? 2 : 1}px solid ${cor}${isHov || isSel ? 'ff' : '77'}`,
                     borderRadius: 6,
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
@@ -555,7 +561,7 @@ function ClusterQuadrant({ clusters }) {
                       ? `0 0 ${isHov ? 20 : 10}px ${cor}44`
                       : isHov ? `0 0 12px ${cor}33` : 'none',
                     position: 'relative', zIndex: 2,
-                    outline: selected === id ? `2px solid ${cor}` : 'none',
+                    outline: isSel ? `2px solid ${cor}` : 'none',
                     outlineOffset: 2,
                   }}
                 >
@@ -740,10 +746,11 @@ function ClusterQuadrant({ clusters }) {
       </div>
       </div>{/* ← row close */}
 
-      {/* ── Painel expandido — aparece ao clicar num cluster ───────────── */}
-      {selected !== null && (() => {
-        const c   = clusters.find(cl => cl.id === selected);
-        const cor = CORES[selected];
+      {/* ── Painel expandido — detalhamento (1) ou comparação (2+) ────── */}
+      {selected.size === 1 && (() => {
+        const selId = [...selected][0];
+        const c     = clusters.find(cl => cl.id === selId);
+        const cor   = CORES[selId];
         if (!c) return null;
         return (
           <div style={{
@@ -768,10 +775,6 @@ function ClusterQuadrant({ clusters }) {
                   {c.descricao}
                 </div>
               </div>
-              <button
-                onClick={() => setSelected(null)}
-                style={{ background: 'transparent', border: '1px solid var(--border-md)', borderRadius: 4, padding: '4px 10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: 10, cursor: 'pointer' }}
-              >✕ FECHAR</button>
             </div>
 
             {/* Grid 3 colunas */}
@@ -862,6 +865,170 @@ function ClusterQuadrant({ clusters }) {
           </div>
         );
       })()}
+
+      {/* ── Painel de comparação — 2+ clusters selecionados ─────────── */}
+      {selected.size >= 2 && (() => {
+        const selIds = [...selected];
+        const selClusters = selIds.map(id => ({ c: clusters.find(cl => cl.id === id), cor: CORES[id] })).filter(x => x.c);
+        const [a, b] = selClusters;
+        const METRICS = [
+          { l: 'INCIDENTES',     get: c => c.tamanho,                   fmt: v => v.toLocaleString('pt-BR'), unit: ''  },
+          { l: 'VIOLAÇÃO OLA',   get: c => c.taxaViolacao,              fmt: v => `${v}`,                    unit: '%' },
+          { l: 'P2 (ALTA)',      get: c => c.perfil.pctP2 ?? 0,         fmt: v => `${v}`,                    unit: '%' },
+          { l: 'FINS DE SEMANA', get: c => c.perfil.pctFds ?? 0,        fmt: v => `${v}`,                    unit: '%' },
+          { l: 'DUR. MEDIANA',   get: c => c.perfil.duracaoMediana ?? 0, fmt: v => `${v}`,                   unit: 'h' },
+          { l: 'HORA PICO',      get: c => c.perfil.horaMedia,          fmt: v => `${v}`,                    unit: 'h' },
+        ];
+        const showDiff = selClusters.length === 2;
+        const diaAtivo = activeItem?.type === 'dia' ? activeItem.key : null;
+        return (
+          <div style={{
+            marginTop: 12,
+            background: 'var(--surface2)',
+            border: '1px solid var(--border)',
+            borderTop: '2px solid var(--text-muted)',
+            borderRadius: 6,
+            padding: '16px 20px',
+            animation: 'fadeInUp 0.2s ease both',
+          }}>
+            {/* Header */}
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.12em', marginBottom: activeItem ? 8 : 14 }}>
+              COMPARAÇÃO — {selIds.length} CLUSTERS SELECIONADOS
+            </div>
+
+            {/* Indicador de item ativo */}
+            {activeItem && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, fontFamily: 'var(--font-mono)', fontSize: 9 }}>
+                <span style={{ color: 'var(--text-muted)' }}>DESTACANDO:</span>
+                <span style={{ color: 'var(--text-pri)', fontWeight: 700 }}>
+                  {activeItem.type === 'dia' ? `DIA ${activeItem.key}` : activeItem.key}
+                </span>
+                <button
+                  onClick={() => setActiveItem(null)}
+                  style={{ background: 'transparent', border: '1px solid var(--border)', borderRadius: 3, padding: '1px 6px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: 8, cursor: 'pointer' }}
+                >✕</button>
+              </div>
+            )}
+
+            {/* Colunas por cluster + coluna DIFF (só quando 2 clusters) */}
+            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${selClusters.length}, 1fr)${showDiff ? ' 1fr' : ''}`, gap: 16 }}>
+
+              {/* Coluna por cluster */}
+              {selClusters.map(({ c, cor }) => {
+                const colOpacity = diaAtivo
+                  ? (c.perfil.diasCriticos.includes(diaAtivo) ? 1 : 0.25)
+                  : 1;
+                return (
+                  <div key={c.id} style={{ display: 'flex', flexDirection: 'column', gap: 8, opacity: colOpacity, transition: 'opacity 0.2s ease' }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, color: cor, letterSpacing: '0.08em', marginBottom: 4 }}>
+                      C{c.id} — {c.label.split('—')[0].trim()}
+                    </div>
+
+                    {/* Cards de métrica clicáveis */}
+                    {METRICS.map(m => {
+                      const val     = m.get(c);
+                      const isActive = activeItem?.key === m.l;
+                      return (
+                        <div
+                          key={m.l}
+                          onClick={() => setActiveItem(prev => prev?.key === m.l ? null : { type: 'metric', key: m.l })}
+                          style={{
+                            background: 'var(--surface3)',
+                            border: `1px solid ${isActive ? cor : 'var(--border)'}`,
+                            borderRadius: 4, padding: '8px 12px',
+                            cursor: 'pointer',
+                            opacity: activeItem?.type === 'metric' && !isActive ? 0.3 : 1,
+                            transition: 'opacity 0.15s, border-color 0.15s',
+                          }}
+                        >
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-muted)', letterSpacing: '0.1em', marginBottom: 2 }}>{m.l}</div>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700, color: 'var(--text-pri)' }}>{m.fmt(val)}{m.unit}</div>
+                        </div>
+                      );
+                    })}
+
+                    {/* Barras TGV clicáveis */}
+                    <div style={{ marginTop: 4 }}>
+                      {[{ l: 'T', v: c.score_T }, { l: 'G', v: c.score_G }, { l: 'V', v: c.score_V }].map(({ l, v }) => {
+                        const tgvKey   = `score_${l}`;
+                        const isActive = activeItem?.key === tgvKey;
+                        return (
+                          <div
+                            key={l}
+                            onClick={() => setActiveItem(prev => prev?.key === tgvKey ? null : { type: 'tgv', key: tgvKey })}
+                            style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5, cursor: 'pointer', opacity: activeItem?.type === 'tgv' && !isActive ? 0.3 : 1, transition: 'opacity 0.15s' }}
+                          >
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: isActive ? cor : 'var(--text-muted)', width: 8, fontWeight: isActive ? 700 : 400 }}>{l}</span>
+                            <div style={{ flex: 1, height: isActive ? 6 : 4, background: 'var(--surface4)', borderRadius: 2, transition: 'height 0.15s' }}>
+                              <div style={{ width: `${v * 100}%`, height: '100%', background: cor, borderRadius: 2, opacity: 0.85 }} />
+                            </div>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: cor, width: 28, textAlign: 'right', fontWeight: 700 }}>{(v * 100).toFixed(0)}%</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Dias críticos clicáveis */}
+                    <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+                      {['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'].map(d => {
+                        const isCrit   = c.perfil.diasCriticos.includes(d);
+                        const isActive = activeItem?.key === d;
+                        return (
+                          <span
+                            key={d}
+                            onClick={() => setActiveItem(prev => prev?.key === d ? null : { type: 'dia', key: d })}
+                            style={{
+                              fontFamily: 'var(--font-mono)', fontSize: 8,
+                              cursor: 'pointer',
+                              opacity: activeItem?.type === 'dia' && !isActive ? 0.2 : 1,
+                              color: isCrit ? cor : isActive ? 'var(--text-pri)' : 'var(--text-muted)',
+                              background: isCrit ? `${cor}20` : isActive ? 'var(--surface3)' : 'var(--surface4)',
+                              border: `1px solid ${isCrit ? cor + '55' : isActive ? 'var(--border-md)' : 'var(--border)'}`,
+                              borderRadius: 3, padding: '2px 5px',
+                              fontWeight: isCrit ? 700 : 400,
+                              transition: 'opacity 0.15s',
+                            }}
+                          >{d}</span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Coluna DIFF — só quando 2 clusters */}
+              {showDiff && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.08em', marginBottom: 4 }}>
+                    DIFF C{a.c.id} → C{b.c.id}
+                  </div>
+                  {METRICS.map(m => {
+                    const diff    = m.get(b.c) - m.get(a.c);
+                    const isAbove = diff > 0;
+                    const isZero  = Math.abs(diff) < 0.01;
+                    const isActive = activeItem?.key === m.l;
+                    return (
+                      <div key={m.l} style={{
+                        background: 'var(--surface3)',
+                        border: `1px solid ${isZero ? 'var(--border)' : isAbove ? 'var(--red)33' : 'var(--green)33'}`,
+                        borderRadius: 4, padding: '8px 12px',
+                        opacity: activeItem?.type === 'metric' && !isActive ? 0.3 : 1,
+                        transition: 'opacity 0.15s',
+                      }}>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-muted)', letterSpacing: '0.1em', marginBottom: 2 }}>{m.l}</div>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 700, color: isZero ? 'var(--text-muted)' : isAbove ? 'var(--red)' : 'var(--green)' }}>
+                          {isZero ? '—' : `${isAbove ? '▲' : '▼'} ${Math.abs(diff).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}${m.unit}`}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
@@ -870,6 +1037,16 @@ function ClusterQuadrant({ clusters }) {
 export default function TecnicoPage() {
   const { isMobile } = useBreakpoint();
   const [periodo, setPeriodo] = useState('ANO');
+  const [clusterSelected, setClusterSelected] = useState(new Set());
+
+  function toggleCluster(id) {
+    setClusterSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   // ── Dados de modelo via API ────────────────────────────────────────────────
   const { data: clustersApiData, loading: clustersLoading, disponivel: clustersDisponivel } = useApi('/clusters');
@@ -1014,13 +1191,33 @@ export default function TecnicoPage() {
           sub={clustersDisponivel && clustersData
             ? `K-MEANS TGV · K=4 · Silhouette=0.608 · Temporalidade × Volume`
             : 'K-MEANS TGV · execute o notebook 05 para gerar dados de cluster'}
+          action={clusterSelected.size > 0 ? (
+            <button
+              onClick={() => setClusterSelected(new Set())}
+              style={{
+                background: 'transparent',
+                border: '1px solid var(--border)',
+                borderRadius: 4,
+                padding: '4px 10px',
+                color: 'var(--text-muted)',
+                fontFamily: 'var(--font-mono)',
+                fontSize: 10,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >✕ LIMPAR SELEÇÃO ({clusterSelected.size})</button>
+          ) : null}
         >
           {clustersLoading ? (
             <Skeleton height={400} />
           ) : !clustersDisponivel ? (
             <SemDados mensagem="Modelo K-Means não treinado — execute o notebook 05" />
           ) : (
-            <ClusterQuadrant clusters={clustersData} />
+            <ClusterQuadrant
+              clusters={clustersData}
+              selected={clusterSelected}
+              onToggle={toggleCluster}
+            />
           )}
         </Module>
 
