@@ -3,6 +3,7 @@ data_loader.py — Carrega JSONs de outputs/ com cache em memória (TTL 60s).
 Invalida o cache quando o arquivo é modificado (mtime). Nunca lança exceção.
 """
 import json
+import math
 import os
 import time
 from pathlib import Path
@@ -12,6 +13,17 @@ BASE = Path(__file__).parent.parent.parent / "outputs"
 
 _cache: dict[str, dict] = {}
 TTL = 60  # segundos
+
+
+def _sanitize(obj: Any) -> Any:
+    """Substitui float NaN/Inf por None recursivamente (pandas escreve NaN no JSON)."""
+    if isinstance(obj, float) and not math.isfinite(obj):
+        return None
+    if isinstance(obj, dict):
+        return {k: _sanitize(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_sanitize(v) for v in obj]
+    return obj
 
 
 def load_json(filename: str) -> Optional[Any]:
@@ -32,7 +44,7 @@ def load_json(filename: str) -> Optional[Any]:
             return cached["data"]
 
         with open(filepath, "r", encoding="utf-8") as f:
-            data = json.load(f)
+            data = _sanitize(json.load(f))
 
         _cache[filename] = {"data": data, "mtime": mtime, "loaded_at": now}
         return data

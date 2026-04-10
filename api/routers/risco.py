@@ -1,6 +1,6 @@
 from typing import Union
 from fastapi import APIRouter
-from api.schemas import RiscoProdutosResponse, RiscoGruposResponse, NaoDisponivel
+from api.schemas import RiscoResponse, RiscoProdutosResponse, RiscoGruposResponse, NaoDisponivel
 from api.services.data_loader import load_json
 
 router = APIRouter(tags=["Risco OLA (XGBoost)"])
@@ -10,7 +10,7 @@ _NOT_TRAINED = {"disponivel": False, "mensagem": "Modelo XGBoost ainda não trei
 
 @router.get(
     "/risco",
-    response_model=Union[dict, NaoDisponivel],
+    response_model=Union[RiscoResponse, NaoDisponivel],
     summary="JSON completo do modelo XGBoost de risco OLA",
 )
 def get_risco():
@@ -18,17 +18,11 @@ def get_risco():
     Retorna o JSON completo do modelo XGBoost de risco de violação de OLA.
 
     **Disponível apenas após execução do notebook 04** (`04_xgboost_ola.ipynb`).
-    O JSON gerado em `outputs/risco_ola.json` deve conter:
-
-    - `produtos`: lista de produtos com probabilidade de violação
-    - `grupos`: lista de grupos com taxa histórica de violação
-    - `shap_features`: feature importance do modelo XGBoost (para o gráfico SHAP)
 
     **Contexto do modelo:**
     - Target: `KPI Violado?` — 1 se duração > OLA, 0 caso contrário
-    - Desbalanceamento: ~1:102 (248 violações vs 25.352 não-violações)
-    - Tratamento: `scale_pos_weight` ou SMOTE (apenas no treino)
-    - Métricas: Recall, F1-Score, ROC-AUC (acurácia descartada pelo desbalanceamento)
+    - Desbalanceamento: ~1:102 — tratado com `scale_pos_weight`
+    - Métricas: Recall, F1-Score, ROC-AUC, PR-AUC (acurácia descartada)
 
     Retorna `disponivel: false` enquanto o notebook não for executado.
     """
@@ -64,11 +58,18 @@ def get_risco_produtos():
     data = load_json("risco_ola.json")
     if data is None:
         return _NOT_TRAINED
-    produtos = sorted(
-        data.get("produtos", []),
-        key=lambda x: x.get("probViolacao", 0),
-        reverse=True,
-    )
+    risco_prio = data.get("risco_por_prioridade", {})
+    produtos = [
+        {
+            "produto":          prio,
+            "probViolacao":     round(v["media_prob"] * 100, 1),
+            "pctAltoRisco":     v["pct_alto_risco"],
+            "nIncidentes":      v["n_incidentes"],
+            "taxaViolacaoReal": v["taxa_violacao_real"],
+        }
+        for prio, v in risco_prio.items()
+    ]
+    produtos.sort(key=lambda x: x["probViolacao"], reverse=True)
     return {"disponivel": True, "produtos": produtos}
 
 
@@ -101,4 +102,4 @@ def get_risco_grupos():
         key=lambda x: x.get("taxaViolacao", 0),
         reverse=True,
     )
-    return {"disponivel": True, "grupos": grupos}
+    return {"disponivel": True, "grupos": grupos}  # lista vazia se notebook não gerou grupos

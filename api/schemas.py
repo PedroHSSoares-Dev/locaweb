@@ -166,15 +166,72 @@ class HeatmapItem(BaseModel):
 
 
 # ────────────────────────────────────────────────────────────────────────────────
-# Risco OLA — XGBoost (notebook 04 — pendente)
+# Risco OLA — XGBoost (notebook 04)
 # ────────────────────────────────────────────────────────────────────────────────
 
+class MetricasRisco(BaseModel):
+    recall_violacao:    float
+    precision_violacao: float
+    f1_violacao:        float
+    roc_auc:            float
+    pr_auc:             float
+    tp:  int
+    fp:  int
+    fn:  int
+    tn:  int
+    total_teste:          int
+    violacoes_reais:      int
+    violacoes_capturadas: int
+    roc_auc_cv_mean: Optional[float] = None
+    roc_auc_cv_std:  Optional[float] = None
+    pr_auc_cv_mean:  Optional[float] = None
+    pr_auc_cv_std:   Optional[float] = None
+
+
+class ShapFeature(BaseModel):
+    rank:          int
+    feature:       str
+    shap_mean_abs: float
+
+
+class RiscoPrioridade(BaseModel):
+    media_prob:         float
+    pct_alto_risco:     float
+    n_incidentes:       int
+    taxa_violacao_real: float
+
+
+class DistRisco(BaseModel):
+    count:           int
+    pct:             float
+    violacoes_reais: int
+    limite_inferior: Optional[float] = None
+    limite_superior: Optional[float] = None
+
+
+class RiscoResponse(BaseModel):
+    disponivel:              bool
+    modelo:                  Optional[str]   = None
+    versao:                  Optional[str]   = None
+    abordagem:               Optional[str]   = None
+    threshold_otimizado:     Optional[float] = None
+    threshold_recall_70:     Optional[float] = None
+    scale_pos_weight:        Optional[int]   = None
+    metricas:                Optional[MetricasRisco]              = None
+    feature_importance_shap: Optional[list[ShapFeature]]         = None
+    risco_por_prioridade:    Optional[dict[str, RiscoPrioridade]] = None
+    distribuicao_risco:      Optional[dict[str, DistRisco]]       = None
+
+
 class RiscoProdutoItem(BaseModel):
-    """Risco de violação de OLA por produto com incidentes em aberto."""
-    produto: str = Field(..., example="lhco", description="Código interno do produto Locaweb")
-    probViolacao: float = Field(..., example=42.0, description="Probabilidade de violar OLA (%) — XGBoost score")
-    incidentesPendentes: int = Field(..., example=23, description="Incidentes em aberto no produto")
-    criticos: Optional[int] = Field(None, example=2, description="Incidentes com risco > 50%")
+    """Risco de violação de OLA por produto/prioridade."""
+    produto: str = Field(..., example="P3", description="Prioridade ou produto")
+    probViolacao: float = Field(..., example=28.2, description="Probabilidade média de violar OLA (%)")
+    pctAltoRisco: Optional[float] = Field(None, example=14.17, description="% de incidentes classificados como alto risco")
+    nIncidentes: Optional[int] = Field(None, example=3881, description="Incidentes no conjunto de teste")
+    taxaViolacaoReal: Optional[float] = Field(None, example=13.86, description="Taxa real de violação (%)")
+    incidentesPendentes: Optional[int] = Field(None, example=23, description="Incidentes em aberto (legado)")
+    criticos: Optional[int] = Field(None, example=2, description="Incidentes com risco > 50% (legado)")
 
 
 class RiscoGrupoItem(BaseModel):

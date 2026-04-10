@@ -1053,6 +1053,25 @@ function ClusterQuadrant({ clusters, selected, onToggle }) {
   );
 }
 
+// ─── SHAP feature descriptions ────────────────────────────────────────────────
+const SHAP_DESCRICOES = {
+  prioridade_bin:   'Prioridade do incidente (P2 vs P3)',
+  grupo_freq:       'Frequência histórica do grupo de atendimento',
+  subcategoria_enc: 'Subcategoria do incidente',
+  aberto_por_enc:   'Usuário que abriu o incidente',
+  produto_freq:     'Frequência histórica do produto',
+  rolling_7d:       'Volume médio dos últimos 7 dias',
+  categoria_enc:    'Categoria do incidente',
+  grupo_enc:        'Grupo designado (codificado)',
+  produto_enc:      'Produto afetado (codificado)',
+  hora:             'Hora de abertura do incidente',
+  semana_ano:       'Semana do ano',
+  rolling_30d:      'Volume médio dos últimos 30 dias',
+  mes:              'Mês de abertura',
+  lag_7d:           'Volume do dia equivalente há 7 dias',
+  mes_cos:          'Componente cosseno do mês (cíclico)',
+};
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function TecnicoPage() {
   const { isMobile } = useBreakpoint();
@@ -1073,10 +1092,15 @@ export default function TecnicoPage() {
   const { data: riscoApiData,    loading: riscoLoading,    disponivel: riscoDisponivel    } = useApi('/risco');
 
   // SHAP: usa API se disponível, senão fallback para mockData (simulado)
-  const shapData = (riscoDisponivel && riscoApiData?.shap_features)
-    ? riscoApiData.shap_features
+  const shapData = (riscoDisponivel && riscoApiData?.feature_importance_shap)
+    ? riscoApiData.feature_importance_shap.map(f => ({
+        feature:    f.feature,
+        label:      SHAP_DESCRICOES[f.feature] ?? f.feature,
+        importance: f.shap_mean_abs,
+        descricao:  SHAP_DESCRICOES[f.feature] ?? f.feature,
+      }))
     : shapFeatures;
-  const isShapSimulado = !riscoDisponivel;
+  const isShapSimulado = !(riscoDisponivel && riscoApiData?.feature_importance_shap);
 
   // Clusters: usa API se disponível
   const clustersData = (clustersDisponivel && clustersApiData?.clusters)
@@ -1178,7 +1202,7 @@ export default function TecnicoPage() {
               barSize={13}
             >
               <XAxis
-                type="number" domain={[0, 0.35]}
+                type="number" domain={[0, 'auto']}
                 {...axisProps}
                 axisLine={{ stroke: 'var(--border)' }}
                 tickFormatter={v => `${(v * 100).toFixed(0)}%`}
@@ -1204,9 +1228,126 @@ export default function TecnicoPage() {
           </ResponsiveContainer>
         </Module>
 
-        {/* ── MODULE 04: Cluster Analysis ───────────────────────────────── */}
+        {/* ── MODULE 04: XGBoost Model Metrics ──────────────────────────── */}
         <Module
           n={4}
+          title="Performance do Modelo XGBoost"
+          sub={riscoDisponivel
+            ? `THRESHOLD F1-ÓTIMO: ${riscoApiData?.threshold_otimizado} · SCALE_POS_WEIGHT: ${riscoApiData?.scale_pos_weight}`
+            : 'Execute o notebook 04 para ver métricas reais'}
+        >
+          {riscoLoading ? <Skeleton height={200} /> :
+           !riscoDisponivel ? <SemDados mensagem="Modelo XGBoost não treinado — execute o notebook 04" /> : (() => {
+            const m = riscoApiData?.metricas;
+            if (!m) return <SemDados mensagem="Métricas não disponíveis" />;
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+                {/* KPI Cards */}
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2,1fr)' : 'repeat(4,1fr)', gap: 10 }}>
+                  {[
+                    { l: 'ROC-AUC',  v: m.roc_auc.toFixed(4),                     sub: 'Discriminação geral',   color: m.roc_auc > 0.8          ? 'var(--green)' : 'var(--orange)' },
+                    { l: 'PR-AUC',   v: m.pr_auc.toFixed(4),                      sub: 'Precisão-Recall',        color: m.pr_auc > 0.5           ? 'var(--green)' : 'var(--orange)' },
+                    { l: 'RECALL',   v: `${(m.recall_violacao * 100).toFixed(1)}%`, sub: 'Violações detectadas', color: m.recall_violacao > 0.5   ? 'var(--green)' : 'var(--orange)' },
+                    { l: 'F1-SCORE', v: m.f1_violacao.toFixed(4),                  sub: 'Equilíbrio P×R',       color: m.f1_violacao > 0.5       ? 'var(--green)' : 'var(--orange)' },
+                  ].map(({ l, v, sub, color }) => (
+                    <div key={l} style={{ background: 'var(--surface3)', border: '1px solid var(--border)', borderRadius: 6, padding: '12px 14px' }}>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', letterSpacing: '0.1em', marginBottom: 4 }}>{l}</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 20, fontWeight: 700, color }}>{v}</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-sec)' }}>{sub}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Matriz de confusão + Distribuição de risco */}
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12 }}>
+
+                  {/* Matriz de confusão */}
+                  <div style={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 6, padding: '12px 14px' }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 10 }}>
+                      MATRIZ DE CONFUSÃO · TESTE ({m.total_teste.toLocaleString('pt-BR')} incidentes)
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                      {[
+                        { l: 'VERDADEIRO POSITIVO', v: m.tp, sub: 'Violações capturadas', color: 'var(--green)'    },
+                        { l: 'FALSO POSITIVO',      v: m.fp, sub: 'Alarmes falsos',        color: 'var(--orange)'  },
+                        { l: 'FALSO NEGATIVO',      v: m.fn, sub: 'Violações perdidas',    color: 'var(--red)'     },
+                        { l: 'VERDADEIRO NEGATIVO', v: m.tn, sub: 'OK confirmados',        color: 'var(--text-sec)' },
+                      ].map(({ l, v, sub, color }) => (
+                        <div key={l} style={{ background: 'var(--surface3)', border: `1px solid ${color}33`, borderRadius: 4, padding: '8px 10px' }}>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-muted)', marginBottom: 2 }}>{l}</div>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 16, fontWeight: 700, color }}>{v.toLocaleString('pt-BR')}</div>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-sec)' }}>{sub}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Distribuição de risco + risco por prioridade */}
+                  <div style={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 6, padding: '12px 14px' }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 10 }}>
+                      DISTRIBUIÇÃO DE RISCO · CONJUNTO DE TESTE
+                    </div>
+                    {riscoApiData?.distribuicao_risco && Object.entries(riscoApiData.distribuicao_risco).map(([cat, d]) => {
+                      const cor   = cat === 'alto' ? 'var(--red)' : cat === 'medio' ? 'var(--orange)' : 'var(--green)';
+                      const label = cat === 'alto' ? 'ALTO' : cat === 'medio' ? 'MÉDIO' : 'BAIXO';
+                      return (
+                        <div key={cat} style={{ marginBottom: 10 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: cor, fontWeight: 700 }}>{label}</span>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-sec)' }}>
+                              {d.count.toLocaleString('pt-BR')} inc. · {d.violacoes_reais} viol. reais
+                            </span>
+                          </div>
+                          <div style={{ height: 6, background: 'var(--surface4)', borderRadius: 3 }}>
+                            <div style={{ width: `${d.pct}%`, height: '100%', background: cor, borderRadius: 3, opacity: 0.8 }} />
+                          </div>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-muted)', marginTop: 2 }}>{d.pct}% dos incidentes</div>
+                        </div>
+                      );
+                    })}
+                    <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 8 }}>RISCO POR PRIORIDADE</div>
+                      {riscoApiData?.risco_por_prioridade && Object.entries(riscoApiData.risco_por_prioridade).map(([prio, d]) => {
+                        const cor = prio === 'P3' ? '#ffcc00' : '#5ac8fa';
+                        return (
+                          <div key={prio} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700, color: cor }}>{prio}</span>
+                            <div style={{ display: 'flex', gap: 12 }}>
+                              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-sec)' }}>
+                                prob. média: <strong style={{ color: cor }}>{(d.media_prob * 100).toFixed(1)}%</strong>
+                              </span>
+                              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-sec)' }}>
+                                violação real: <strong style={{ color: d.taxa_violacao_real > 10 ? 'var(--red)' : 'var(--green)' }}>{d.taxa_violacao_real}%</strong>
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Insight P3 > P2 */}
+                <div style={{ background: 'var(--surface2)', border: '1px solid var(--orange)33', borderLeft: '3px solid var(--orange)', borderRadius: 6, padding: '10px 14px' }}>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--orange)', fontWeight: 700, letterSpacing: '0.1em', marginBottom: 4 }}>
+                    INSIGHT: P3 VIOLA MAIS QUE P2
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--text-sec)', lineHeight: 1.6 }}>
+                    Contra-intuitivo: P2 tem OLA mais curto (4h vs 12h) mas viola menos (0.97%) que P3 (13.86%).
+                    A priorização humana das equipes resolve P2 antes do prazo mesmo sob pressão.
+                    P3 acumula na fila e frequentemente ultrapassa as 12h — o modelo captura esse padrão.
+                  </div>
+                </div>
+
+              </div>
+            );
+          })()}
+        </Module>
+
+        {/* ── MODULE 05: Cluster Analysis ───────────────────────────────── */}
+        <Module
+          n={5}
           title="Análise de Clusters"
           sub={clustersDisponivel && clustersData
             ? `K-MEANS TGV · K=4 · Silhouette=0.608 · Temporalidade × Volume`
@@ -1241,9 +1382,9 @@ export default function TecnicoPage() {
           )}
         </Module>
 
-        {/* ── MODULE 05: Group × Category Matrix ────────────────────────── */}
+        {/* ── MODULE 06: Group × Category Matrix ────────────────────────── */}
         <Module
-          n={5}
+          n={6}
           title="Matriz Grupo × Categoria"
           sub="Taxa de violação estimada (%) · células mais escuras = maior taxa · scroll horizontal disponível"
           noPad
