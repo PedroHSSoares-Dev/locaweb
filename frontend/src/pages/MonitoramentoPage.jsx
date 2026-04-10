@@ -9,6 +9,7 @@ import { AlertTriangle, Users, Package, Activity } from 'lucide-react';
 import { useApi } from '../hooks/useApi';
 import SemDados from '../components/SemDados';
 import DrillDownPanel from '../components/DrillDownPanel';
+import RiscoUnificado from '../components/RiscoUnificado';
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 function Skeleton({ height = 80 }) {
@@ -480,116 +481,13 @@ export default function MonitoramentoPage() {
           </div>
         </Module>
 
-        {/* ── MODULE 04: Predicted SLA Breaches ─────────────────────────── */}
+        {/* ── MODULE 04: Análise Preditiva de Violação ──────────────────── */}
         <Module
           n={4}
-          title="Risco de Violação por Produto"
-          sub={riscoDisponivel ? 'ATRIBUIÇÃO DE RISCO EM TEMPO REAL POR PRODUTO · XGBoost' : 'XGBOOST PENDENTE · execute o notebook 04'}
-          noPad
+          title="Análise Preditiva de Violação"
+          sub="XGBOOST · SHAP · DISTRIBUIÇÃO DE RISCO"
         >
-          {riscoLoading ? (
-            <div style={{ padding: '16px' }}><Skeleton height={120} /></div>
-          ) : !riscoDisponivel ? (
-            <div style={{ padding: '16px' }}>
-              <SemDados mensagem="Modelo XGBoost não treinado — execute o notebook 04" />
-            </div>
-          ) : (
-            <>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ background: 'var(--surface3)' }}>
-                    {['PRODUTO', 'INC. PENDENTES', 'RISCO DE VIOLAÇÃO OLA', 'STATUS', ''].map(h => (
-                      <th key={h} style={{
-                        padding: '8px 16px', textAlign: 'left',
-                        fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
-                        color: 'var(--text-sec)', letterSpacing: '0.12em',
-                        borderBottom: '1px solid var(--border)',
-                      }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {riscoList.map((r, i) => {
-                    const riskColor = r.probViolacao > 30 ? 'var(--red)' : r.probViolacao > 15 ? 'var(--orange)' : 'var(--green)';
-                    return (
-                      <tr
-                        key={r.produto}
-                        style={{
-                          background: r.probViolacao > 30 ? 'rgba(255,45,85,0.04)' : r.probViolacao > 15 ? 'rgba(255,159,10,0.03)' : 'transparent',
-                          borderBottom: i < riscoList.length - 1 ? '1px solid var(--border)' : 'none',
-                        }}
-                      >
-                        <td style={{ padding: '10px 0 10px 0', paddingLeft: 0 }}>
-                          <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <div style={{ width: 3, height: 36, background: riskColor, borderRadius: 2, marginRight: 14, flexShrink: 0 }} />
-                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: 'var(--text-pri)' }}>
-                              {r.produto}
-                            </span>
-                          </div>
-                        </td>
-                        <td style={{ padding: '14px 16px', fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--text-sec)' }}>
-                          {r.incidentesPendentes}
-                        </td>
-                        <td style={{ padding: '14px 16px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <div style={{ width: 80, height: 3, background: 'var(--surface4)', borderRadius: 2, overflow: 'hidden' }}>
-                              <div style={{
-                                height: '100%', width: `${r.probViolacao}%`,
-                                background: riskColor, borderRadius: 2,
-                              }} />
-                            </div>
-                            <span style={{
-                              fontFamily: 'var(--font-mono)', fontSize: 12,
-                              fontWeight: 700, color: riskColor,
-                            }}>{r.probViolacao}% RISCO</span>
-                          </div>
-                        </td>
-                        <td style={{ padding: '14px 16px' }}>
-                          <span style={{
-                            fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
-                            color: riskColor,
-                            background: r.probViolacao > 30 ? 'var(--red-dim)' : r.probViolacao > 15 ? 'var(--orange-dim)' : 'var(--green-dim)',
-                            border: `1px solid ${riskColor}44`,
-                            borderRadius: 3, padding: '2px 8px', letterSpacing: '0.08em',
-                          }}>
-                            {r.probViolacao > 30 ? 'ALTO RISCO' : r.probViolacao > 15 ? 'ATENÇÃO' : 'NOMINAL'}
-                          </span>
-                        </td>
-                        <td style={{ padding: '14px 16px' }}>
-                          <button
-                            onClick={() => setPanelItem(r)}
-                            style={{
-                              fontFamily: 'var(--font-mono)', fontSize: 11,
-                              color: 'var(--text-sec)',
-                              border: '1px solid var(--border-hi)',
-                              borderRadius: 3, padding: '3px 10px',
-                              background: 'transparent',
-                              letterSpacing: '0.06em', transition: 'all 0.15s',
-                            }}
-                            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'var(--text-pri)'; }}
-                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-sec)'; }}
-                          >
-                            [ANALISAR]
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-              <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)' }}>
-                <button style={{
-                  fontFamily: 'var(--font-mono)', fontSize: 11,
-                  color: 'var(--text-sec)',
-                  border: '1px solid var(--border-hi)',
-                  borderRadius: 3, padding: '6px 16px',
-                  background: 'transparent', letterSpacing: '0.08em',
-                }}>
-                  [EXECUTAR MITIGAÇÃO PREDITIVA]
-                </button>
-              </div>
-            </>
-          )}
+          <RiscoUnificado />
         </Module>
       </main>
 

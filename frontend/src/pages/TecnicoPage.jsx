@@ -5,10 +5,11 @@ import {
   Cell, LabelList,
 } from 'recharts';
 import { Terminal, AlertTriangle, Activity, Users } from 'lucide-react';
-import { grupos, shapFeatures, categorias, categoriaNomes } from '../data/mockData';
+import { grupos, categorias, categoriaNomes } from '../data/mockData';
 import { useApi } from '../hooks/useApi';
 import SemDados from '../components/SemDados';
 import PeriodoToggle from '../components/PeriodoToggle';
+import RiscoUnificado from '../components/RiscoUnificado';
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 function Skeleton({ height = 80 }) {
@@ -129,23 +130,6 @@ function GrupoTooltip({ active, payload, label }) {
   );
 }
 
-// ─── SHAP tooltip ──────────────────────────────────────────────────────────────
-function ShapTooltip({ active, payload }) {
-  if (!active || !payload?.length) return null;
-  const d = payload[0]?.payload;
-  return (
-    <div style={{
-      background: 'var(--surface3)', border: '1px solid var(--border-md)',
-      borderRadius: 4, padding: '8px 12px', maxWidth: 220,
-    }}>
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)', marginBottom: 4 }}>{d?.feature}</div>
-      <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--text-pri)', marginBottom: 4 }}>{d?.descricao}</div>
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: 'var(--red)' }}>
-        {(d?.importance * 100).toFixed(0)}%
-      </div>
-    </div>
-  );
-}
 
 // ─── Cluster Heatmap (layout unificado: identidade + grid de métricas) ────────
 function ClusterHeatmap({ clusters }) {
@@ -1053,25 +1037,6 @@ function ClusterQuadrant({ clusters, selected, onToggle }) {
   );
 }
 
-// ─── SHAP feature descriptions ────────────────────────────────────────────────
-const SHAP_DESCRICOES = {
-  prioridade_bin:   'Prioridade do incidente (P2 vs P3)',
-  grupo_freq:       'Frequência histórica do grupo de atendimento',
-  subcategoria_enc: 'Subcategoria do incidente',
-  aberto_por_enc:   'Usuário que abriu o incidente',
-  produto_freq:     'Frequência histórica do produto',
-  rolling_7d:       'Volume médio dos últimos 7 dias',
-  categoria_enc:    'Categoria do incidente',
-  grupo_enc:        'Grupo designado (codificado)',
-  produto_enc:      'Produto afetado (codificado)',
-  hora:             'Hora de abertura do incidente',
-  semana_ano:       'Semana do ano',
-  rolling_30d:      'Volume médio dos últimos 30 dias',
-  mes:              'Mês de abertura',
-  lag_7d:           'Volume do dia equivalente há 7 dias',
-  mes_cos:          'Componente cosseno do mês (cíclico)',
-};
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function TecnicoPage() {
   const { isMobile } = useBreakpoint();
@@ -1091,17 +1056,6 @@ export default function TecnicoPage() {
   const { data: clustersApiData, loading: clustersLoading, disponivel: clustersDisponivel } = useApi('/clusters');
   const { data: riscoApiData,    loading: riscoLoading,    disponivel: riscoDisponivel    } = useApi('/risco');
 
-  // SHAP: usa API se disponível, senão fallback para mockData (simulado)
-  const shapData = (riscoDisponivel && riscoApiData?.feature_importance_shap)
-    ? riscoApiData.feature_importance_shap.map(f => ({
-        feature:    f.feature,
-        label:      SHAP_DESCRICOES[f.feature] ?? f.feature,
-        importance: f.shap_mean_abs,
-        descricao:  SHAP_DESCRICOES[f.feature] ?? f.feature,
-      }))
-    : shapFeatures;
-  const isShapSimulado = !(riscoDisponivel && riscoApiData?.feature_importance_shap);
-
   // Clusters: usa API se disponível
   const clustersData = (clustersDisponivel && clustersApiData?.clusters)
     ? clustersApiData.clusters
@@ -1109,8 +1063,6 @@ export default function TecnicoPage() {
 
   // Dados históricos (mockData — referência imutável do dataset)
   const gruposOrdenados = [...grupos].sort((a, b) => b.taxaViolacao - a.taxaViolacao);
-  const shapOrdenado = [...shapData].sort((a, b) => b.importance - a.importance);
-  const maxImportance = shapOrdenado[0]?.importance ?? 1;
   const topCats = categorias.slice(0, 5);
 
   const axisProps = {
@@ -1187,45 +1139,15 @@ export default function TecnicoPage() {
           </ResponsiveContainer>
         </Module>
 
-        {/* ── MODULE 03: XGBoost Feature Importance ─────────────────────── */}
+        {/* ── MODULE 03: Análise Preditiva de Violação ──────────────────── */}
         <Module
           n={3}
-          title={`Fatores de Risco de Violação${isShapSimulado ? ' · SIMULADO' : ''}`}
-          sub={isShapSimulado
-            ? 'Valores simulados · substituídos por SHAP real após executar notebook 04'
-            : 'Valores SHAP reais — outputs/risco_ola.json'}
+          title="Análise Preditiva de Violação"
+          sub={riscoDisponivel
+            ? 'Valores SHAP reais — outputs/risco_ola.json'
+            : 'Valores SHAP simulados · execute o notebook 04'}
         >
-          <ResponsiveContainer width="100%" height={shapOrdenado.length * 36 + 20}>
-            <BarChart
-              data={shapOrdenado} layout="vertical"
-              margin={{ top: 4, right: 60, bottom: 4, left: 20 }}
-              barSize={13}
-            >
-              <XAxis
-                type="number" domain={[0, 'auto']}
-                {...axisProps}
-                axisLine={{ stroke: 'var(--border)' }}
-                tickFormatter={v => `${(v * 100).toFixed(0)}%`}
-              />
-              <YAxis
-                type="category" dataKey="label" width={130}
-                tick={{ fontFamily: 'var(--font-mono)', fontSize: 10, fill: 'var(--text-sec)' }}
-                tickLine={false} axisLine={false}
-              />
-              <Tooltip content={<ShapTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
-              <Bar dataKey="importance" name="Importância" radius={[0, 3, 3, 0]}>
-                {shapOrdenado.map((f, i) => (
-                  <Cell key={i} fill="var(--red)" fillOpacity={0.2 + 0.8 * (f.importance / maxImportance)} />
-                ))}
-                <LabelList
-                  dataKey="importance"
-                  position="right"
-                  formatter={v => `${(v * 100).toFixed(0)}%`}
-                  style={{ fill: 'var(--text-muted)', fontSize: 10, fontFamily: 'var(--font-mono)' }}
-                />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <RiscoUnificado />
         </Module>
 
         {/* ── MODULE 04: XGBoost Model Metrics ──────────────────────────── */}
