@@ -159,14 +159,38 @@ def train(df: pd.DataFrame) -> dict:
         else:
             nome = f"Operação Normal — {periodo_m.capitalize()}"
 
+        dia_names = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"]
+        dia_medio = sub["dia_semana"].mean()
+        dias_criticos = [dia_names[int(round(dia_medio)) % 7]]
+
+        descricoes = {
+            "Alta Prioridade P2-dominante": "Incidentes de alta prioridade com predominância de P2. Maior risco de violação de OLA.",
+            "Fim de Semana / Noturno": "Incidentes concentrados nos fins de semana e horários noturnos. Menor cobertura de equipe.",
+            "Fora do Horário Comercial": "Incidentes abertos fora do horário comercial (antes das 8h ou após 18h).",
+        }
+        descricao = descricoes.get(nome, f"Incidentes com perfil {periodo_m}. Padrão operacional identificado por clustering.")
+
         cluster_info.append({
             "id": int(c),
             "nome": nome,
+            "label": nome,
+            "descricao": descricao,
             "tamanho": n,
             "pct_total": round(n / len(df_cl) * 100, 2),
+            "taxaViolacao": round(taxa, 3),
             "taxa_violacao_pct": round(taxa, 3),
             "total_violacoes": viol,
+            "score_T": round(min(10.0, hora_med / 2.4), 2),
+            "score_G": round(min(10.0, pct_p2 / 10.0), 2),
+            "score_V": round(min(10.0, taxa * 10.0), 2),
             "perfil": {
+                "horaMedia":      int(round(hora_med)),
+                "diasCriticos":   dias_criticos,
+                "produtos":       [],
+                "grupo":          "",
+                "pctP2":          round(pct_p2, 1),
+                "duracaoMediana": None,
+                "pctFds":         round(pct_fds, 1),
                 "hora_media": round(hora_med, 1),
                 "dia_semana_medio": round(float(sub["dia_semana"].mean()), 1),
                 "prioridade_p2_pct": round(pct_p2, 1),
@@ -205,13 +229,15 @@ def train(df: pd.DataFrame) -> dict:
 
 def export_json(results: dict, path: Path = OUTPUT_PATH) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    metricas = results["metricas_finais"]
     output = {
         "modelo": "kmeans_segmentacao",
         "gerado_em": date.today().strftime("%Y-%m-%d"),
-        "versao": "v2",
+        "metodologia": f"K-Means K={results['k_final']} — seleção por voto majoritário (Silhouette, CH, DB), K ímpar ≥ {K_MIN}",
         "k": results["k_final"],
+        "silhouette": metricas["silhouette_score"],
         "k_min_utilizado": K_MIN,
-        "metricas": results["metricas_finais"],
+        "metricas": metricas,
         "features_clustering": CLUSTER_FEATURES,
         "clusters": results["cluster_info"],
     }

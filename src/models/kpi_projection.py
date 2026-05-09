@@ -30,6 +30,14 @@ META_ANUAL = {
     "P3": {"min": 231, "max": 263},
 }
 
+OLA_HORAS = {"P2": 4, "P3": 12}
+
+NOMES_MESES = {
+    1: "Jan", 2: "Fev", 3: "Mar", 4: "Abr",
+    5: "Mai", 6: "Jun", 7: "Jul", 8: "Ago",
+    9: "Set", 10: "Out", 11: "Nov", 12: "Dez",
+}
+
 
 def calcular_meta_ajustada(
     violacoes_por_mes: list[int],
@@ -62,13 +70,15 @@ def load_data(raw_path: Path = RAW_PATH) -> pd.DataFrame:
 def calcular_projecao(kpi: pd.DataFrame, ano_referencia: int | None = None) -> dict:
     """
     Calcula KPI atingimento para o ano de referência (último ano do dataset se None).
+    Formato de saída compatível com o schema KpiResponse da API FastAPI.
     """
     if ano_referencia is None:
         ano_referencia = int(kpi["ano"].max())
 
     kpi_ano = kpi[kpi["ano"] == ano_referencia].copy()
 
-    resultado = {"ano": ano_referencia, "por_prioridade": {}}
+    resultado: dict = {"ano": ano_referencia}
+    por_mes: dict = {}
 
     for prio_label, prio_key in [("2 - Alta", "P2"), ("3 - Média", "P3")]:
         sub = kpi_ano[kpi_ano["Prioridade"] == prio_label]
@@ -85,57 +95,46 @@ def calcular_projecao(kpi: pd.DataFrame, ano_referencia: int | None = None) -> d
         meta_min = META_ANUAL[prio_key]["min"]
         meta_max = META_ANUAL[prio_key]["max"]
         meta_centro = (meta_min + meta_max) / 2
-        orcamento_mensal_base = meta_centro / 12
+        meta_mensal = meta_centro / 12
 
-        # Status anual
+        # Status / tendência anual
         if total_violacoes <= meta_max:
-            status_anual = "dentro_meta"
+            tendencia = "dentro_da_meta"
         elif total_violacoes <= meta_max * 1.2:
-            status_anual = "atencao"
+            tendencia = "atencao"
         else:
-            status_anual = "fora_meta"
+            tendencia = "fora_da_meta"
 
-        # Análise mensal com ajuste dinâmico
-        meses_info = []
+        # Meses anômalos (status critico ou atencao)
+        meses_anomalos = []
         for mes in range(1, 13):
-            viol_mes = violacoes_lista[mes - 1]
-            meta_ajustada = calcular_meta_ajustada(violacoes_lista, int(meta_centro), mes)
-            orcamento = orcamento_mensal_base
+            viol = violacoes_lista[mes - 1]
+            if viol > meta_mensal * 1.5:
+                meses_anomalos.append(NOMES_MESES[mes])
+            elif viol > meta_mensal:
+                meses_anomalos.append(NOMES_MESES[mes])
 
-            if viol_mes > orcamento * 1.5:
-                status_mes = "critico"
-            elif viol_mes > orcamento:
-                status_mes = "atencao"
-            else:
-                status_mes = "ok"
+        # pct e margem
+        pct_utilizado = round(total_violacoes / meta_centro * 100, 1) if meta_centro > 0 else 0.0
+        margem_restante = int(meta_centro - total_violacoes)
+        pct_atingimento = min(100, int(meta_centro / total_violacoes * 100)) if total_violacoes > 0 else 100
 
-            meses_info.append({
-                "mes": mes,
-                "violacoes": viol_mes,
-                "orcamento_base": round(orcamento_mensal_base, 2),
-                "meta_ajustada_proximo": round(meta_ajustada, 2),
-                "status": status_mes,
-            })
-
-        # Projeção fim de ano (tendência dos últimos 3 meses com dados)
-        meses_com_dados = [m for m in meses_info if m["violacoes"] > 0]
-        if len(meses_com_dados) >= 3:
-            media_recente = sum(m["violacoes"] for m in meses_com_dados[-3:]) / 3
-            meses_decorridos = len(meses_com_dados)
-            meses_restantes = 12 - meses_decorridos
-            projecao_fim_ano = total_violacoes + media_recente * meses_restantes
-        else:
-            projecao_fim_ano = total_violacoes * (12 / max(1, len(meses_com_dados)))
-
-        resultado["por_prioridade"][prio_key] = {
-            "meta_anual": {"min": meta_min, "max": meta_max, "centro": meta_centro},
-            "total_violacoes_ano": total_violacoes,
-            "status_anual": status_anual,
-            "projecao_fim_ano": round(projecao_fim_ano, 1),
-            "pct_meta_utilizado": round(total_violacoes / meta_centro * 100, 1),
-            "meses": meses_info,
+        resultado[prio_key] = {
+            "violacoesAno":   total_violacoes,
+            "metaAnual":      int(meta_centro),
+            "metaMensal":     round(meta_mensal, 2),
+            "pctUtilizado":   pct_utilizado,
+            "margemRestante": margem_restante,
+            "tendencia":      tendencia,
+            "olaHoras":       OLA_HORAS[prio_key],
+            "pctAtingimento": pct_atingimento,
+            "mesesAnomalos":  meses_anomalos,
         }
 
+        # por_mes: chave = número do mês como string (ex.: "1", "2", ...)
+        por_mes[prio_key] = {str(m): int(violacoes_lista[m - 1]) for m in range(1, 13)}
+
+    resultado["por_mes"] = por_mes
     return resultado
 
 
@@ -143,8 +142,8 @@ def export_json(resultado: dict, path: Path = OUTPUT_PATH) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     output = {
         "modelo": "kpi_projection",
+        "metodologia": "meta_anual_distribuida",
         "gerado_em": date.today().strftime("%Y-%m-%d"),
-        "versao": "v2",
         **resultado,
     }
     with open(path, "w", encoding="utf-8") as f:
@@ -160,11 +159,12 @@ if __name__ == "__main__":
     print("\nCalculando projeção...")
     resultado = calcular_projecao(kpi)
 
-    for prio, dados in resultado["por_prioridade"].items():
+    for prio in ["P2", "P3"]:
+        dados = resultado[prio]
         print(
-            f"  {prio}: {dados['total_violacoes_ano']} violações | "
-            f"Meta {dados['meta_anual']['min']}-{dados['meta_anual']['max']} | "
-            f"Status: {dados['status_anual']}"
+            f"  {prio}: {dados['violacoesAno']} violações | "
+            f"Meta ±{dados['metaAnual']} | "
+            f"Status: {dados['tendencia']}"
         )
 
     print("\nExportando JSON...")

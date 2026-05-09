@@ -61,10 +61,12 @@ def get_context():
     orig_data = load_json("previsoes_volume.json")
 
     if lstm_data:
+        mae_raw = lstm_data["mae_holdout_92_dias"]
+        mae_val = mae_raw["total"] if isinstance(mae_raw, dict) else float(mae_raw)
         previsoes_ctx = {
             "disponivel":   True,
             "modelo_ativo": "lstm_v2",
-            "mae_92_dias":  lstm_data["mae_holdout_92_dias"],
+            "mae_92_dias":  mae_val,
             "D1": {"total": _round_pos(lstm_data["serie"][0]["total"]), "p2": None, "p3": None},
             "D7": {"total": _round_pos(lstm_data["serie"][6]["total"]), "p2": None, "p3": None},
         }

@@ -1,0 +1,313 @@
+<mxfile host="app.diagrams.net" modified="2026-05-09" agent="Claude" version="21.0" type="device">
+  <diagram id="predictfy-arch" name="Arquitetura Predictfy × Locaweb">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ═══════════════════════════════════════════════════════════
+             TÍTULO
+        ═══════════════════════════════════════════════════════════ -->
+        <mxCell id="2" value="Predictfy × Locaweb — AIOps Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=20;fontStyle=1;fontColor=#1a1a1a;" vertex="1" parent="1">
+          <mxGeometry x="40" y="15" width="1200" height="45" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             CAMADA 1 — FONTE DE DADOS
+        ═══════════════════════════════════════════════════════════ -->
+        <mxCell id="L1" value="FONTE DE DADOS" style="swimlane;startSize=28;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=11;fontColor=#1a1a1a;swimlaneLine=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="75" width="1200" height="82" as="geometry" />
+        </mxCell>
+        <mxCell id="xlsx" value="&lt;b&gt;data/raw/LW-DATASET.xlsx&lt;/b&gt;&lt;br&gt;122.543 incidentes ITSM · jan/2023–dez/2025 · Sistema ITSM Locaweb" style="rounded=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="L1">
+          <mxGeometry x="290" y="17" width="620" height="48" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             CAMADA 2 — PROCESSAMENTO DE DADOS
+        ═══════════════════════════════════════════════════════════ -->
+        <mxCell id="L2" value="CAMADA DE DADOS  (src/data/)" style="swimlane;startSize=28;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=11;fontColor=#1a1a1a;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="177" width="1200" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="loader" value="&lt;b&gt;loader.py&lt;/b&gt;&lt;br&gt;load_raw()&lt;br&gt;load_kpi_subset()" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="L2">
+          <mxGeometry x="25" y="30" width="210" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="preproc" value="&lt;b&gt;preprocessor.py&lt;/b&gt;&lt;br&gt;build_features() · 27 colunas&lt;br&gt;~25.588 incidentes KPI" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="L2">
+          <mxGeometry x="290" y="30" width="240" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="parquet" value="&lt;b&gt;incidents_features.parquet&lt;/b&gt;&lt;br&gt;25.588 linhas × 27 features&lt;br&gt;data/processed/ (gitignored)" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="L2">
+          <mxGeometry x="600" y="30" width="290" height="52" as="geometry" />
+        </mxCell>
+        <!-- Subset KPI label -->
+        <mxCell id="kpiLabel" value="Subset KPI: P2 + P3&lt;br&gt;~25.600 incidentes" style="text;html=1;strokeColor=none;fillColor=#fffde7;rounded=1;strokeColor=#f9a825;fontSize=9;align=center;" vertex="1" parent="L2">
+          <mxGeometry x="955" y="30" width="170" height="52" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             CAMADA 3 — MODELOS
+        ═══════════════════════════════════════════════════════════ -->
+        <mxCell id="L3" value="CAMADA DE MODELOS  (src/models/)" style="swimlane;startSize=28;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=11;fontColor=#1a1a1a;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="292" width="1200" height="108" as="geometry" />
+        </mxCell>
+        <mxCell id="mXGB" value="&lt;b&gt;XGBoost&lt;/b&gt;&lt;br&gt;Risco OLA&lt;br&gt;PR-AUC=0.048&lt;br&gt;✅ Sprint 2" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="L3">
+          <mxGeometry x="12" y="30" width="188" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="mKM" value="&lt;b&gt;K-Means&lt;/b&gt;&lt;br&gt;Clustering&lt;br&gt;K=5 · Sil=0.18&lt;br&gt;✅ Sprint 2" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="L3">
+          <mxGeometry x="218" y="30" width="188" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="mKPI" value="&lt;b&gt;KPI Projection&lt;/b&gt;&lt;br&gt;Meta dinâmica&lt;br&gt;mensal&lt;br&gt;✅ Sprint 2" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="L3">
+          <mxGeometry x="424" y="30" width="188" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="mPro" value="&lt;b&gt;Prophet&lt;/b&gt;&lt;br&gt;D+1 / D+7&lt;br&gt;Séries temporais&lt;br&gt;⏳ Sprint 3" style="rounded=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=2;" vertex="1" parent="L3">
+          <mxGeometry x="630" y="30" width="188" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="mLSTM" value="&lt;b&gt;LSTM v2&lt;/b&gt;&lt;br&gt;D+1 / D+7&lt;br&gt;MAE=13.15&lt;br&gt;⏳ Sprint 3" style="rounded=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=2;" vertex="1" parent="L3">
+          <mxGeometry x="836" y="30" width="188" height="65" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             PIPELINE BAR
+        ═══════════════════════════════════════════════════════════ -->
+        <mxCell id="pipeline" value="⚙  &lt;b&gt;src/pipeline.py&lt;/b&gt;  ·  python src/pipeline.py  [--step  fe  |  xgb  |  km  |  kpi  |  prophet  |  lstm]" style="rounded=1;whiteSpace=wrap;fillColor=#fffde7;strokeColor=#f9a825;fontSize=10;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="40" y="420" width="1200" height="34" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             CAMADA 4 — OUTPUTS JSON
+        ═══════════════════════════════════════════════════════════ -->
+        <mxCell id="L4" value="OUTPUTS JSON  (outputs/  —  lidos pela API)" style="swimlane;startSize=28;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=11;fontColor=#1a1a1a;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="474" width="1200" height="92" as="geometry" />
+        </mxCell>
+        <mxCell id="jRisco" value="risco_ola.json&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;pipeline.py ✅&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="L4">
+          <mxGeometry x="10" y="28" width="175" height="47" as="geometry" />
+        </mxCell>
+        <mxCell id="jClust" value="clusters.json&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;pipeline.py ✅&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="L4">
+          <mxGeometry x="200" y="28" width="175" height="47" as="geometry" />
+        </mxCell>
+        <mxCell id="jKpi" value="kpi_atingimento.json&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;pipeline.py ✅&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="L4">
+          <mxGeometry x="390" y="28" width="185" height="47" as="geometry" />
+        </mxCell>
+        <mxCell id="jVol" value="previsoes_volume.json&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;notebook 03 ⏳ S3&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=2;" vertex="1" parent="L4">
+          <mxGeometry x="590" y="28" width="185" height="47" as="geometry" />
+        </mxCell>
+        <mxCell id="jMC" value="previsoes_volume_mc.json&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;notebook 03c ⏳ S3&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=2;" vertex="1" parent="L4">
+          <mxGeometry x="790" y="28" width="195" height="47" as="geometry" />
+        </mxCell>
+        <mxCell id="jLSTM" value="previsoes_lstm.json&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;notebook 03d ⏳ S3&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=2;" vertex="1" parent="L4">
+          <mxGeometry x="1000" y="28" width="185" height="47" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             CAMADA 5 — API FASTAPI
+        ═══════════════════════════════════════════════════════════ -->
+        <mxCell id="L5" value="API FastAPI  (api/main.py  ·  http://localhost:8000/api)" style="swimlane;startSize=28;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=11;fontColor=#1a1a1a;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="586" width="1200" height="92" as="geometry" />
+        </mxCell>
+        <mxCell id="aRisco" value="/risco&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;XGBoost · SHAP&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="L5">
+          <mxGeometry x="10" y="28" width="155" height="47" as="geometry" />
+        </mxCell>
+        <mxCell id="aClust" value="/clusters&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;K-Means · perfis&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="L5">
+          <mxGeometry x="180" y="28" width="155" height="47" as="geometry" />
+        </mxCell>
+        <mxCell id="aKpi" value="/kpi&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Projeção mensal&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="L5">
+          <mxGeometry x="350" y="28" width="155" height="47" as="geometry" />
+        </mxCell>
+        <mxCell id="aPrev" value="/previsoes&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;LSTM › MC › Original&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="L5">
+          <mxGeometry x="520" y="28" width="155" height="47" as="geometry" />
+        </mxCell>
+        <mxCell id="aHist" value="/historico&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Estático 2025&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="L5">
+          <mxGeometry x="690" y="28" width="155" height="47" as="geometry" />
+        </mxCell>
+        <mxCell id="aCtx" value="/context&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Snapshot chatbot&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="L5">
+          <mxGeometry x="860" y="28" width="155" height="47" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             CAMADA 6 — FRONTEND + CHATBOT
+        ═══════════════════════════════════════════════════════════ -->
+        <!-- Dashboard React -->
+        <mxCell id="L6a" value="Dashboard React + Vite  (http://localhost:5173)" style="swimlane;startSize=28;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;fontSize=11;fontColor=#1a1a1a;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="698" width="880" height="108" as="geometry" />
+        </mxCell>
+        <mxCell id="pGest" value="&lt;b&gt;/gestao&lt;/b&gt;&lt;br&gt;Gestores&lt;br&gt;KPI · Tendência · R$" style="rounded=1;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="L6a">
+          <mxGeometry x="10" y="30" width="190" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="pMon" value="&lt;b&gt;/monitoramento&lt;/b&gt;&lt;br&gt;NOC / Geral&lt;br&gt;Heatmap · Alertas" style="rounded=1;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="L6a">
+          <mxGeometry x="215" y="30" width="190" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="pTec" value="&lt;b&gt;/tecnico&lt;/b&gt;&lt;br&gt;DevOps / SRE&lt;br&gt;SHAP · Drill-down" style="rounded=1;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="L6a">
+          <mxGeometry x="420" y="30" width="190" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="pFin" value="&lt;b&gt;/financeiro&lt;/b&gt;&lt;br&gt;Gestores&lt;br&gt;Projeção · Exposição R$" style="rounded=1;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="L6a">
+          <mxGeometry x="625" y="30" width="220" height="62" as="geometry" />
+        </mxCell>
+
+        <!-- Chatbot -->
+        <mxCell id="L6b" value="Chatbot Gemini  ⏳ Sprint 3" style="swimlane;startSize=28;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=3;fontSize=11;fontColor=#7d6608;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="940" y="698" width="300" height="108" as="geometry" />
+        </mxCell>
+        <mxCell id="cFlash" value="&lt;b&gt;Gemini 2.5 Flash&lt;/b&gt;&lt;br&gt;Roteador&lt;br&gt;~1s resposta" style="rounded=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="L6b">
+          <mxGeometry x="10" y="30" width="125" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="cPro" value="&lt;b&gt;Gemini 2.5 Pro&lt;/b&gt;&lt;br&gt;Analista Sênior&lt;br&gt;Contexto expandido" style="rounded=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="L6b">
+          <mxGeometry x="155" y="30" width="125" height="62" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             PAINEL DE NOTEBOOKS (coluna direita)
+        ═══════════════════════════════════════════════════════════ -->
+        <mxCell id="NB" value="NOTEBOOKS  (apenas exploratórios)" style="swimlane;startSize=28;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=10;fontColor=#333333;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="1280" y="75" width="360" height="731" as="geometry" />
+        </mxCell>
+
+        <!-- Header exploratory -->
+        <mxCell id="nbH1" value="✅  Exploratórios — não geram arquivos" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontStyle=1;fontSize=10;fontColor=#006600;" vertex="1" parent="NB">
+          <mxGeometry x="10" y="33" width="340" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="nb01" value="01_eda.ipynb" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="NB">
+          <mxGeometry x="10" y="62" width="340" height="33" as="geometry" />
+        </mxCell>
+        <mxCell id="nb02" value="02_eda_features.ipynb  →  usa src/data/" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="NB">
+          <mxGeometry x="10" y="103" width="340" height="33" as="geometry" />
+        </mxCell>
+        <mxCell id="nb04" value="04_eda_xgboost.ipynb  →  usa src/models/xgboost_model" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="NB">
+          <mxGeometry x="10" y="144" width="340" height="33" as="geometry" />
+        </mxCell>
+        <mxCell id="nb05" value="05_eda_kmeans.ipynb  →  usa src/models/kmeans_model" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="NB">
+          <mxGeometry x="10" y="185" width="340" height="33" as="geometry" />
+        </mxCell>
+        <mxCell id="nb07" value="07_eda_kpi.ipynb  →  usa src/models/kpi_projection" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="NB">
+          <mxGeometry x="10" y="226" width="340" height="33" as="geometry" />
+        </mxCell>
+
+        <!-- Divider -->
+        <mxCell id="sep" value="" style="line;strokeWidth=1;strokeColor=#999999;fillColor=none;" vertex="1" parent="NB">
+          <mxGeometry x="10" y="275" width="340" height="8" as="geometry" />
+        </mxCell>
+
+        <!-- Header pending -->
+        <mxCell id="nbH2" value="⏳  Geram outputs — pendentes .py  (Sprint 3)" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontStyle=1;fontSize=10;fontColor=#996600;" vertex="1" parent="NB">
+          <mxGeometry x="10" y="288" width="340" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="nb03" value="03_prophet_volume.ipynb  →  previsoes_volume.json" style="rounded=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=2;align=left;spacingLeft=10;" vertex="1" parent="NB">
+          <mxGeometry x="10" y="317" width="340" height="33" as="geometry" />
+        </mxCell>
+        <mxCell id="nb03b" value="03b_monte_carlo_seed.ipynb  →  serie_sintetica*.csv" style="rounded=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=2;align=left;spacingLeft=10;" vertex="1" parent="NB">
+          <mxGeometry x="10" y="358" width="340" height="33" as="geometry" />
+        </mxCell>
+        <mxCell id="nb03c" value="03c_prophet_monte_carlo.ipynb  →  previsoes_mc.json" style="rounded=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=2;align=left;spacingLeft=10;" vertex="1" parent="NB">
+          <mxGeometry x="10" y="399" width="340" height="33" as="geometry" />
+        </mxCell>
+        <mxCell id="nb03d" value="03d_lstm.ipynb  →  previsoes_lstm.json" style="rounded=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=2;align=left;spacingLeft=10;" vertex="1" parent="NB">
+          <mxGeometry x="10" y="440" width="340" height="33" as="geometry" />
+        </mxCell>
+
+        <!-- LEGENDA -->
+        <mxCell id="legH" value="LEGENDA" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontStyle=1;fontSize=11;fontColor=#333333;" vertex="1" parent="NB">
+          <mxGeometry x="10" y="500" width="340" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="leg1" value="✅  Implementado — Sprint 2" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="NB">
+          <mxGeometry x="10" y="527" width="340" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="leg2" value="⏳  Pendente — Sprint 3" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=2;align=left;spacingLeft=10;" vertex="1" parent="NB">
+          <mxGeometry x="10" y="565" width="340" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="leg3" value="── ── ──  Fluxo pendente Sprint 3" style="rounded=1;fillColor=#f5f5f5;strokeColor=#d6b656;strokeDashArray=6 4;fontSize=10;fontStyle=2;align=left;spacingLeft=10;" vertex="1" parent="NB">
+          <mxGeometry x="10" y="603" width="340" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="leg4" value="────────  Fluxo implementado" style="rounded=1;fillColor=#f5f5f5;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="NB">
+          <mxGeometry x="10" y="641" width="340" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             SETAS DE FLUXO
+        ═══════════════════════════════════════════════════════════ -->
+
+        <!-- XLSX → loader.py -->
+        <mxCell id="e01" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#6c8ebf;strokeWidth=2;" edge="1" source="xlsx" target="loader" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- loader → preprocessor -->
+        <mxCell id="e02" style="edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#82b366;strokeWidth=2;" edge="1" source="loader" target="preproc" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- preprocessor → parquet -->
+        <mxCell id="e03" style="edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#82b366;strokeWidth=2;" edge="1" source="preproc" target="parquet" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- parquet → XGBoost -->
+        <mxCell id="e04" style="edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=0.2;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#82b366;strokeWidth=2;" edge="1" source="parquet" target="mXGB" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- parquet → K-Means -->
+        <mxCell id="e05" style="edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=0.4;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#82b366;strokeWidth=2;" edge="1" source="parquet" target="mKM" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- parquet → KPI -->
+        <mxCell id="e06" style="edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=0.6;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#82b366;strokeWidth=2;" edge="1" source="parquet" target="mKPI" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- parquet → Prophet (dashed) -->
+        <mxCell id="e07" style="edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=0.8;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#d6b656;strokeWidth=2;dashed=1;strokeDashArray=6 4;" edge="1" source="parquet" target="mPro" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- parquet → LSTM (dashed) -->
+        <mxCell id="e08" style="edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#d6b656;strokeWidth=2;dashed=1;strokeDashArray=6 4;" edge="1" source="parquet" target="mLSTM" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- XGBoost → risco_ola.json -->
+        <mxCell id="e09" style="edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#b85450;strokeWidth=2;" edge="1" source="mXGB" target="jRisco" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- K-Means → clusters.json -->
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#b85450;strokeWidth=2;" edge="1" source="mKM" target="jClust" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- KPI → kpi_atingimento.json -->
+        <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#b85450;strokeWidth=2;" edge="1" source="mKPI" target="jKpi" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Prophet → previsoes_volume.json (dashed) -->
+        <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#d6b656;strokeWidth=2;dashed=1;strokeDashArray=6 4;" edge="1" source="mPro" target="jVol" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- LSTM → previsoes_lstm.json (dashed) -->
+        <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#d6b656;strokeWidth=2;dashed=1;strokeDashArray=6 4;" edge="1" source="mLSTM" target="jLSTM" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Outputs → API (group arrow) -->
+        <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#9673a6;strokeWidth=2;" edge="1" source="L4" target="L5" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- API → Dashboard React -->
+        <mxCell id="e15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=0.35;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#d79b00;strokeWidth=2;" edge="1" source="L5" target="L6a" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- API /context → Chatbot (dashed) -->
+        <mxCell id="e16" value="/context" style="edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=0.9;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#d6b656;strokeWidth=2;dashed=1;strokeDashArray=6 4;fontStyle=2;fontSize=9;" edge="1" source="L5" target="L6b" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- pipeline bar → models (visual only) -->
+        <mxCell id="e17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#f9a825;strokeWidth=1;dashed=1;strokeDashArray=3 3;" edge="1" source="pipeline" target="L3" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
