@@ -1,65 +1,202 @@
 {
-  "modelo": "kpi_ola_atingimento",
-  "gerado_em": "2026-03-28",
-  "metodologia": "SPC — meta derivada da distribuição histórica: média mensal + 1 desvio padrão",
-  "periodo": "2025-01-01 a 2025-12-31",
-  "P2": {
-    "violacoesAno": 42,
-    "metaAnual": 63,
-    "metaMensal": 5.2,
-    "pctUtilizado": 66.7,
-    "margemRestante": 21,
-    "tendencia": "dentro_da_meta",
-    "olaHoras": 4,
-    "pctAtingimento": 100,
-    "mesesAnomalos": [
-      "Mai",
-      "Jul",
-      "Nov"
-    ]
-  },
-  "P3": {
-    "violacoesAno": 206,
-    "metaAnual": 280,
-    "metaMensal": 23.4,
-    "pctUtilizado": 73.6,
-    "margemRestante": 74,
-    "tendencia": "dentro_da_meta",
-    "olaHoras": 12,
-    "pctAtingimento": 100,
-    "mesesAnomalos": [
-      "Jun",
-      "Jul"
-    ]
-  },
-  "por_mes": {
+  "modelo": "kpi_projection",
+  "gerado_em": "2026-05-09",
+  "versao": "v2",
+  "ano": 2025,
+  "por_prioridade": {
     "P2": {
-      "1": 4,
-      "2": 4,
-      "3": 3,
-      "4": 2,
-      "5": 6,
-      "6": 3,
-      "7": 6,
-      "8": 3,
-      "9": 2,
-      "10": 2,
-      "11": 6,
-      "12": 1
+      "meta_anual": {
+        "min": 36,
+        "max": 39,
+        "centro": 37.5
+      },
+      "total_violacoes_ano": 42,
+      "status_anual": "atencao",
+      "projecao_fim_ano": 42.0,
+      "pct_meta_utilizado": 112.0,
+      "meses": [
+        {
+          "mes": 1,
+          "violacoes": 4,
+          "orcamento_base": 3.12,
+          "meta_ajustada_proximo": 3.0,
+          "status": "atencao"
+        },
+        {
+          "mes": 2,
+          "violacoes": 4,
+          "orcamento_base": 3.12,
+          "meta_ajustada_proximo": 2.9,
+          "status": "atencao"
+        },
+        {
+          "mes": 3,
+          "violacoes": 3,
+          "orcamento_base": 3.12,
+          "meta_ajustada_proximo": 2.89,
+          "status": "ok"
+        },
+        {
+          "mes": 4,
+          "violacoes": 2,
+          "orcamento_base": 3.12,
+          "meta_ajustada_proximo": 3.0,
+          "status": "ok"
+        },
+        {
+          "mes": 5,
+          "violacoes": 6,
+          "orcamento_base": 3.12,
+          "meta_ajustada_proximo": 2.57,
+          "status": "critico"
+        },
+        {
+          "mes": 6,
+          "violacoes": 3,
+          "orcamento_base": 3.12,
+          "meta_ajustada_proximo": 2.5,
+          "status": "ok"
+        },
+        {
+          "mes": 7,
+          "violacoes": 6,
+          "orcamento_base": 3.12,
+          "meta_ajustada_proximo": 1.8,
+          "status": "critico"
+        },
+        {
+          "mes": 8,
+          "violacoes": 3,
+          "orcamento_base": 3.12,
+          "meta_ajustada_proximo": 1.5,
+          "status": "ok"
+        },
+        {
+          "mes": 9,
+          "violacoes": 2,
+          "orcamento_base": 3.12,
+          "meta_ajustada_proximo": 1.33,
+          "status": "ok"
+        },
+        {
+          "mes": 10,
+          "violacoes": 2,
+          "orcamento_base": 3.12,
+          "meta_ajustada_proximo": 1.0,
+          "status": "ok"
+        },
+        {
+          "mes": 11,
+          "violacoes": 6,
+          "orcamento_base": 3.12,
+          "meta_ajustada_proximo": 0.0,
+          "status": "critico"
+        },
+        {
+          "mes": 12,
+          "violacoes": 1,
+          "orcamento_base": 3.12,
+          "meta_ajustada_proximo": 0.0,
+          "status": "ok"
+        }
+      ]
     },
     "P3": {
-      "1": 19,
-      "2": 23,
-      "3": 18,
-      "4": 11,
-      "5": 15,
-      "6": 29,
-      "7": 24,
-      "8": 14,
-      "9": 9,
-      "10": 9,
-      "11": 15,
-      "12": 20
+      "meta_anual": {
+        "min": 231,
+        "max": 263,
+        "centro": 247.0
+      },
+      "total_violacoes_ano": 196,
+      "status_anual": "dentro_meta",
+      "projecao_fim_ano": 196.0,
+      "pct_meta_utilizado": 79.4,
+      "meses": [
+        {
+          "mes": 1,
+          "violacoes": 19,
+          "orcamento_base": 20.58,
+          "meta_ajustada_proximo": 20.73,
+          "status": "ok"
+        },
+        {
+          "mes": 2,
+          "violacoes": 21,
+          "orcamento_base": 20.58,
+          "meta_ajustada_proximo": 20.7,
+          "status": "atencao"
+        },
+        {
+          "mes": 3,
+          "violacoes": 16,
+          "orcamento_base": 20.58,
+          "meta_ajustada_proximo": 21.22,
+          "status": "ok"
+        },
+        {
+          "mes": 4,
+          "violacoes": 10,
+          "orcamento_base": 20.58,
+          "meta_ajustada_proximo": 22.62,
+          "status": "ok"
+        },
+        {
+          "mes": 5,
+          "violacoes": 15,
+          "orcamento_base": 20.58,
+          "meta_ajustada_proximo": 23.71,
+          "status": "ok"
+        },
+        {
+          "mes": 6,
+          "violacoes": 28,
+          "orcamento_base": 20.58,
+          "meta_ajustada_proximo": 23.0,
+          "status": "atencao"
+        },
+        {
+          "mes": 7,
+          "violacoes": 23,
+          "orcamento_base": 20.58,
+          "meta_ajustada_proximo": 23.0,
+          "status": "atencao"
+        },
+        {
+          "mes": 8,
+          "violacoes": 14,
+          "orcamento_base": 20.58,
+          "meta_ajustada_proximo": 25.25,
+          "status": "ok"
+        },
+        {
+          "mes": 9,
+          "violacoes": 9,
+          "orcamento_base": 20.58,
+          "meta_ajustada_proximo": 30.67,
+          "status": "ok"
+        },
+        {
+          "mes": 10,
+          "violacoes": 9,
+          "orcamento_base": 20.58,
+          "meta_ajustada_proximo": 41.5,
+          "status": "ok"
+        },
+        {
+          "mes": 11,
+          "violacoes": 15,
+          "orcamento_base": 20.58,
+          "meta_ajustada_proximo": 68.0,
+          "status": "ok"
+        },
+        {
+          "mes": 12,
+          "violacoes": 17,
+          "orcamento_base": 20.58,
+          "meta_ajustada_proximo": 0.0,
+          "status": "ok"
+        }
+      ]
     }
   }
 }

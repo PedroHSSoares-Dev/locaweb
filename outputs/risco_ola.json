@@ -1,0 +1,141 @@
+{
+  "modelo": "xgboost_ola_risk",
+  "gerado_em": "2026-05-09",
+  "versao": "v2",
+  "abordagem": "XGBoost + Base + threshold F1-ótimo + CV validado",
+  "threshold_otimizado": 0.3072,
+  "threshold_recall_70": null,
+  "scale_pos_weight": 102,
+  "metricas": {
+    "recall_violacao": 0.0862,
+    "precision_violacao": 0.2174,
+    "f1_violacao": 0.1235,
+    "roc_auc": 0.7239,
+    "pr_auc": 0.0481,
+    "roc_auc_cv_mean": 0.8111,
+    "roc_auc_cv_std": 0.0325,
+    "pr_auc_cv_mean": 0.1242,
+    "pr_auc_cv_std": 0.0219,
+    "tp": 5,
+    "fp": 18,
+    "fn": 53,
+    "tn": 5042,
+    "total_teste": 5118,
+    "violacoes_reais": 58,
+    "violacoes_capturadas": 5
+  },
+  "feature_importance_shap": [
+    {
+      "rank": 1,
+      "feature": "rolling_30d",
+      "shap_mean_abs": 0.950563
+    },
+    {
+      "rank": 2,
+      "feature": "rolling_7d",
+      "shap_mean_abs": 0.86989
+    },
+    {
+      "rank": 3,
+      "feature": "grupo_freq",
+      "shap_mean_abs": 0.715085
+    },
+    {
+      "rank": 4,
+      "feature": "semana_ano",
+      "shap_mean_abs": 0.591037
+    },
+    {
+      "rank": 5,
+      "feature": "categoria_enc",
+      "shap_mean_abs": 0.576313
+    },
+    {
+      "rank": 6,
+      "feature": "lag_7d",
+      "shap_mean_abs": 0.541841
+    },
+    {
+      "rank": 7,
+      "feature": "hora",
+      "shap_mean_abs": 0.516087
+    },
+    {
+      "rank": 8,
+      "feature": "produto_freq",
+      "shap_mean_abs": 0.493274
+    },
+    {
+      "rank": 9,
+      "feature": "subcategoria_enc",
+      "shap_mean_abs": 0.484139
+    },
+    {
+      "rank": 10,
+      "feature": "produto_enc",
+      "shap_mean_abs": 0.468792
+    },
+    {
+      "rank": 11,
+      "feature": "grupo_enc",
+      "shap_mean_abs": 0.43823
+    },
+    {
+      "rank": 12,
+      "feature": "aberto_por_enc",
+      "shap_mean_abs": 0.423595
+    },
+    {
+      "rank": 13,
+      "feature": "dia_mes",
+      "shap_mean_abs": 0.361917
+    },
+    {
+      "rank": 14,
+      "feature": "lag_1d",
+      "shap_mean_abs": 0.354829
+    },
+    {
+      "rank": 15,
+      "feature": "dia_semana",
+      "shap_mean_abs": 0.218233
+    }
+  ],
+  "risco_por_prioridade": {
+    "P3": {
+      "media_prob": 0.0136,
+      "pct_alto_risco": 0.54,
+      "n_incidentes": 4081,
+      "taxa_violacao_real": 1.23
+    },
+    "P2": {
+      "media_prob": 0.0055,
+      "pct_alto_risco": 0.1,
+      "n_incidentes": 1037,
+      "taxa_violacao_real": 0.77
+    }
+  },
+  "distribuicao_risco": {
+    "baixo": {
+      "count": 5074,
+      "pct": 99.14,
+      "limite_inferior": 0.0,
+      "limite_superior": 0.2,
+      "violacoes_reais": 53
+    },
+    "medio": {
+      "count": 21,
+      "pct": 0.41,
+      "limite_inferior": 0.2,
+      "limite_superior": 0.30716338753700256,
+      "violacoes_reais": 0
+    },
+    "alto": {
+      "count": 23,
+      "pct": 0.45,
+      "limite_inferior": 0.30716338753700256,
+      "limite_superior": 1.0,
+      "violacoes_reais": 5
+    }
+  }
+}

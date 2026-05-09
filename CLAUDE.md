@@ -44,11 +44,12 @@
 
 ### Target (variável alvo dos modelos)
 ```python
-target_ola = (Duração > OLA_por_prioridade).astype(int)
+target_ola = (kpi["KPI Violado?"] == "SIM").astype(int)
 # 1 = KPI violado, 0 = KPI não violado
 ```
-- `KPI Violado?` no dataset é 100% consistente com `Duração > OLA` (verificado na EDA)
-- **Desbalanceamento:** ~248 violações SIM vs ~25.352 NAO → razão 1:102
+- Usar sempre `KPI Violado?` como ground truth (regras de negócio: pausas de SLA, exceções aprovadas)
+- Há ~3.399 divergências entre `Duração > OLA` e `KPI Violado?` — ground truth é o campo
+- **Desbalanceamento:** ~248 SIM vs ~25.340 NÃO → razão 1:102
 
 ---
 
@@ -115,28 +116,33 @@ O arquivo `data/processed/incidents_features.parquet` contém:
 ```
 Dataset ITSM (XLSX)
        ↓
-Preparação (Python / pandas)
-  └─ limpeza · feature engineering · targets OLA
+src/data/preprocessor.py → data/processed/incidents_features.parquet
        ↓
-┌─────────────────────────────────────────────┐
-│              Modelos de ML                   │
-│  Prophet        XGBoost          K-Means     │
-│  D+1/D+7        risco OLA        clusters    │
-│  (nb03) ✅      (nb04) ❌        (nb05) ❌   │
-└─────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│                     Modelos de ML                        │
+│  Prophet/LSTM       XGBoost          K-Means    KPI      │
+│  D+1/D+7            risco OLA        clusters   projeção  │
+│  ⏳ Sprint 3        ✅ .py           ✅ .py    ✅ .py   │
+└─────────────────────────────────────────────────────────┘
        ↓
 JSONs estáticos (outputs/)
-  ├── previsoes_volume.json ✅
-  ├── risco_ola.json ❌
-  ├── clusters.json ❌
-  └── kpi_atingimento.json ❌
+  ├── previsoes_volume.json      ✅ (Prophet, gerado por notebook)
+  ├── previsoes_volume_mc.json   ✅ (Prophet Monte Carlo)
+  ├── previsoes_lstm.json        ✅ (LSTM v2, gerado por notebook)
+  ├── risco_ola.json             ✅ (XGBoost — src/models/xgboost_model.py)
+  ├── clusters.json              ✅ (K-Means — src/models/kmeans_model.py)
+  └── kpi_atingimento.json       ✅ (KPI — src/models/kpi_projection.py)
+       ↓
+  FastAPI (api/) → REST endpoints
        ↓
   ┌────────────────┬──────────────┐
   │ Dashboard React│   Power BI   │
   │ (frontend/) ✅ │  (pendente)  │
   └────────────────┴──────────────┘
        ↓
-  Chatbot (Gemini Flash + Pro) ❌ pendente
+  Chatbot (Gemini Flash + Pro) ⏳ Sprint 3
+
+Orquestrador: python src/pipeline.py [--step fe|xgb|km|kpi]
 ```
 
 ---
@@ -156,25 +162,33 @@ JSONs estáticos (outputs/)
 
 ## 7. Status dos Notebooks
 
-| Notebook | Descrição | Status |
+Notebooks são **apenas exploratórios**. Código de produção vive em `src/`.
+
+| Notebook | Tipo | Status |
 |---|---|---|
-| `01_eda.ipynb` | Análise Exploratória de Dados | ✅ Criado |
-| `02_feature_engineering.ipynb` | Feature Engineering + Export Parquet | ✅ Criado |
-| `03_prophet_volume.ipynb` | Prophet D+1/D+7 com ensemble v5/v6 | ✅ Criado |
-| `04_xgboost_ola.ipynb` | XGBoost — classificação risco OLA | ❌ Pendente |
-| `05_kmeans_clusters.ipynb` | K-Means — padrões recorrentes | ❌ Pendente |
-| `06_shap_explicabilidade.ipynb` | SHAP — feature importance | ❌ Pendente |
-| `07_kpi_projection.ipynb` | Projeção anual de KPI atingimento | ❌ Pendente |
+| `01_eda.ipynb` | EDA (permanente) | ✅ |
+| `02_eda_features.ipynb` | Exploratório (features, imbalance, correlações) | ✅ |
+| `03_prophet_volume.ipynb` | Treina Prophet — pendente conversão `.py` | ⏳ Sprint 3 |
+| `03b/03c_monte_carlo*.ipynb` | Variantes Monte Carlo — pendente conversão | ⏳ Sprint 3 |
+| `03d_lstm.ipynb` | Treina LSTM v2 — pendente conversão `.py` | ⏳ Sprint 3 |
+| `04_eda_xgboost.ipynb` | Exploratório (PR/ROC, SHAP, confusion matrix) | ✅ |
+| `05_eda_kmeans.ipynb` | Exploratório (heatmap clusters, PCA 2D) | ✅ |
+| `07_eda_kpi.ipynb` | Exploratório (violações × orçamento mensal) | ✅ |
 
 ---
 
 ## 8. Status do Código Python (`src/`)
 
-Todos os scripts de produção estão **pendentes**:
-- `src/data/loader.py` · `preprocessor.py`
-- `src/models/prophet_model.py` · `xgboost_model.py` · `kmeans_model.py`
-- `src/outputs/json_generator.py`
-- `src/pipeline.py` (orquestrador)
+| Arquivo | Status | Notas |
+|---|---|---|
+| `src/data/loader.py` | ✅ Criado | `load_raw()`, `load_kpi_subset()` |
+| `src/data/preprocessor.py` | ✅ Criado | 27 colunas, nomes NB04 convention |
+| `src/models/xgboost_model.py` | ✅ Criado | PR-AUC 0.048, Base > SMOTE |
+| `src/models/kmeans_model.py` | ✅ Criado | K=5, Silhouette=0.18 |
+| `src/models/kpi_projection.py` | ✅ Criado | Meta dinâmica mensal |
+| `src/models/prophet_model.py` | ⏳ Sprint 3 | Ainda como notebook |
+| `src/models/lstm_model.py` | ⏳ Sprint 3 | Ainda como notebook |
+| `src/pipeline.py` | ✅ Criado | `--step fe\|xgb\|km\|kpi` |
 
 ---
 

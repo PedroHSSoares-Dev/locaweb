@@ -67,41 +67,56 @@ JSONs estáticos (outputs/)
 ## Estrutura do repositório
 
 ```
-predictfy-locaweb/
-├── data/                   # dataset local — nunca commitado
-│   ├── raw/                # CSV original da Locaweb
-│   └── processed/          # dados após limpeza e feature engineering
-├── notebooks/              # análises KDD — exploração e prova de conceito
-│   ├── 01_eda.ipynb
-│   ├── 02_feature_engineering.ipynb
-│   ├── 03_prophet_volume.ipynb
-│   ├── 04_xgboost_ola.ipynb
-│   ├── 05_kmeans_clusters.ipynb
-│   ├── 06_shap_explicabilidade.ipynb
-│   └── 07_kpi_projection.ipynb
-├── src/                    # código de produção
-│   ├── data/               # loader.py · preprocessor.py
-│   ├── models/             # prophet_model.py · xgboost_model.py · kmeans_model.py
-│   ├── outputs/            # json_generator.py
-│   └── pipeline.py         # orquestrador: load → process → train → export
-├── models_saved/           # artefatos .pkl — não commitados (regeneráveis)
-├── outputs/                # JSONs consumidos pelo frontend — commitados
-│   ├── previsoes_volume.json
+locaweb/
+├── data/                        # dataset local — nunca commitado
+│   ├── raw/LW-DATASET.xlsx      # arquivo ITSM original da Locaweb
+│   └── processed/               # parquet com features geradas
+├── notebooks/                   # APENAS exploratórios — sem código de produção
+│   ├── 01_eda.ipynb             # EDA permanente
+│   ├── 02_eda_features.ipynb    # distribuição de features, imbalance, correlações
+│   ├── 03_prophet_volume.ipynb  # Prophet séries temporais (pendente .py)
+│   ├── 03b/03c_monte_carlo      # variantes Monte Carlo (pendente .py)
+│   ├── 03d_lstm.ipynb           # LSTM v2 early stopping (pendente .py)
+│   ├── 04_eda_xgboost.ipynb     # PR/ROC curves, SHAP, confusion matrix
+│   ├── 05_eda_kmeans.ipynb      # heatmap clusters, PCA 2D
+│   └── 07_eda_kpi.ipynb         # violações × orçamento, projeção anual
+├── src/                         # código de produção Python
+│   ├── data/
+│   │   ├── loader.py            # carga do XLSX e subset KPI
+│   │   └── preprocessor.py     # feature engineering → parquet (27 colunas)
+│   ├── models/
+│   │   ├── xgboost_model.py    # classificação risco OLA ✅
+│   │   ├── kmeans_model.py     # segmentação K-Means ✅
+│   │   ├── kpi_projection.py   # projeção atingimento anual ✅
+│   │   ├── prophet_model.py    # séries temporais ⏳ Sprint 3
+│   │   └── lstm_model.py       # LSTM ⏳ Sprint 3
+│   └── pipeline.py             # orquestrador principal
+├── api/                         # FastAPI
+│   ├── main.py
+│   ├── routers/                 # previsoes · risco · clusters · kpi · historico · context
+│   ├── schemas.py
+│   └── services/data_loader.py
+├── frontend/                    # React + Vite + Recharts
+│   └── src/
+│       ├── pages/               # GestaoPage · MonitoramentoPage · TecnicoPage · FinancialPage
+│       └── components/
+├── models_saved/                # artefatos .pkl — não commitados (regeneráveis)
+├── outputs/                     # JSONs consumidos pelo frontend
 │   ├── risco_ola.json
 │   ├── clusters.json
-│   └── kpi_atingimento.json
-├── frontend/               # React + Vite
-│   └── src/
-│       ├── pages/          # GestaoPage · MonitoramentoPage · TecnicoPage · FinancialPage
-│       ├── components/     # KpiCards · RiskHeatmap · AlertsList · TimeSeriesChart · DrillDownPanel · FinancialImpact
-│       ├── context/        # DashboardContext (horizon global)
-│       └── data/           # mockData.js → substituído pelos JSONs reais
-├── chatbot/                # lógica de roteamento Gemini Flash → Pro
-├── avaliacoes/             # relatórios de avaliação da dashboard
-├── docs/                   # documentos do challenge FIAP
-├── .github/workflows/      # GitHub Actions: pipeline ML + webhook de alerta
-├── .env.example            # variáveis de ambiente necessárias
-├── requirements.txt        # dependências Python
+│   ├── kpi_atingimento.json
+│   ├── previsoes_volume.json
+│   ├── previsoes_volume_mc.json
+│   └── previsoes_lstm.json
+├── docs/                        # documentação técnica
+│   ├── arquitetura.md
+│   ├── dataset.md
+│   ├── modelos.md
+│   └── api.md
+├── chatbot/                     # Gemini Flash + Pro ⏳ Sprint 3
+├── requirements.txt
+├── environment.yml
+├── CLAUDE.md
 └── README.md
 ```
 
@@ -112,7 +127,7 @@ predictfy-locaweb/
 
 ### Pré-requisitos
 
-- Python 3.11+
+- Python 3.11+ (recomendado: micromamba env `dev`)
 - Node.js 20+
 - Git
 
@@ -120,45 +135,55 @@ predictfy-locaweb/
 
 ```bash
 git clone https://github.com/PedroHSSoares-Dev/locaweb.git
-cd predictfy-locaweb
+cd locaweb
 ```
 
-### 2. Configurar variáveis de ambiente
+### 2. Instalar dependências Python
 
 ```bash
-cp .env.example .env
-# editar .env com suas chaves
-```
-
-### 3. Instalar dependências Python
-
-```bash
-python3 -m venv venv
-source venv/bin/activate
+micromamba install -c conda-forge --file requirements.txt
+# ou com pip:
 pip install -r requirements.txt
 ```
 
-### 4. Adicionar o dataset
+### 3. Adicionar o dataset
 
-Colocar o arquivo CSV fornecido pela Locaweb em:
+Colocar o arquivo fornecido pela Locaweb em:
 ```
-data/raw/incidents.csv
+data/raw/LW-DATASET.xlsx
 ```
 
-### 5. Rodar o pipeline de ML
+### 4. Executar o pipeline de ML
 
 ```bash
-python3 src/pipeline.py
-# gera os JSONs em outputs/
+# Pipeline completo (feature engineering + todos os modelos)
+python src/pipeline.py
+
+# Passos individuais
+python src/pipeline.py --step fe    # só feature engineering
+python src/pipeline.py --step xgb   # só XGBoost
+python src/pipeline.py --step km    # só K-Means
+python src/pipeline.py --step kpi   # só projeção KPI
+
+# Gera em outputs/:
+#   risco_ola.json · clusters.json · kpi_atingimento.json
 ```
 
-### 6. Rodar o frontend
+### 5. Iniciar a API
+
+```bash
+uvicorn api.main:app --reload
+# API disponível em http://localhost:8000
+# Docs interativos em http://localhost:8000/docs
+```
+
+### 6. Iniciar o frontend
 
 ```bash
 cd frontend
 npm install
 npm run dev
-# acesse http://localhost:5173
+# Dashboard em http://localhost:5173
 ```
 
 ---

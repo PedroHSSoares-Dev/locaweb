@@ -35,7 +35,6 @@ Thumbs.db
 *.env
 
 # ── Documentos internos (não são código do projeto) ───────
-docs/
 avaliacoes/
 PLANO_DE_ACAO.md
 PROMPT_*.md
