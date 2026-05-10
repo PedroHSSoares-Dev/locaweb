@@ -34,6 +34,7 @@ CLUSTER_FEATURES = [
     "is_horario_comercial", "is_fim_de_semana", "prioridade_bin",
     "lag_1d", "rolling_7d",
     "produto_freq", "grupo_freq",
+    "is_feriado",
 ]
 TARGET = "target_ola"
 
@@ -54,7 +55,7 @@ def load_data(path: Path = PARQUET_PATH) -> pd.DataFrame:
         raise ValueError(f"Features faltando: {missing}\nExecute: python src/data/preprocessor.py")
 
     df_cl = df[CLUSTER_FEATURES + [TARGET]].copy()
-    df_cl[["lag_1d", "rolling_7d"]] = df_cl[["lag_1d", "rolling_7d"]].fillna(0)
+    df_cl[["lag_1d", "rolling_7d", "is_feriado"]] = df_cl[["lag_1d", "rolling_7d", "is_feriado"]].fillna(0)
     assert df_cl.isnull().sum().sum() == 0, "Dataset com nulos"
     return df_cl
 

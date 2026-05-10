@@ -3,16 +3,16 @@
   "gerado_em": "2026-05-09",
   "metodologia": "K-Means K=5 — seleção por voto majoritário (Silhouette, CH, DB), K ímpar ≥ 5",
   "k": 5,
-  "silhouette": 0.1838,
+  "silhouette": 0.1994,
   "k_min_utilizado": 5,
   "metricas": {
-    "inertia": 171789.49,
-    "silhouette_score": 0.1838,
-    "calinski_harabasz": 4083.35,
-    "davies_bouldin": 1.7138,
-    "features_usadas": 11,
+    "inertia": 190928.76,
+    "silhouette_score": 0.1994,
+    "calinski_harabasz": 3890.04,
+    "davies_bouldin": 1.5043,
+    "features_usadas": 12,
     "total_incidentes": 25588,
-    "pca_variancia_2d": 0.3492
+    "pca_variancia_2d": 0.3214
   },
   "features_clustering": [
     "hora",
@@ -25,7 +25,8 @@
     "lag_1d",
     "rolling_7d",
     "produto_freq",
-    "grupo_freq"
+    "grupo_freq",
+    "is_feriado"
   ],
   "clusters": [
     {
@@ -33,76 +34,14 @@
       "nome": "Fora do Horário Comercial",
       "label": "Fora do Horário Comercial",
       "descricao": "Incidentes abertos fora do horário comercial (antes das 8h ou após 18h).",
-      "tamanho": 3520,
-      "pct_total": 13.76,
-      "taxaViolacao": 0.909,
-      "taxa_violacao_pct": 0.909,
-      "total_violacoes": 32,
-      "score_T": 1.78,
-      "score_G": 3.13,
-      "score_V": 9.09,
-      "perfil": {
-        "horaMedia": 4,
-        "diasCriticos": [
-          "Qua"
-        ],
-        "produtos": [],
-        "grupo": "",
-        "pctP2": 31.3,
-        "duracaoMediana": null,
-        "pctFds": 0.0,
-        "hora_media": 4.3,
-        "dia_semana_medio": 2.1,
-        "prioridade_p2_pct": 31.3,
-        "horario_comercial_pct": 0.0,
-        "fim_de_semana_pct": 0.0,
-        "periodo_dia_predominante": "madrugada"
-      }
-    },
-    {
-      "id": 1,
-      "nome": "Operação Normal — Tarde",
-      "label": "Operação Normal — Tarde",
-      "descricao": "Incidentes com perfil tarde. Padrão operacional identificado por clustering.",
-      "tamanho": 9756,
-      "pct_total": 38.13,
-      "taxaViolacao": 0.81,
-      "taxa_violacao_pct": 0.81,
-      "total_violacoes": 79,
-      "score_T": 5.37,
-      "score_G": 1.35,
-      "score_V": 8.1,
-      "perfil": {
-        "horaMedia": 13,
-        "diasCriticos": [
-          "Qua"
-        ],
-        "produtos": [],
-        "grupo": "",
-        "pctP2": 13.5,
-        "duracaoMediana": null,
-        "pctFds": 0.0,
-        "hora_media": 12.9,
-        "dia_semana_medio": 2.5,
-        "prioridade_p2_pct": 13.5,
-        "horario_comercial_pct": 100.0,
-        "fim_de_semana_pct": 0.0,
-        "periodo_dia_predominante": "tarde"
-      }
-    },
-    {
-      "id": 2,
-      "nome": "Fora do Horário Comercial",
-      "label": "Fora do Horário Comercial",
-      "descricao": "Incidentes abertos fora do horário comercial (antes das 8h ou após 18h).",
-      "tamanho": 3865,
-      "pct_total": 15.1,
-      "taxaViolacao": 0.957,
-      "taxa_violacao_pct": 0.957,
-      "total_violacoes": 37,
+      "tamanho": 3896,
+      "pct_total": 15.23,
+      "taxaViolacao": 0.975,
+      "taxa_violacao_pct": 0.975,
+      "total_violacoes": 38,
       "score_T": 8.42,
-      "score_G": 2.18,
-      "score_V": 9.57,
+      "score_G": 2.11,
+      "score_V": 9.75,
       "perfil": {
         "horaMedia": 20,
         "diasCriticos": [
@@ -110,46 +49,84 @@
         ],
         "produtos": [],
         "grupo": "",
-        "pctP2": 21.8,
+        "pctP2": 21.1,
         "duracaoMediana": null,
-        "pctFds": 0.0,
-        "hora_media": 20.2,
-        "dia_semana_medio": 1.9,
-        "prioridade_p2_pct": 21.8,
-        "horario_comercial_pct": 0.0,
-        "fim_de_semana_pct": 0.0,
-        "periodo_dia_predominante": "noite"
+        "pctFds": 0.0
+      }
+    },
+    {
+      "id": 1,
+      "nome": "Operação Normal — Tarde",
+      "label": "Operação Normal — Tarde",
+      "descricao": "Incidentes com perfil tarde. Padrão operacional identificado por clustering.",
+      "tamanho": 14241,
+      "pct_total": 55.65,
+      "taxaViolacao": 0.829,
+      "taxa_violacao_pct": 0.829,
+      "total_violacoes": 118,
+      "score_T": 5.37,
+      "score_G": 1.48,
+      "score_V": 8.29,
+      "perfil": {
+        "horaMedia": 13,
+        "diasCriticos": [
+          "Qua"
+        ],
+        "produtos": [],
+        "grupo": "",
+        "pctP2": 14.8,
+        "duracaoMediana": null,
+        "pctFds": 0.0
+      }
+    },
+    {
+      "id": 2,
+      "nome": "Fora do Horário Comercial",
+      "label": "Fora do Horário Comercial",
+      "descricao": "Incidentes abertos fora do horário comercial (antes das 8h ou após 18h).",
+      "tamanho": 3565,
+      "pct_total": 13.93,
+      "taxaViolacao": 0.87,
+      "taxa_violacao_pct": 0.87,
+      "total_violacoes": 31,
+      "score_T": 1.84,
+      "score_G": 3.04,
+      "score_V": 8.7,
+      "perfil": {
+        "horaMedia": 4,
+        "diasCriticos": [
+          "Qua"
+        ],
+        "produtos": [],
+        "grupo": "",
+        "pctP2": 30.4,
+        "duracaoMediana": null,
+        "pctFds": 0.0
       }
     },
     {
       "id": 3,
-      "nome": "Operação Normal — Tarde",
-      "label": "Operação Normal — Tarde",
-      "descricao": "Incidentes com perfil tarde. Padrão operacional identificado por clustering.",
-      "tamanho": 4851,
-      "pct_total": 18.96,
-      "taxaViolacao": 0.886,
-      "taxa_violacao_pct": 0.886,
-      "total_violacoes": 43,
-      "score_T": 5.35,
-      "score_G": 1.73,
-      "score_V": 8.86,
+      "nome": "Risco Elevado — Manhã",
+      "label": "Risco Elevado — Manhã",
+      "descricao": "Incidentes com perfil manhã. Padrão operacional identificado por clustering.",
+      "tamanho": 389,
+      "pct_total": 1.52,
+      "taxaViolacao": 1.285,
+      "taxa_violacao_pct": 1.285,
+      "total_violacoes": 5,
+      "score_T": 4.76,
+      "score_G": 3.37,
+      "score_V": 10.0,
       "perfil": {
-        "horaMedia": 13,
+        "horaMedia": 11,
         "diasCriticos": [
-          "Ter"
+          "Qui"
         ],
         "produtos": [],
         "grupo": "",
-        "pctP2": 17.3,
+        "pctP2": 33.7,
         "duracaoMediana": null,
-        "pctFds": 0.0,
-        "hora_media": 12.8,
-        "dia_semana_medio": 1.0,
-        "prioridade_p2_pct": 17.3,
-        "horario_comercial_pct": 95.2,
-        "fim_de_semana_pct": 0.0,
-        "periodo_dia_predominante": "tarde"
+        "pctFds": 25.4
       }
     },
     {
@@ -157,13 +134,13 @@
       "nome": "Fim de Semana / Noturno",
       "label": "Fim de Semana / Noturno",
       "descricao": "Incidentes concentrados nos fins de semana e horários noturnos. Menor cobertura de equipe.",
-      "tamanho": 3596,
-      "pct_total": 14.05,
-      "taxaViolacao": 1.585,
-      "taxa_violacao_pct": 1.585,
-      "total_violacoes": 57,
+      "tamanho": 3497,
+      "pct_total": 13.67,
+      "taxaViolacao": 1.601,
+      "taxa_violacao_pct": 1.601,
+      "total_violacoes": 56,
       "score_T": 4.76,
-      "score_G": 2.95,
+      "score_G": 2.89,
       "score_V": 10.0,
       "perfil": {
         "horaMedia": 11,
@@ -172,15 +149,9 @@
         ],
         "produtos": [],
         "grupo": "",
-        "pctP2": 29.5,
+        "pctP2": 28.9,
         "duracaoMediana": null,
-        "pctFds": 100.0,
-        "hora_media": 11.4,
-        "dia_semana_medio": 5.4,
-        "prioridade_p2_pct": 29.5,
-        "horario_comercial_pct": 46.1,
-        "fim_de_semana_pct": 100.0,
-        "periodo_dia_predominante": "manhã"
+        "pctFds": 100.0
       }
     }
   ]

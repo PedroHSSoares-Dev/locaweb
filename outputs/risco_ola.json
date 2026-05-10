@@ -3,23 +3,23 @@
   "gerado_em": "2026-05-09",
   "versao": "v2",
   "abordagem": "XGBoost + Base + threshold F1-ótimo + CV validado",
-  "threshold_otimizado": 0.4112,
+  "threshold_otimizado": 0.4241,
   "threshold_recall_70": null,
   "scale_pos_weight": 102,
   "metricas": {
     "recall_violacao": 0.1379,
-    "precision_violacao": 0.2963,
-    "f1_violacao": 0.1882,
-    "roc_auc": 0.7729,
-    "pr_auc": 0.0699,
-    "roc_auc_cv_mean": 0.8422,
-    "roc_auc_cv_std": 0.0207,
-    "pr_auc_cv_mean": 0.1319,
-    "pr_auc_cv_std": 0.0085,
+    "precision_violacao": 0.2759,
+    "f1_violacao": 0.1839,
+    "roc_auc": 0.7767,
+    "pr_auc": 0.0694,
+    "roc_auc_cv_mean": 0.8407,
+    "roc_auc_cv_std": 0.0219,
+    "pr_auc_cv_mean": 0.1279,
+    "pr_auc_cv_std": 0.0019,
     "tp": 8,
-    "fp": 19,
+    "fp": 21,
     "fn": 50,
-    "tn": 5041,
+    "tn": 5039,
     "total_teste": 5118,
     "violacoes_reais": 58,
     "violacoes_capturadas": 8
@@ -28,88 +28,88 @@
     {
       "rank": 1,
       "feature": "grupo_viol_rate",
-      "shap_mean_abs": 0.886904
+      "shap_mean_abs": 0.903159
     },
     {
       "rank": 2,
       "feature": "rolling_30d",
-      "shap_mean_abs": 0.346297
+      "shap_mean_abs": 0.335505
     },
     {
       "rank": 3,
       "feature": "rolling_7d",
-      "shap_mean_abs": 0.275059
+      "shap_mean_abs": 0.280049
     },
     {
       "rank": 4,
-      "feature": "produto_freq",
-      "shap_mean_abs": 0.241527
+      "feature": "aberto_por_enc",
+      "shap_mean_abs": 0.256087
     },
     {
       "rank": 5,
-      "feature": "aberto_por_enc",
-      "shap_mean_abs": 0.235228
+      "feature": "produto_freq",
+      "shap_mean_abs": 0.230512
     },
     {
       "rank": 6,
-      "feature": "categoria_enc",
-      "shap_mean_abs": 0.214272
+      "feature": "produto_enc",
+      "shap_mean_abs": 0.215485
     },
     {
       "rank": 7,
-      "feature": "produto_enc",
-      "shap_mean_abs": 0.21081
+      "feature": "categoria_enc",
+      "shap_mean_abs": 0.210427
     },
     {
       "rank": 8,
       "feature": "lag_7d",
-      "shap_mean_abs": 0.190156
+      "shap_mean_abs": 0.193126
     },
     {
       "rank": 9,
       "feature": "hora",
-      "shap_mean_abs": 0.187182
+      "shap_mean_abs": 0.184128
     },
     {
       "rank": 10,
       "feature": "semana_ano",
-      "shap_mean_abs": 0.158544
+      "shap_mean_abs": 0.17259
     },
     {
       "rank": 11,
       "feature": "subcategoria_enc",
-      "shap_mean_abs": 0.145505
+      "shap_mean_abs": 0.150808
     },
     {
       "rank": 12,
-      "feature": "dia_mes",
-      "shap_mean_abs": 0.133389
+      "feature": "grupo_freq",
+      "shap_mean_abs": 0.137956
     },
     {
       "rank": 13,
-      "feature": "grupo_freq",
-      "shap_mean_abs": 0.13196
+      "feature": "dia_mes",
+      "shap_mean_abs": 0.132456
     },
     {
       "rank": 14,
-      "feature": "lag_1d_p3",
-      "shap_mean_abs": 0.113497
+      "feature": "grupo_enc",
+      "shap_mean_abs": 0.112102
     },
     {
       "rank": 15,
-      "feature": "grupo_enc",
-      "shap_mean_abs": 0.109483
+      "feature": "lag_1d_p3",
+      "shap_mean_abs": 0.111889
     }
   ],
   "risco_por_prioridade": {
     "P3": {
-      "media_prob": 0.0523,
-      "pct_alto_risco": 0.56,
+      "media_prob": 0.0526,
+      "pct_alto_risco": 0.61,
       "n_incidentes": 4081,
       "taxa_violacao_real": 1.23
     },
     "P2": {
-      "media_prob": 0.0298,
+      "media_prob": 0.0304,
       "pct_alto_risco": 0.39,
       "n_incidentes": 1037,
       "taxa_violacao_real": 0.77
@@ -117,23 +117,23 @@
   },
   "distribuicao_risco": {
     "baixo": {
-      "count": 4917,
-      "pct": 96.07,
+      "count": 4909,
+      "pct": 95.92,
       "limite_inferior": 0.0,
       "limite_superior": 0.2,
-      "violacoes_reais": 46
+      "violacoes_reais": 44
     },
     "medio": {
-      "count": 174,
-      "pct": 3.4,
+      "count": 180,
+      "pct": 3.52,
       "limite_inferior": 0.2,
-      "limite_superior": 0.4112094044685364,
-      "violacoes_reais": 4
+      "limite_superior": 0.424137681722641,
+      "violacoes_reais": 6
     },
     "alto": {
-      "count": 27,
-      "pct": 0.53,
-      "limite_inferior": 0.4112094044685364,
+      "count": 29,
+      "pct": 0.57,
+      "limite_inferior": 0.424137681722641,
       "limite_superior": 1.0,
       "violacoes_reais": 8
     }

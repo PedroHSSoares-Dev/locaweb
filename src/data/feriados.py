@@ -1,11 +1,14 @@
 """
-Calendário de feriados brasileiro — nacional + SP estado + SP município.
+Calendário de feriados brasileiro — apenas feriados nacionais.
 Cobre 2023–2026 (intervalo do dataset + previsões futuras).
 
+Carnaval (seg/ter) e Corpus Christi são incluídos manualmente pois a
+biblioteca `holidays` não os cobre por padrão.
+
 Features geradas:
-  is_feriado       (0/1)  — dia é feriado?
-  tipo_feriado     (0–3)  — 0=normal, 1=nacional, 2=estadual SP, 3=municipal SP
-  dias_ate_feriado (0–7)  — dias até o próximo feriado (clipado em 7)
+  is_feriado         (0/1) — dia é feriado nacional?
+  tipo_feriado       (0/1) — 0=normal, 1=nacional (mantido para compatibilidade)
+  dias_ate_feriado   (0–7) — dias até o próximo feriado (clipado em 7)
   dias_desde_feriado (0–7) — dias desde o último feriado (clipado em 7)
 """
 from __future__ import annotations
@@ -19,10 +22,8 @@ import pandas as pd
 ANOS = range(2023, 2027)
 
 # ── Tipos de feriado (ordinal) ────────────────────────────────────────────────
-TIPO_NORMAL     = 0
-TIPO_NACIONAL   = 1
-TIPO_ESTADUAL   = 2
-TIPO_MUNICIPAL  = 3
+TIPO_NORMAL   = 0
+TIPO_NACIONAL = 1
 
 
 def _easter(year: int) -> date:
@@ -58,16 +59,6 @@ def _build_holiday_map(anos: range = ANOS) -> dict[date, int]:
         cal[easter - timedelta(days=47)] = TIPO_NACIONAL  # terça
         # Corpus Christi: 60 dias após a Páscoa
         cal[easter + timedelta(days=60)] = TIPO_NACIONAL
-
-        # ── SP estado ─────────────────────────────────────────────────────
-        # 09/07 — Revolução Constitucionalista
-        for d in hol.country_holidays("BR", subdiv="SP", years=year):
-            cal.setdefault(d, TIPO_ESTADUAL)
-
-        # ── SP município ──────────────────────────────────────────────────
-        # 25/01 — Aniversário de São Paulo
-        d_aniv = date(year, 1, 25)
-        cal.setdefault(d_aniv, TIPO_MUNICIPAL)
 
     return cal
 
@@ -131,7 +122,7 @@ def build_holiday_features(datas: pd.Series) -> pd.DataFrame:
 if __name__ == "__main__":
     # Sanidade: imprimir feriados 2025
     hmap = _build_holiday_map(range(2025, 2026))
-    nomes_tipo = {0: "normal", 1: "nacional", 2: "estadual-SP", 3: "municipal-SP"}
+    nomes_tipo = {0: "normal", 1: "nacional"}
     print("Feriados 2025:")
     for d, t in sorted(hmap.items()):
         print(f"  {d.strftime('%d/%m/%Y')}  [{nomes_tipo[t]}]")
