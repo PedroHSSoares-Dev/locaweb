@@ -5,6 +5,7 @@ import Sidebar from './components/Sidebar';
 import GestaoPage from './pages/GestaoPage';
 import MonitoramentoPage from './pages/MonitoramentoPage';
 import TecnicoPage from './pages/TecnicoPage';
+import ModelosPage from './pages/ModelosPage';
 import { useBreakpoint } from './hooks/useBreakpoint';
 
 import { Analytics } from "@vercel/analytics/react"
@@ -32,6 +33,7 @@ function AppInner() {
               <Route path="/gestao"        element={<GestaoPage />} />
               <Route path="/monitoramento" element={<MonitoramentoPage />} />
               <Route path="/tecnico"       element={<TecnicoPage />} />
+              <Route path="/modelos"       element={<ModelosPage />} />
             </Routes>
       </div>
     </div>

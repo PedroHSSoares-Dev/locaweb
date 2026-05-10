@@ -3,12 +3,13 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
 import { useBreakpoint } from '../hooks/useBreakpoint';
 import LogoPredictfy from './LogoPredictfy';
-import { LayoutDashboard, Activity, Server } from 'lucide-react';
+import { LayoutDashboard, Activity, Server, FlaskConical } from 'lucide-react';
 
 const NAV = [
   { to: '/gestao',        label: 'GESTÃO',       icon: <LayoutDashboard size={18} /> },
   { to: '/monitoramento', label: 'MONITORAMENTO', icon: <Activity size={18} /> },
   { to: '/tecnico',       label: 'TÉCNICO',       icon: <Server size={18} /> },
+  { to: '/modelos',       label: 'MODELOS',       icon: <FlaskConical size={18} /> },
 ];
 
 const SIDEBAR_FULL      = 220;
