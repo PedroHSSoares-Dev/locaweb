@@ -15,7 +15,7 @@ def get_clusters():
     """
     Retorna os clusters K-Means de padrões de incidentes KPI.
 
-    **Disponível apenas após execução do notebook 05** (`05_kmeans_clusters.ipynb`).
+    **Gerado por** `src/models/kmeans_model.py` via `python src/pipeline.py --step km`.
     O JSON gerado em `outputs/clusters.json` deve conter uma lista de clusters,
     cada um com:
 
@@ -32,9 +32,9 @@ def get_clusters():
     - Cluster 2: Volume alto P3 — maior cluster, horário comercial, Média prioridade
     - Cluster 3: Team07 anomalias — grupo específico com taxa de violação extrema
 
-    Retorna `disponivel: false` enquanto o notebook 05 não for executado.
+    Retorna `disponivel: false` se `outputs/clusters.json` não existir.
     """
     data = load_json("clusters.json")
     if data is None:
-        return {"disponivel": False, "mensagem": "Modelo K-Means ainda não treinado"}
+        return {"disponivel": False, "mensagem": "Modelo K-Means não disponível — execute: python src/pipeline.py --step km"}
     return {"disponivel": True, **data}

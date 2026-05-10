@@ -5,7 +5,7 @@ from api.services.data_loader import load_json
 
 router = APIRouter(tags=["Risco OLA (XGBoost)"])
 
-_NOT_TRAINED = {"disponivel": False, "mensagem": "Modelo XGBoost ainda não treinado"}
+_NOT_TRAINED = {"disponivel": False, "mensagem": "Modelo XGBoost não disponível — execute: python src/pipeline.py --step xgb"}
 
 
 @router.get(
@@ -17,7 +17,7 @@ def get_risco():
     """
     Retorna o JSON completo do modelo XGBoost de risco de violação de OLA.
 
-    **Disponível apenas após execução do notebook 04** (`04_xgboost_ola.ipynb`).
+    **Gerado por** `src/models/xgboost_model.py` via `python src/pipeline.py --step xgb`.
 
     **Contexto do modelo:**
     - Target: `KPI Violado?` — 1 se duração > OLA, 0 caso contrário
@@ -53,7 +53,7 @@ def get_risco_produtos():
     - > 15%: 🟡 ATENÇÃO
     - ≤ 15%: 🟢 NORMAL
 
-    Retorna `disponivel: false` enquanto o notebook 04 não for executado.
+    Retorna `disponivel: false` se `outputs/risco_ola.json` não existir.
     """
     data = load_json("risco_ola.json")
     if data is None:
@@ -92,7 +92,7 @@ def get_risco_grupos():
 
     Usado no ranking de grupos do TecnicoPage.
 
-    Retorna `disponivel: false` enquanto o notebook 04 não for executado.
+    Retorna `disponivel: false` se `outputs/risco_ola.json` não existir.
     """
     data = load_json("risco_ola.json")
     if data is None:
