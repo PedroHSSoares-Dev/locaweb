@@ -26,14 +26,14 @@ app = FastAPI(
 API AIOps para previsão de incidentes e monitoramento de OLA em operações ITSM.
 
 ### Modelos disponíveis
-| Modelo | Status | MAE holdout | Notebook |
+| Modelo | Status | MAE holdout | Origem |
 |---|---|---|---|
-| **LSTM v2** (early stopping) — Volume D+1 a D+7 | ✅ Disponível | 13.15 | `03d_lstm` |
-| **Prophet MC** (ensemble adaptativo) — Volume D+1 a D+7 | ✅ Disponível | 23.80 | `03c_prophet_monte_carlo` |
-| **Prophet original** (ensemble v5+v6) — Volume D+1 a D+7 | ✅ Disponível | 17.06 (CV) | `03_prophet_volume` |
-| **XGBoost** — Risco de violação de OLA | ⏳ Pendente | — | `04_xgboost_ola` |
-| **K-Means** — Segmentação de incidentes | ⏳ Pendente | — | `05_kmeans_clusters` |
-| **KPI OLA** (SPC — média + 1σ) | ✅ Disponível | — | `07_kpi_projection` |
+| **LSTM v2** (early stopping) — Volume D+1 a D+7 | ✅ Disponível | 13.15 | `03d_lstm.ipynb` ⏳ S3 |
+| **Prophet MC** (ensemble adaptativo) — Volume D+1 a D+7 | ✅ Disponível | 23.80 | `03c_prophet_monte_carlo.ipynb` ⏳ S3 |
+| **Prophet original** (ensemble v5+v6) — Volume D+1 a D+7 | ✅ Disponível | 17.06 (CV) | `03_prophet_volume.ipynb` ⏳ S3 |
+| **XGBoost** — Risco de violação de OLA | ✅ Disponível | — | `src/models/xgboost_model.py` |
+| **K-Means** — Segmentação de incidentes | ✅ Disponível | — | `src/models/kmeans_model.py` |
+| **KPI OLA** — Meta dinâmica mensal | ✅ Disponível | — | `src/models/kpi_projection.py` |
 
 ### Hierarquia de modelos ativos
 Os endpoints `/previsoes/*` usam automaticamente o melhor modelo disponível:
