@@ -480,12 +480,11 @@ function ClusterQuadrant({ clusters, selected, onToggle }) {
   }
 
   return (
-    <div ref={wrapperRef} style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
-      <div style={{ display: 'flex', gap: 16 }}>
+    <div ref={wrapperRef} style={{ display: 'flex', flexDirection: 'column', position: 'relative', gap: 12 }}>
 
-      {/* ── Scatter Quadrant — grid 2×2 fixo ────────────────────────────── */}
+      {/* ── Scatter Quadrant — grid 2×2 fixo (largura total) ─────────────── */}
       <div style={{
-        flex: '0 0 65%',
+        width: '100%',
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
         gridTemplateRows: '1fr 1fr',
@@ -664,15 +663,17 @@ function ClusterQuadrant({ clusters, selected, onToggle }) {
         );
       })()}
 
-      {/* ── Painel direito ───────────────────────────────────────────────── */}
-      <div style={{ flex: '0 0 calc(35% - 16px)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {/* ── Perfil de risco — abaixo do gráfico, largura total ───────────── */}
+      <div style={{ display: 'flex', gap: 12 }}>
 
-        {/* Alerta */}
+        {/* Alerta compacto */}
         <div style={{
+          flex: '0 0 210px',
           background: 'rgba(255,45,85,0.08)',
           border: '1px solid var(--red)',
           borderLeft: '3px solid var(--red)',
           borderRadius: 6, padding: '12px 14px',
+          alignSelf: 'flex-start',
         }}>
           <div style={{
             fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
@@ -686,57 +687,63 @@ function ClusterQuadrant({ clusters, selected, onToggle }) {
             display: 'flex', gap: 8, marginTop: 8,
             fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-muted)',
           }}>
-            <span>SEVERITY: CRITICAL</span>
-            <span>·</span>
-            <span>TAG: OUT_OF_HOURS</span>
+            <span>SEVERITY: CRITICAL</span><span>·</span><span>TAG: OUT_OF_HOURS</span>
           </div>
         </div>
 
-        {/* Metrics Score */}
+        {/* Perfil — clusters lado a lado usando largura restante */}
         <div style={{
+          flex: 1,
           background: 'var(--surface2)',
           border: '1px solid var(--border)',
-          borderRadius: 6, padding: '12px 14px', flex: 1,
+          borderRadius: 6, padding: '12px 16px',
         }}>
           <div style={{
             fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
-            color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 10,
-          }}>CLUSTER METRICS SCORE</div>
+            color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 12,
+          }}>PERFIL DE RISCO · por cluster</div>
 
-          {[...clusters].sort((a, b) => b.taxaViolacao - a.taxaViolacao).map(c => {
-            const cor = CORES[c.id];
-            return (
-              <div key={c.id} style={{ marginBottom: 12 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5, alignItems: 'baseline' }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: cor, fontWeight: 700 }}>
-                    C{c.id} — {c.label.split(' ').slice(0, 2).join(' ')}
-                  </span>
-                  <span style={{
-                    fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
-                    color: c.taxaViolacao > 2 ? 'var(--red)' : c.taxaViolacao > 1.2 ? 'var(--orange)' : 'var(--green)',
-                  }}>{c.taxaViolacao}%</span>
-                </div>
-                {[
-                  { l: 'T', v: c.score_T },
-                  { l: 'G', v: c.score_G },
-                  { l: 'V', v: c.score_V },
-                ].map(({ l, v }) => (
-                  <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-muted)', width: 8, flexShrink: 0 }}>{l}</span>
-                    <div style={{ flex: 1, height: 3, background: 'var(--surface4)', borderRadius: 2 }}>
-                      <div style={{ width: `${v * 100}%`, height: '100%', background: cor, borderRadius: 2, opacity: 0.8 }} />
-                    </div>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-muted)', width: 24, textAlign: 'right' }}>
-                      {(v * 100).toFixed(0)}%
-                    </span>
+          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${clusters.length}, 1fr)`, gap: 14 }}>
+            {[...clusters].sort((a, b) => b.taxaViolacao - a.taxaViolacao).map(c => {
+              const cor = CORES[c.id];
+              return (
+                <div key={c.id}>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: cor, fontWeight: 700, marginBottom: 2 }}>
+                    C{c.id}
                   </div>
-                ))}
-              </div>
-            );
-          })}
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 7, color: 'var(--text-muted)', marginBottom: 4, lineHeight: 1.3 }}>
+                    {c.label.split(' ').slice(0, 3).join(' ')}
+                  </div>
+                  <div style={{
+                    fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700, marginBottom: 10,
+                    color: c.taxaViolacao > 2 ? 'var(--red)' : c.taxaViolacao > 1.2 ? 'var(--orange)' : 'var(--green)',
+                  }}>
+                    {c.taxaViolacao}% viol.
+                  </div>
+                  {[
+                    { l: 'TEMPORAL',  desc: 'fora do horário', v: c.score_T },
+                    { l: 'GRAVIDADE', desc: '% prioridade P2', v: c.score_G },
+                    { l: 'VIOLAÇÃO',  desc: 'taxa OLA',        v: c.score_V },
+                  ].map(({ l, desc, v }) => (
+                    <div key={l} style={{ marginBottom: 8 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-sec)', fontWeight: 600 }}>{l}</span>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-pri)', fontWeight: 700 }}>
+                          {(v * 100).toFixed(0)}%
+                        </span>
+                      </div>
+                      <div style={{ height: 5, background: 'var(--surface1)', borderRadius: 3 }}>
+                        <div style={{ width: `${v * 100}%`, height: '100%', background: cor, borderRadius: 3, opacity: 0.85 }} />
+                      </div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 7, color: 'var(--text-muted)', marginTop: 2 }}>{desc}</div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
-      </div>{/* ← row close */}
 
       {/* ── Painel expandido — detalhamento (1) ou comparação (2+) ────── */}
       {selected.size === 1 && (() => {
@@ -1308,11 +1315,11 @@ export default function TecnicoPage() {
         <Module
           n={6}
           title="Matriz Grupo × Categoria"
-          sub="Taxa de violação estimada (%) · células mais escuras = maior taxa · scroll horizontal disponível"
+          sub="Taxa de violação histórica (%) por equipe e categoria · ordenado pela maior taxa global · scroll horizontal disponível"
           noPad
         >
           <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 600 }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 640 }}>
               <thead>
                 <tr style={{ background: 'var(--surface3)' }}>
                   <th style={{
@@ -1331,15 +1338,21 @@ export default function TecnicoPage() {
                       {categoriaNomes[c.id] ?? c.id}
                     </th>
                   ))}
+                  <th style={{
+                    padding: '8px 14px', textAlign: 'center',
+                    fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
+                    color: 'var(--text-muted)', letterSpacing: '0.1em',
+                    borderBottom: '1px solid var(--border)', borderLeft: '1px solid var(--border)', minWidth: 80,
+                  }}>TOTAL</th>
                 </tr>
               </thead>
               <tbody>
-                {grupos.map((g, gi) => (
-                  <tr key={g.id} style={{ borderBottom: gi < grupos.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                {gruposOrdenados.map((g, gi) => (
+                  <tr key={g.id} style={{ borderBottom: gi < gruposOrdenados.length - 1 ? '1px solid var(--border)' : 'none' }}>
                     <td style={{
                       padding: '8px 16px',
                       fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700,
-                      color: g.id === 'Team07' ? 'var(--red)' : 'var(--text-pri)',
+                      color: g.taxaViolacao > 5 ? 'var(--red)' : g.taxaViolacao > 2 ? 'var(--orange)' : 'var(--text-pri)',
                     }}>{g.id}</td>
                     {topCats.map((c, ci) => {
                       const rate = +((g.taxaViolacao * 0.6 + c.taxaViolacao * 0.4) * (0.8 + (gi * ci % 5) * 0.08)).toFixed(2);
@@ -1356,10 +1369,34 @@ export default function TecnicoPage() {
                         </td>
                       );
                     })}
+                    <td style={{
+                      padding: '8px 14px', textAlign: 'center',
+                      fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700,
+                      color: g.taxaViolacao > 5 ? 'var(--red)' : g.taxaViolacao > 2 ? 'var(--orange)' : 'var(--text-sec)',
+                      background: `rgba(255,45,85,${Math.min(g.taxaViolacao / 10, 1) * 0.25})`,
+                      borderLeft: '1px solid var(--border)',
+                    }}>
+                      {g.taxaViolacao.toFixed(2)}%
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+          <div style={{ padding: '10px 16px 14px', display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+            {[
+              { cor: 'var(--red)',      label: '> 3% — crítico' },
+              { cor: 'var(--orange)',   label: '1,5–3% — atenção' },
+              { cor: 'var(--text-sec)', label: '< 1,5% — normal' },
+            ].map(({ cor, label }) => (
+              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ width: 8, height: 8, borderRadius: 2, background: cor }} />
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)' }}>{label}</span>
+              </div>
+            ))}
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)', marginLeft: 'auto' }}>
+              coluna TOTAL = taxa real histórica do grupo · demais células = estimativa combinada
+            </span>
           </div>
         </Module>
 

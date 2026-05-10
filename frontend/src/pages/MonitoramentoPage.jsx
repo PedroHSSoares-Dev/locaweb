@@ -113,7 +113,7 @@ function KpiCard({ label, value, sub, color, delay = 0 }) {
 }
 
 // ─── Heatmap SVG custom ───────────────────────────────────────────────────────
-function Heatmap({ data }) {
+function Heatmap({ data, mode = 'VOLUME' }) {
   const { isMobile } = useBreakpoint();
   const [tooltip, setTooltip] = useState(null);
   const wrapperRef = useRef(null);
@@ -125,13 +125,20 @@ function Heatmap({ data }) {
     const totalPorHora = Array.from({ length: 24 }, (_, h) =>
       data.reduce((s, r) => s + r.horas[h], 0)
     );
-    const mediaHora = totalPorHora.map(t => Math.round(t / data.length));
+    const mediaHora = totalPorHora.map(t => t / data.length);
     const flat = [];
     data.forEach((r, ri) => r.horas.forEach((v, hi) => flat.push({ ri, hi, v })));
     flat.sort((a, b) => b.v - a.v);
     const rankMap = new Map();
     flat.forEach(({ ri, hi }, idx) => rankMap.set(`${ri}_${hi}`, { rank: idx + 1, total: flat.length }));
-    return { maxVal, totalPorDia, totalPorHora, mediaHora, rankMap };
+    // Desvio % de cada célula em relação à média da hora entre os dias
+    const deviationGrid = data.map(r =>
+      r.horas.map((v, hi) => {
+        const med = mediaHora[hi];
+        return med > 0 ? Math.round((v - med) / med * 100) : 0;
+      })
+    );
+    return { maxVal, totalPorDia, totalPorHora, mediaHora: mediaHora.map(Math.round), rankMap, deviationGrid };
   }, [data]);
 
   const cellW = isMobile ? 20 : 28, cellH = isMobile ? 20 : 28, labelW = 36;
@@ -140,14 +147,29 @@ function Heatmap({ data }) {
   const svgW = labelW + 24 * cellW + 8;
   const svgH = data.length * cellH + 28;
 
-  // teal (low) → orange (mid) → red (high)
-  function cellColor(v) {
+  // teal (low) → orange (mid) → red (high) para volume absoluto
+  function cellColorVolume(v) {
     if (!stats) return 'rgba(90,200,250,0.04)';
     const pct = v / stats.maxVal;
     if (pct < 0.15) return 'rgba(90,200,250,0.04)';
     if (pct < 0.35) return `rgba(90,200,250,${(0.12 + pct * 0.5).toFixed(2)})`;
     if (pct < 0.65) return `rgba(255,159,10,${(0.3 + pct * 0.4).toFixed(2)})`;
     return `rgba(255,45,85,${(0.45 + pct * 0.5).toFixed(2)})`;
+  }
+
+  // divergente: teal (abaixo da média) → cinza (na média) → laranja/vermelho (acima)
+  function cellColorAnomalia(dev) {
+    if (dev < -40) return 'rgba(90,200,250,0.65)';
+    if (dev < -20) return `rgba(90,200,250,${(0.15 + Math.abs(dev) / 150).toFixed(2)})`;
+    if (dev < 10)  return 'rgba(150,150,180,0.07)';
+    if (dev < 30)  return `rgba(255,159,10,${(0.25 + dev / 130).toFixed(2)})`;
+    if (dev < 60)  return `rgba(255,159,10,${(0.55 + dev / 250).toFixed(2)})`;
+    return `rgba(255,45,85,${Math.min(0.92, 0.48 + dev / 280).toFixed(2)})`;
+  }
+
+  function cellColor(ri, hi, v) {
+    if (mode === 'ANOMALIA') return cellColorAnomalia(stats?.deviationGrid?.[ri]?.[hi] ?? 0);
+    return cellColorVolume(v);
   }
 
   function handleMouseEnter(e, ri, hi, v) {
@@ -160,7 +182,8 @@ function Heatmap({ data }) {
     const pctDia    = stats.totalPorDia[ri]  > 0 ? Math.round(v / stats.totalPorDia[ri]  * 100) : 0;
     const media     = stats.mediaHora[hi];
     const diffMedia = media > 0 ? Math.round((v - media) / media * 100) : 0;
-    setTooltip({ x, y, dia: data[ri].dia, hora: hi, valor: v, pctDia, rank, total, media, diffMedia });
+    const dev       = stats.deviationGrid?.[ri]?.[hi] ?? 0;
+    setTooltip({ x, y, dia: data[ri].dia, hora: hi, valor: v, pctDia, rank, total, media, diffMedia, dev });
   }
 
   return (
@@ -182,7 +205,7 @@ function Heatmap({ data }) {
               <rect key={hi}
                 x={labelW + hi * cellW + 1} y={28 + ri * cellH + 1}
                 width={cellW - 2} height={cellH - 2} rx={3}
-                fill={cellColor(v)}
+                fill={cellColor(ri, hi, v)}
                 style={{ cursor: 'crosshair' }}
                 onMouseEnter={e => handleMouseEnter(e, ri, hi, v)}
                 onMouseLeave={() => setTooltip(null)}
@@ -223,16 +246,20 @@ function Heatmap({ data }) {
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, color: 'var(--text-pri)' }}>
                 {tooltip.dia} · {tooltip.hora}h–{tooltip.hora + 1}h
               </span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 15, fontWeight: 700, color: valColor }}>
-                {tooltip.valor}
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 15, fontWeight: 700, color: mode === 'ANOMALIA' ? diffColor : valColor }}>
+                {mode === 'ANOMALIA' ? `${diffSign}${tooltip.diffMedia}%` : tooltip.valor}
               </span>
             </div>
             <div style={{ height: '0.5px', background: 'var(--border)', marginBottom: 8 }} />
-            {[
+            {(mode === 'ANOMALIA' ? [
+              { label: 'desvio da média',    value: `${diffSign}${tooltip.diffMedia}% em relação a ${tooltip.media} (média ${tooltip.hora}h)`, color: diffColor },
+              { label: 'volume real',        value: `${tooltip.valor} incidentes`, color: 'var(--text-sec)' },
+              { label: '% do dia',           value: `${tooltip.pctDia}% dos incidentes de ${tooltip.dia}`,  color: 'var(--text-muted)' },
+            ] : [
               { label: '% do dia',                value: `${tooltip.pctDia}% dos incidentes de ${tooltip.dia}`,          color: 'var(--text-sec)' },
               { label: `vs média ${tooltip.hora}h`, value: `${diffSign}${tooltip.diffMedia}% (média: ${tooltip.media})`, color: diffColor },
               { label: 'ranking',                  value: `#${tooltip.rank} de ${tooltip.total} · top ${rankTop}%`,      color: rankColor },
-            ].map(({ label, value, color }) => (
+            ]).map(({ label, value, color }) => (
               <div key={label} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 5 }}>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)', flexShrink: 0 }}>{label}</span>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color, fontWeight: 600, textAlign: 'right' }}>{value}</span>
@@ -257,12 +284,15 @@ export default function MonitoramentoPage() {
   const { isMobile } = useBreakpoint();
   const [panelItem, setPanelItem] = useState(null);
   const [periodo, setPeriodo] = useState('ANO');
+  const [heatmapMode, setHeatmapMode] = useState('VOLUME');
 
   // ── Dados de modelo via API ────────────────────────────────────────────────
   const { data: d1Data,           loading: d1Loading,       disponivel: d1Disponivel       } = useApi('/previsoes/d1');
   const { data: serieData,        loading: serieLoading,    disponivel: serieDisponivel    } = useApi('/previsoes/serie');
   const { data: historicoData,    loading: historicoLoading, disponivel: historicoDisponivel } = useApi('/historico/diario');
   const { data: sazonalidadeData, disponivel: sazonalidadeDisponivel } = useApi('/historico/sazonalidade');
+  const { data: gruposData,       disponivel: gruposDisponivel       } = useApi('/risco/grupos');
+  const { data: kpiData,          disponivel: kpiDisponivel          } = useApi('/kpi');
 
   // Combina histórico (API) + previsão (API Prophet)
   const volumeComPrevisao = useMemo(() => {
@@ -295,6 +325,18 @@ export default function MonitoramentoPage() {
     'prophet_original':    { label: 'PROPHET ORIGINAL', cor: 'var(--text-sec)' },
   };
   const modeloMeta = MODELO_META[modeloAtivo] ?? { label: 'MODELO ATIVO', cor: 'var(--text-sec)' };
+
+  // Pico previsto hoje via sazonalidade histórica
+  const picoHoje = useMemo(() => {
+    if (!sazonalidadeDisponivel || !sazonalidadeData?.length) return null;
+    const JS_DIA = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    const hojeNome = JS_DIA[new Date().getDay()];
+    const row = sazonalidadeData.find(r => r.dia === hojeNome);
+    if (!row) return null;
+    const picoVal  = Math.max(...row.horas);
+    const picoHora = row.horas.indexOf(picoVal);
+    return { dia: hojeNome, hora: picoHora, volume: picoVal };
+  }, [sazonalidadeData, sazonalidadeDisponivel]);
 
   const axisProps = {
     tick: { fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--text-muted)' },
@@ -450,29 +492,167 @@ export default function MonitoramentoPage() {
         <Module
           n={3}
           title="Matriz de Sazonalidade"
-          sub="Concentração de incidentes por hora × dia da semana · 2023–2025 · pico: Qui 11h (391)"
+          sub={heatmapMode === 'ANOMALIA'
+            ? 'Desvio % em relação à média da hora — revela padrões além do horário comercial'
+            : 'Volume de incidentes por hora × dia da semana · 2023–2025 · pico: Qui 11h (391)'}
+          action={
+            <div style={{ display: 'flex', gap: 4 }}>
+              {['VOLUME', 'ANOMALIA'].map(m => (
+                <button key={m} onClick={() => setHeatmapMode(m)} style={{
+                  fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
+                  letterSpacing: '0.10em', padding: '4px 10px', borderRadius: 4, cursor: 'pointer',
+                  border: '1px solid var(--border)',
+                  background: heatmapMode === m ? 'var(--surface3)' : 'transparent',
+                  color: heatmapMode === m ? 'var(--text-pri)' : 'var(--text-muted)',
+                  transition: 'all 0.15s',
+                }}>
+                  {m}
+                </button>
+              ))}
+            </div>
+          }
         >
           {!sazonalidadeDisponivel ? (
             <SemDados mensagem="Dados de sazonalidade indisponíveis" />
           ) : (
             <div style={{ overflowX: 'auto' }}>
               <div style={{ minWidth: 700, minHeight: 280 }}>
-                <Heatmap data={sazonalidadeData} />
+                <Heatmap data={sazonalidadeData} mode={heatmapMode} />
               </div>
             </div>
           )}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--teal)' }}>BAIXO</span>
-            {[
-              'rgba(90,200,250,0.04)',
-              'rgba(90,200,250,0.22)',
-              'rgba(255,159,10,0.45)',
-              'rgba(255,45,85,0.60)',
-              'rgba(255,45,85,0.90)',
-            ].map((c, i) => (
-              <div key={i} style={{ width: 24, height: 12, borderRadius: 2, background: c }} />
-            ))}
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--red)' }}>ALTO</span>
+            {heatmapMode === 'ANOMALIA' ? (
+              <>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--teal)' }}>ABAIXO</span>
+                {['rgba(90,200,250,0.65)', 'rgba(90,200,250,0.25)', 'rgba(150,150,180,0.07)', 'rgba(255,159,10,0.55)', 'rgba(255,45,85,0.85)'].map((c, i) => (
+                  <div key={i} style={{ width: 24, height: 12, borderRadius: 2, background: c }} />
+                ))}
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--red)' }}>ACIMA</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', marginLeft: 8 }}>da média histórica p/ aquela hora</span>
+              </>
+            ) : (
+              <>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--teal)' }}>BAIXO</span>
+                {['rgba(90,200,250,0.04)', 'rgba(90,200,250,0.22)', 'rgba(255,159,10,0.45)', 'rgba(255,45,85,0.60)', 'rgba(255,45,85,0.90)'].map((c, i) => (
+                  <div key={i} style={{ width: 24, height: 12, borderRadius: 2, background: c }} />
+                ))}
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--red)' }}>ALTO</span>
+              </>
+            )}
+          </div>
+        </Module>
+
+        {/* ── MODULE 04: Alertas Operacionais ───────────────────────────── */}
+        <Module
+          n={4}
+          title="Alertas Operacionais"
+          sub="Grupos em risco · pico previsto · orçamento OLA acumulado"
+        >
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 20 }}>
+
+            {/* Grupos críticos */}
+            <div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)', letterSpacing: '0.14em', marginBottom: 10, textTransform: 'uppercase' }}>
+                Top grupos por taxa de violação OLA
+              </div>
+              {!gruposDisponivel ? (
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>
+                  Modelo XGBoost não disponível
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {(gruposData?.grupos ?? []).slice(0, 6).map((g, i) => {
+                    const taxa = g.taxaViolacao ?? 0;
+                    const cor = taxa > 5 ? 'var(--red)' : taxa > 2 ? 'var(--orange)' : 'var(--green)';
+                    const barW = Math.min(100, taxa * 8);
+                    return (
+                      <div key={g.grupo ?? i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: cor, fontWeight: 700, width: 52, flexShrink: 0, textAlign: 'right' }}>
+                          {taxa.toFixed(1)}%
+                        </div>
+                        <div style={{ flex: 1, height: 6, background: 'var(--surface3)', borderRadius: 3, overflow: 'hidden' }}>
+                          <div style={{ width: `${barW}%`, height: '100%', background: cor, borderRadius: 3 }} />
+                        </div>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-sec)', flexShrink: 0 }}>
+                          {g.grupo}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div style={{ marginTop: 6, fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)' }}>
+                    <span style={{ color: 'var(--red)' }}>█ </span>&gt;5% crítico&ensp;
+                    <span style={{ color: 'var(--orange)' }}>█ </span>2–5% atenção&ensp;
+                    <span style={{ color: 'var(--green)' }}>█ </span>&lt;2% normal
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Pico previsto + Orçamento KPI */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+              {/* Pico de hoje */}
+              <div style={{ background: 'var(--surface3)', border: '1px solid var(--border)', borderRadius: 6, padding: '14px 16px' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)', letterSpacing: '0.14em', marginBottom: 8, textTransform: 'uppercase' }}>
+                  Pico de volume previsto hoje
+                </div>
+                {picoHoje ? (
+                  <>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 24, fontWeight: 700, color: 'var(--orange)' }}>
+                        {picoHoje.hora}h–{picoHoje.hora + 1}h
+                      </span>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--text-sec)' }}>
+                        {picoHoje.dia}
+                      </span>
+                    </div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-sec)', marginTop: 4 }}>
+                      {picoHoje.volume} incidentes esperados · média histórica 2023–2025
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>
+                    Dados de sazonalidade indisponíveis
+                  </div>
+                )}
+              </div>
+
+              {/* Orçamento KPI */}
+              <div style={{ background: 'var(--surface3)', border: '1px solid var(--border)', borderRadius: 6, padding: '14px 16px' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)', letterSpacing: '0.14em', marginBottom: 10, textTransform: 'uppercase' }}>
+                  Orçamento anual de violações OLA
+                </div>
+                {!kpiDisponivel ? (
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>KPI indisponível</div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {[
+                      { label: 'P2 · OLA 4h', viol: kpiData?.P2?.violacoesAno, meta: kpiData?.P2?.metaAnual, pct: kpiData?.P2?.pctUtilizado },
+                      { label: 'P3 · OLA 12h', viol: kpiData?.P3?.violacoesAno, meta: kpiData?.P3?.metaAnual, pct: kpiData?.P3?.pctUtilizado },
+                    ].map(({ label, viol, meta, pct }) => {
+                      const over = pct > 100;
+                      const cor = pct > 100 ? 'var(--red)' : pct > 80 ? 'var(--orange)' : 'var(--green)';
+                      const barFill = Math.min(100, pct ?? 0);
+                      return (
+                        <div key={label}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-sec)' }}>{label}</span>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: cor, fontWeight: 700 }}>
+                              {viol}/{meta} · {pct}%{over ? ' ⚠' : ''}
+                            </span>
+                          </div>
+                          <div style={{ height: 5, background: 'var(--surface1)', borderRadius: 3, overflow: 'hidden' }}>
+                            <div style={{ width: `${barFill}%`, height: '100%', background: cor, borderRadius: 3 }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+            </div>
           </div>
         </Module>
 
