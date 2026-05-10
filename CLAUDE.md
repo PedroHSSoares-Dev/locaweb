@@ -127,13 +127,13 @@ src/data/preprocessor.py → data/processed/incidents_features.parquet
 │                     Modelos de ML                        │
 │  Prophet/LSTM       XGBoost          K-Means    KPI      │
 │  D+1/D+7            risco OLA        clusters   projeção  │
-│  ⏳ Sprint 3        ✅ .py           ✅ .py    ✅ .py   │
+│  ✅ .py             ✅ .py           ✅ .py    ✅ .py   │
 └─────────────────────────────────────────────────────────┘
        ↓
 JSONs estáticos (outputs/)
-  ├── previsoes_volume.json      ✅ (Prophet, gerado por notebook)
+  ├── previsoes_volume.json      ✅ (Prophet ensemble — src/models/prophet_model.py)
   ├── previsoes_volume_mc.json   ✅ (Prophet Monte Carlo)
-  ├── previsoes_lstm.json        ✅ (LSTM v2, gerado por notebook)
+  ├── previsoes_lstm.json        ✅ (LSTM v2 — src/models/lstm_model.py)
   ├── risco_ola.json             ✅ (XGBoost — src/models/xgboost_model.py)
   ├── clusters.json              ✅ (K-Means — src/models/kmeans_model.py)
   └── kpi_atingimento.json       ✅ (KPI — src/models/kpi_projection.py)
@@ -147,7 +147,7 @@ JSONs estáticos (outputs/)
        ↓
   Chatbot (Gemini Flash + Pro) ⏳ Sprint 3
 
-Orquestrador: python src/pipeline.py [--step fe|xgb|km|kpi]
+Orquestrador: python src/pipeline.py [--step fe|xgb|km|kpi|prophet|prophet-mc|lstm]
 ```
 
 ---
@@ -188,13 +188,13 @@ Notebooks são **apenas exploratórios**. Código de produção vive em `src/`.
 |---|---|---|
 | `src/data/loader.py` | ✅ Criado | `load_raw()`, `load_kpi_subset()` |
 | `src/data/preprocessor.py` | ✅ Criado | 30 features no parquet (inclui 4 de feriados) |
-| `src/data/feriados.py` | ✅ Criado | Feriados BR nacionais + SP estado + SP município; Carnaval e Corpus Christi via algoritmo de Páscoa |
+| `src/data/feriados.py` | ✅ Criado | Feriados nacionais BR; Carnaval e Corpus Christi via algoritmo de Páscoa de Butcher |
 | `src/models/xgboost_model.py` | ✅ Criado | 31 features (30 parquet + grupo_viol_rate); PR-AUC 0.070, Recall 13.8%, Precision 29.6%, F1 0.188 — Optuna (80 trials) — hiperparâmetros otimizados para 27 features (retuning pendente) |
 | `src/models/kmeans_model.py` | ✅ Criado | K=5, Silhouette=0.18 |
 | `src/models/kpi_projection.py` | ✅ Criado | Meta dinâmica mensal |
 | `src/models/prophet_model.py` | ✅ Criado | Ensemble v5+v6 por horizonte; Block Bootstrap Monte Carlo; MAE Total D+1=12.4, P2=7.7, P3=10.0 |
 | `src/models/lstm_model.py` | ✅ Criado | LSTM 2 camadas hidden=128, early stopping; MAE Total=14.7, P2=4.2, P3=13.3 |
-| `src/pipeline.py` | ✅ Criado | `--step fe\|xgb\|km\|kpi\|prophet\|prophet-mc` |
+| `src/pipeline.py` | ✅ Criado | `--step fe\|xgb\|km\|kpi\|prophet\|prophet-mc\|lstm` |
 
 ---
 
@@ -202,10 +202,10 @@ Notebooks são **apenas exploratórios**. Código de produção vive em `src/`.
 
 | Rota | Público-alvo | Conteúdo |
 |---|---|---|
-| `/gestao` | Gestores | Saúde geral · R$ em risco · tendência global |
-| `/monitoramento` | Geral | Heatmap de risco · alertas · série temporal |
-| `/tecnico` | DevOps/SRE | Métricas brutas · drill-down · SHAP values |
-| `/financeiro` | Gestores | Exposição financeira · projeção KPI anual |
+| `/gestao` | Gestores | Saúde geral · R$ em risco · tendência global · previsão LSTM |
+| `/monitoramento` | Geral | Heatmap Volume/Anomalia · alertas operacionais · sazonalidade |
+| `/tecnico` | DevOps/SRE | Clusters K-Means · SHAP values · perfis de risco |
+| `/modelos` | Todos | Métricas dos modelos com contexto e explicações |
 
 ---
 
