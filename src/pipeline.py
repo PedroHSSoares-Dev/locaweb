@@ -7,6 +7,8 @@ Uso:
     python src/pipeline.py --step xgb   # só XGBoost
     python src/pipeline.py --step km    # só K-Means
     python src/pipeline.py --step kpi   # só KPI projection
+    python src/pipeline.py --step prophet     # Prophet 2025-only
+    python src/pipeline.py --step prophet-mc  # Prophet Monte Carlo (3 anos)
 """
 from __future__ import annotations
 
@@ -54,6 +56,26 @@ def step_kmeans() -> None:
     print("OK: outputs/clusters.json gerado\n")
 
 
+def step_prophet(use_monte_carlo: bool = False) -> None:
+    label = "Prophet Monte Carlo (2023-2025)" if use_monte_carlo else "Prophet (2025-only)"
+    print("=" * 50)
+    print(f"ETAPA — {label}")
+    print("=" * 50)
+    from src.models.prophet_model import (
+        OUTPUT_MC_PATH,
+        OUTPUT_PATH,
+        export_json,
+        save_models,
+        train,
+    )
+
+    out = train(use_monte_carlo=use_monte_carlo)
+    path = OUTPUT_MC_PATH if use_monte_carlo else OUTPUT_PATH
+    export_json(out["resultados"], path)
+    save_models(out["modelos"])
+    print(f"OK: {path.name} gerado\n")
+
+
 def step_kpi() -> None:
     print("=" * 50)
     print("ETAPA 4 — KPI Projection")
@@ -71,6 +93,8 @@ STEPS = {
     "xgb": step_xgboost,
     "km": step_kmeans,
     "kpi": step_kpi,
+    "prophet": lambda: step_prophet(use_monte_carlo=False),
+    "prophet-mc": lambda: step_prophet(use_monte_carlo=True),
 }
 
 
@@ -91,6 +115,7 @@ def main(step: str | None = None) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--step", choices=list(STEPS), default=None)
+    parser.add_argument("--step", choices=list(STEPS), default=None,
+                        metavar="{" + ",".join(STEPS) + "}")
     args = parser.parse_args()
     main(args.step)

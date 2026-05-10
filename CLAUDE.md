@@ -173,8 +173,8 @@ Notebooks são **apenas exploratórios**. Código de produção vive em `src/`.
 |---|---|---|
 | `01_eda.ipynb` | EDA (permanente) | ✅ |
 | `02_eda_features.ipynb` | Exploratório (features, imbalance, correlações) | ✅ |
-| `03_prophet_volume.ipynb` | Treina Prophet — pendente conversão `.py` | ⏳ Sprint 3 |
-| `03b/03c_monte_carlo*.ipynb` | Variantes Monte Carlo — pendente conversão | ⏳ Sprint 3 |
+| `03_prophet_volume.ipynb` | Exploratório — código migrado para `prophet_model.py` | ✅ |
+| `03b/03c_monte_carlo*.ipynb` | Exploratório — Monte Carlo integrado em `prophet_model.py` | ✅ |
 | `03d_lstm.ipynb` | Treina LSTM v2 — pendente conversão `.py` | ⏳ Sprint 3 |
 | `04_eda_xgboost.ipynb` | Exploratório (PR/ROC, SHAP, confusion matrix) | ✅ |
 | `05_eda_kmeans.ipynb` | Exploratório (heatmap clusters, PCA 2D) | ✅ |
@@ -192,9 +192,9 @@ Notebooks são **apenas exploratórios**. Código de produção vive em `src/`.
 | `src/models/xgboost_model.py` | ✅ Criado | 31 features (30 parquet + grupo_viol_rate); PR-AUC 0.070, Recall 13.8%, Precision 29.6%, F1 0.188 — Optuna (80 trials) — hiperparâmetros otimizados para 27 features (retuning pendente) |
 | `src/models/kmeans_model.py` | ✅ Criado | K=5, Silhouette=0.18 |
 | `src/models/kpi_projection.py` | ✅ Criado | Meta dinâmica mensal |
-| `src/models/prophet_model.py` | ⏳ Sprint 3 | Ainda como notebook |
+| `src/models/prophet_model.py` | ✅ Criado | Ensemble v5+v6 por horizonte; Block Bootstrap Monte Carlo; MAE Total D+1=12.4, P2=7.7, P3=10.0 |
 | `src/models/lstm_model.py` | ⏳ Sprint 3 | Ainda como notebook |
-| `src/pipeline.py` | ✅ Criado | `--step fe\|xgb\|km\|kpi` |
+| `src/pipeline.py` | ✅ Criado | `--step fe\|xgb\|km\|kpi\|prophet\|prophet-mc` |
 
 ---
 
