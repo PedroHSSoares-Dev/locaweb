@@ -9,6 +9,7 @@ Uso:
     python src/pipeline.py --step kpi   # só KPI projection
     python src/pipeline.py --step prophet     # Prophet 2025-only
     python src/pipeline.py --step prophet-mc  # Prophet Monte Carlo (3 anos)
+    python src/pipeline.py --step lstm        # LSTM v2 (Monte Carlo 2023-2025)
 """
 from __future__ import annotations
 
@@ -56,6 +57,19 @@ def step_kmeans() -> None:
     print("OK: outputs/clusters.json gerado\n")
 
 
+def step_lstm() -> None:
+    print("=" * 50)
+    print("ETAPA — LSTM (Previsão de Volume)")
+    print("=" * 50)
+    from src.models.lstm_model import export_json, save_models, train
+
+    out = train()
+    export_json(out["resultados"])
+    save_models(out["modelos"], out["scalers"])
+    mae = out["resultados"]["mae_holdout_92_dias"]
+    print(f"OK: previsoes_lstm.json gerado | MAE Total={mae['total']} P2={mae['p2']} P3={mae['p3']}\n")
+
+
 def step_prophet(use_monte_carlo: bool = False) -> None:
     label = "Prophet Monte Carlo (2023-2025)" if use_monte_carlo else "Prophet (2025-only)"
     print("=" * 50)
@@ -95,6 +109,7 @@ STEPS = {
     "kpi": step_kpi,
     "prophet": lambda: step_prophet(use_monte_carlo=False),
     "prophet-mc": lambda: step_prophet(use_monte_carlo=True),
+    "lstm": step_lstm,
 }
 
 

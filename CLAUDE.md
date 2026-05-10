@@ -175,7 +175,7 @@ Notebooks são **apenas exploratórios**. Código de produção vive em `src/`.
 | `02_eda_features.ipynb` | Exploratório (features, imbalance, correlações) | ✅ |
 | `03_prophet_volume.ipynb` | Exploratório — código migrado para `prophet_model.py` | ✅ |
 | `03b/03c_monte_carlo*.ipynb` | Exploratório — Monte Carlo integrado em `prophet_model.py` | ✅ |
-| `03d_lstm.ipynb` | Treina LSTM v2 — pendente conversão `.py` | ⏳ Sprint 3 |
+| `03d_lstm.ipynb` | Exploratório — código migrado para `lstm_model.py` | ✅ |
 | `04_eda_xgboost.ipynb` | Exploratório (PR/ROC, SHAP, confusion matrix) | ✅ |
 | `05_eda_kmeans.ipynb` | Exploratório (heatmap clusters, PCA 2D) | ✅ |
 | `07_eda_kpi.ipynb` | Exploratório (violações × orçamento mensal) | ✅ |
@@ -193,7 +193,7 @@ Notebooks são **apenas exploratórios**. Código de produção vive em `src/`.
 | `src/models/kmeans_model.py` | ✅ Criado | K=5, Silhouette=0.18 |
 | `src/models/kpi_projection.py` | ✅ Criado | Meta dinâmica mensal |
 | `src/models/prophet_model.py` | ✅ Criado | Ensemble v5+v6 por horizonte; Block Bootstrap Monte Carlo; MAE Total D+1=12.4, P2=7.7, P3=10.0 |
-| `src/models/lstm_model.py` | ⏳ Sprint 3 | Ainda como notebook |
+| `src/models/lstm_model.py` | ✅ Criado | LSTM 2 camadas hidden=128, early stopping; MAE Total=14.7, P2=4.2, P3=13.3 |
 | `src/pipeline.py` | ✅ Criado | `--step fe\|xgb\|km\|kpi\|prophet\|prophet-mc` |
 
 ---
