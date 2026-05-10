@@ -106,39 +106,37 @@ def get_d1():
 
     Retorna `disponivel: false` se nenhum modelo estiver disponível.
     """
-    lstm = load_json("previsoes_lstm.json")
-    if lstm:
-        mae_raw = lstm["mae_holdout_92_dias"]
+    modelo_ativo, data = _carregar_melhor_modelo()
+    if data is None:
+        return _NOT_TRAINED
+    if modelo_ativo == "lstm_v2":
+        mae_raw = data["mae_holdout_92_dias"]
         mae_val = mae_raw["total"] if isinstance(mae_raw, dict) else float(mae_raw)
         return {
             "disponivel":   True,
-            "total":        _round_pos(lstm["serie"][0]["total"]),
-            "p2":           _round_pos(lstm["serie"][0]["P2"]),
-            "p3":           _round_pos(lstm["serie"][0]["P3"]),
+            "total":        _round_pos(data["serie"][0]["total"]),
+            "p2":           _round_pos(data["serie"][0]["P2"]),
+            "p3":           _round_pos(data["serie"][0]["P3"]),
             "modelo_usado": "lstm_v2",
             "mae":          mae_val,
         }
-    mc = load_json("previsoes_volume_mc.json")
-    if mc:
+    if modelo_ativo == "prophet_mc_ensemble":
         return {
             "disponivel":   True,
-            "total":        mc["d1"]["total"],
-            "p2":           mc["d1"]["p2"],
-            "p3":           mc["d1"]["p3"],
+            "total":        data["d1"]["total"],
+            "p2":           data["d1"]["p2"],
+            "p3":           data["d1"]["p3"],
             "modelo_usado": "prophet_mc_ensemble",
             "mae":          None,
         }
-    orig = load_json("previsoes_volume.json")
-    if orig:
-        return {
-            "disponivel":   True,
-            "total":        _round_pos(orig["total"]["D1"]["yhat"]),
-            "p2":           _round_pos(orig["p2"]["D1"]["yhat"]),
-            "p3":           _round_pos(orig["p3"]["D1"]["yhat"]),
-            "modelo_usado": "prophet_original",
-            "mae":          None,
-        }
-    return _NOT_TRAINED
+    return {
+        "disponivel":   True,
+        "total":        _round_pos(data["total"]["D1"]["yhat"]),
+        "p2":           _round_pos(data["p2"]["D1"]["yhat"]),
+        "p3":           _round_pos(data["p3"]["D1"]["yhat"]),
+        "modelo_usado": "prophet_original",
+        "mae":          None,
+    }
 
 
 @router.get(
@@ -154,39 +152,37 @@ def get_d7():
 
     Retorna `disponivel: false` se nenhum modelo estiver disponível.
     """
-    lstm = load_json("previsoes_lstm.json")
-    if lstm:
-        mae_raw = lstm["mae_holdout_92_dias"]
+    modelo_ativo, data = _carregar_melhor_modelo()
+    if data is None:
+        return _NOT_TRAINED
+    if modelo_ativo == "lstm_v2":
+        mae_raw = data["mae_holdout_92_dias"]
         mae_val = mae_raw["total"] if isinstance(mae_raw, dict) else float(mae_raw)
         return {
             "disponivel":   True,
-            "total":        _round_pos(lstm["serie"][6]["total"]),
-            "p2":           _round_pos(lstm["serie"][6]["P2"]),
-            "p3":           _round_pos(lstm["serie"][6]["P3"]),
+            "total":        _round_pos(data["serie"][6]["total"]),
+            "p2":           _round_pos(data["serie"][6]["P2"]),
+            "p3":           _round_pos(data["serie"][6]["P3"]),
             "modelo_usado": "lstm_v2",
             "mae":          mae_val,
         }
-    mc = load_json("previsoes_volume_mc.json")
-    if mc:
+    if modelo_ativo == "prophet_mc_ensemble":
         return {
             "disponivel":   True,
-            "total":        mc["d7"]["total"],
-            "p2":           mc["d7"]["p2"],
-            "p3":           mc["d7"]["p3"],
+            "total":        data["d7"]["total"],
+            "p2":           data["d7"]["p2"],
+            "p3":           data["d7"]["p3"],
             "modelo_usado": "prophet_mc_ensemble",
             "mae":          None,
         }
-    orig = load_json("previsoes_volume.json")
-    if orig:
-        return {
-            "disponivel":   True,
-            "total":        _round_pos(orig["total"]["D7"]["yhat"]),
-            "p2":           _round_pos(orig["p2"]["D7"]["yhat"]),
-            "p3":           _round_pos(orig["p3"]["D7"]["yhat"]),
-            "modelo_usado": "prophet_original",
-            "mae":          None,
-        }
-    return _NOT_TRAINED
+    return {
+        "disponivel":   True,
+        "total":        _round_pos(data["total"]["D7"]["yhat"]),
+        "p2":           _round_pos(data["p2"]["D7"]["yhat"]),
+        "p3":           _round_pos(data["p3"]["D7"]["yhat"]),
+        "modelo_usado": "prophet_original",
+        "mae":          None,
+    }
 
 
 @router.get(
@@ -206,8 +202,10 @@ def get_serie():
 
     Retorna `disponivel: false` se nenhum modelo estiver disponível.
     """
-    lstm = load_json("previsoes_lstm.json")
-    if lstm:
+    modelo_ativo, data = _carregar_melhor_modelo()
+    if data is None:
+        return _NOT_TRAINED
+    if modelo_ativo == "lstm_v2":
         serie = [
             {
                 "dia":   p["horizonte"],
@@ -216,12 +214,10 @@ def get_serie():
                 "P2":    _round_pos(p["P2"]) if p.get("P2") is not None else None,
                 "P3":    _round_pos(p["P3"]) if p.get("P3") is not None else None,
             }
-            for p in lstm["serie"]
+            for p in data["serie"]
         ]
         return {"disponivel": True, "modelo_usado": "lstm_v2", "serie": serie}
-
-    mc = load_json("previsoes_volume_mc.json")
-    if mc:
+    if modelo_ativo == "prophet_mc_ensemble":
         serie = [
             {
                 "dia":   p["horizonte"],
@@ -230,25 +226,20 @@ def get_serie():
                 "P2":    _round_pos(p["P2"]),
                 "P3":    _round_pos(p["P3"]),
             }
-            for p in mc["serie"]
+            for p in data["serie"]
         ]
         return {"disponivel": True, "modelo_usado": "prophet_mc_ensemble", "serie": serie}
-
-    orig = load_json("previsoes_volume.json")
-    if orig:
-        serie = []
-        for t, p2, p3 in zip(
-            orig["total"]["serie_7d"],
-            orig["p2"]["serie_7d"],
-            orig["p3"]["serie_7d"],
-        ):
-            serie.append({
-                "dia":   t["horizonte"],
-                "ds":    t["ds"],
-                "total": _round_pos(t["yhat"]),
-                "P2":    _round_pos(p2["yhat"]),
-                "P3":    _round_pos(p3["yhat"]),
-            })
-        return {"disponivel": True, "modelo_usado": "prophet_original", "serie": serie}
-
-    return _NOT_TRAINED
+    serie = []
+    for t, p2, p3 in zip(
+        data["total"]["serie_7d"],
+        data["p2"]["serie_7d"],
+        data["p3"]["serie_7d"],
+    ):
+        serie.append({
+            "dia":   t["horizonte"],
+            "ds":    t["ds"],
+            "total": _round_pos(t["yhat"]),
+            "P2":    _round_pos(p2["yhat"]),
+            "P3":    _round_pos(p3["yhat"]),
+        })
+    return {"disponivel": True, "modelo_usado": "prophet_original", "serie": serie}

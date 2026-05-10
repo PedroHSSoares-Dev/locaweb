@@ -191,12 +191,6 @@ def train(df: pd.DataFrame) -> dict:
                 "pctP2":          round(pct_p2, 1),
                 "duracaoMediana": None,
                 "pctFds":         round(pct_fds, 1),
-                "hora_media": round(hora_med, 1),
-                "dia_semana_medio": round(float(sub["dia_semana"].mean()), 1),
-                "prioridade_p2_pct": round(pct_p2, 1),
-                "horario_comercial_pct": round(pct_comerc, 1),
-                "fim_de_semana_pct": round(pct_fds, 1),
-                "periodo_dia_predominante": periodo_m,
             },
         })
 

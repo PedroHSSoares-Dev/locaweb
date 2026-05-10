@@ -131,7 +131,7 @@ def train(df: pd.DataFrame) -> dict:
     y_prob_base = model_base.predict_proba(X_test)[:, 1]
     pr_base = average_precision_score(y_test, y_prob_base)
 
-    # Modelo SMOTE (mantido para comparação — Optuna Base vence)
+    # Modelo SMOTE: mesmos hiperparâmetros Optuna, treinado em dados reamostrados.
     params_smote = dict(
         n_estimators=454,
         max_depth=8,
