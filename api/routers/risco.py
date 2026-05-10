@@ -24,7 +24,7 @@ def get_risco():
     - Desbalanceamento: ~1:102 — tratado com `scale_pos_weight`
     - Métricas: Recall, F1-Score, ROC-AUC, PR-AUC (acurácia descartada)
 
-    Retorna `disponivel: false` enquanto o notebook não for executado.
+    Retorna `disponivel: false` se `outputs/risco_ola.json` não existir.
     """
     data = load_json("risco_ola.json")
     if data is None:
@@ -102,4 +102,4 @@ def get_risco_grupos():
         key=lambda x: x.get("taxaViolacao", 0),
         reverse=True,
     )
-    return {"disponivel": True, "grupos": grupos}  # lista vazia se notebook não gerou grupos
+    return {"disponivel": True, "grupos": grupos}  # lista vazia se o modelo não gerou grupos

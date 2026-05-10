@@ -166,7 +166,7 @@ class HeatmapItem(BaseModel):
 
 
 # ────────────────────────────────────────────────────────────────────────────────
-# Risco OLA — XGBoost (notebook 04)
+# Risco OLA — XGBoost (src/models/xgboost_model.py)
 # ────────────────────────────────────────────────────────────────────────────────
 
 class MetricasRisco(BaseModel):
@@ -253,7 +253,7 @@ class RiscoGruposResponse(BaseModel):
 
 
 # ────────────────────────────────────────────────────────────────────────────────
-# KPI Operacional (notebook 07 — pendente)
+# KPI Operacional (src/models/kpi_projection.py)
 # ────────────────────────────────────────────────────────────────────────────────
 
 class KpiPrioridade(BaseModel):
@@ -337,7 +337,7 @@ class ContextResponse(BaseModel):
 
 
 # ────────────────────────────────────────────────────────────────────────────────
-# Clusters K-Means (notebook 05 — pendente)
+# Clusters K-Means (src/models/kmeans_model.py)
 # ────────────────────────────────────────────────────────────────────────────────
 
 class ClusterPerfil(BaseModel):
@@ -363,7 +363,7 @@ class ClusterItem(BaseModel):
 
 
 class ClustersResponse(BaseModel):
-    """Segmentação K-Means de padrões de incidentes — disponível após notebook 05."""
+    """Segmentação K-Means de padrões de incidentes."""
     disponivel:  bool                    = Field(True, example=True)
     modelo:      Optional[str]           = None
     gerado_em:   Optional[str]           = None

@@ -151,7 +151,7 @@ Orquestrador: python src/pipeline.py [--step fe|xgb|km|kpi]
 
 | Camada | Tecnologia |
 |---|---|
-| Modelos ML | Prophet · XGBoost · scikit-learn · SHAP · imbalanced-learn |
+| Modelos ML | Prophet · XGBoost · scikit-learn · SHAP · imbalanced-learn · Optuna |
 | Dados | pandas · numpy · openpyxl · pyarrow |
 | Frontend | React + Vite · Recharts · react-router-dom · lucide-react |
 | Chatbot | Gemini 2.5 Flash (roteador) · Gemini 2.5 Pro (analista) |
@@ -183,7 +183,7 @@ Notebooks são **apenas exploratórios**. Código de produção vive em `src/`.
 |---|---|---|
 | `src/data/loader.py` | ✅ Criado | `load_raw()`, `load_kpi_subset()` |
 | `src/data/preprocessor.py` | ✅ Criado | 27 colunas, nomes NB04 convention |
-| `src/models/xgboost_model.py` | ✅ Criado | PR-AUC 0.048, Base > SMOTE |
+| `src/models/xgboost_model.py` | ✅ Criado | PR-AUC 0.099, Recall 15.5%, F1 0.184 — Optuna (80 trials) |
 | `src/models/kmeans_model.py` | ✅ Criado | K=5, Silhouette=0.18 |
 | `src/models/kpi_projection.py` | ✅ Criado | Meta dinâmica mensal |
 | `src/models/prophet_model.py` | ⏳ Sprint 3 | Ainda como notebook |

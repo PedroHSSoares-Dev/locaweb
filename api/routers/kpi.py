@@ -29,11 +29,11 @@ def get_kpi(
     - `trimestre`: KPI apenas do Q4 (out/nov/dez)
     - `mes`: KPI apenas de dezembro
 
-    Retorna `disponivel: false` enquanto o notebook 07 não for executado.
+    Retorna `disponivel: false` se `outputs/kpi_atingimento.json` não existir.
     """
     data = load_json("kpi_atingimento.json")
     if data is None:
-        return {"disponivel": False, "mensagem": "KPI ainda não calculado — execute o notebook 07"}
+        return {"disponivel": False, "mensagem": "KPI não disponível — execute: python src/pipeline.py --step kpi"}
 
     if periodo == "mes":
         meses_idx = ["12"]

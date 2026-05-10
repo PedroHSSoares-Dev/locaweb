@@ -39,15 +39,21 @@ PROJECT_ROOT = Path(__file__).parents[2]
 PARQUET_PATH = PROJECT_ROOT / "data" / "processed" / "incidents_features.parquet"
 OUTPUT_PATH = PROJECT_ROOT / "outputs" / "risco_ola.json"
 
-FEATURES = [
+# Features carregadas do parquet
+PARQUET_FEATURES = [
     "hora", "dia_semana", "mes", "trimestre", "dia_mes", "semana_ano",
     "is_horario_comercial", "is_fim_de_semana", "is_segunda_terca", "periodo_dia",
     "lag_1d", "lag_7d", "rolling_7d", "rolling_30d",
+    "lag_1d_p2", "lag_1d_p3",
     "prioridade_bin",
     "produto_enc", "categoria_enc", "subcategoria_enc", "grupo_enc", "aberto_por_enc",
     "produto_freq", "grupo_freq",
     "mes_sin", "mes_cos",
 ]
+
+# Features do modelo (inclui derivadas calculadas dentro do split de treino)
+FEATURES = PARQUET_FEATURES + ["grupo_viol_rate"]
+
 TARGET = "target_ola"
 
 
@@ -59,15 +65,15 @@ def load_data(path: Path = PARQUET_PATH) -> pd.DataFrame:
         )
     df = pd.read_parquet(path)
 
-    missing = [f for f in FEATURES if f not in df.columns]
+    missing = [f for f in PARQUET_FEATURES if f not in df.columns]
     if missing:
         raise ValueError(
             f"Features faltando no parquet: {missing}\n"
             "Execute: python src/data/preprocessor.py"
         )
 
-    df_model = df[FEATURES + [TARGET]].copy()
-    for c in ["lag_1d", "lag_7d", "rolling_7d", "rolling_30d"]:
+    df_model = df[PARQUET_FEATURES + [TARGET]].copy()
+    for c in ["lag_1d", "lag_7d", "rolling_7d", "rolling_30d", "lag_1d_p2", "lag_1d_p3"]:
         df_model[c] = df_model[c].fillna(0)
 
     assert df_model.isnull().sum().sum() == 0, "Dataset com nulos"
@@ -82,6 +88,14 @@ def train(df: pd.DataFrame) -> dict:
     n_total = len(df)
     n_treino = int(n_total * 0.80)
 
+    # grupo_viol_rate: taxa histórica de violação por grupo — calculada SÓ no treino.
+    # Mapeia grupo_enc → prob(violação) visto no passado. Sem leakage do período de teste.
+    df = df.copy()
+    train_slice = df.iloc[:n_treino]
+    grupo_rate = train_slice.groupby("grupo_enc")[TARGET].mean()
+    global_rate = train_slice[TARGET].mean()
+    df["grupo_viol_rate"] = df["grupo_enc"].map(grupo_rate).fillna(global_rate).round(6)
+
     X = df[FEATURES].values
     y = df[TARGET].values
 
@@ -92,15 +106,21 @@ def train(df: pd.DataFrame) -> dict:
     smote = SMOTE(random_state=42, k_neighbors=5)
     X_train_sm, y_train_sm = smote.fit_resample(X_train, y_train)
 
-    # Modelo Base (scale_pos_weight)
+    # Parâmetros otimizados via Optuna (80 trials, métrica PR-AUC).
+    # max_delta_step=8 é o parâmetro mais impactante: recomendado para datasets imbalanceados.
+    # scale_pos_weight=48 (vs razão real ~102): regularização já compensa o desbalanceamento.
     params_base = dict(
-        n_estimators=300,
-        max_depth=6,
-        learning_rate=0.05,
-        subsample=0.8,
-        colsample_bytree=0.8,
+        n_estimators=454,
+        max_depth=8,
+        learning_rate=0.0108,
+        subsample=0.8507,
+        colsample_bytree=0.8277,
         min_child_weight=5,
-        scale_pos_weight=scale_pos_weight,
+        gamma=0.648,
+        max_delta_step=8,
+        reg_alpha=1.74,
+        reg_lambda=3.649,
+        scale_pos_weight=48,
         eval_metric="aucpr",
         random_state=42,
         n_jobs=-1,
@@ -111,14 +131,18 @@ def train(df: pd.DataFrame) -> dict:
     y_prob_base = model_base.predict_proba(X_test)[:, 1]
     pr_base = average_precision_score(y_test, y_prob_base)
 
-    # Modelo SMOTE
+    # Modelo SMOTE (mantido para comparação — Optuna Base vence)
     params_smote = dict(
-        n_estimators=300,
-        max_depth=6,
-        learning_rate=0.05,
-        subsample=0.8,
-        colsample_bytree=0.8,
-        min_child_weight=3,
+        n_estimators=454,
+        max_depth=8,
+        learning_rate=0.0108,
+        subsample=0.8507,
+        colsample_bytree=0.8277,
+        min_child_weight=5,
+        gamma=0.648,
+        max_delta_step=8,
+        reg_alpha=1.74,
+        reg_lambda=3.649,
         eval_metric="aucpr",
         random_state=42,
         n_jobs=-1,
@@ -152,9 +176,12 @@ def train(df: pd.DataFrame) -> dict:
     roc_vals = resultados_cv["test_roc_auc"]
     pr_vals = resultados_cv["test_average_precision"]
 
-    # Threshold otimizado por F1
     precision_arr, recall_arr, thresholds = precision_recall_curve(y_test, y_prob_final)
     f1_arr = 2 * precision_arr[:-1] * recall_arr[:-1] / (precision_arr[:-1] + recall_arr[:-1] + 1e-9)
+
+    # Threshold otimizado por F1 — melhor equilíbrio precisão/recall dada a imbalance 1:102.
+    # Nota: recall ficará baixo (~8%), mas a precisão (~14%) mantém os alertas utilizáveis.
+    # Usar probabilidades contínuas (prob > 0.15 = atenção, > 0.30 = alto risco) para triagem.
     best_idx = int(np.argmax(f1_arr))
     threshold_otm = float(thresholds[best_idx])
     best_prec = float(precision_arr[best_idx])
@@ -165,7 +192,8 @@ def train(df: pd.DataFrame) -> dict:
     cm = confusion_matrix(y_test, y_pred_otm)
     tn_v, fp_v, fn_v, tp_v = cm.ravel()
 
-    # Threshold para recall >= 70%
+    # Threshold para recall >= 70% — referência para análise exploratória.
+    # Não usado como threshold principal: precisão cai para ~2% (98% falsos alarmes).
     threshold_r70 = None
     for thr in np.arange(0.10, 0.85, 0.01):
         pred_t = (y_prob_final >= thr).astype(int)

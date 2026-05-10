@@ -57,8 +57,7 @@ Use `GET /api/previsoes/modelos` para verificar qual modelo está ativo e quais 
 ### Cache e atualização
 Os JSONs em `outputs/` são lidos com cache em memória de **60 segundos** (TTL).
 O cache é invalidado automaticamente quando o arquivo é modificado (verificação por mtime).
-Ao executar um notebook e gerar um novo JSON, o endpoint correspondente começa a retornar
-dados reais em até 1 minuto — sem restart da API.
+Para regenerar os modelos execute `python src/pipeline.py` — os endpoints atualizam em até 1 minuto sem restart da API.
 
 ### Fonte dos dados
 Dataset real Locaweb — **122.543 incidentes** · jan/2023–dez/2025
@@ -94,10 +93,10 @@ def health():
     Verifica se a API está no ar e lista os modelos ML disponíveis em `outputs/`.
 
     **Modelos possíveis:**
-    - `previsoes_volume` — Prophet ensemble (notebook 03)
-    - `risco_ola` — XGBoost (notebook 04)
-    - `clusters` — K-Means (notebook 05)
-    - `kpi_atingimento` — Projeção anual (notebook 07)
+    - `previsoes_volume` — Prophet ensemble (`03_prophet_volume.ipynb` — conversão Sprint 3)
+    - `risco_ola` — XGBoost (`src/models/xgboost_model.py`)
+    - `clusters` — K-Means (`src/models/kmeans_model.py`)
+    - `kpi_atingimento` — Projeção anual (`src/models/kpi_projection.py`)
 
     Usar para healthcheck do Docker e monitoramento de disponibilidade.
     """
