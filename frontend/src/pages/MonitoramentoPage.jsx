@@ -9,7 +9,6 @@ import { AlertTriangle, Users, Package, Activity } from 'lucide-react';
 import { useApi } from '../hooks/useApi';
 import SemDados from '../components/SemDados';
 import DrillDownPanel from '../components/DrillDownPanel';
-import RiscoUnificado from '../components/RiscoUnificado';
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 function Skeleton({ height = 80 }) {
@@ -262,7 +261,6 @@ export default function MonitoramentoPage() {
   // ── Dados de modelo via API ────────────────────────────────────────────────
   const { data: d1Data,           loading: d1Loading,       disponivel: d1Disponivel       } = useApi('/previsoes/d1');
   const { data: serieData,        loading: serieLoading,    disponivel: serieDisponivel    } = useApi('/previsoes/serie');
-  const { data: riscoData,        loading: riscoLoading,    disponivel: riscoDisponivel    } = useApi('/risco/produtos');
   const { data: historicoData,    loading: historicoLoading, disponivel: historicoDisponivel } = useApi('/historico/diario');
   const { data: sazonalidadeData, disponivel: sazonalidadeDisponivel } = useApi('/historico/sazonalidade');
 
@@ -297,9 +295,6 @@ export default function MonitoramentoPage() {
     'prophet_original':    { label: 'PROPHET ORIGINAL', cor: 'var(--text-sec)' },
   };
   const modeloMeta = MODELO_META[modeloAtivo] ?? { label: 'MODELO ATIVO', cor: 'var(--text-sec)' };
-
-  // Tabela de risco — usa API se disponível, senão sem dados
-  const riscoList = riscoDisponivel ? riscoData.produtos : null;
 
   const axisProps = {
     tick: { fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--text-muted)' },
@@ -481,14 +476,6 @@ export default function MonitoramentoPage() {
           </div>
         </Module>
 
-        {/* ── MODULE 04: Análise Preditiva de Violação ──────────────────── */}
-        <Module
-          n={4}
-          title="Análise Preditiva de Violação"
-          sub="XGBOOST · SHAP · DISTRIBUIÇÃO DE RISCO"
-        >
-          <RiscoUnificado />
-        </Module>
       </main>
 
       {panelItem && (

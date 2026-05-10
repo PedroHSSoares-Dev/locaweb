@@ -1,13 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  LineChart, Line, CartesianGrid, PieChart, Pie, Cell,
+  CartesianGrid, PieChart, Pie, Cell,
   ReferenceLine,
 } from 'recharts';
-import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle } from 'lucide-react';
 import {
-  volumeMensal2025, produtos, kpiAtingimento,
+  volumeMensal2025, kpiAtingimento,
   violacoesReais2025, olaTargets,
 } from '../data/mockData';
 import { useApi } from '../hooks/useApi';
@@ -325,7 +323,6 @@ function filtrarPorPeriodo(dados, periodo) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function GestaoPage() {
-  const navigate = useNavigate();
   const { isMobile, isTablet } = useBreakpoint();
   const [periodo, setPeriodo] = useState('ANO');
   const [filtroViolacoes, setFiltroViolacoes] = useState('AMBOS');
@@ -353,13 +350,6 @@ export default function GestaoPage() {
     violP3: filtroViolacoes !== 'P2' ? d.violP3 : null,
     _violP2orig: d.violP2,
     _violP3orig: d.violP3,
-  }));
-
-  const fatorPeriodo = periodo === 'MÊS' ? 1 / 12 : periodo === 'TRIMESTRE' ? 3 / 12 : 1;
-  const produtosFiltrados = [...produtos].slice(0, 8).map(p => ({
-    ...p,
-    total: Math.round(p.total * fatorPeriodo),
-    violacoes: Math.round(p.violacoes * fatorPeriodo),
   }));
 
   const axisProps = {
@@ -415,7 +405,7 @@ export default function GestaoPage() {
             title="Cota OLA Utilizada"
             sub={kpiDisponivel
               ? `METODOLOGIA SPC · ${PERIODO_LABELS[periodo]}`
-              : `ESTIMATIVAS SIMULADAS · nb07 pendente · ${PERIODO_LABELS[periodo]}`
+              : `ESTIMATIVAS SIMULADAS · ${PERIODO_LABELS[periodo]}`
             }
           >
             {kpiLoading ? (
@@ -606,70 +596,6 @@ export default function GestaoPage() {
               [['var(--red)', 'Acima do limiar SPC']],
             ]} />
           </Module>
-
-          {/* ── MODULE 05: Volume por Produto ─────────────────────────────── */}
-          <Module
-            n={5}
-            title="Incidentes por Produto"
-            sub={`Clique na barra para detalhar em Monitoramento · top 8 produtos · ${PERIODO_LABELS[periodo]}`}
-          >
-            <ResponsiveContainer width="100%" height={420}>
-              <BarChart
-                data={produtosFiltrados} layout="vertical"
-                margin={{ top: 4, right: 16, bottom: 4, left: 20 }}
-                barSize={10}
-                onClick={d => { if (d?.activeLabel) navigate('/monitoramento'); }}
-                style={{ cursor: 'pointer' }}
-              >
-                <XAxis type="number" {...axisProps} axisLine={{ stroke: 'var(--border)' }} />
-                <YAxis
-                  type="category" dataKey="id" width={44}
-                  tick={{ fontFamily: 'var(--font-mono)', fontSize: 10, fill: 'var(--text-sec)' }}
-                  tickLine={false} axisLine={false}
-                />
-                <Tooltip
-                  content={({ active, payload, label }) => {
-                    if (!active || !payload?.length) return null;
-                    const d = payload[0]?.payload;
-                    return (
-                      <div style={{
-                        background: 'var(--surface3)', border: '1px solid var(--border-md)',
-                        borderRadius: 4, padding: '8px 12px',
-                      }}>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-sec)', marginBottom: 6 }}>{label}</div>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--teal)', marginBottom: 2 }}>total: {d?.total}</div>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--red)' }}>violações: {d?.violacoes} ({d?.taxaViolacao}%)</div>
-                      </div>
-                    );
-                  }}
-                  cursor={{ fill: 'rgba(255,255,255,0.03)' }}
-                />
-                <Bar dataKey="total" name="Total" fill="var(--teal)" fillOpacity={0.65} radius={[0, 3, 3, 0]} />
-                <Bar dataKey="violacoes" name="Violações" fill="var(--red)" fillOpacity={0.85} radius={[0, 3, 3, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-            <Legend items={[['var(--teal)', 'Total'], ['var(--red)', 'Violações']]} />
-          </Module>
-
-          {/* ── MODULE 06: Tendência Mensal ───────────────────────────────── */}
-          <Module
-            n={6}
-            title="Tendência Mensal"
-            sub={`P2 e P3 · apenas incidentes KPI (prioridade Alta e Média) · ${PERIODO_LABELS[periodo]}`}
-          >
-            <ResponsiveContainer width="100%" height={280}>
-              <LineChart data={dadosFiltrados} margin={{ top: 8, right: 16, bottom: 0, left: -10 }}>
-                <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="mes" {...axisProps} axisLine={{ stroke: 'var(--border)' }} />
-                <YAxis {...axisProps} axisLine={false} />
-                <Tooltip content={<ChartTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.08)', strokeWidth: 1 }} />
-                <Line type="monotone" dataKey="P2" name="P2" stroke="var(--red)" strokeWidth={2} dot={{ r: 3, fill: 'var(--red)', stroke: 'var(--bg)', strokeWidth: 2 }} />
-                <Line type="monotone" dataKey="P3" name="P3" stroke="var(--orange)" strokeWidth={2} dot={{ r: 3, fill: 'var(--orange)', stroke: 'var(--bg)', strokeWidth: 2 }} />
-              </LineChart>
-            </ResponsiveContainer>
-            <Legend items={[['var(--red)', 'P2'], ['var(--orange)', 'P3']]} />
-          </Module>
-
 
       </main>
     </div>
