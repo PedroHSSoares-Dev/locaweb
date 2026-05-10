@@ -28,77 +28,77 @@
     {
       "rank": 1,
       "feature": "grupo_viol_rate",
-      "shap_mean_abs": 0.903159
+      "shap_mean_abs": 0.901964
     },
     {
       "rank": 2,
       "feature": "rolling_30d",
-      "shap_mean_abs": 0.335505
+      "shap_mean_abs": 0.334304
     },
     {
       "rank": 3,
       "feature": "rolling_7d",
-      "shap_mean_abs": 0.280049
+      "shap_mean_abs": 0.286286
     },
     {
       "rank": 4,
       "feature": "aberto_por_enc",
-      "shap_mean_abs": 0.256087
+      "shap_mean_abs": 0.247714
     },
     {
       "rank": 5,
       "feature": "produto_freq",
-      "shap_mean_abs": 0.230512
+      "shap_mean_abs": 0.241246
     },
     {
       "rank": 6,
       "feature": "produto_enc",
-      "shap_mean_abs": 0.215485
+      "shap_mean_abs": 0.216228
     },
     {
       "rank": 7,
       "feature": "categoria_enc",
-      "shap_mean_abs": 0.210427
+      "shap_mean_abs": 0.211737
     },
     {
       "rank": 8,
       "feature": "lag_7d",
-      "shap_mean_abs": 0.193126
+      "shap_mean_abs": 0.190997
     },
     {
       "rank": 9,
       "feature": "hora",
-      "shap_mean_abs": 0.184128
+      "shap_mean_abs": 0.183056
     },
     {
       "rank": 10,
       "feature": "semana_ano",
-      "shap_mean_abs": 0.17259
+      "shap_mean_abs": 0.172502
     },
     {
       "rank": 11,
       "feature": "subcategoria_enc",
-      "shap_mean_abs": 0.150808
+      "shap_mean_abs": 0.149456
     },
     {
       "rank": 12,
       "feature": "grupo_freq",
-      "shap_mean_abs": 0.137956
+      "shap_mean_abs": 0.138973
     },
     {
       "rank": 13,
       "feature": "dia_mes",
-      "shap_mean_abs": 0.132456
+      "shap_mean_abs": 0.137309
     },
     {
       "rank": 14,
       "feature": "grupo_enc",
-      "shap_mean_abs": 0.112102
+      "shap_mean_abs": 0.111079
     },
     {
       "rank": 15,
       "feature": "lag_1d_p3",
-      "shap_mean_abs": 0.111889
+      "shap_mean_abs": 0.110827
     }
   ],
   "risco_por_prioridade": {

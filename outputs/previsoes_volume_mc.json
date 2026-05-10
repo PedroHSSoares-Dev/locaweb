@@ -1,130 +1,284 @@
 {
-  "modelo": "prophet_ensemble_adaptativo_mc_original",
-  "gerado_em": "2026-03-27",
-  "descricao": "Ensemble adaptativo por horizonte — pesos inversamente proporcionais ao MAE",
-  "mae_cv": {
-    "mc_v6": {
-      "D+1": 14.62,
-      "D+2": 12.8,
-      "D+3": 12.48,
-      "D+4": 12.01,
-      "D+5": 18.88,
-      "D+6": 18.08,
-      "D+7": 15.27
+  "total": {
+    "modelo": "prophet_ensemble_total",
+    "gerado_em": "2026-05-09",
+    "abordagem": "ensemble v5+v6 — melhor modelo por horizonte (Monte Carlo)",
+    "D1": {
+      "yhat": 64,
+      "lower": 0.0,
+      "upper": 64,
+      "modelo_usado": "v6"
     },
-    "original": {
-      "1": 17.06,
-      "2": 10.08,
-      "3": 8.25,
-      "4": 12.31,
-      "5": 9.66,
-      "6": 20.84,
-      "7": 14.14
+    "D7": {
+      "yhat": 41,
+      "lower": 0.0,
+      "upper": 69.4,
+      "modelo_usado": "v5"
+    },
+    "serie_7d": [
+      {
+        "dia": "01/01",
+        "ds": "2026-01-01",
+        "horizonte": "D+1",
+        "modelo": "v6",
+        "mae_usado": 29.43,
+        "yhat": 64,
+        "yhat_lower": 0.0,
+        "yhat_upper": 64
+      },
+      {
+        "dia": "02/01",
+        "ds": "2026-01-02",
+        "horizonte": "D+2",
+        "modelo": "v6",
+        "mae_usado": 28.0,
+        "yhat": 56,
+        "yhat_lower": 0.0,
+        "yhat_upper": 67.8
+      },
+      {
+        "dia": "03/01",
+        "ds": "2026-01-03",
+        "horizonte": "D+3",
+        "modelo": "v6",
+        "mae_usado": 25.59,
+        "yhat": 29,
+        "yhat_lower": 0.0,
+        "yhat_upper": 58.7
+      },
+      {
+        "dia": "04/01",
+        "ds": "2026-01-04",
+        "horizonte": "D+4",
+        "modelo": "v5",
+        "mae_usado": 26.57,
+        "yhat": 21,
+        "yhat_lower": 0.0,
+        "yhat_upper": 57.3
+      },
+      {
+        "dia": "05/01",
+        "ds": "2026-01-05",
+        "horizonte": "D+5",
+        "modelo": "v6",
+        "mae_usado": 28.35,
+        "yhat": 79,
+        "yhat_lower": 0.0,
+        "yhat_upper": 79
+      },
+      {
+        "dia": "06/01",
+        "ds": "2026-01-06",
+        "horizonte": "D+6",
+        "modelo": "v6",
+        "mae_usado": 26.17,
+        "yhat": 70,
+        "yhat_lower": 0.0,
+        "yhat_upper": 71.2
+      },
+      {
+        "dia": "07/01",
+        "ds": "2026-01-07",
+        "horizonte": "D+7",
+        "modelo": "v5",
+        "mae_usado": 22.39,
+        "yhat": 41,
+        "yhat_lower": 0.0,
+        "yhat_upper": 69.4
+      }
+    ],
+    "metricas": {
+      "mae_d1": 29.43,
+      "mae_d7": 22.39,
+      "nota": "MAE mínimo entre v5 e v6 por horizonte — CV initial=180d"
     }
   },
-  "pesos": {
-    "D+1": {
-      "mc": 0.539,
-      "orig": 0.461
+  "p2": {
+    "modelo": "prophet_ensemble_p2",
+    "gerado_em": "2026-05-09",
+    "abordagem": "ensemble v5+v6 — melhor modelo por horizonte (Monte Carlo)",
+    "D1": {
+      "yhat": 12.2,
+      "lower": 5.0,
+      "upper": 18.8,
+      "modelo_usado": "v5"
     },
-    "D+2": {
-      "mc": 0.441,
-      "orig": 0.559
+    "D7": {
+      "yhat": 12.8,
+      "lower": 6.4,
+      "upper": 20.0,
+      "modelo_usado": "v6"
     },
-    "D+3": {
-      "mc": 0.398,
-      "orig": 0.602
-    },
-    "D+4": {
-      "mc": 0.506,
-      "orig": 0.494
-    },
-    "D+5": {
-      "mc": 0.338,
-      "orig": 0.662
-    },
-    "D+6": {
-      "mc": 0.535,
-      "orig": 0.465
-    },
-    "D+7": {
-      "mc": 0.481,
-      "orig": 0.519
+    "serie_7d": [
+      {
+        "dia": "01/01",
+        "ds": "2026-01-01",
+        "horizonte": "D+1",
+        "modelo": "v5",
+        "mae_usado": 4.75,
+        "yhat": 12.2,
+        "yhat_lower": 5.0,
+        "yhat_upper": 18.8
+      },
+      {
+        "dia": "02/01",
+        "ds": "2026-01-02",
+        "horizonte": "D+2",
+        "modelo": "v5",
+        "mae_usado": 5.03,
+        "yhat": 12.0,
+        "yhat_lower": 5.1,
+        "yhat_upper": 18.6
+      },
+      {
+        "dia": "03/01",
+        "ds": "2026-01-03",
+        "horizonte": "D+3",
+        "modelo": "v6",
+        "mae_usado": 4.52,
+        "yhat": 11,
+        "yhat_lower": 2.8,
+        "yhat_upper": 15.8
+      },
+      {
+        "dia": "04/01",
+        "ds": "2026-01-04",
+        "horizonte": "D+4",
+        "modelo": "v6",
+        "mae_usado": 5.58,
+        "yhat": 10,
+        "yhat_lower": 0.7,
+        "yhat_upper": 14.3
+      },
+      {
+        "dia": "05/01",
+        "ds": "2026-01-05",
+        "horizonte": "D+5",
+        "modelo": "v6",
+        "mae_usado": 4.3,
+        "yhat": 17,
+        "yhat_lower": 1.9,
+        "yhat_upper": 17
+      },
+      {
+        "dia": "06/01",
+        "ds": "2026-01-06",
+        "horizonte": "D+6",
+        "modelo": "v5",
+        "mae_usado": 4.21,
+        "yhat": 14,
+        "yhat_lower": 6.1,
+        "yhat_upper": 19.1
+      },
+      {
+        "dia": "07/01",
+        "ds": "2026-01-07",
+        "horizonte": "D+7",
+        "modelo": "v6",
+        "mae_usado": 3.74,
+        "yhat": 12.8,
+        "yhat_lower": 6.4,
+        "yhat_upper": 20.0
+      }
+    ],
+    "metricas": {
+      "mae_d1": 4.75,
+      "mae_d7": 3.74,
+      "nota": "MAE mínimo entre v5 e v6 por horizonte — CV initial=180d"
     }
   },
-  "d1": {
-    "total": 82,
-    "p2": 15,
-    "p3": 66
-  },
-  "d7": {
-    "total": 85,
-    "p2": 15,
-    "p3": 69
-  },
-  "serie": [
-    {
-      "ds": "2025-10-01",
-      "horizonte": "D+1",
-      "total": 81.7,
-      "P2": 15.2,
-      "P3": 66.5,
-      "peso_mc": 0.539,
-      "peso_orig": 0.461
+  "p3": {
+    "modelo": "prophet_ensemble_p3",
+    "gerado_em": "2026-05-09",
+    "abordagem": "ensemble v5+v6 — melhor modelo por horizonte (Monte Carlo)",
+    "D1": {
+      "yhat": 49,
+      "lower": 0.0,
+      "upper": 51.9,
+      "modelo_usado": "v5"
     },
-    {
-      "ds": "2025-10-02",
-      "horizonte": "D+2",
-      "total": 79.8,
-      "P2": 14.8,
-      "P3": 64.9,
-      "peso_mc": 0.441,
-      "peso_orig": 0.559
+    "D7": {
+      "yhat": 30,
+      "lower": 0.0,
+      "upper": 54.4,
+      "modelo_usado": "v6"
     },
-    {
-      "ds": "2025-10-03",
-      "horizonte": "D+3",
-      "total": 69.2,
-      "P2": 12.5,
-      "P3": 56.3,
-      "peso_mc": 0.398,
-      "peso_orig": 0.602
-    },
-    {
-      "ds": "2025-10-04",
-      "horizonte": "D+4",
-      "total": 52.1,
-      "P2": 10.6,
-      "P3": 40.7,
-      "peso_mc": 0.506,
-      "peso_orig": 0.494
-    },
-    {
-      "ds": "2025-10-05",
-      "horizonte": "D+5",
-      "total": 62.0,
-      "P2": 12.5,
-      "P3": 48.7,
-      "peso_mc": 0.338,
-      "peso_orig": 0.662
-    },
-    {
-      "ds": "2025-10-06",
-      "horizonte": "D+6",
-      "total": 85.4,
-      "P2": 15.8,
-      "P3": 69.4,
-      "peso_mc": 0.535,
-      "peso_orig": 0.465
-    },
-    {
-      "ds": "2025-10-07",
-      "horizonte": "D+7",
-      "total": 84.6,
-      "P2": 15.3,
-      "P3": 69.0,
-      "peso_mc": 0.481,
-      "peso_orig": 0.519
+    "serie_7d": [
+      {
+        "dia": "01/01",
+        "ds": "2026-01-01",
+        "horizonte": "D+1",
+        "modelo": "v5",
+        "mae_usado": 24.93,
+        "yhat": 49,
+        "yhat_lower": 0.0,
+        "yhat_upper": 51.9
+      },
+      {
+        "dia": "02/01",
+        "ds": "2026-01-02",
+        "horizonte": "D+2",
+        "modelo": "v5",
+        "mae_usado": 23.77,
+        "yhat": 46,
+        "yhat_lower": 0.0,
+        "yhat_upper": 49.7
+      },
+      {
+        "dia": "03/01",
+        "ds": "2026-01-03",
+        "horizonte": "D+3",
+        "modelo": "v5",
+        "mae_usado": 20.03,
+        "yhat": 16,
+        "yhat_lower": 0.0,
+        "yhat_upper": 44.3
+      },
+      {
+        "dia": "04/01",
+        "ds": "2026-01-04",
+        "horizonte": "D+4",
+        "modelo": "v5",
+        "mae_usado": 22.7,
+        "yhat": 10,
+        "yhat_lower": 0.0,
+        "yhat_upper": 38.6
+      },
+      {
+        "dia": "05/01",
+        "ds": "2026-01-05",
+        "horizonte": "D+5",
+        "modelo": "v6",
+        "mae_usado": 23.77,
+        "yhat": 55,
+        "yhat_lower": 0.0,
+        "yhat_upper": 55
+      },
+      {
+        "dia": "06/01",
+        "ds": "2026-01-06",
+        "horizonte": "D+6",
+        "modelo": "v5",
+        "mae_usado": 21.85,
+        "yhat": 54,
+        "yhat_lower": 0.0,
+        "yhat_upper": 54.3
+      },
+      {
+        "dia": "07/01",
+        "ds": "2026-01-07",
+        "horizonte": "D+7",
+        "modelo": "v6",
+        "mae_usado": 19.3,
+        "yhat": 30,
+        "yhat_lower": 0.0,
+        "yhat_upper": 54.4
+      }
+    ],
+    "metricas": {
+      "mae_d1": 24.93,
+      "mae_d7": 19.3,
+      "nota": "MAE mínimo entre v5 e v6 por horizonte — CV initial=180d"
     }
-  ]
+  }
 }

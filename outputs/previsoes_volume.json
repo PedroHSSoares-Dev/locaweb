@@ -11,8 +11,8 @@
     },
     "D7": {
       "yhat": 49.0,
-      "lower": 34.3,
-      "upper": 64.2,
+      "lower": 35.0,
+      "upper": 63.8,
       "modelo_usado": "v6"
     },
     "serie_7d": [
@@ -33,7 +33,7 @@
         "modelo": "v5",
         "mae_usado": 10.5,
         "yhat": 56,
-        "yhat_lower": 22.0,
+        "yhat_lower": 21.0,
         "yhat_upper": 56
       },
       {
@@ -63,7 +63,7 @@
         "modelo": "v6",
         "mae_usado": 13.05,
         "yhat": 79,
-        "yhat_lower": 33.3,
+        "yhat_lower": 31.7,
         "yhat_upper": 79
       },
       {
@@ -73,7 +73,7 @@
         "modelo": "v6",
         "mae_usado": 11.09,
         "yhat": 70,
-        "yhat_lower": 35.1,
+        "yhat_lower": 35.0,
         "yhat_upper": 70
       },
       {
@@ -83,8 +83,8 @@
         "modelo": "v6",
         "mae_usado": 10.58,
         "yhat": 49.0,
-        "yhat_lower": 34.3,
-        "yhat_upper": 64.2
+        "yhat_lower": 35.0,
+        "yhat_upper": 63.8
       }
     ],
     "metricas": {
@@ -99,14 +99,14 @@
     "abordagem": "ensemble v5+v6 — melhor modelo por horizonte",
     "D1": {
       "yhat": 12.7,
-      "lower": 7.6,
-      "upper": 18.5,
+      "lower": 6.8,
+      "upper": 18.3,
       "modelo_usado": "v6"
     },
     "D7": {
       "yhat": 16.0,
-      "lower": 10.3,
-      "upper": 21.7,
+      "lower": 10.1,
+      "upper": 21.6,
       "modelo_usado": "v5"
     },
     "serie_7d": [
@@ -117,8 +117,8 @@
         "modelo": "v6",
         "mae_usado": 7.7,
         "yhat": 12.7,
-        "yhat_lower": 7.6,
-        "yhat_upper": 18.5
+        "yhat_lower": 6.8,
+        "yhat_upper": 18.3
       },
       {
         "dia": "02/01",
@@ -127,8 +127,8 @@
         "modelo": "v6",
         "mae_usado": 6.19,
         "yhat": 11.8,
-        "yhat_lower": 6.2,
-        "yhat_upper": 17.9
+        "yhat_lower": 5.6,
+        "yhat_upper": 17.4
       },
       {
         "dia": "03/01",
@@ -137,8 +137,8 @@
         "modelo": "v5",
         "mae_usado": 5.04,
         "yhat": 11,
-        "yhat_lower": 3.2,
-        "yhat_upper": 15.4
+        "yhat_lower": 4.0,
+        "yhat_upper": 14.8
       },
       {
         "dia": "04/01",
@@ -147,8 +147,8 @@
         "modelo": "v6",
         "mae_usado": 5.96,
         "yhat": 10,
-        "yhat_lower": 1.8,
-        "yhat_upper": 14.3
+        "yhat_lower": 2.3,
+        "yhat_upper": 14.0
       },
       {
         "dia": "05/01",
@@ -157,8 +157,8 @@
         "modelo": "v5",
         "mae_usado": 2.13,
         "yhat": 17,
-        "yhat_lower": 10.6,
-        "yhat_upper": 22.0
+        "yhat_lower": 10.4,
+        "yhat_upper": 22.4
       },
       {
         "dia": "06/01",
@@ -167,8 +167,8 @@
         "modelo": "v6",
         "mae_usado": 7.04,
         "yhat": 15.9,
-        "yhat_lower": 10.1,
-        "yhat_upper": 22.1
+        "yhat_lower": 9.8,
+        "yhat_upper": 21.8
       },
       {
         "dia": "07/01",
@@ -177,8 +177,8 @@
         "modelo": "v5",
         "mae_usado": 4.7,
         "yhat": 16.0,
-        "yhat_lower": 10.3,
-        "yhat_upper": 21.7
+        "yhat_lower": 10.1,
+        "yhat_upper": 21.6
       }
     ],
     "metricas": {
@@ -200,7 +200,7 @@
     "D7": {
       "yhat": 31.9,
       "lower": 17.7,
-      "upper": 46.3,
+      "upper": 44.8,
       "modelo_usado": "v5"
     },
     "serie_7d": [
@@ -221,7 +221,7 @@
         "modelo": "v6",
         "mae_usado": 9.87,
         "yhat": 46,
-        "yhat_lower": 10.6,
+        "yhat_lower": 10.8,
         "yhat_upper": 46
       },
       {
@@ -261,7 +261,7 @@
         "modelo": "v5",
         "mae_usado": 10.34,
         "yhat": 54,
-        "yhat_lower": 19.8,
+        "yhat_lower": 19.4,
         "yhat_upper": 54
       },
       {
@@ -272,7 +272,7 @@
         "mae_usado": 9.77,
         "yhat": 31.9,
         "yhat_lower": 17.7,
-        "yhat_upper": 46.3
+        "yhat_upper": 44.8
       }
     ],
     "metricas": {

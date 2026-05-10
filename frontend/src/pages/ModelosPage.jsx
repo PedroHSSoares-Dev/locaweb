@@ -122,10 +122,15 @@ export default function ModelosPage() {
 
   const { data: riscoData,    loading: riscoLoading,    disponivel: riscoDisponivel    } = useApi('/risco');
   const { data: clustersData, loading: clustersLoading, disponivel: clustersDisponivel } = useApi('/clusters');
-  const { data: modelosData,  disponivel: modelosDisponivel  } = useApi('/previsoes/modelos');
+  const { data: modelosData, loading: modelosLoading, disponivel: modelosDisponivel } = useApi('/previsoes/modelos');
 
   const m  = riscoDisponivel    ? riscoData?.metricas    : null;
   const km = clustersDisponivel ? clustersData?.metricas : null;
+  const ml = modelosDisponivel  ? modelosData?.metricas_lstm    : null;
+  const mp = modelosDisponivel  ? modelosData?.metricas_prophet : null;
+
+  const fmtMae = (v) => (v != null ? v.toFixed(2) : '—');
+  const fmtPct = (v) => (v != null ? `−${v.toFixed(1)}%` : '—');
 
   const grid2 = { display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',         gap: 14 };
   const grid3 = { display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',   gap: 14 };
@@ -342,7 +347,9 @@ export default function ModelosPage() {
         <Module
           n={2}
           title="Previsão de Volume — Prophet & LSTM"
-          sub="Erro médio absoluto (MAE) em incidentes/dia · modelo ativo: hierarquia LSTM v2 > Prophet MC > Prophet Original"
+          sub={modelosDisponivel
+            ? `modelo ativo: ${modelosData?.modelo_ativo ?? '—'} · MAE holdout: ${fmtMae(modelosData?.mae_modelo_ativo)}`
+            : 'Erro médio absoluto (MAE) em incidentes/dia · hierarquia LSTM v2 > Prophet MC > Prophet Original'}
         >
           {/* Callout: o que é MAE */}
           <div style={{
@@ -359,97 +366,105 @@ export default function ModelosPage() {
             </div>
           </div>
 
-          <Divider label="LSTM V2 — MELHOR MODELO ATIVO" />
-          <div style={grid3}>
-            <MetricCard
-              label="MAE HOLDOUT — TOTAL"
-              value="13.15"
-              sub="Média em 92 dias de holdout real (out–dez 2025)"
-              color="var(--green)"
-              badge={{ text: 'MODELO ATIVO', color: 'var(--teal)' }}
-              explain="Erro médio absoluto medido em 92 dias completamente fora do treino (holdout). Dados 100% reais, sem Monte Carlo. A separação estrita evita vazamento de dados futuros."
-              context="LSTM 2 camadas · hidden=128 · dropout=0.3 · lookback=30 dias"
-            />
-            <MetricCard
-              label="MAE HOLDOUT — P2"
-              value="4.38"
-              sub="Alta prioridade · OLA ≤ 4h"
-              color="var(--green)"
-              explain="Incidentes P2 têm menor volume diário — mais fáceis de prever com precisão. MAE de 4.38 incidentes/dia representa alta qualidade de previsão para a classe mais crítica."
-              context="P2 é a prioridade que excedeu a meta em 2025 (42 vs meta 37)"
-            />
-            <MetricCard
-              label="MAE HOLDOUT — P3"
-              value="11.63"
-              sub="Média prioridade · OLA ≤ 12h"
-              color="var(--teal)"
-              explain="P3 tem maior volume diário e mais variabilidade. O erro de 11.63 incidentes/dia é aceitável dado que o volume médio diário de P3 é ~50 incidentes."
-              context="P3 ficou dentro da meta em 2025 (196 vs meta 247)"
-            />
-          </div>
+          {modelosLoading ? (
+            <div style={grid3}>{[0,1,2,3,4,5].map(i => <Skeleton key={i} height={180} />)}</div>
+          ) : !modelosDisponivel ? (
+            <SemDados mensagem="Modelos de previsão não disponíveis — execute: python src/pipeline.py --step lstm" />
+          ) : (
+            <>
+              <Divider label="LSTM V2 — MELHOR MODELO ATIVO" />
+              <div style={grid3}>
+                <MetricCard
+                  label="MAE HOLDOUT — TOTAL"
+                  value={fmtMae(ml?.mae_total)}
+                  sub="Média em 92 dias de holdout real (out–dez 2025)"
+                  color="var(--green)"
+                  badge={{ text: 'MODELO ATIVO', color: 'var(--teal)' }}
+                  explain="Erro médio absoluto medido em 92 dias completamente fora do treino (holdout). Dados 100% reais, sem Monte Carlo. A separação estrita evita vazamento de dados futuros."
+                  context={ml?.arquitetura ?? '—'}
+                />
+                <MetricCard
+                  label="MAE HOLDOUT — P2"
+                  value={fmtMae(ml?.mae_p2)}
+                  sub="Alta prioridade · OLA ≤ 4h"
+                  color="var(--green)"
+                  explain="Incidentes P2 têm menor volume diário — mais fáceis de prever com precisão. MAE baixo representa alta qualidade de previsão para a classe mais crítica."
+                  context="P2 é a prioridade que excedeu a meta em 2025 (42 vs meta 37)"
+                />
+                <MetricCard
+                  label="MAE HOLDOUT — P3"
+                  value={fmtMae(ml?.mae_p3)}
+                  sub="Média prioridade · OLA ≤ 12h"
+                  color="var(--teal)"
+                  explain="P3 tem maior volume diário e mais variabilidade. O erro é aceitável dado que o volume médio diário de P3 é ~50 incidentes."
+                  context="P3 ficou dentro da meta em 2025 (196 vs meta 247)"
+                />
+              </div>
 
-          <Divider label="PROPHET ENSEMBLE — FALLBACK" />
-          <div style={grid3}>
-            <MetricCard
-              label="MAE D+1 — TOTAL"
-              value="17.06"
-              sub="Erro previsão 1 dia à frente"
-              color="var(--orange)"
-              explain="MAE do Prophet Ensemble (v5+v6) para previsão do próximo dia. Calculado por cross-validation nos dados de treino. Usado como fallback quando LSTM não está disponível."
-              context="Prophet MC ensemble com floor P10 sab/dom"
-            />
-            <MetricCard
-              label="MAE D+7 — TOTAL"
-              value="14.14"
-              sub="Erro previsão 7 dias à frente"
-              color="var(--orange)"
-              explain="Para horizontes maiores, o Prophet seleciona automaticamente o modelo (v5 ou v6) com menor MAE histórico para aquele horizonte específico — reduzindo o erro médio."
-              context="Melhor horizonte: D+3 com MAE 7.36 (modelo v5)"
-            />
-            <MetricCard
-              label="LSTM vs PROPHET"
-              value="−44.8%"
-              sub="Redução de erro no holdout de 92 dias"
-              color="var(--green)"
-              badge={{ text: 'MELHORA', color: 'var(--green)' }}
-              explain="No holdout de 92 dias (oct–dec 2025), o LSTM v2 reduziu o MAE em 44.8% em relação ao Prophet (13.15 vs 23.80). O LSTM captura melhor os padrões de longo prazo após 3 anos de dados."
-              context="Prophet holdout MAE = 23.80 · LSTM holdout MAE = 13.15"
-            />
-          </div>
+              <Divider label="PROPHET ENSEMBLE — FALLBACK" />
+              <div style={grid3}>
+                <MetricCard
+                  label="MAE D+1 — TOTAL"
+                  value={fmtMae(mp?.mae_d1_total)}
+                  sub="Erro previsão 1 dia à frente"
+                  color="var(--orange)"
+                  explain="MAE do Prophet Ensemble (v5+v6) para previsão do próximo dia. Calculado por cross-validation (initial=180d). Usado como fallback quando LSTM não está disponível."
+                  context="Prophet 2025-only · ensemble v5 (4 lags) + v6 (+ is_dia_util)"
+                />
+                <MetricCard
+                  label="MAE D+7 — TOTAL"
+                  value={fmtMae(mp?.mae_d7_total)}
+                  sub="Erro previsão 7 dias à frente"
+                  color="var(--orange)"
+                  explain="Para horizontes maiores, o Prophet seleciona automaticamente o modelo (v5 ou v6) com menor MAE histórico para aquele horizonte específico — reduzindo o erro médio."
+                  context="Seleção por horizonte via cross-validation"
+                />
+                <MetricCard
+                  label="LSTM vs PROPHET"
+                  value={fmtPct(ml?.melhora_pct_vs_prophet)}
+                  sub="Redução de erro no holdout de 92 dias"
+                  color="var(--green)"
+                  badge={{ text: 'MELHORA', color: 'var(--green)' }}
+                  explain={`No holdout de 92 dias (out–dez 2025), o LSTM v2 reduziu o MAE vs Prophet rolling. O LSTM captura melhor padrões de longo prazo após 3 anos de dados.`}
+                  context={`Prophet holdout MAE = ${fmtMae(ml?.mae_prophet_holdout_92d)} · LSTM holdout MAE = ${fmtMae(ml?.mae_total)}`}
+                />
+              </div>
 
-          {/* Tabela comparativa */}
-          <Divider label="COMPARAÇÃO DIRETA — HOLDOUT 92 DIAS" />
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: 11 }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                  {['Modelo', 'Período', 'MAE Total', 'MAE P2', 'MAE P3', 'Status'].map(h => (
-                    <th key={h} style={{ padding: '6px 12px', textAlign: 'left', color: 'var(--text-muted)', fontSize: 9, letterSpacing: '0.12em', fontWeight: 600 }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  { model: 'LSTM v2', period: 'Holdout real 92d', total: '13.15', p2: '4.38', p3: '11.63', status: 'ATIVO', statusColor: 'var(--teal)' },
-                  { model: 'Prophet MC', period: 'Holdout real 92d', total: '23.80', p2: '—', p3: '—', status: 'FALLBACK', statusColor: 'var(--text-muted)' },
-                  { model: 'Prophet Orig.', period: 'Cross-validation', total: '17.06', p2: '7.75', p3: '8.74', status: 'FALLBACK', statusColor: 'var(--text-muted)' },
-                ].map((row, i) => (
-                  <tr key={i} style={{ borderBottom: '0.5px solid var(--border)', background: i === 0 ? 'rgba(90,200,250,0.04)' : 'transparent' }}>
-                    <td style={{ padding: '8px 12px', color: i === 0 ? 'var(--teal)' : 'var(--text-sec)', fontWeight: i === 0 ? 700 : 400 }}>{row.model}</td>
-                    <td style={{ padding: '8px 12px', color: 'var(--text-muted)', fontSize: 10 }}>{row.period}</td>
-                    <td style={{ padding: '8px 12px', color: i === 0 ? 'var(--green)' : 'var(--text-sec)', fontWeight: i === 0 ? 700 : 400 }}>{row.total}</td>
-                    <td style={{ padding: '8px 12px', color: 'var(--text-sec)' }}>{row.p2}</td>
-                    <td style={{ padding: '8px 12px', color: 'var(--text-sec)' }}>{row.p3}</td>
-                    <td style={{ padding: '8px 12px' }}>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: row.statusColor, background: `${row.statusColor}15`, border: `1px solid ${row.statusColor}33`, borderRadius: 3, padding: '2px 6px' }}>
-                        {row.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              {/* Tabela comparativa */}
+              <Divider label="COMPARAÇÃO DIRETA — HOLDOUT 92 DIAS" />
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: 11 }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                      {['Modelo', 'Período', 'MAE Total', 'MAE P2', 'MAE P3', 'Status'].map(h => (
+                        <th key={h} style={{ padding: '6px 12px', textAlign: 'left', color: 'var(--text-muted)', fontSize: 9, letterSpacing: '0.12em', fontWeight: 600 }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { model: 'LSTM v2', period: 'Holdout real 92d', total: fmtMae(ml?.mae_total), p2: fmtMae(ml?.mae_p2), p3: fmtMae(ml?.mae_p3), status: 'ATIVO', statusColor: 'var(--teal)' },
+                      { model: 'Prophet MC', period: 'Holdout real 92d', total: fmtMae(ml?.mae_prophet_holdout_92d), p2: '—', p3: '—', status: 'FALLBACK', statusColor: 'var(--text-muted)' },
+                      { model: 'Prophet Orig.', period: 'Cross-validation', total: fmtMae(mp?.mae_d1_total), p2: fmtMae(mp?.mae_d1_p2), p3: fmtMae(mp?.mae_d1_p3), status: 'FALLBACK', statusColor: 'var(--text-muted)' },
+                    ].map((row, i) => (
+                      <tr key={i} style={{ borderBottom: '0.5px solid var(--border)', background: i === 0 ? 'rgba(90,200,250,0.04)' : 'transparent' }}>
+                        <td style={{ padding: '8px 12px', color: i === 0 ? 'var(--teal)' : 'var(--text-sec)', fontWeight: i === 0 ? 700 : 400 }}>{row.model}</td>
+                        <td style={{ padding: '8px 12px', color: 'var(--text-muted)', fontSize: 10 }}>{row.period}</td>
+                        <td style={{ padding: '8px 12px', color: i === 0 ? 'var(--green)' : 'var(--text-sec)', fontWeight: i === 0 ? 700 : 400 }}>{row.total}</td>
+                        <td style={{ padding: '8px 12px', color: 'var(--text-sec)' }}>{row.p2}</td>
+                        <td style={{ padding: '8px 12px', color: 'var(--text-sec)' }}>{row.p3}</td>
+                        <td style={{ padding: '8px 12px' }}>
+                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: row.statusColor, background: `${row.statusColor}15`, border: `1px solid ${row.statusColor}33`, borderRadius: 3, padding: '2px 6px' }}>
+                            {row.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
         </Module>
 
         {/* ── MODULE 03: K-Means ────────────────────────────────────────────── */}

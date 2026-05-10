@@ -2,16 +2,16 @@
 previsoes.py — Endpoints de previsão de volume de incidentes.
 
 Hierarquia de modelos (melhor → fallback):
-  1. LSTM v2 early stopping  (MAE holdout = 13.15)
-  2. Prophet MC ensemble     (MAE holdout = 23.80)
-  3. Prophet original v5+v6  (MAE CV     = 17.06)
+  1. LSTM v2 early stopping  (MAE holdout 92d = 14.67)
+  2. Prophet MC ensemble     (MAE holdout 92d = 23.80)
+  3. Prophet original v5+v6  (MAE CV D+1      = 12.43)
 
 Todos os endpoints tentam na ordem acima e usam o primeiro disponível.
 """
 from typing import Union
 from fastapi import APIRouter
 from api.schemas import (
-    ModelosDisponiveisResponse,
+    ModelosDisponiveisResponse, MetricasLSTM, MetricasProphet,
     PrevisaoD1Response, PrevisaoD7Response,
     PrevisaoSerieResponse, NaoDisponivel,
 )
@@ -53,17 +53,49 @@ def get_modelos():
     Retorna quais modelos de previsão estão disponíveis e qual está sendo usado
     ativamente pelos endpoints `/previsoes/d1`, `/previsoes/d7` e `/previsoes/serie`.
 
-    **Hierarquia:** LSTM v2 (MAE=13.15) > Prophet MC (MAE=23.80) > Prophet Original (MAE=17.06 CV)
+    **Hierarquia:** LSTM v2 > Prophet MC > Prophet Original
     """
     modelo_ativo, data = _carregar_melhor_modelo()
     mae_raw = data.get("mae_holdout_92_dias") if modelo_ativo == "lstm_v2" and data else None
     mae = mae_raw["total"] if isinstance(mae_raw, dict) else mae_raw
+
+    lstm_data = load_json("previsoes_lstm.json")
+    prophet_data = load_json("previsoes_volume.json")
+
+    metricas_lstm = None
+    if lstm_data:
+        mae_h = lstm_data.get("mae_holdout_92_dias", {})
+        metricas_lstm = MetricasLSTM(
+            mae_total=mae_h.get("total", 0),
+            mae_p2=mae_h.get("p2", 0),
+            mae_p3=mae_h.get("p3", 0),
+            mae_prophet_holdout_92d=lstm_data.get("mae_prophet_92_dias", 0),
+            melhora_pct_vs_prophet=lstm_data.get("melhora_pct_vs_prophet", 0),
+            arquitetura=lstm_data.get("arquitetura", ""),
+            treino=lstm_data.get("treino", ""),
+            holdout=lstm_data.get("holdout", ""),
+        )
+
+    metricas_prophet = None
+    if prophet_data:
+        total_m = prophet_data.get("total", {}).get("metricas", {})
+        p2_m = prophet_data.get("p2", {}).get("metricas", {})
+        p3_m = prophet_data.get("p3", {}).get("metricas", {})
+        metricas_prophet = MetricasProphet(
+            mae_d1_total=total_m.get("mae_d1", 0),
+            mae_d7_total=total_m.get("mae_d7", 0),
+            mae_d1_p2=p2_m.get("mae_d1", 0),
+            mae_d1_p3=p3_m.get("mae_d1", 0),
+        )
+
     return {
-        "lstm":             load_json("previsoes_lstm.json")      is not None,
+        "lstm":             lstm_data is not None,
         "prophet_mc":       load_json("previsoes_volume_mc.json") is not None,
-        "prophet_original": load_json("previsoes_volume.json")    is not None,
+        "prophet_original": prophet_data is not None,
         "modelo_ativo":     modelo_ativo or "nenhum",
         "mae_modelo_ativo": mae,
+        "metricas_lstm":    metricas_lstm,
+        "metricas_prophet": metricas_prophet,
     }
 
 

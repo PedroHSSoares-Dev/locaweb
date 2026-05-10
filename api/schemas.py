@@ -122,13 +122,35 @@ class PrevisaoSerieResponse(BaseModel):
     serie: list[PrevisaoDia]
 
 
+class MetricasLSTM(BaseModel):
+    """Métricas do LSTM v2 extraídas do previsoes_lstm.json."""
+    mae_total: float = Field(..., example=14.67, description="MAE total no holdout de 92 dias")
+    mae_p2: float = Field(..., example=4.15, description="MAE P2 no holdout de 92 dias")
+    mae_p3: float = Field(..., example=13.32, description="MAE P3 no holdout de 92 dias")
+    mae_prophet_holdout_92d: float = Field(..., example=23.80, description="MAE Prophet MC no mesmo holdout de 92 dias")
+    melhora_pct_vs_prophet: float = Field(..., example=38.3, description="Redução percentual de erro LSTM vs Prophet")
+    arquitetura: str = Field(..., example="LSTM 2 camadas hidden=128 dropout=0.3 lookback=30")
+    treino: str = Field(..., example="2023-01-01 a 2025-09-30 (Monte Carlo + real)")
+    holdout: str = Field(..., example="2025-10-01 a 2025-12-31 (92 dias 100% real)")
+
+
+class MetricasProphet(BaseModel):
+    """Métricas do Prophet Ensemble extraídas do previsoes_volume.json."""
+    mae_d1_total: float = Field(..., example=12.43, description="MAE D+1 total (cross-validation)")
+    mae_d7_total: float = Field(..., example=10.58, description="MAE D+7 total (cross-validation)")
+    mae_d1_p2: float = Field(..., example=7.70, description="MAE D+1 P2 (cross-validation)")
+    mae_d1_p3: float = Field(..., example=9.98, description="MAE D+1 P3 (cross-validation)")
+
+
 class ModelosDisponiveisResponse(BaseModel):
-    """Status de disponibilidade dos modelos de previsão e hierarquia ativa."""
+    """Status de disponibilidade dos modelos de previsão e métricas completas."""
     lstm: bool = Field(..., description="previsoes_lstm.json presente em outputs/")
     prophet_mc: bool = Field(..., description="previsoes_volume_mc.json presente em outputs/")
     prophet_original: bool = Field(..., description="previsoes_volume.json presente em outputs/")
     modelo_ativo: str = Field(..., example="lstm_v2", description="Modelo sendo usado pelos endpoints /previsoes/*")
-    mae_modelo_ativo: Optional[float] = Field(None, example=13.15, description="MAE holdout do modelo ativo (só LSTM tem)")
+    mae_modelo_ativo: Optional[float] = Field(None, example=14.67, description="MAE holdout do modelo ativo (só LSTM tem)")
+    metricas_lstm: Optional[MetricasLSTM] = Field(None, description="Métricas detalhadas do LSTM (None se não treinado)")
+    metricas_prophet: Optional[MetricasProphet] = Field(None, description="Métricas detalhadas do Prophet (None se não treinado)")
 
 
 # ────────────────────────────────────────────────────────────────────────────────
