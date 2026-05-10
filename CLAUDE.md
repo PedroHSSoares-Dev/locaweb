@@ -107,7 +107,12 @@ O arquivo `data/processed/incidents_features.parquet` contém:
 | `produto_freq` | Frequency Encoded | Produto |
 | `grupo_freq` | Frequency Encoded | Grupo designado |
 | `mes_sin`, `mes_cos` | Cíclicas | Encoding senoidal do mês |
-| `target_ola` | Binária (TARGET) | Duração > OLA |
+| `is_feriado` | Binária | 1 = data é feriado (nacional, estadual-SP ou municipal-SP) |
+| `tipo_feriado` | Ordinal | 0=normal, 1=nacional, 2=estadual-SP, 3=municipal-SP |
+| `dias_ate_feriado` | Numérica | Dias até o próximo feriado (clip em 7) |
+| `dias_desde_feriado` | Numérica | Dias desde o último feriado (clip em 7) |
+| `grupo_viol_rate` | Numérica | Taxa hist. de violação por grupo (calculada só no treino — anti-leakage) |
+| `target_ola` | Binária (TARGET) | KPI Violado? == SIM |
 
 ---
 
@@ -182,8 +187,9 @@ Notebooks são **apenas exploratórios**. Código de produção vive em `src/`.
 | Arquivo | Status | Notas |
 |---|---|---|
 | `src/data/loader.py` | ✅ Criado | `load_raw()`, `load_kpi_subset()` |
-| `src/data/preprocessor.py` | ✅ Criado | 27 colunas, nomes NB04 convention |
-| `src/models/xgboost_model.py` | ✅ Criado | PR-AUC 0.099, Recall 15.5%, F1 0.184 — Optuna (80 trials) |
+| `src/data/preprocessor.py` | ✅ Criado | 30 features no parquet (inclui 4 de feriados) |
+| `src/data/feriados.py` | ✅ Criado | Feriados BR nacionais + SP estado + SP município; Carnaval e Corpus Christi via algoritmo de Páscoa |
+| `src/models/xgboost_model.py` | ✅ Criado | 31 features (30 parquet + grupo_viol_rate); PR-AUC 0.070, Recall 13.8%, Precision 29.6%, F1 0.188 — Optuna (80 trials) — hiperparâmetros otimizados para 27 features (retuning pendente) |
 | `src/models/kmeans_model.py` | ✅ Criado | K=5, Silhouette=0.18 |
 | `src/models/kpi_projection.py` | ✅ Criado | Meta dinâmica mensal |
 | `src/models/prophet_model.py` | ⏳ Sprint 3 | Ainda como notebook |

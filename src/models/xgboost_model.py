@@ -49,6 +49,8 @@ PARQUET_FEATURES = [
     "produto_enc", "categoria_enc", "subcategoria_enc", "grupo_enc", "aberto_por_enc",
     "produto_freq", "grupo_freq",
     "mes_sin", "mes_cos",
+    # Feriados
+    "is_feriado", "tipo_feriado", "dias_ate_feriado", "dias_desde_feriado",
 ]
 
 # Features do modelo (inclui derivadas calculadas dentro do split de treino)
@@ -73,8 +75,10 @@ def load_data(path: Path = PARQUET_PATH) -> pd.DataFrame:
         )
 
     df_model = df[PARQUET_FEATURES + [TARGET]].copy()
-    for c in ["lag_1d", "lag_7d", "rolling_7d", "rolling_30d", "lag_1d_p2", "lag_1d_p3"]:
-        df_model[c] = df_model[c].fillna(0)
+    for c in ["lag_1d", "lag_7d", "rolling_7d", "rolling_30d", "lag_1d_p2", "lag_1d_p3",
+              "is_feriado", "tipo_feriado", "dias_ate_feriado", "dias_desde_feriado"]:
+        if c in df_model.columns:
+            df_model[c] = df_model[c].fillna(0)
 
     assert df_model.isnull().sum().sum() == 0, "Dataset com nulos"
     return df_model

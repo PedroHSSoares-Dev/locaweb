@@ -6,11 +6,16 @@ Convenção de nomes alinhada com NB04/NB05:
   produto_freq, grupo_freq, mes_sin, mes_cos
 """
 from pathlib import Path
+import sys
 import warnings
 
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
+
+sys.path.insert(0, str(Path(__file__).parent))
+from feriados import build_holiday_features
+sys.path.pop(0)
 
 warnings.filterwarnings("ignore")
 
@@ -36,6 +41,8 @@ FEATURES = [
     "produto_freq", "grupo_freq",
     # Cíclicas
     "mes_sin", "mes_cos",
+    # Feriados (nacionais + SP estado + SP município)
+    "is_feriado", "tipo_feriado", "dias_ate_feriado", "dias_desde_feriado",
 ]
 TARGET = "target_ola"
 
@@ -79,6 +86,11 @@ def build_features(raw_path: Path = RAW_PATH) -> pd.DataFrame:
     # Features cíclicas
     kpi["mes_sin"] = np.sin(2 * np.pi * kpi["mes"] / 12)
     kpi["mes_cos"] = np.cos(2 * np.pi * kpi["mes"] / 12)
+
+    # Feriados — nacionais + SP estado + SP município
+    feriados_df = build_holiday_features(kpi["Aberto"])
+    feriados_df.index = kpi.index
+    kpi = pd.concat([kpi, feriados_df], axis=1)
 
     # Lags e médias móveis (volume diário geral)
     kpi["data"] = kpi["Aberto"].dt.date
