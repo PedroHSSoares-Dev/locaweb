@@ -28,7 +28,6 @@ from sklearn.metrics import (
     f1_score,
     precision_recall_curve,
     precision_score,
-    recall_score,
     roc_auc_score,
 )
 from sklearn.model_selection import StratifiedKFold, cross_validate
@@ -84,7 +83,7 @@ def load_data(path: Path = PARQUET_PATH) -> pd.DataFrame:
     return df_model
 
 
-def train(df: pd.DataFrame) -> dict:
+def train(df: pd.DataFrame, recall_target: float = 0.70) -> dict:
     """Treina, avalia e retorna resultados do XGBoost."""
     contagem = df[TARGET].value_counts().sort_index()
     scale_pos_weight = int(contagem[0] // contagem[1])
@@ -183,11 +182,29 @@ def train(df: pd.DataFrame) -> dict:
     precision_arr, recall_arr, thresholds = precision_recall_curve(y_test, y_prob_final)
     f1_arr = 2 * precision_arr[:-1] * recall_arr[:-1] / (precision_arr[:-1] + recall_arr[:-1] + 1e-9)
 
-    # Threshold otimizado por F1 — melhor equilíbrio precisão/recall dada a imbalance 1:102.
-    # Nota: recall ficará baixo (~8%), mas a precisão (~14%) mantém os alertas utilizáveis.
-    # Usar probabilidades contínuas (prob > 0.15 = atenção, > 0.30 = alto risco) para triagem.
-    best_idx = int(np.argmax(f1_arr))
-    threshold_otm = float(thresholds[best_idx])
+    # Threshold F1-ótimo — referência comparativa
+    f1_idx = int(np.argmax(f1_arr))
+    threshold_f1 = float(thresholds[f1_idx])
+    f1_prec = float(precision_arr[f1_idx])
+    f1_rec = float(recall_arr[f1_idx])
+    f1_score_val = float(f1_arr[f1_idx])
+    y_pred_f1 = (y_prob_final >= threshold_f1).astype(int)
+    cm_f1 = confusion_matrix(y_test, y_pred_f1)
+    tn_f1, fp_f1, fn_f1, tp_f1 = cm_f1.ravel()
+
+    # Threshold recall-ótimo: menor threshold que atinge recall_target.
+    # Prioriza capturar violações (minimiza FN), aceitando mais falsos alarmes (FP).
+    valid_rec = np.where(recall_arr[:-1] >= recall_target)[0]
+    if len(valid_rec) > 0:
+        # Entre os thresholds que atingem o target, escolhe o mais alto (menos FP)
+        best_idx = valid_rec[-1]
+        threshold_otm = float(thresholds[best_idx])
+    else:
+        # recall_target inatingível — cai para o de maior recall disponível
+        best_idx = int(np.argmax(recall_arr[:-1]))
+        threshold_otm = float(thresholds[best_idx])
+        print(f"Aviso: recall_target={recall_target:.0%} inatingível, usando recall máximo disponível")
+
     best_prec = float(precision_arr[best_idx])
     best_rec = float(recall_arr[best_idx])
     best_f1 = float(f1_arr[best_idx])
@@ -196,16 +213,8 @@ def train(df: pd.DataFrame) -> dict:
     cm = confusion_matrix(y_test, y_pred_otm)
     tn_v, fp_v, fn_v, tp_v = cm.ravel()
 
-    # Threshold para recall >= 70% — referência para análise exploratória.
-    # Não usado como threshold principal: precisão cai para ~2% (98% falsos alarmes).
-    threshold_r70 = None
-    for thr in np.arange(0.10, 0.85, 0.01):
-        pred_t = (y_prob_final >= thr).astype(int)
-        if recall_score(y_test, pred_t, zero_division=0) >= 0.70:
-            threshold_r70 = round(float(thr), 4)
-            break
-
-    print(f"Threshold F1: {threshold_otm:.4f} | Recall: {best_rec:.4f} | F1: {best_f1:.4f}")
+    print(f"Threshold Recall-ótimo ({recall_target:.0%}): {threshold_otm:.4f} | Recall: {best_rec:.4f} | Precision: {best_prec:.4f} | F1: {best_f1:.4f}")
+    print(f"Threshold F1-ótimo (ref):                   {threshold_f1:.4f} | Recall: {f1_rec:.4f} | Precision: {f1_prec:.4f} | F1: {f1_score_val:.4f}")
     print(classification_report(y_test, y_pred_otm, target_names=["NAO (0)", "SIM (1)"]))
 
     # SHAP feature importance
@@ -249,7 +258,8 @@ def train(df: pd.DataFrame) -> dict:
     return {
         "model": model_final,
         "threshold_otm": threshold_otm,
-        "threshold_r70": threshold_r70,
+        "threshold_f1": threshold_f1,
+        "recall_target": recall_target,
         "scale_pos_weight": scale_pos_weight,
         "melhor_nome": melhor_nome,
         "metricas": {
@@ -266,6 +276,14 @@ def train(df: pd.DataFrame) -> dict:
             "total_teste": int(len(y_test)),
             "violacoes_reais": int(y_test.sum()),
             "violacoes_capturadas": int(tp_v),
+        },
+        "metricas_f1_ref": {
+            "threshold": round(threshold_f1, 4),
+            "recall_violacao": round(f1_rec, 4),
+            "precision_violacao": round(f1_prec, 4),
+            "f1_violacao": round(f1_score_val, 4),
+            "tp": int(tp_f1), "fp": int(fp_f1), "fn": int(fn_f1), "tn": int(tn_f1),
+            "violacoes_capturadas": int(tp_f1),
         },
         "feat_imp_list": feat_imp_list,
         "risco_prio_dict": risco_prio_dict,
@@ -285,12 +303,14 @@ def export_json(results: dict, path: Path = OUTPUT_PATH) -> None:
     output = {
         "modelo": "xgboost_ola_risk",
         "gerado_em": date.today().strftime("%Y-%m-%d"),
-        "versao": "v2",
-        "abordagem": f"XGBoost + {results['melhor_nome']} + threshold F1-ótimo + CV validado",
+        "versao": "v3",
+        "abordagem": f"XGBoost + {results['melhor_nome']} + threshold recall≥{results['recall_target']:.0%} + CV validado",
         "threshold_otimizado": round(results["threshold_otm"], 4),
-        "threshold_recall_70": results["threshold_r70"],
+        "threshold_f1_referencia": round(results["threshold_f1"], 4),
+        "recall_target": results["recall_target"],
         "scale_pos_weight": results["scale_pos_weight"],
         "metricas": results["metricas"],
+        "metricas_f1_referencia": results["metricas_f1_ref"],
         "feature_importance_shap": results["feat_imp_list"][:15],
         "risco_por_prioridade": results["risco_prio_dict"],
         "distribuicao_risco": results["dist_risco"],

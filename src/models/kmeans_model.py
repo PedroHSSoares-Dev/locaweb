@@ -225,6 +225,18 @@ def train(df: pd.DataFrame) -> dict:
 def export_json(results: dict, path: Path = OUTPUT_PATH) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     metricas = results["metricas_finais"]
+    comparacao_k = [
+        {
+            "k":                 k,
+            "inertia":           round(float(v["inertia"]), 2),
+            "silhouette":        round(float(v["silhouette"]), 4),
+            "calinski_harabasz": round(float(v["calinski_harabasz"]), 2),
+            "davies_bouldin":    round(float(v["davies_bouldin"]), 4),
+            "selecionado":       k == results["k_final"],
+        }
+        for k, v in sorted(results["metricas_k"].items())
+    ]
+
     output = {
         "modelo": "kmeans_segmentacao",
         "gerado_em": date.today().strftime("%Y-%m-%d"),
@@ -233,6 +245,7 @@ def export_json(results: dict, path: Path = OUTPUT_PATH) -> None:
         "silhouette": metricas["silhouette_score"],
         "k_min_utilizado": K_MIN,
         "metricas": metricas,
+        "comparacao_k": comparacao_k,
         "features_clustering": CLUSTER_FEATURES,
         "clusters": results["cluster_info"],
     }

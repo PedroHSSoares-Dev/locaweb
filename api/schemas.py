@@ -384,12 +384,33 @@ class ClusterItem(BaseModel):
     perfil:       ClusterPerfil
 
 
+class MetricasKMeans(BaseModel):
+    inertia:           Optional[float] = None
+    silhouette_score:  Optional[float] = None
+    calinski_harabasz: Optional[float] = None
+    davies_bouldin:    Optional[float] = None
+    pca_variancia_2d:  Optional[float] = None
+    features_usadas:   Optional[int]   = None
+    total_incidentes:  Optional[int]   = None
+
+
+class ComparacaoKItem(BaseModel):
+    k:                 int
+    inertia:           float
+    silhouette:        float
+    calinski_harabasz: float
+    davies_bouldin:    float
+    selecionado:       bool
+
+
 class ClustersResponse(BaseModel):
     """Segmentação K-Means de padrões de incidentes."""
-    disponivel:  bool                    = Field(True, example=True)
-    modelo:      Optional[str]           = None
-    gerado_em:   Optional[str]           = None
-    metodologia: Optional[str]           = None
-    k:           Optional[int]           = None
-    silhouette:  Optional[float]         = None
-    clusters:    Optional[list[ClusterItem]] = None
+    disponivel:   bool                            = Field(True, example=True)
+    modelo:       Optional[str]                   = None
+    gerado_em:    Optional[str]                   = None
+    metodologia:  Optional[str]                   = None
+    k:            Optional[int]                   = None
+    silhouette:   Optional[float]                 = None
+    metricas:     Optional[MetricasKMeans]        = None
+    comparacao_k: Optional[list[ComparacaoKItem]] = None
+    clusters:     Optional[list[ClusterItem]]     = None

@@ -1,6 +1,6 @@
 {
   "modelo": "kmeans_segmentacao",
-  "gerado_em": "2026-05-09",
+  "gerado_em": "2026-05-14",
   "metodologia": "K-Means K=5 — seleção por voto majoritário (Silhouette, CH, DB), K ímpar ≥ 5",
   "k": 5,
   "silhouette": 0.1994,
@@ -14,6 +14,80 @@
     "total_incidentes": 25588,
     "pca_variancia_2d": 0.3214
   },
+  "comparacao_k": [
+    {
+      "k": 2,
+      "inertia": 269612.63,
+      "silhouette": 0.2008,
+      "calinski_harabasz": 3553.35,
+      "davies_bouldin": 2.392,
+      "selecionado": false
+    },
+    {
+      "k": 3,
+      "inertia": 240001.92,
+      "silhouette": 0.1429,
+      "calinski_harabasz": 3574.09,
+      "davies_bouldin": 2.1998,
+      "selecionado": false
+    },
+    {
+      "k": 4,
+      "inertia": 214968.01,
+      "silhouette": 0.1914,
+      "calinski_harabasz": 3653.22,
+      "davies_bouldin": 1.754,
+      "selecionado": false
+    },
+    {
+      "k": 5,
+      "inertia": 190928.76,
+      "silhouette": 0.1965,
+      "calinski_harabasz": 3890.04,
+      "davies_bouldin": 1.5043,
+      "selecionado": true
+    },
+    {
+      "k": 6,
+      "inertia": 173392.74,
+      "silhouette": 0.1856,
+      "calinski_harabasz": 3944.08,
+      "davies_bouldin": 1.5537,
+      "selecionado": false
+    },
+    {
+      "k": 7,
+      "inertia": 163867.92,
+      "silhouette": 0.1887,
+      "calinski_harabasz": 3725.45,
+      "davies_bouldin": 1.4902,
+      "selecionado": false
+    },
+    {
+      "k": 8,
+      "inertia": 155156.98,
+      "silhouette": 0.1783,
+      "calinski_harabasz": 3577.56,
+      "davies_bouldin": 1.4777,
+      "selecionado": false
+    },
+    {
+      "k": 9,
+      "inertia": 147037.16,
+      "silhouette": 0.1713,
+      "calinski_harabasz": 3479.67,
+      "davies_bouldin": 1.4307,
+      "selecionado": false
+    },
+    {
+      "k": 10,
+      "inertia": 141024.85,
+      "silhouette": 0.1695,
+      "calinski_harabasz": 3345.94,
+      "davies_bouldin": 1.3869,
+      "selecionado": false
+    }
+  ],
   "features_clustering": [
     "hora",
     "dia_semana",

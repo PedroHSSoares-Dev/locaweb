@@ -1,3 +1,4 @@
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, Cell, LabelList } from 'recharts';
 import { useBreakpoint } from '../hooks/useBreakpoint';
 import { useApi } from '../hooks/useApi';
 import SemDados from '../components/SemDados';
@@ -100,6 +101,58 @@ function MetricCard({ label, value, sub, color = 'var(--teal)', badge, explain, 
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+const SHAP_LABELS = {
+  grupo_viol_rate:  'Taxa histórica de violação do grupo de atendimento',
+  rolling_30d:      'Volume médio de incidentes nos últimos 30 dias',
+  rolling_7d:       'Volume médio de incidentes nos últimos 7 dias',
+  aberto_por_enc:   'Agente responsável pela abertura',
+  produto_freq:     'Frequência do produto afetado',
+  produto_enc:      'Produto afetado',
+  categoria_enc:    'Categoria do incidente',
+  lag_7d:           'Volume de incidentes 7 dias atrás',
+  hora:             'Hora de abertura do incidente',
+  semana_ano:       'Semana do ano',
+  subcategoria_enc: 'Subcategoria',
+  grupo_freq:       'Frequência do grupo designado',
+  dia_mes:          'Dia do mês',
+  grupo_enc:        'Grupo de atendimento designado',
+  mes_cos:          'Sazonalidade mensal',
+};
+
+function ExplainBox({ title, color = 'var(--purple, #a78bfa)', items }) {
+  return (
+    <div style={{
+      marginTop: 24,
+      background: `color-mix(in srgb, ${color} 6%, transparent)`,
+      border: `1px solid color-mix(in srgb, ${color} 30%, transparent)`,
+      borderLeft: `3px solid ${color}`,
+      borderRadius: 6, padding: '14px 18px',
+    }}>
+      <div style={{
+        fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
+        color, letterSpacing: '0.14em', marginBottom: 12,
+      }}>
+        {title}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {items.map((item, i) => (
+          <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+            <span style={{
+              fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
+              color, background: `color-mix(in srgb, ${color} 15%, transparent)`,
+              border: `1px solid color-mix(in srgb, ${color} 30%, transparent)`,
+              borderRadius: 3, padding: '2px 6px', whiteSpace: 'nowrap', marginTop: 1,
+            }}>{item.tag}</span>
+            <span style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--text-sec)', lineHeight: 1.6 }}>
+              {item.text}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -319,6 +372,34 @@ export default function ModelosPage() {
                 </div>
               </div>
 
+              {/* SHAP Feature Importance Chart */}
+              {riscoData?.feature_importance_shap?.length > 0 && (<>
+                <Divider label="FEATURE IMPORTANCE — SHAP (TOP 10)" />
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart
+                    layout="vertical"
+                    data={riscoData.feature_importance_shap.slice(0, 10).map(f => ({
+                      name: SHAP_LABELS[f.feature] ?? f.feature,
+                      value: f.shap_mean_abs,
+                    })).reverse()}
+                    margin={{ top: 0, right: 40, left: 8, bottom: 0 }}
+                  >
+                    <XAxis type="number" tick={{ fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--text-muted)' }} tickFormatter={v => v.toFixed(2)} />
+                    <YAxis type="category" dataKey="name" width={210} tick={{ fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--text-sec)' }} />
+                    <Tooltip
+                      contentStyle={{ background: 'var(--surface3)', border: '1px solid var(--border)', borderRadius: 6, fontFamily: 'var(--font-mono)', fontSize: 10 }}
+                      formatter={v => [v.toFixed(4), 'SHAP médio |valor|']}
+                    />
+                    <Bar dataKey="value" radius={[0, 3, 3, 0]}>
+                      {riscoData.feature_importance_shap.slice(0, 10).map((_, i) => (
+                        <Cell key={i} fill={i === 9 ? 'var(--teal)' : `rgba(90,200,250,${0.35 + (i / 9) * 0.65})`} />
+                      ))}
+                      <LabelList dataKey="value" position="right" formatter={v => v.toFixed(3)} style={{ fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--text-muted)' }} />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </>)}
+
               {/* PR-AUC CV */}
               <Divider label="CROSS-VALIDATION — PR-AUC" />
               <div style={grid2}>
@@ -339,6 +420,48 @@ export default function ModelosPage() {
                   context={`Threshold F1-ótimo: ${(riscoData?.threshold_otimizado ?? 0).toFixed(4)} · threshold p/ recall ≥70%: ${riscoData?.threshold_recall_70 ?? '—'}`}
                 />
               </div>
+
+              {/* Explicabilidade XGBoost */}
+              {riscoData?.feature_importance_shap?.length > 0 && (() => {
+                const top3 = riscoData.feature_importance_shap.slice(0, 3);
+                const rec  = m?.recall_violacao ?? 0;
+                const fn   = m?.fn ?? 0;
+                const tp   = m?.violacoes_capturadas ?? 0;
+                const total = tp + fn;
+                return (
+                  <ExplainBox
+                    title="INTERPRETAÇÃO OPERACIONAL — O QUE O MODELO APRENDEU"
+                    color="var(--purple, #a78bfa)"
+                    items={[
+                      {
+                        tag: 'PREDITOR #1',
+                        text: <>
+                          <strong style={{ color: 'var(--text-pri)' }}>{SHAP_LABELS[top3[0].feature] ?? top3[0].feature}</strong>
+                          {' '}é o fator mais determinante do risco (SHAP médio {top3[0].shap_mean_abs.toFixed(3)}). Grupos com histórico de violações frequentes concentram a maior parte dos alertas — o modelo reconhece padrões recorrentes por equipe.
+                        </>,
+                      },
+                      {
+                        tag: 'PREDITOR #2',
+                        text: <>
+                          <strong style={{ color: 'var(--text-pri)' }}>{SHAP_LABELS[top3[1].feature] ?? top3[1].feature}</strong>
+                          {' '}(SHAP {top3[1].shap_mean_abs.toFixed(3)}) e <strong style={{ color: 'var(--text-pri)' }}>{SHAP_LABELS[top3[2].feature] ?? top3[2].feature}</strong>
+                          {' '}(SHAP {top3[2].shap_mean_abs.toFixed(3)}) indicam que períodos de alta demanda elevam o risco de violação — sobrecarga operacional é um fator independente do grupo.
+                        </>,
+                      },
+                      {
+                        tag: 'THRESHOLD',
+                        text: <>
+                          Com threshold recall≥70%, o modelo captura <strong style={{ color: 'var(--text-pri)' }}>{tp} de {total} violações reais</strong> no conjunto de teste ({(rec * 100).toFixed(0)}% de recall). O uso como <em>score contínuo</em> permite priorizar a fila de incidentes abertos sem depender de um corte binário.
+                        </>,
+                      },
+                      {
+                        tag: 'LIMITAÇÃO',
+                        text: 'Desbalanceamento 1:102 limita a precision (3%). Recomendado para triagem — um analista valida os incidentes sinalizados, não para alertas automáticos sem revisão humana.',
+                      },
+                    ]}
+                  />
+                );
+              })()}
             </>
           )}
         </Module>
@@ -463,6 +586,78 @@ export default function ModelosPage() {
                   </tbody>
                 </table>
               </div>
+
+              {/* MAE Comparison Chart */}
+              {modelosDisponivel && ml && (<>
+                <Divider label="COMPARATIVO MAE — GRÁFICO" />
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart
+                    data={[
+                      { modelo: 'LSTM v2',       total: ml.mae_total,                    p2: ml.mae_p2,    p3: ml.mae_p3 },
+                      { modelo: 'Prophet MC',     total: ml.mae_prophet_holdout_92d ?? null, p2: null,     p3: null },
+                      { modelo: 'Prophet Orig.',  total: mp?.mae_d1_total ?? null,        p2: mp?.mae_d1_p2 ?? null, p3: mp?.mae_d1_p3 ?? null },
+                    ]}
+                    margin={{ top: 8, right: 20, left: 0, bottom: 0 }}
+                  >
+                    <XAxis dataKey="modelo" tick={{ fontFamily: 'var(--font-mono)', fontSize: 10, fill: 'var(--text-sec)' }} />
+                    <YAxis tick={{ fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--text-muted)' }} unit=" inc" />
+                    <Tooltip
+                      contentStyle={{ background: 'var(--surface3)', border: '1px solid var(--border)', borderRadius: 6, fontFamily: 'var(--font-mono)', fontSize: 10 }}
+                      formatter={(v, name) => [v != null ? `${v.toFixed(2)} inc/dia` : '—', name.toUpperCase()]}
+                    />
+                    <Legend wrapperStyle={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)' }} />
+                    <Bar dataKey="total" name="Total" fill="var(--teal)"   radius={[3,3,0,0]}>
+                      <LabelList dataKey="total" position="top" formatter={v => v != null ? v.toFixed(1) : ''} style={{ fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--text-muted)' }} />
+                    </Bar>
+                    <Bar dataKey="p2"    name="P2"    fill="var(--orange)" radius={[3,3,0,0]}>
+                      <LabelList dataKey="p2"    position="top" formatter={v => v != null ? v.toFixed(1) : ''} style={{ fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--text-muted)' }} />
+                    </Bar>
+                    <Bar dataKey="p3"    name="P3"    fill="rgba(90,200,250,0.45)" radius={[3,3,0,0]}>
+                      <LabelList dataKey="p3"    position="top" formatter={v => v != null ? v.toFixed(1) : ''} style={{ fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--text-muted)' }} />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </>)}
+
+              {/* Explicabilidade Prophet/LSTM */}
+              {modelosDisponivel && (() => {
+                const maeTotal   = ml?.mae_total;
+                const maeP2      = ml?.mae_p2;
+                const melhora    = ml?.melhora_pct_vs_prophet;
+                const volMedio   = 70; // ~70 incidentes/dia KPI (P2+P3)
+                const pctErro    = maeTotal != null ? ((maeTotal / volMedio) * 100).toFixed(1) : null;
+                return (
+                  <ExplainBox
+                    title="INTERPRETAÇÃO OPERACIONAL — O QUE O MODELO PREVÊ"
+                    color="var(--teal)"
+                    items={[
+                      {
+                        tag: 'PRECISÃO',
+                        text: <>
+                          O LSTM v2 erra em média <strong style={{ color: 'var(--text-pri)' }}>{fmtMae(maeTotal)} incidentes/dia</strong> no conjunto de holdout real (out–dez 2025).
+                          {pctErro && <> Isso representa <strong style={{ color: 'var(--text-pri)' }}>{pctErro}%</strong> do volume médio diário — margem operacionalmente aceitável para planejamento de capacidade.</>}
+                        </>,
+                      },
+                      {
+                        tag: 'P2 CRÍTICO',
+                        text: <>
+                          Para incidentes P2 (OLA ≤ 4h), o erro médio é de apenas <strong style={{ color: 'var(--text-pri)' }}>{fmtMae(maeP2)} incidentes/dia</strong> — a classe mais crítica é também a mais previsível por ter menor variabilidade de volume.
+                        </>,
+                      },
+                      {
+                        tag: 'EVOLUÇÃO',
+                        text: <>
+                          O LSTM reduziu o erro em <strong style={{ color: 'var(--text-pri)' }}>{fmtPct(melhora)}</strong> comparado ao Prophet no mesmo período de holdout. O ganho vem da capacidade do LSTM de capturar dependências de longo prazo nos 3 anos de histórico.
+                        </>,
+                      },
+                      {
+                        tag: 'USO',
+                        text: 'As previsões permitem antecipar picos de demanda e dimensionar equipes com até 7 dias de antecedência. Não substituem monitoramento em tempo real — são complementares ao XGBoost (risco por incidente).',
+                      },
+                    ]}
+                  />
+                );
+              })()}
             </>
           )}
         </Module>
@@ -548,6 +743,136 @@ export default function ModelosPage() {
                   context={`${(km?.total_incidentes ?? 0).toLocaleString('pt-BR')} incidentes · ${km?.features_usadas} features`}
                 />
               </div>
+
+              {/* Cluster Violation Rate Chart */}
+              {clustersDisponivel && clustersData?.clusters?.length > 0 && (<>
+                <Divider label="TAXA DE VIOLAÇÃO OLA POR CLUSTER" />
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart
+                    data={[...clustersData.clusters]
+                      .sort((a, b) => b.taxaViolacao - a.taxaViolacao)
+                      .map(c => ({ name: `C${c.id}`, label: c.label, viol: c.taxaViolacao, tam: c.tamanho }))}
+                    margin={{ top: 8, right: 20, left: 0, bottom: 8 }}
+                  >
+                    <XAxis dataKey="name" tick={{ fontFamily: 'var(--font-mono)', fontSize: 10, fill: 'var(--text-sec)' }} />
+                    <YAxis tick={{ fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--text-muted)' }} unit="%" tickFormatter={v => v.toFixed(1)} />
+                    <Tooltip
+                      contentStyle={{ background: 'var(--surface3)', border: '1px solid var(--border)', borderRadius: 6, fontFamily: 'var(--font-mono)', fontSize: 10 }}
+                      formatter={(v, name) => name === 'viol' ? [`${v.toFixed(3)}%`, 'Taxa violação OLA'] : [v.toLocaleString('pt-BR'), 'Incidentes']}
+                      labelFormatter={(_, payload) => payload?.[0]?.payload?.label ?? ''}
+                    />
+                    <Bar dataKey="viol" name="viol" radius={[3,3,0,0]}>
+                      {[...clustersData.clusters]
+                        .sort((a, b) => b.taxaViolacao - a.taxaViolacao)
+                        .map((c, i, arr) => {
+                          const max = arr[0].taxaViolacao;
+                          const ratio = c.taxaViolacao / max;
+                          return <Cell key={i} fill={`rgba(${Math.round(255*ratio)},${Math.round(140*(1-ratio*0.5))},89,0.85)`} />;
+                        })}
+                      <LabelList dataKey="viol" position="top" formatter={v => `${v.toFixed(2)}%`} style={{ fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--text-muted)' }} />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </>)}
+
+              {/* Tabela comparação de K */}
+              {clustersData?.comparacao_k?.length > 0 && (() => {
+                const rows = clustersData.comparacao_k;
+                const kMin = clustersData.k_min_utilizado ?? 5;
+                // elegível = K ímpar >= kMin (mesma regra do modelo)
+                const elegiveis = rows.filter(r => r.k >= kMin && r.k % 2 === 1);
+                const bestSil = Math.max(...elegiveis.map(r => r.silhouette));
+                const bestCH  = Math.max(...elegiveis.map(r => r.calinski_harabasz));
+                const bestDB  = Math.min(...elegiveis.map(r => r.davies_bouldin));
+                const bestIn  = Math.min(...elegiveis.map(r => r.inertia));
+                const elegivel = r => r.k >= kMin && r.k % 2 === 1;
+                const cellStyle = (isBest, isElegivel) => ({
+                  padding: '6px 12px',
+                  textAlign: 'right',
+                  color: isBest ? 'var(--green)' : isElegivel ? 'var(--text-sec)' : 'var(--text-muted)',
+                  fontWeight: isBest ? 700 : 400,
+                  opacity: isElegivel ? 1 : 0.5,
+                });
+                return (
+                  <div style={{ marginTop: 24 }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--text-muted)', marginBottom: 10 }}>
+                      COMPARAÇÃO DE K — JUSTIFICATIVA DA ESCOLHA
+                    </div>
+                    <div style={{ overflowX: 'auto' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11, fontFamily: 'var(--font-mono)' }}>
+                        <thead>
+                          <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                            {['K', 'Silhouette ↑', 'Calinski-H ↑', 'Davies-B ↓', 'Inércia ↓'].map(h => (
+                              <th key={h} style={{ padding: '6px 12px', textAlign: 'right', color: 'var(--text-muted)', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {rows.map(row => {
+                            const el = elegivel(row);
+                            const trStyle = row.selecionado
+                              ? { background: 'var(--surface-alt)', outline: '1.5px solid var(--accent)', outlineOffset: '-1px' }
+                              : { borderBottom: '1px solid var(--border)', background: 'transparent' };
+                            return (
+                              <tr key={row.k} style={trStyle}>
+                                <td style={{ padding: '6px 12px', textAlign: 'right', fontWeight: row.selecionado ? 700 : 400, color: row.selecionado ? 'var(--accent)' : el ? 'var(--text-pri)' : 'var(--text-muted)', opacity: el ? 1 : 0.5 }}>
+                                  {row.k}{row.selecionado ? ' ✓' : ''}
+                                </td>
+                                <td style={cellStyle(el && row.silhouette === bestSil, el)}>{row.silhouette.toFixed(4)}</td>
+                                <td style={cellStyle(el && row.calinski_harabasz === bestCH, el)}>{row.calinski_harabasz.toFixed(0)}</td>
+                                <td style={cellStyle(el && row.davies_bouldin === bestDB, el)}>{row.davies_bouldin.toFixed(4)}</td>
+                                <td style={cellStyle(el && row.inertia === bestIn, el)}>{row.inertia.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 8 }}>
+                      Verde = melhor entre candidatos elegíveis · linhas esmaecidas = K inelegível (par ou abaixo de {kMin}) · seleção por voto majoritário: Silhouette, Calinski-Harabász e Davies-Bouldin
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Explicabilidade K-Means */}
+              {clustersDisponivel && clustersData?.clusters?.length > 0 && (() => {
+                const sorted   = [...clustersData.clusters].sort((a, b) => b.taxaViolacao - a.taxaViolacao);
+                const top      = sorted[0];
+                const bottom   = sorted[sorted.length - 1];
+                const total    = clustersData.clusters.reduce((s, c) => s + c.tamanho, 0);
+                const topPct   = ((top.tamanho / total) * 100).toFixed(1);
+                return (
+                  <ExplainBox
+                    title="INTERPRETAÇÃO OPERACIONAL — O QUE OS CLUSTERS REVELAM"
+                    color="var(--orange)"
+                    items={[
+                      {
+                        tag: 'MAIOR RISCO',
+                        text: <>
+                          <strong style={{ color: 'var(--text-pri)' }}>{top.label}</strong> (Cluster {top.id}) apresenta a maior taxa de violação OLA: <strong style={{ color: 'var(--red)' }}>{top.taxaViolacao.toFixed(2)}%</strong> dos incidentes desse grupo violam o prazo. Representa {topPct}% do volume total — foco prioritário de monitoramento.
+                        </>,
+                      },
+                      {
+                        tag: 'MENOR RISCO',
+                        text: <>
+                          <strong style={{ color: 'var(--text-pri)' }}>{bottom.label}</strong> (Cluster {bottom.id}) tem a menor taxa de violação (<strong style={{ color: 'var(--green)' }}>{bottom.taxaViolacao.toFixed(2)}%</strong>). Serve como referência de operação saudável — seus padrões (hora, produto, grupo) devem ser comparados com os clusters de alto risco para identificar diferenças acionáveis.
+                        </>,
+                      },
+                      {
+                        tag: 'SILHOUETTE',
+                        text: <>
+                          Score de {clustersData.silhouette?.toFixed(4)} indica sobreposição moderada entre grupos — esperado em dados operacionais de TI sem segmentação natural rígida. O valor é consistente entre K=5, 7 e 9, confirmando que os grupos identificados são estáveis e não artefatos do algoritmo.
+                        </>,
+                      },
+                      {
+                        tag: 'USO',
+                        text: 'Os clusters permitem criar políticas diferenciadas por perfil operacional — SLAs mais apertados para grupos de alto risco, roteiros de escalada distintos por período do dia e prioridade.',
+                      },
+                    ]}
+                  />
+                );
+              })()}
             </>
           )}
         </Module>

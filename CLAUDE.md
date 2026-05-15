@@ -189,8 +189,8 @@ Notebooks são **apenas exploratórios**. Código de produção vive em `src/`.
 | `src/data/loader.py` | ✅ Criado | `load_raw()`, `load_kpi_subset()` |
 | `src/data/preprocessor.py` | ✅ Criado | 30 features no parquet (inclui 4 de feriados) |
 | `src/data/feriados.py` | ✅ Criado | Feriados nacionais BR; Carnaval e Corpus Christi via algoritmo de Páscoa de Butcher |
-| `src/models/xgboost_model.py` | ✅ Criado | 31 features (30 parquet + grupo_viol_rate); PR-AUC 0.070, Recall 13.8%, Precision 29.6%, F1 0.188 — Optuna (80 trials) — hiperparâmetros otimizados para 27 features (retuning pendente) |
-| `src/models/kmeans_model.py` | ✅ Criado | K=5, Silhouette=0.18 |
+| `src/models/xgboost_model.py` | ✅ Criado | 31 features; versão v3 — threshold recall≥70% (0.0526): Recall 70.7%, Precision 3.1%, F1 0.059; threshold F1-ótimo (ref): 0.4241, Recall 13.8%, F1 0.184; ROC-AUC 0.777, PR-AUC 0.069; `train(recall_target=0.70)` — JSON exporta ambos thresholds para comparação |
+| `src/models/kmeans_model.py` | ✅ Criado | K=5, Silhouette=0.1994; exporta `comparacao_k` (K=2–10 com métricas); API schema corrigido — `MetricasKMeans` e `ComparacaoKItem` adicionados |
 | `src/models/kpi_projection.py` | ✅ Criado | Meta dinâmica mensal |
 | `src/models/prophet_model.py` | ✅ Criado | Ensemble v5+v6 por horizonte; Block Bootstrap Monte Carlo; MAE Total D+1=12.4, P2=7.7, P3=10.0 |
 | `src/models/lstm_model.py` | ✅ Criado | LSTM 2 camadas hidden=128, early stopping; MAE Total=14.7, P2=4.2, P3=13.3 |
@@ -205,7 +205,7 @@ Notebooks são **apenas exploratórios**. Código de produção vive em `src/`.
 | `/gestao` | Gestores | Saúde geral · R$ em risco · tendência global · previsão LSTM |
 | `/monitoramento` | Geral | Heatmap Volume/Anomalia · alertas operacionais · sazonalidade |
 | `/tecnico` | DevOps/SRE | Clusters K-Means · SHAP values · perfis de risco |
-| `/modelos` | Todos | Métricas dos modelos com contexto e explicações |
+| `/modelos` | Todos | Métricas dos modelos · gráficos SHAP, MAE comparativo, violação por cluster · painéis de explicabilidade operacional por modelo |
 
 ---
 
