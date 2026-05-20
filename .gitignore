@@ -1,5 +1,6 @@
-# ── Claude Code (configurações locais) ───────────────────
+# ── Claude Code & Codex(configurações locais) ───────────────────
 .claude/
+AGENTS.md
 
 # ── Dados — nunca commitar o dataset real ─────────────────
 data/raw/*
