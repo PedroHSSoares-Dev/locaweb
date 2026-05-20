@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './index.css';
 import { DashboardProvider } from './context/DashboardContext';
 import Sidebar from './components/Sidebar';
+import ChatBot from './components/ChatBot';
 import GestaoPage from './pages/GestaoPage';
 import MonitoramentoPage from './pages/MonitoramentoPage';
 import TecnicoPage from './pages/TecnicoPage';
@@ -36,6 +37,7 @@ function AppInner() {
               <Route path="/modelos"       element={<ModelosPage />} />
             </Routes>
       </div>
+      <ChatBot />
     </div>
   );
 }
