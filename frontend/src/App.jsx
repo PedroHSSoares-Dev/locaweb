@@ -8,6 +8,9 @@ import MonitoramentoPage from './pages/MonitoramentoPage';
 import TecnicoPage from './pages/TecnicoPage';
 import ModelosPage from './pages/ModelosPage';
 import { useBreakpoint } from './hooks/useBreakpoint';
+import { useChatAuth } from './hooks/useChatAuth';
+import LogoPredictfy from './components/LogoPredictfy';
+import './App.css';
 
 import { Analytics } from "@vercel/analytics/react"
 
@@ -42,11 +45,37 @@ function AppInner() {
   );
 }
 
+function LoginScreen() {
+  const { status, error, signIn, entraConfigured } = useChatAuth();
+  const loading = status === 'verifying' || status === 'checking';
+  return (
+    <main className="login-screen">
+      <section className="login-card" aria-labelledby="login-title">
+        <div className="login-card__mark"><LogoPredictfy size={30} color="var(--purple)" /></div>
+        <div className="login-card__eyebrow">PREDICTFY × LOCAWEB</div>
+        <h1 id="login-title">Acesso operacional protegido</h1>
+        <p>Entre com a conta Microsoft autorizada para acessar a dashboard e o assistente AIOps.</p>
+        <button className="microsoft-login" type="button" onClick={signIn} disabled={loading || !entraConfigured}>
+          <span className="microsoft-login__logo" aria-hidden="true"><i /><i /><i /><i /></span>
+          {loading ? 'VALIDANDO IDENTIDADE…' : 'ENTRAR COM MICROSOFT'}
+        </button>
+        {error && <div className="login-card__error" role="alert">{error}</div>}
+        {!entraConfigured && <small>Configuração local pendente: IDs públicos do Entra ainda não informados.</small>}
+        <div className="login-card__security">
+          <span>IDENTIDADE / MICROSOFT ENTRA ID</span>
+          <span>ACESSO / ALLOWLIST</span>
+        </div>
+      </section>
+    </main>
+  );
+}
+
 export default function App() {
+  const { user } = useChatAuth();
   return (
     <DashboardProvider>
       <BrowserRouter>
-        <AppInner />
+        {user ? <AppInner /> : <LoginScreen />}
         <Analytics />
       </BrowserRouter>
     </DashboardProvider>

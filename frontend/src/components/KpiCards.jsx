@@ -1,4 +1,5 @@
-import { getKpis, serverDeltas, servers } from '../data/mockData';
+import { createElement } from 'react';
+import { getKpis, servers } from '../data/mockData';
 import { Server, AlertTriangle, ShieldAlert, Clock } from 'lucide-react';
 
 function Delta({ value, unit = '' }) {
@@ -20,7 +21,7 @@ function formatIncidente(horas) {
   return 'mais de 6h';
 }
 
-function Card({ icon: Icon, label, value, unit, sub, accent, delta, deltaUnit, style = {} }) {
+function Card({ icon, label, value, unit, sub, accent, delta, deltaUnit, style = {} }) {
   return (
     <div style={{
       background: 'var(--surface1)',
@@ -54,7 +55,7 @@ function Card({ icon: Icon, label, value, unit, sub, accent, delta, deltaUnit, s
           width: 28, height: 28, borderRadius: 6,
           background: `${accent}18`, color: accent,
         }}>
-          <Icon size={14} strokeWidth={2} />
+          {createElement(icon, { size: 14, strokeWidth: 2 })}
         </span>
       </div>
 

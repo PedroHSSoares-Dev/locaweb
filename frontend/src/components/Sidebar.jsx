@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
 import { useBreakpoint } from '../hooks/useBreakpoint';
 import LogoPredictfy from './LogoPredictfy';
@@ -145,29 +145,12 @@ function SidebarInner({ collapsed, onToggle, clock, p2Critical, p3Critical, kpiD
 // ─── Sidebar principal ────────────────────────────────────────────────────────
 export default function Sidebar() {
   const { isMobile, isTablet } = useBreakpoint();
-  const location = useLocation();
   const [clock, setClock]         = useState('');
-  const [collapsed, setCollapsed] = useState(() => {
-    const w = window.innerWidth;
-    const isTab = w >= 768 && w < 1024;
-    const sidebarW = w < 768 ? 0 : isTab ? SIDEBAR_COLLAPSED : SIDEBAR_FULL;
-    document.documentElement.style.setProperty('--sidebar-width', `${sidebarW}px`);
-    return isTab;
-  });
+  const [desktopCollapsed, setDesktopCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const collapsed = isTablet || desktopCollapsed;
 
   const { data: kpiData, disponivel: kpiDisponivel } = useApi('/kpi');
-
-  // Fechar sidebar mobile ao navegar
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [location.pathname]);
-
-  // Tablet → colapsar; desktop → expandir
-  useEffect(() => {
-    if (isTablet) setCollapsed(true);
-    if (!isTablet && !isMobile) setCollapsed(false);
-  }, [isTablet, isMobile]);
 
   // Sincronizar CSS var
   useEffect(() => {
@@ -253,7 +236,9 @@ export default function Sidebar() {
       transition: 'width 0.25s cubic-bezier(0.4,0,0.2,1)', overflow: 'hidden',
     }}>
       <SidebarInner
-        collapsed={collapsed} onToggle={() => setCollapsed(c => !c)} clock={clock}
+        collapsed={collapsed}
+        onToggle={isTablet ? null : () => setDesktopCollapsed(current => !current)}
+        clock={clock}
         p2Critical={p2Critical} p3Critical={p3Critical}
         kpiDisponivel={kpiDisponivel}
         onNavClick={null}

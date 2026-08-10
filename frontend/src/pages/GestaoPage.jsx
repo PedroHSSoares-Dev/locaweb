@@ -12,6 +12,7 @@ import { useApi } from '../hooks/useApi';
 import { useBreakpoint } from '../hooks/useBreakpoint';
 import SemDados from '../components/SemDados';
 import PeriodoToggle from '../components/PeriodoToggle';
+import { useDashboard } from '../hooks/useDashboard';
 
 // ─── Identidade visual P2 / P3 ────────────────────────────────────────────────
 const COR_P2 = 'var(--teal)';
@@ -324,8 +325,11 @@ function filtrarPorPeriodo(dados, periodo) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function GestaoPage() {
   const { isMobile, isTablet } = useBreakpoint();
-  const [periodo, setPeriodo] = useState('ANO');
-  const [filtroViolacoes, setFiltroViolacoes] = useState('AMBOS');
+  const { filtersByRoute, updateDashboardFilter } = useDashboard();
+  const periodo = filtersByRoute['/gestao']?.periodo || 'ANO';
+  const setPeriodo = (value) => updateDashboardFilter('/gestao', 'periodo', value);
+  const filtroViolacoes = filtersByRoute['/gestao']?.prioridade || 'AMBOS';
+  const setFiltroViolacoes = (value) => updateDashboardFilter('/gestao', 'prioridade', value);
 
   // ── Dados de modelo via API ────────────────────────────────────────────────
   const { data: d1Data, loading: d1Loading, disponivel: d1Disponivel } = useApi('/previsoes/d1');
@@ -601,4 +605,3 @@ export default function GestaoPage() {
     </div>
   );
 }
-

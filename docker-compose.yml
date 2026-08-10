@@ -17,12 +17,21 @@ services:
       # Monta outputs/ como volume — novos JSONs gerados pelos notebooks
       # são vistos pelo container imediatamente (cache TTL 60s)
       - ./outputs:/app/outputs:ro
+      # Arquivo SQLite do histórico; pode ser trocado por PostgreSQL via CHAT_DATABASE_URL.
+      - chat-data:/app/data/chat
     command: uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+    env_file:
+      - .env
     environment:
       - PYTHONUNBUFFERED=1
+      # Usado somente quando CHAT_LLM_PROVIDER=ollama; OpenAI usa OPENAI_API_KEY do env_file.
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
       interval: 30s
       timeout: 5s
       retries: 3
+
+volumes:
+  chat-data:

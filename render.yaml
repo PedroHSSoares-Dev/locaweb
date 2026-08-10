@@ -1,0 +1,41 @@
+services:
+  - type: web
+    name: predictfy-api
+    runtime: python
+    plan: free
+    branch: main
+    buildCommand: pip install -r api/requirements.txt
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: CHAT_LLM_PROVIDER
+        value: openai
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-5.6-luna
+      - key: CHAT_SESSION_SECRET
+        generateValue: true
+      - key: CHAT_ALLOW_LOCAL_DEV
+        value: "false"
+      - key: CHAT_SESSION_TTL_MINUTES
+        value: "480"
+      - key: CHAT_RATE_LIMIT_PER_MINUTE
+        value: "20"
+      - key: CHAT_CURRENT_DATE
+        value: "2025-12-31"
+      - key: ALLOWED_EMAILS
+        value: pedrohssoares@live.com
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: CHAT_DATABASE_URL
+        sync: false
+      - key: ENTRA_TENANT_ID
+        value: common
+      - key: ENTRA_API_CLIENT_ID
+        value: b287dff6-ca6c-4774-a80a-116fab84fe15
+      - key: ENTRA_SPA_CLIENT_ID
+        value: 7b9f31be-1f6a-473f-bb93-e0c863e1ad4a
+      - key: ENTRA_REQUIRED_SCOPE
+        value: access_as_user

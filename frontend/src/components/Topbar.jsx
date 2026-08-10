@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { createElement, useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { BarChart2, Activity, Terminal } from 'lucide-react';
 import { violacoesReais2025, olaTargets } from '../data/mockData';
@@ -57,13 +57,13 @@ export default function Topbar() {
         display: 'flex', alignItems: 'stretch',
         height: 56, gap: 2, flex: 1, justifyContent: 'center',
       }}>
-        {TABS.map(({ to, label, Icon }) => (
+        {TABS.map(({ to, label, Icon: icon }) => (
           <NavLink
             key={to}
             to={to}
             className={({ isActive }) => isActive ? 'tab tab-active' : 'tab'}
           >
-            <Icon size={13} />
+            {createElement(icon, { size: 13 })}
             {label}
           </NavLink>
         ))}

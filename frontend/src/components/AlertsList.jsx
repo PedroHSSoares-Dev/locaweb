@@ -160,10 +160,6 @@ export default function AlertsList({ horizon, viewMode, onSelectServer }) {
   const sorted = [...servers].sort((a, b) => b.failProb - a.failProb);
   const displayed = viewMode === 'geral' ? sorted.slice(0, 5) : sorted;
 
-  const colHeaders = viewMode === 'tecnica'
-    ? ['SERVIDOR', 'TIPO DE FALHA', 'PROB.', 'HORIZONTE', 'CPU', '', 'RAM', '', 'LATÊNCIA', '']
-    : ['SERVIDOR', 'TIPO DE FALHA', 'PROB.', 'HORIZONTE', ''];
-
   return (
     <div style={{
       background: 'var(--surface1)',

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useBreakpoint } from '../hooks/useBreakpoint';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -10,6 +10,7 @@ import { useApi } from '../hooks/useApi';
 import SemDados from '../components/SemDados';
 import PeriodoToggle from '../components/PeriodoToggle';
 import RiscoUnificado from '../components/RiscoUnificado';
+import { useDashboard } from '../hooks/useDashboard';
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 function Skeleton({ height = 80 }) {
@@ -179,6 +180,7 @@ function ClusterHeatmap({ clusters }) {
     setTooltip({
       x:      cell.left - wrap.left + cell.width / 2,
       y:      cell.top  - wrap.top,
+      wrapWidth: wrap.width,
       cluster, metrica, norm,
       valor:  metrica.fmt(metrica.key(cluster)),
       isMax:  norm === Math.max(...normPorMetrica[mi]),
@@ -338,8 +340,7 @@ function ClusterHeatmap({ clusters }) {
       {/* ── Tooltip ──────────────────────────────────────────────────────── */}
       {tooltip && (() => {
         const TWIDTH    = 210;
-        const wrapW     = wrapperRef.current?.getBoundingClientRect().width ?? 600;
-        const left      = Math.max(4, Math.min(tooltip.x - TWIDTH / 2, wrapW - TWIDTH - 4));
+        const left      = Math.max(4, Math.min(tooltip.x - TWIDTH / 2, tooltip.wrapWidth - TWIDTH - 4));
         const showBelow = tooltip.y < 100;
         const top       = showBelow ? tooltip.y + 36 : tooltip.y - 148;
         const normColor = tooltip.norm > 0.65 ? 'var(--red)' : tooltip.norm > 0.35 ? 'var(--orange)' : 'var(--green)';
@@ -426,8 +427,6 @@ function ClusterQuadrant({ clusters, selected, onToggle }) {
   const [activeKeys, setActiveKeys] = useState(new Set());
   const wrapperRef = useRef(null);
 
-  useEffect(() => { setActiveKeys(new Set()); }, [selected]);
-
   function toggleKey(key) {
     setActiveKeys(prev => {
       const next = new Set(prev);
@@ -475,6 +474,7 @@ function ClusterQuadrant({ clusters, selected, onToggle }) {
     setTooltip({
       x: rect.left - wrap.left + rect.width / 2,
       y: rect.top  - wrap.top,
+      wrapWidth: wrap.width,
       cluster,
     });
   }
@@ -611,8 +611,7 @@ function ClusterQuadrant({ clusters, selected, onToggle }) {
       {/* Tooltip (relativo ao wrapperRef externo) */}
       {tooltip && (() => {
         const TWIDTH = 220;
-        const wrapW  = wrapperRef.current?.getBoundingClientRect().width ?? 700;
-        const left   = Math.max(4, Math.min(tooltip.x - TWIDTH / 2, wrapW - TWIDTH - 4));
+        const left   = Math.max(4, Math.min(tooltip.x - TWIDTH / 2, tooltip.wrapWidth - TWIDTH - 4));
         const top    = tooltip.y < 200 ? tooltip.y + 60 : tooltip.y - 180;
         const c      = tooltip.cluster;
         const cor    = CORES[c.id];
@@ -1047,16 +1046,30 @@ function ClusterQuadrant({ clusters, selected, onToggle }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function TecnicoPage() {
   const { isMobile } = useBreakpoint();
-  const [periodo, setPeriodo] = useState('ANO');
-  const [clusterSelected, setClusterSelected] = useState(new Set());
+  const { filtersByRoute, updateDashboardFilter } = useDashboard();
+  const periodo = filtersByRoute['/tecnico']?.periodo || 'ANO';
+  const setPeriodo = (value) => updateDashboardFilter('/tecnico', 'periodo', value);
+  const [clusterSelected, setClusterSelected] = useState(() => {
+    const saved = filtersByRoute['/tecnico']?.clusters || 'TODOS';
+    if (saved === 'TODOS') return new Set();
+    return new Set(saved.split(',').map(Number).filter(Number.isFinite));
+  });
+
+  function clearClusterSelection() {
+    setClusterSelected(new Set());
+    updateDashboardFilter('/tecnico', 'clusters', 'TODOS');
+  }
 
   function toggleCluster(id) {
-    setClusterSelected(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+    const next = new Set(clusterSelected);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setClusterSelected(next);
+    updateDashboardFilter(
+      '/tecnico',
+      'clusters',
+      next.size > 0 ? [...next].sort((a, b) => a - b).join(',') : 'TODOS',
+    );
   }
 
   // ── Dados de modelo via API ────────────────────────────────────────────────
@@ -1283,7 +1296,7 @@ export default function TecnicoPage() {
             : 'K-MEANS TGV · execute o notebook 05 para gerar dados de cluster'}
           action={clusterSelected.size > 0 ? (
             <button
-              onClick={() => setClusterSelected(new Set())}
+              onClick={clearClusterSelection}
               style={{
                 background: 'transparent',
                 border: '1px solid var(--border)',
@@ -1304,6 +1317,7 @@ export default function TecnicoPage() {
             <SemDados mensagem="Modelo K-Means não treinado — execute o notebook 05" />
           ) : (
             <ClusterQuadrant
+              key={[...clusterSelected].sort().join(',')}
               clusters={clustersData}
               selected={clusterSelected}
               onToggle={toggleCluster}

@@ -325,6 +325,9 @@ class ContextRisco(BaseModel):
     disponivel: bool
     top_produtos: Optional[list[dict]] = Field(None, description="Top 3 produtos por probabilidade de violação")
     top_grupos: Optional[list[dict]] = Field(None, description="Top 3 grupos por taxa de violação")
+    metricas: Optional[dict] = Field(None, description="Métricas do classificador de risco")
+    por_prioridade: Optional[dict] = Field(None, description="Risco agregado para P2 e P3")
+    top_fatores: Optional[list[dict]] = Field(None, description="Top fatores por importância SHAP")
 
 
 class ContextClusters(BaseModel):
@@ -334,6 +337,7 @@ class ContextClusters(BaseModel):
 
 class ContextKpi(BaseModel):
     disponivel: bool
+    metodologia: Optional[str] = None
     P2: Optional[dict] = None
     P3: Optional[dict] = None
 
@@ -343,6 +347,8 @@ class OperacionalInfo(BaseModel):
     ola_targets: dict = Field(..., example={"P2": "4h", "P3": "12h"})
     metas_anuais: dict = Field(..., example={"P2": "36-39", "P3": "231-263"})
     violacoes_2025: dict = Field(..., example={"P2": 42, "P3": 196})
+    dataset: Optional[dict] = Field(None, description="Volume e período coberto pelo dataset")
+    modelagem: Optional[dict] = Field(None, description="Target, desbalanceamento e restrições anti-leakage")
 
 
 class ContextResponse(BaseModel):
@@ -355,7 +361,9 @@ class ContextResponse(BaseModel):
     risco: ContextRisco
     clusters: ContextClusters
     kpi: ContextKpi
+    modelos: Optional[dict] = Field(None, description="Catálogo de modelos, métricas e protocolos de validação")
     operacional: OperacionalInfo
+    observacoes: list[str] = Field(default_factory=list)
 
 
 # ────────────────────────────────────────────────────────────────────────────────

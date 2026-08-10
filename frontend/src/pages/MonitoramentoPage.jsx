@@ -9,6 +9,7 @@ import { AlertTriangle, Users, Package, Activity } from 'lucide-react';
 import { useApi } from '../hooks/useApi';
 import SemDados from '../components/SemDados';
 import DrillDownPanel from '../components/DrillDownPanel';
+import { useDashboard } from '../hooks/useDashboard';
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 function Skeleton({ height = 80 }) {
@@ -183,7 +184,21 @@ function Heatmap({ data, mode = 'VOLUME' }) {
     const media     = stats.mediaHora[hi];
     const diffMedia = media > 0 ? Math.round((v - media) / media * 100) : 0;
     const dev       = stats.deviationGrid?.[ri]?.[hi] ?? 0;
-    setTooltip({ x, y, dia: data[ri].dia, hora: hi, valor: v, pctDia, rank, total, media, diffMedia, dev });
+    setTooltip({
+      x,
+      y,
+      wrapWidth: wrapRect.width,
+      cellHeight: cellRect.height,
+      dia: data[ri].dia,
+      hora: hi,
+      valor: v,
+      pctDia,
+      rank,
+      total,
+      media,
+      diffMedia,
+      dev,
+    });
   }
 
   return (
@@ -217,17 +232,9 @@ function Heatmap({ data, mode = 'VOLUME' }) {
 
       {tooltip && (() => {
         const TWIDTH   = 215;
-        const svgEl    = wrapperRef.current?.querySelector('svg');
-        const svgRect  = svgEl?.getBoundingClientRect();
-        const wrapRect = wrapperRef.current?.getBoundingClientRect();
-        const scaleX   = svgRect ? svgRect.width  / svgW : 1;
-        const scaleY   = svgRect ? svgRect.height / svgH  : 1;
-        const cellPxX  = (labelW + tooltip.hora * cellW + cellW / 2) * scaleX;
-        const cellPxY  = (28 + (data.findIndex(r => r.dia === tooltip.dia)) * cellH) * scaleY;
-        const wrapW    = wrapRect?.width ?? 600;
-        const left     = Math.max(4, Math.min(cellPxX - TWIDTH / 2, wrapW - TWIDTH - 4));
-        const showBelow = cellPxY < 130;
-        const top      = showBelow ? cellPxY + cellH * scaleY + 6 : cellPxY - 150;
+        const left     = Math.max(4, Math.min(tooltip.x - TWIDTH / 2, tooltip.wrapWidth - TWIDTH - 4));
+        const showBelow = tooltip.y < 130;
+        const top      = showBelow ? tooltip.y + tooltip.cellHeight + 6 : tooltip.y - 150;
         const diffColor = tooltip.diffMedia > 20 ? 'var(--red)' : tooltip.diffMedia > 0 ? 'var(--orange)' : 'var(--green)';
         const diffSign  = tooltip.diffMedia >= 0 ? '+' : '';
         const rankTop   = tooltip.total > 0 ? Math.round(tooltip.rank / tooltip.total * 100) : 100;
@@ -282,13 +289,16 @@ function fmtDia(ds) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function MonitoramentoPage() {
   const { isMobile } = useBreakpoint();
+  const { filtersByRoute, updateDashboardFilter } = useDashboard();
   const [panelItem, setPanelItem] = useState(null);
-  const [periodo, setPeriodo] = useState('ANO');
-  const [heatmapMode, setHeatmapMode] = useState('VOLUME');
+  const periodo = filtersByRoute['/monitoramento']?.periodo || 'ANO';
+  const heatmapMode = filtersByRoute['/monitoramento']?.visualizacao || 'VOLUME';
+  const setPeriodo = (value) => updateDashboardFilter('/monitoramento', 'periodo', value);
+  const setHeatmapMode = (value) => updateDashboardFilter('/monitoramento', 'visualizacao', value);
 
   // ── Dados de modelo via API ────────────────────────────────────────────────
   const { data: d1Data,           loading: d1Loading,       disponivel: d1Disponivel       } = useApi('/previsoes/d1');
-  const { data: serieData,        loading: serieLoading,    disponivel: serieDisponivel    } = useApi('/previsoes/serie');
+  const { data: serieData,        disponivel: serieDisponivel    } = useApi('/previsoes/serie');
   const { data: historicoData,    loading: historicoLoading, disponivel: historicoDisponivel } = useApi('/historico/diario');
   const { data: sazonalidadeData, disponivel: sazonalidadeDisponivel } = useApi('/historico/sazonalidade');
   const { data: gruposData,       disponivel: gruposDisponivel       } = useApi('/risco/grupos');

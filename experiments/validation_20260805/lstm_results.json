@@ -1,0 +1,621 @@
+{
+  "protocol": {
+    "holdout": "2025-10-01..2025-12-31",
+    "training_real_cutoff": "2025-09-30",
+    "lookback": 30,
+    "rolling_origins": 86,
+    "device": "mps",
+    "synthetic_rule": "weekly block bootstrap aligned by weekday; source only Jan-Sep/2025"
+  },
+  "production_published_one_step_mae": {
+    "total": 14.67,
+    "p2": 4.15,
+    "p3": 13.32,
+    "note": "MAE one-step publicado; scaler ajustado na série completa e anos sintéticos gerados com todo 2025, inclusive o holdout. Não é comparação limpa."
+  },
+  "series": {
+    "total": {
+      "n_train": 1004,
+      "n_holdout": 92,
+      "holdout_mean": 56.337,
+      "baselines": {
+        "seasonal_naive_lag7": {
+          "one_step_mae_92d": 13.3261,
+          "one_step_mae_comparable_86_origins": 12.1977,
+          "rolling_origin_mae_by_horizon": {
+            "d1": 12.1977,
+            "d2": 12.2558,
+            "d3": 12.3953,
+            "d4": 12.314,
+            "d5": 12.4767,
+            "d6": 12.7558,
+            "d7": 13.1047
+          },
+          "rolling_origin_mae_mean_d1_d7": 12.5
+        },
+        "last_value": {
+          "one_step_mae_92d": 18.6522,
+          "one_step_mae_comparable_86_origins": 19.2791,
+          "rolling_origin_mae_by_horizon": {
+            "d1": 19.2791,
+            "d2": 29.4419,
+            "d3": 31.2791,
+            "d4": 30.7907,
+            "d5": 28.6628,
+            "d6": 20.3721,
+            "d7": 13.1047
+          },
+          "rolling_origin_mae_mean_d1_d7": 24.7043
+        },
+        "train_dow_median": {
+          "one_step_mae_92d": 18.6389,
+          "one_step_mae_comparable_86_origins": 16.2756,
+          "rolling_origin_mae_by_horizon": {
+            "d1": 16.2756,
+            "d2": 16.7498,
+            "d3": 16.7982,
+            "d4": 16.8027,
+            "d5": 17.4594,
+            "d6": 18.2688,
+            "d7": 19.1469
+          },
+          "rolling_origin_mae_mean_d1_d7": 17.3573
+        }
+      },
+      "models": {
+        "univariate_clean_mc": {
+          "primary_seed_42": {
+            "one_step_mae_92d": 13.0436,
+            "rolling_origin_mae_by_horizon": {
+              "d1": 12.0009,
+              "d2": 12.6118,
+              "d3": 12.4859,
+              "d4": 12.3803,
+              "d5": 12.509,
+              "d6": 12.7986,
+              "d7": 13.3095
+            },
+            "rolling_origin_mae_mean_d1_d7": 12.5851,
+            "epochs": 55,
+            "best_internal_val_loss": 0.0179966
+          },
+          "seed_stability": {
+            "seeds": [
+              42,
+              123,
+              2026
+            ],
+            "one_step_mae_mean": 14.783,
+            "one_step_mae_std": 2.0064,
+            "multihorizon_mae_mean": 14.3121,
+            "multihorizon_mae_std": 1.94
+          },
+          "runs": {
+            "42": {
+              "one_step_mae_92d": 13.0436,
+              "rolling_origin_mae_by_horizon": {
+                "d1": 12.0009,
+                "d2": 12.6118,
+                "d3": 12.4859,
+                "d4": 12.3803,
+                "d5": 12.509,
+                "d6": 12.7986,
+                "d7": 13.3095
+              },
+              "rolling_origin_mae_mean_d1_d7": 12.5851,
+              "epochs": 55,
+              "best_internal_val_loss": 0.0179966
+            },
+            "123": {
+              "one_step_mae_92d": 17.5942,
+              "rolling_origin_mae_by_horizon": {
+                "d1": 17.0465,
+                "d2": 17.3584,
+                "d3": 17.0159,
+                "d4": 16.6652,
+                "d5": 16.751,
+                "d6": 16.9359,
+                "d7": 17.3799
+              },
+              "rolling_origin_mae_mean_d1_d7": 17.0218,
+              "epochs": 29,
+              "best_internal_val_loss": 0.0321681
+            },
+            "2026": {
+              "one_step_mae_92d": 13.7112,
+              "rolling_origin_mae_by_horizon": {
+                "d1": 12.7348,
+                "d2": 13.4253,
+                "d3": 13.2799,
+                "d4": 13.0253,
+                "d5": 13.1269,
+                "d6": 13.5462,
+                "d7": 14.1664
+              },
+              "rolling_origin_mae_mean_d1_d7": 13.3293,
+              "epochs": 50,
+              "best_internal_val_loss": 0.0208443
+            }
+          }
+        },
+        "calendar_clean_mc": {
+          "primary_seed_42": {
+            "one_step_mae_92d": 13.5761,
+            "rolling_origin_mae_by_horizon": {
+              "d1": 11.7355,
+              "d2": 12.564,
+              "d3": 12.4074,
+              "d4": 12.2453,
+              "d5": 12.7999,
+              "d6": 13.494,
+              "d7": 14.2144
+            },
+            "rolling_origin_mae_mean_d1_d7": 12.7801,
+            "epochs": 34,
+            "best_internal_val_loss": 0.0083507
+          },
+          "seed_stability": {
+            "seeds": [
+              42,
+              123,
+              2026
+            ],
+            "one_step_mae_mean": 14.1918,
+            "one_step_mae_std": 1.2066,
+            "multihorizon_mae_mean": 13.5322,
+            "multihorizon_mae_std": 1.6475
+          },
+          "runs": {
+            "42": {
+              "one_step_mae_92d": 13.5761,
+              "rolling_origin_mae_by_horizon": {
+                "d1": 11.7355,
+                "d2": 12.564,
+                "d3": 12.4074,
+                "d4": 12.2453,
+                "d5": 12.7999,
+                "d6": 13.494,
+                "d7": 14.2144
+              },
+              "rolling_origin_mae_mean_d1_d7": 12.7801,
+              "epochs": 34,
+              "best_internal_val_loss": 0.0083507
+            },
+            "123": {
+              "one_step_mae_92d": 15.8779,
+              "rolling_origin_mae_by_horizon": {
+                "d1": 13.908,
+                "d2": 15.276,
+                "d3": 15.4505,
+                "d4": 15.4114,
+                "d5": 16.147,
+                "d6": 16.9292,
+                "d7": 17.6041
+              },
+              "rolling_origin_mae_mean_d1_d7": 15.818,
+              "epochs": 44,
+              "best_internal_val_loss": 0.0064404
+            },
+            "2026": {
+              "one_step_mae_92d": 13.1214,
+              "rolling_origin_mae_by_horizon": {
+                "d1": 11.1607,
+                "d2": 11.7118,
+                "d3": 11.6282,
+                "d4": 11.4402,
+                "d5": 11.9285,
+                "d6": 12.6644,
+                "d7": 13.4549
+              },
+              "rolling_origin_mae_mean_d1_d7": 11.9984,
+              "epochs": 25,
+              "best_internal_val_loss": 0.0092786
+            }
+          }
+        }
+      }
+    },
+    "p2": {
+      "n_train": 1004,
+      "n_holdout": 92,
+      "holdout_mean": 13.5652,
+      "baselines": {
+        "seasonal_naive_lag7": {
+          "one_step_mae_92d": 5.1304,
+          "one_step_mae_comparable_86_origins": 5.2209,
+          "rolling_origin_mae_by_horizon": {
+            "d1": 5.2209,
+            "d2": 5.0814,
+            "d3": 5.0698,
+            "d4": 5.0349,
+            "d5": 5.0349,
+            "d6": 5.1047,
+            "d7": 5.0814
+          },
+          "rolling_origin_mae_mean_d1_d7": 5.0897
+        },
+        "last_value": {
+          "one_step_mae_92d": 5.087,
+          "one_step_mae_comparable_86_origins": 5.0116,
+          "rolling_origin_mae_by_horizon": {
+            "d1": 5.0116,
+            "d2": 5.314,
+            "d3": 5.6977,
+            "d4": 5.6628,
+            "d5": 5.9651,
+            "d6": 4.9884,
+            "d7": 5.0814
+          },
+          "rolling_origin_mae_mean_d1_d7": 5.3887
+        },
+        "train_dow_median": {
+          "one_step_mae_92d": 3.6002,
+          "one_step_mae_comparable_86_origins": 3.5173,
+          "rolling_origin_mae_by_horizon": {
+            "d1": 3.5173,
+            "d2": 3.515,
+            "d3": 3.4387,
+            "d4": 3.4166,
+            "d5": 3.4351,
+            "d6": 3.5484,
+            "d7": 3.5459
+          },
+          "rolling_origin_mae_mean_d1_d7": 3.4881
+        }
+      },
+      "models": {
+        "univariate_clean_mc": {
+          "primary_seed_42": {
+            "one_step_mae_92d": 4.6257,
+            "rolling_origin_mae_by_horizon": {
+              "d1": 4.7263,
+              "d2": 4.8718,
+              "d3": 4.761,
+              "d4": 4.7016,
+              "d5": 4.7931,
+              "d6": 4.8169,
+              "d7": 4.8215
+            },
+            "rolling_origin_mae_mean_d1_d7": 4.7846,
+            "epochs": 21,
+            "best_internal_val_loss": 0.0283933
+          },
+          "seed_stability": {
+            "seeds": [
+              42,
+              123,
+              2026
+            ],
+            "one_step_mae_mean": 4.7861,
+            "one_step_mae_std": 0.1712,
+            "multihorizon_mae_mean": 5.04,
+            "multihorizon_mae_std": 0.2496
+          },
+          "runs": {
+            "42": {
+              "one_step_mae_92d": 4.6257,
+              "rolling_origin_mae_by_horizon": {
+                "d1": 4.7263,
+                "d2": 4.8718,
+                "d3": 4.761,
+                "d4": 4.7016,
+                "d5": 4.7931,
+                "d6": 4.8169,
+                "d7": 4.8215
+              },
+              "rolling_origin_mae_mean_d1_d7": 4.7846,
+              "epochs": 21,
+              "best_internal_val_loss": 0.0283933
+            },
+            "123": {
+              "one_step_mae_92d": 5.0233,
+              "rolling_origin_mae_by_horizon": {
+                "d1": 5.1506,
+                "d2": 5.4221,
+                "d3": 5.4093,
+                "d4": 5.3361,
+                "d5": 5.4091,
+                "d6": 5.4402,
+                "d7": 5.4835
+              },
+              "rolling_origin_mae_mean_d1_d7": 5.3787,
+              "epochs": 28,
+              "best_internal_val_loss": 0.0316071
+            },
+            "2026": {
+              "one_step_mae_92d": 4.7093,
+              "rolling_origin_mae_by_horizon": {
+                "d1": 4.8208,
+                "d2": 5.0351,
+                "d3": 4.9734,
+                "d4": 4.8898,
+                "d5": 4.9551,
+                "d6": 4.9893,
+                "d7": 5.0327
+              },
+              "rolling_origin_mae_mean_d1_d7": 4.9566,
+              "epochs": 28,
+              "best_internal_val_loss": 0.0289753
+            }
+          }
+        },
+        "calendar_clean_mc": {
+          "primary_seed_42": {
+            "one_step_mae_92d": 3.9469,
+            "rolling_origin_mae_by_horizon": {
+              "d1": 3.9185,
+              "d2": 3.9437,
+              "d3": 3.8195,
+              "d4": 3.7757,
+              "d5": 3.8035,
+              "d6": 3.9011,
+              "d7": 3.9206
+            },
+            "rolling_origin_mae_mean_d1_d7": 3.8689,
+            "epochs": 12,
+            "best_internal_val_loss": 0.0250754
+          },
+          "seed_stability": {
+            "seeds": [
+              42,
+              123,
+              2026
+            ],
+            "one_step_mae_mean": 4.2488,
+            "one_step_mae_std": 0.3877,
+            "multihorizon_mae_mean": 4.1432,
+            "multihorizon_mae_std": 0.3591
+          },
+          "runs": {
+            "42": {
+              "one_step_mae_92d": 3.9469,
+              "rolling_origin_mae_by_horizon": {
+                "d1": 3.9185,
+                "d2": 3.9437,
+                "d3": 3.8195,
+                "d4": 3.7757,
+                "d5": 3.8035,
+                "d6": 3.9011,
+                "d7": 3.9206
+              },
+              "rolling_origin_mae_mean_d1_d7": 3.8689,
+              "epochs": 12,
+              "best_internal_val_loss": 0.0250754
+            },
+            "123": {
+              "one_step_mae_92d": 4.0033,
+              "rolling_origin_mae_by_horizon": {
+                "d1": 3.9982,
+                "d2": 3.9671,
+                "d3": 3.8308,
+                "d4": 3.8245,
+                "d5": 3.8334,
+                "d6": 3.9635,
+                "d7": 3.9537
+              },
+              "rolling_origin_mae_mean_d1_d7": 3.9102,
+              "epochs": 56,
+              "best_internal_val_loss": 0.0182827
+            },
+            "2026": {
+              "one_step_mae_92d": 4.7961,
+              "rolling_origin_mae_by_horizon": {
+                "d1": 4.7924,
+                "d2": 4.7624,
+                "d3": 4.5741,
+                "d4": 4.5057,
+                "d5": 4.5551,
+                "d6": 4.6876,
+                "d7": 4.6759
+              },
+              "rolling_origin_mae_mean_d1_d7": 4.6505,
+              "epochs": 100,
+              "best_internal_val_loss": 0.0165447
+            }
+          }
+        }
+      }
+    },
+    "p3": {
+      "n_train": 1004,
+      "n_holdout": 92,
+      "holdout_mean": 42.7717,
+      "baselines": {
+        "seasonal_naive_lag7": {
+          "one_step_mae_92d": 11.7174,
+          "one_step_mae_comparable_86_origins": 10.6512,
+          "rolling_origin_mae_by_horizon": {
+            "d1": 10.6512,
+            "d2": 10.8488,
+            "d3": 10.9535,
+            "d4": 10.907,
+            "d5": 11.0698,
+            "d6": 11.2326,
+            "d7": 11.5581
+          },
+          "rolling_origin_mae_mean_d1_d7": 11.0316
+        },
+        "last_value": {
+          "one_step_mae_92d": 16.6739,
+          "one_step_mae_comparable_86_origins": 17.4767,
+          "rolling_origin_mae_by_horizon": {
+            "d1": 17.4767,
+            "d2": 26.0814,
+            "d3": 27.8372,
+            "d4": 27.0814,
+            "d5": 25.2791,
+            "d6": 18.4767,
+            "d7": 11.5581
+          },
+          "rolling_origin_mae_mean_d1_d7": 21.9701
+        },
+        "train_dow_median": {
+          "one_step_mae_92d": 17.6126,
+          "one_step_mae_comparable_86_origins": 15.4526,
+          "rolling_origin_mae_by_horizon": {
+            "d1": 15.4526,
+            "d2": 15.9423,
+            "d3": 16.0766,
+            "d4": 16.0994,
+            "d5": 16.7808,
+            "d6": 17.4906,
+            "d7": 18.345
+          },
+          "rolling_origin_mae_mean_d1_d7": 16.5982
+        }
+      },
+      "models": {
+        "univariate_clean_mc": {
+          "primary_seed_42": {
+            "one_step_mae_92d": 12.1512,
+            "rolling_origin_mae_by_horizon": {
+              "d1": 11.0206,
+              "d2": 11.2245,
+              "d3": 11.005,
+              "d4": 10.7227,
+              "d5": 10.8887,
+              "d6": 11.3314,
+              "d7": 11.8414
+            },
+            "rolling_origin_mae_mean_d1_d7": 11.1478,
+            "epochs": 47,
+            "best_internal_val_loss": 0.0196577
+          },
+          "seed_stability": {
+            "seeds": [
+              42,
+              123,
+              2026
+            ],
+            "one_step_mae_mean": 12.8364,
+            "one_step_mae_std": 0.7953,
+            "multihorizon_mae_mean": 11.9298,
+            "multihorizon_mae_std": 0.884
+          },
+          "runs": {
+            "42": {
+              "one_step_mae_92d": 12.1512,
+              "rolling_origin_mae_by_horizon": {
+                "d1": 11.0206,
+                "d2": 11.2245,
+                "d3": 11.005,
+                "d4": 10.7227,
+                "d5": 10.8887,
+                "d6": 11.3314,
+                "d7": 11.8414
+              },
+              "rolling_origin_mae_mean_d1_d7": 11.1478,
+              "epochs": 47,
+              "best_internal_val_loss": 0.0196577
+            },
+            "123": {
+              "one_step_mae_92d": 13.9514,
+              "rolling_origin_mae_by_horizon": {
+                "d1": 13.021,
+                "d2": 13.2532,
+                "d3": 13.0584,
+                "d4": 12.8543,
+                "d5": 12.9902,
+                "d6": 13.3274,
+                "d7": 13.6547
+              },
+              "rolling_origin_mae_mean_d1_d7": 13.1656,
+              "epochs": 54,
+              "best_internal_val_loss": 0.0252166
+            },
+            "2026": {
+              "one_step_mae_92d": 12.4066,
+              "rolling_origin_mae_by_horizon": {
+                "d1": 11.2965,
+                "d2": 11.6006,
+                "d3": 11.4007,
+                "d4": 11.0905,
+                "d5": 11.2183,
+                "d6": 11.6284,
+                "d7": 12.0978
+              },
+              "rolling_origin_mae_mean_d1_d7": 11.4761,
+              "epochs": 47,
+              "best_internal_val_loss": 0.0207798
+            }
+          }
+        },
+        "calendar_clean_mc": {
+          "primary_seed_42": {
+            "one_step_mae_92d": 12.0567,
+            "rolling_origin_mae_by_horizon": {
+              "d1": 10.2194,
+              "d2": 10.6604,
+              "d3": 10.6671,
+              "d4": 10.5579,
+              "d5": 11.0902,
+              "d6": 11.6877,
+              "d7": 12.371
+            },
+            "rolling_origin_mae_mean_d1_d7": 11.0362,
+            "epochs": 23,
+            "best_internal_val_loss": 0.0057843
+          },
+          "seed_stability": {
+            "seeds": [
+              42,
+              123,
+              2026
+            ],
+            "one_step_mae_mean": 14.4164,
+            "one_step_mae_std": 1.7089,
+            "multihorizon_mae_mean": 14.8513,
+            "multihorizon_mae_std": 3.0395
+          },
+          "runs": {
+            "42": {
+              "one_step_mae_92d": 12.0567,
+              "rolling_origin_mae_by_horizon": {
+                "d1": 10.2194,
+                "d2": 10.6604,
+                "d3": 10.6671,
+                "d4": 10.5579,
+                "d5": 11.0902,
+                "d6": 11.6877,
+                "d7": 12.371
+              },
+              "rolling_origin_mae_mean_d1_d7": 11.0362,
+              "epochs": 23,
+              "best_internal_val_loss": 0.0057843
+            },
+            "123": {
+              "one_step_mae_92d": 15.1442,
+              "rolling_origin_mae_by_horizon": {
+                "d1": 13.2325,
+                "d2": 14.3815,
+                "d3": 14.7447,
+                "d4": 14.7326,
+                "d5": 15.4114,
+                "d6": 16.0521,
+                "d7": 16.7515
+              },
+              "rolling_origin_mae_mean_d1_d7": 15.0438,
+              "epochs": 44,
+              "best_internal_val_loss": 0.0046358
+            },
+            "2026": {
+              "one_step_mae_92d": 16.0483,
+              "rolling_origin_mae_by_horizon": {
+                "d1": 14.6155,
+                "d2": 17.0619,
+                "d3": 17.6783,
+                "d4": 18.4851,
+                "d5": 19.4475,
+                "d6": 20.6963,
+                "d7": 21.3336
+              },
+              "rolling_origin_mae_mean_d1_d7": 18.474,
+              "epochs": 95,
+              "best_internal_val_loss": 0.0043547
+            }
+          }
+        }
+      }
+    }
+  }
+}

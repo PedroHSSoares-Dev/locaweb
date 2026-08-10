@@ -11,6 +11,22 @@ não existe em `outputs/`, a resposta segue o padrão:
 { "disponivel": false, "mensagem": "..." }
 ```
 
+## Chatbot operacional
+
+As rotas abaixo exigem `Authorization: Bearer <sessão Predictfy>`.
+
+- `POST /api/chat/stream`: NDJSON com `conversation_id` e `analysis_mode` (`fast` ou `deep`).
+- `POST /api/chat`: versão não streaming com fontes, uso, cache e `response_id` estruturados.
+- `POST /api/chat/feedback`: registra `up`/`down` somente para uma resposta recente do mesmo usuário.
+- `DELETE /api/chat/conversation`: apaga a memória curta de uma conversa.
+- `GET/POST /api/chat/conversations`: pesquisa/lista ou cria uma conversa persistente.
+- `GET/PATCH/DELETE /api/chat/conversations/{id}`: restaura, renomeia, fixa, troca contexto ou exclui uma conversa.
+- `GET /api/chat/metrics`: telemetria agregada sem prompts ou respostas.
+
+O cache inclui a versão do contexto, prompt, provider e modelo. Redis/Valkey é opcional
+via `CHAT_REDIS_URL`; sem ele, cache, memória e rate limit continuam locais ao processo.
+O arquivo completo usa SQLite por padrão e aceita PostgreSQL por `CHAT_DATABASE_URL`.
+
 ---
 
 ## Módulo: Previsões de Volume
@@ -311,26 +327,26 @@ Pico: quinta-feira às 15h (420 incidentes acumulados).
 
 ### `GET /api/context`
 
-Snapshot operacional completo para uso como contexto do chatbot Gemini.
+Snapshot operacional canônico para o chatbot local e outras integrações.
 
 **Response:**
 ```json
 {
-  "gerado_em": "2026-05-09T12:00:00Z",
+  "timestamp": "2026-08-06T12:00:00Z",
   "previsoes": {
     "disponivel": true,
-    "modelo_usado": "lstm_v2",
-    "d1": { "total": 87, "p2": null, "p3": null },
-    "d7": { "total": 91, "p2": null, "p3": null }
+    "modelo_ativo": "lstm_v2",
+    "D1": { "total": 66, "p2": 13, "p3": 54 },
+    "D7": { "total": 62, "p2": 14, "p3": 44 }
   },
   "risco": {
     "disponivel": true,
-    "top_produtos": [...],
-    "top_grupos": [...]
+    "por_prioridade": { "P2": {}, "P3": {} },
+    "top_fatores": []
   },
   "clusters": {
     "disponivel": true,
-    "k": 5
+    "resumo": { "n_clusters": 5, "mais_critico": { "id": 4 } }
   },
   "kpi": {
     "disponivel": true,
@@ -349,6 +365,30 @@ Campos com modelos indisponíveis retornam `"disponivel": false`.
 
 ---
 
+## Módulo: Chatbot híbrido
+
+| Método | Endpoint | Função |
+|---|---|---|
+| `POST` | `/api/chat/session` | Valida o access token Microsoft Entra, aplica a allowlist e emite a sessão Predictfy |
+| `GET` | `/api/chat/session` | Valida a sessão atual e retorna a identidade pública |
+| `DELETE` | `/api/chat/session` | Encerra a sessão e libera recursos locais quando o provider usa Ollama |
+| `GET` | `/api/chat/status` | Verifica o provider e o modelo configurados |
+| `POST` | `/api/chat` | Resposta completa, útil para integrações e testes |
+| `POST` | `/api/chat/stream` | Eventos NDJSON `meta`, `status`, `reasoning`, `token`, `done` ou `error` |
+| `GET` | `/api/chat/conversations` | Lista e pesquisa conversas do usuário atual |
+| `POST` | `/api/chat/conversations` | Cria uma conversa com o contexto atual do dashboard |
+| `GET` | `/api/chat/conversations/{id}` | Restaura metadados e mensagens completas |
+| `PATCH` | `/api/chat/conversations/{id}` | Renomeia, fixa ou atualiza o contexto anexado |
+| `DELETE` | `/api/chat/conversations/{id}` | Exclui permanentemente a conversa do usuário |
+
+Os endpoints de consulta exigem `Authorization: Bearer <token>`. Somente quick actions factuais explicitamente reconhecidas são respondidas a partir de `outputs/`, sem custo de LLM. Toda pergunta natural, estratégica, futura, comparativa ou ambígua prefere o agente `gpt-5.6-luna` quando `CHAT_LLM_PROVIDER=openai`, ou `OLLAMA_MODEL` quando o fallback local está ativo.
+
+O provider OpenAI usa a Responses API com function calling, `reasoning.effort=low` e chave mantida somente no backend. O agente possui ferramentas read-only para previsões LSTM, projeções Prophet D+1..D+365, simulação de cota, planejamento mensal/trimestral com score auditável, KPIs, XGBoost/SHAP, K-Means e regras operacionais. Chamadas têm schemas estritos, limite de rodadas e retornam somente agregados sanitizados. O ciclo do fallback local é controlado por `OLLAMA_AUTOSTART`, `OLLAMA_PRELOAD_ON_SESSION` e `OLLAMA_STOP_MANAGED_SERVER_ON_LOGOUT`.
+
+O evento `reasoning` contém somente um resumo auditável das evidências e limitações, não a cadeia de pensamento interna do modelo. O evento `done` inclui `elapsed_ms`, usado pela interface para exibir `Worked for X min Y sec`.
+
+---
+
 ## Rotas do Dashboard
 
 | Rota | Público-alvo | Endpoints consumidos |
@@ -357,4 +397,4 @@ Campos com modelos indisponíveis retornam `"disponivel": false`.
 | `/monitoramento` | Geral | `/historico/diario`, `/previsoes/serie`, `/historico/sazonalidade`, `/risco/produtos` |
 | `/tecnico` | DevOps/SRE | `/risco`, `/risco/grupos`, `/clusters` |
 | `/financeiro` | Gestores | `/kpi`, `/historico/mensal` |
-| Chatbot | — | `/context` |
+| Chatbot | — | `/context`, `/chat/session` (`POST`/`DELETE`), `/chat/status`, `/chat`, `/chat/stream` |

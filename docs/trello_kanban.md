@@ -11,7 +11,7 @@
 ---
 
 ### [S1-01] Kick-off e formação do time
-**Lista:** Concluído  
+**Lista:** Concluído
 **Label:** `Docs`  
 **Estimativa:** 3h  
 **Descrição:** Reunião de kick-off, definição de papéis e responsabilidades, setup de ferramentas de comunicação e repositório GitHub.
@@ -26,7 +26,7 @@
 ---
 
 ### [S1-02] Análise do problema e escopo
-**Lista:** Concluído  
+**Lista:** Concluído
 **Label:** `Docs`  
 **Estimativa:** 4h  
 **Descrição:** Entendimento profundo do desafio Locaweb, regras de negócio dos OLAs, metas anuais de violações e critérios do FIAP Enterprise Challenge.
@@ -41,7 +41,7 @@
 ---
 
 ### [S1-03] EDA preliminar do dataset
-**Lista:** Concluído  
+**Lista:** Concluído
 **Label:** `Dados` `ML`  
 **Estimativa:** 6h  
 **Descrição:** Exploração inicial do LW-DATASET.xlsx: volume, distribuição de prioridades, sazonalidade, desbalanceamento de classes e achados críticos.
@@ -340,48 +340,48 @@
 
 ---
 
-### [S3-05] Chatbot Gemini — Roteador (Flash)
-**Lista:** Backlog  
+### [S3-05] Chatbot local-first — Roteador determinístico
+**Lista:** Concluído
 **Label:** `Backend` `ML`  
 **Estimativa:** 1,5 dias  
-**Descrição:** Implementar LLM 1 com Gemini 2.5 Flash como roteador: responde perguntas simples usando o snapshot de `/api/context` e escala para o Pro quando necessário.
+**Descrição:** Responder perguntas factuais diretamente do snapshot canônico e encaminhar perguntas analíticas ao provider local.
 
 **Checklist:**
-- [ ] Integração com Gemini 2.5 Flash API
-- [ ] System prompt com contexto operacional (via /api/context)
-- [ ] Lógica de roteamento: resposta simples vs escala para Pro
-- [ ] Tempo de resposta alvo: < 2s para perguntas simples
-- [ ] Tratamento de erros e fallback
+- [x] Integração com os artefatos locais em `outputs/`
+- [x] Contexto operacional canônico compartilhado com `/api/context`
+- [x] Roteamento: resposta factual vs Gemma local
+- [x] Respostas factuais sem chamada de LLM
+- [x] Tratamento de erros e fallback controlado
 
 ---
 
-### [S3-06] Chatbot Gemini — Analista (Pro)
-**Lista:** Backlog  
+### [S3-06] Chatbot local — Analista Gemma 4 12B
+**Lista:** Concluído
 **Label:** `Backend` `ML`  
 **Estimativa:** 1,5 dias  
-**Descrição:** Implementar LLM 2 com Gemini 2.5 Pro como analista sênior: recebe contexto expandido e retorna análise formatada para o Flash repassar ao usuário.
+**Descrição:** Usar Gemma 4 12B IT QAT via Ollama para análises abertas, sem custo por requisição.
 
 **Checklist:**
-- [ ] Integração com Gemini 2.5 Pro API
-- [ ] System prompt expandido com histórico e outputs dos modelos
-- [ ] Contexto: risco_ola + clusters + kpi + previsoes
-- [ ] Resposta formatada para o dashboard
-- [ ] Testes com perguntas reais de operação
+- [x] Provider Ollama assíncrono
+- [x] System prompt com histórico limitado e regras anti-alucinação
+- [x] Contexto: risco_ola + clusters + kpi + previsões
+- [x] Streaming de tokens para o dashboard
+- [x] Testes com perguntas reais de operação
 
 ---
 
 ### [S3-07] Integração do chatbot no dashboard
-**Lista:** Backlog  
+**Lista:** Concluído
 **Label:** `Frontend` `Backend`  
 **Estimativa:** 1 dia  
 **Descrição:** Criar componente de chat no dashboard React integrado à API do chatbot. Disponível em todas as páginas como drawer lateral.
 
 **Checklist:**
-- [ ] Componente ChatDrawer (React)
-- [ ] Endpoint `/api/chat` (FastAPI → Gemini)
-- [ ] Histórico de mensagens na sessão
-- [ ] Indicador de "digitando..."
-- [ ] Exemplos de perguntas sugeridas
+- [x] Console de chat responsivo (React)
+- [x] Endpoints `/api/chat` e `/api/chat/stream`
+- [x] Histórico local separado por usuário
+- [x] Streaming e indicador de geração
+- [x] Perguntas sugeridas e atalhos para o dashboard
 
 ---
 

@@ -1,544 +1,1131 @@
-import { useState, useRef, useEffect } from 'react';
-import LogoPredictfy from './LogoPredictfy';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import {
+  BrainCircuit,
+  Gauge,
+  History,
+  PanelRightClose,
+  Plus,
+  SendHorizontal,
+  ThumbsDown,
+  ThumbsUp,
+} from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { CHAT_API_BASE, useChatAuth } from '../hooks/useChatAuth';
+import { useBreakpoint } from '../hooks/useBreakpoint';
+import { useDashboard } from '../hooks/useDashboard';
+import ChatHistory from './ChatHistory';
+import './ChatBot.css';
 
-// ── Respostas mockadas ────────────────────────────────────────────────────────
-const MOCK_RESPONSES = {
-  cluster: {
-    text: 'C3 é o cluster mais crítico — Operação Fora do Horário. Taxa de violação: **2.1%** vs média 0.97%. 2.813 incidentes · Team05 · Sáb/Dom/Sex.',
-    badge: { label: 'C3 CRÍTICO', color: 'var(--red)', bg: 'var(--red-dim)' },
-    action: { label: 'VER CENTRO TÉCNICO', route: '/tecnico' },
-    suggestions: ['Por que C3 viola mais?', 'Comparar C1 vs C3', 'Time responsável'],
-  },
-  violacao: {
-    text: 'Em 2025: P2 registrou **42 violações** (67.7% da cota anual). P3 registrou **206 violações** (73.3% da cota). Ambos dentro da meta SPC.',
-    badge: { label: 'DENTRO DA META', color: 'var(--green)', bg: 'var(--green-dim)' },
-    action: { label: 'VER GESTÃO', route: '/gestao' },
-    suggestions: ['Quais meses foram anomalias?', 'Meta do próximo período'],
-  },
-  previsao: {
-    text: 'Previsão LSTM para amanhã (D+1): **69 incidentes** · P2: 13 · P3: 57. Horizonte D+7: **65 incidentes** (média semanal).',
-    badge: { label: 'D+1: 69 INC', color: 'var(--teal)', bg: 'var(--teal-dim)' },
-    action: { label: 'VER MONITORAMENTO', route: '/monitoramento' },
-    suggestions: ['Como o LSTM funciona?', 'Comparar com semana passada'],
-  },
-  risco: {
-    text: 'Risco de violação OLA por prioridade — P3: **28.2%** de probabilidade média (ATENÇÃO). P2: **3.9%** (NOMINAL). Modelo XGBoost · ROC-AUC 0.84.',
-    badge: { label: 'P3 ATENÇÃO 28.2%', color: 'var(--orange)', bg: 'var(--orange-dim)' },
-    action: { label: 'VER ANÁLISE PREDITIVA', route: '/monitoramento' },
-    suggestions: ['Por que P3 viola mais?', 'Top fatores de risco'],
-  },
-  shap: {
-    text: 'Top 3 fatores de risco (SHAP values): 1. **Prioridade P2/P3** (67.6%) · 2. Frequência histórica do grupo (53.4%) · 3. Subcategoria do incidente (47.3%).',
-    badge: { label: 'SHAP · TOP FEATURE: PRIORIDADE', color: 'var(--purple)', bg: 'rgba(191,90,242,0.12)' },
-    action: { label: 'VER FATORES DE RISCO', route: '/tecnico' },
-    suggestions: ['Como o XGBoost foi treinado?', 'Ver todos os fatores'],
-  },
-  default: {
-    text: 'Não reconheci a consulta. Tente perguntar sobre clusters, violações, previsões ou fatores de risco.',
-    badge: null,
-    action: null,
-    suggestions: ['Cluster mais crítico', 'Previsão amanhã', 'Fatores de risco hoje'],
-  },
+const DEFAULT_WELCOME = 'SYSTEM READY. Contexto operacional 2023–2025 carregado. Como posso ajudar?';
+const DEFAULT_SUGGESTIONS = ['Previsão amanhã', 'Status das metas', 'Cluster mais crítico'];
+const ALLOWED_ACTION_ROUTES = new Set(['/gestao', '/monitoramento', '/tecnico', '/modelos']);
+const MAX_MESSAGE_LENGTH = 6000;
+const PANEL_DEFAULT_WIDTH = 430;
+const PANEL_MIN_WIDTH = 340;
+const PANEL_MAX_WIDTH = 720;
+const DASHBOARD_MIN_WIDTH = 620;
+const DOCK_BREAKPOINT = 1180;
+const ROUTE_LABELS = {
+  '/gestao': 'GESTÃO',
+  '/monitoramento': 'MONITORAMENTO',
+  '/tecnico': 'TÉCNICO',
+  '/modelos': 'MODELOS',
 };
 
-function getResponse(input) {
-  const q = input.toLowerCase();
-  if (q.match(/cluster|c3|c0|c1|c2|segmenta/)) return MOCK_RESPONSES.cluster;
-  if (q.match(/violaç|viola|ola|meta|cota/)) return MOCK_RESPONSES.violacao;
-  if (q.match(/previs|amanhã|d\+1|d\+7|lstm|volume/)) return MOCK_RESPONSES.previsao;
-  if (q.match(/risco|xgboost|probabilidade|p2|p3/)) return MOCK_RESPONSES.risco;
-  if (q.match(/shap|fator|feature|importância/)) return MOCK_RESPONSES.shap;
-  return MOCK_RESPONSES.default;
+function clamp(value, minimum, maximum) {
+  return Math.min(Math.max(value, minimum), maximum);
 }
 
-function ChatButtonLogo({ size = 28, color = 'currentColor' }) {
+function panelPreferenceKey(email, preference) {
+  return `predictfy_chat_panel:${email.toLowerCase()}:${preference}`;
+}
+
+function readPanelWidth(email) {
+  try {
+    const stored = Number(localStorage.getItem(panelPreferenceKey(email, 'width')));
+    return Number.isFinite(stored)
+      ? clamp(stored, PANEL_MIN_WIDTH, PANEL_MAX_WIDTH)
+      : PANEL_DEFAULT_WIDTH;
+  } catch {
+    return PANEL_DEFAULT_WIDTH;
+  }
+}
+
+function readPanelOpen(email) {
+  try {
+    const stored = localStorage.getItem(panelPreferenceKey(email, 'open'));
+    return stored == null ? null : stored === 'true';
+  } catch {
+    return null;
+  }
+}
+
+function AgentGlyph({ size = 28, active = false }) {
   return (
-    <svg
+    <span
+      className={`agent-glyph ${active ? 'agent-glyph--active' : ''}`}
+      style={{ '--agent-glyph-size': `${size}px` }}
       aria-hidden="true"
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="31 31 258 258"
-      width={size}
-      height={size}
-      style={{ display: 'block', color }}
     >
-      <rect x="40" y="40" width="240" height="240" rx="45" stroke="currentColor" strokeWidth="18" fill="none" strokeLinejoin="round" />
-      <path d="M 60 260 L 120 140 L 170 190 L 230 100" stroke="currentColor" strokeWidth="18" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="120" cy="140" r="20" stroke="currentColor" strokeWidth="18" fill="none" />
-      <circle cx="170" cy="190" r="20" stroke="currentColor" strokeWidth="18" fill="none" />
-      <circle cx="230" cy="100" r="20" stroke="currentColor" strokeWidth="18" fill="none" />
-    </svg>
+      <svg viewBox="0 0 32 32" fill="none">
+        <path className="agent-glyph__frame" d="M16 2.75 27.25 9.2v13.6L16 29.25 4.75 22.8V9.2L16 2.75Z" />
+        <path className="agent-glyph__signal" d="m9.2 22.4 6.65-14.1 6.9 14.1M12.25 16.45h7.55" />
+        <circle className="agent-glyph__node" cx="15.85" cy="8.3" r="1.45" />
+        <path className="agent-glyph__spark" d="M24.6 4.1v4.4M22.4 6.3h4.4" />
+      </svg>
+    </span>
   );
 }
 
-// ── Componente principal ──────────────────────────────────────────────────────
-export default function ChatBot() {
-  // 'closed' | 'loading' | 'open'
-  const [phase, setPhase] = useState('closed');
-  const isClosed  = phase === 'closed';
-  const isLoading = phase === 'loading';
-  const isOpen    = phase === 'open';
-  const timerRef  = useRef(null);
-  const [motionReady, setMotionReady] = useState(false);
-
-  function openChat() {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    setPhase('loading');
+function readableErrorDetail(detail, fallback) {
+  if (typeof detail === 'string' && detail.trim()) return detail;
+  if (Array.isArray(detail)) {
+    const messages = detail
+      .map((item) => (typeof item === 'string' ? item : item?.msg || item?.message))
+      .filter(Boolean);
+    if (messages.length > 0) return messages.join(' · ');
   }
-
-  function closeChat() {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    setPhase('closed');
+  if (detail && typeof detail === 'object') {
+    const message = detail.message || detail.msg || detail.error;
+    if (typeof message === 'string' && message.trim()) return message;
   }
+  return fallback;
+}
 
-  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+function timeNow() {
+  return new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function timeFromIso(value) {
+  const parsed = value ? new Date(value) : null;
+  if (!parsed || Number.isNaN(parsed.getTime())) return timeNow();
+  return parsed.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function contextKey(value) {
+  if (!value) return '';
+  const filters = Object.entries(value.filters || {}).toSorted(([left], [right]) => left.localeCompare(right));
+  return JSON.stringify({ route: value.route, label: value.label, filters });
+}
+
+function formatElapsed(elapsedMs) {
+  if (elapsedMs < 1000) return 'Worked for <1 sec';
+  const totalSeconds = Math.max(1, Math.round(elapsedMs / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return minutes > 0
+    ? `Worked for ${minutes} min ${seconds} sec`
+    : `Worked for ${seconds} sec`;
+}
+
+function conversationPreferenceKey(email) {
+  return `predictfy_chat_conversation:${email.toLowerCase()}`;
+}
+
+function createConversationId() {
+  if (typeof globalThis.crypto?.randomUUID === 'function') {
+    return globalThis.crypto.randomUUID().replaceAll('-', '');
+  }
+  return `conversation_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function readConversationId(email) {
+  try {
+    const stored = localStorage.getItem(conversationPreferenceKey(email));
+    if (stored && /^[A-Za-z0-9_-]{1,64}$/.test(stored)) return stored;
+    const created = createConversationId();
+    localStorage.setItem(conversationPreferenceKey(email), created);
+    return created;
+  } catch {
+    return createConversationId();
+  }
+}
+
+function historyKey(email, conversationId) {
+  return `predictfy_chat_history:${email.toLowerCase()}:${conversationId}`;
+}
+
+function initialMessages(user, conversationId) {
+  try {
+    const saved = localStorage.getItem(historyKey(user.email, conversationId));
+    const parsed = saved ? JSON.parse(saved) : null;
+    if (Array.isArray(parsed)) {
+      const sanitized = parsed
+        .filter((message) => message && typeof message === 'object'
+          && ['user', 'bot'].includes(message.role) && typeof message.text === 'string')
+        .slice(-30)
+        .map((message, index) => ({
+          ...message,
+          id: typeof message.id === 'string' ? message.id : `restored-${index}`,
+          streaming: false,
+          reasoningOpen: false,
+          reasoningComplete: true,
+          elapsedMs: Number.isFinite(message.elapsedMs) ? message.elapsedMs : null,
+        }));
+      if (sanitized.length > 0) return sanitized;
+    }
+  } catch {
+    // Um histórico corrompido não deve impedir a abertura do assistente.
+  }
+  return [{
+    id: 'welcome',
+    role: 'bot',
+    text: user.welcome || DEFAULT_WELCOME,
+    ts: '--:--',
+    badge: { label: 'DADOS LOCAIS', tone: 'green' },
+    suggestions: DEFAULT_SUGGESTIONS,
+  }];
+}
+
+function messagesFromArchive(conversation, user) {
+  if (!Array.isArray(conversation?.messages) || conversation.messages.length === 0) {
+    return initialMessages(user, conversation?.id || 'empty');
+  }
+  return conversation.messages.map((message, index) => {
+    const metadata = message.metadata || {};
+    return {
+      id: message.id || `archive-${index}`,
+      role: message.role === 'assistant' ? 'bot' : 'user',
+      text: message.content || '',
+      ts: timeFromIso(message.created_at),
+      reasoning: metadata.reasoning || '',
+      reasoningOpen: false,
+      reasoningComplete: true,
+      elapsedMs: Number.isFinite(metadata.elapsed_ms) ? metadata.elapsed_ms : null,
+      mode: metadata.mode,
+      provider: metadata.provider,
+      model: metadata.model,
+      badge: metadata.badge,
+      action: metadata.action,
+      suggestions: metadata.suggestions || [],
+      analysisMode: metadata.analysis_mode || 'fast',
+      sources: metadata.sources || [],
+      usage: metadata.usage || {},
+      cache: metadata.cache || {},
+      responseId: message.response_id || null,
+      streaming: false,
+    };
+  });
+}
+
+function sanitizeMarkdown(text) {
+  return text
+    .replace(/!?\[[^\]]*\]\(\s*(?:https?:\/\/|www\.)[^)]+\)/gi, '[link externo bloqueado]')
+    .replace(/(?:https?:\/\/|www\.)\S+/gi, '[link externo bloqueado]');
+}
+
+const MARKDOWN_COMPONENTS = {
+  a: ({ children }) => <span className="chat-markdown__blocked-link">{children}</span>,
+  img: ({ alt }) => <span className="chat-markdown__blocked-link">[{alt || 'imagem bloqueada'}]</span>,
+  table: ({ children }) => (
+    <div className="chat-markdown__table-wrap" role="region" aria-label="Tabela da resposta" tabIndex="0">
+      <table>{children}</table>
+    </div>
+  ),
+};
+
+function MarkdownContent({ text, compact = false }) {
+  return (
+    <div className={`chat-markdown ${compact ? 'chat-markdown--compact' : ''}`}>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={MARKDOWN_COMPONENTS}
+        skipHtml
+      >
+        {sanitizeMarkdown(text)}
+      </ReactMarkdown>
+    </div>
+  );
+}
+
+function ProviderStatus({ token }) {
+  const [status, setStatus] = useState({ state: 'checking', model: 'Assistente', provider: null });
 
   useEffect(() => {
-    if (!isLoading) return undefined;
-    timerRef.current = setTimeout(() => setPhase('open'), 360);
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+    let controller;
+    const check = () => {
+      controller?.abort();
+      controller = new AbortController();
+      fetch(`${CHAT_API_BASE}/chat/status`, {
+        signal: controller.signal,
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((response) => response.json())
+        .then((data) => setStatus({
+          state: data.available ? 'online' : 'offline',
+          model: data.model || 'Assistente',
+          provider: data.provider || null,
+        }))
+        .catch((requestError) => {
+          if (requestError.name !== 'AbortError') setStatus({ state: 'offline', model: 'Assistente', provider: null });
+        });
     };
-  }, [isLoading]);
-
-  useEffect(() => {
-    let frame2 = null;
-    const frame1 = requestAnimationFrame(() => {
-      frame2 = requestAnimationFrame(() => setMotionReady(true));
-    });
+    check();
+    const interval = window.setInterval(check, 30_000);
     return () => {
-      cancelAnimationFrame(frame1);
-      if (frame2) cancelAnimationFrame(frame2);
+      window.clearInterval(interval);
+      controller?.abort();
     };
-  }, []);
+  }, [token]);
 
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      role: 'bot',
-      text: 'SYSTEM READY. Monitorando 4 clusters · 25.006 incidentes KPI. Contexto 2023–2025 carregado. Como posso ajudar?',
-      badge: null,
-      action: null,
-      suggestions: ['Cluster mais crítico', 'Previsão amanhã', 'Fatores de risco hoje'],
-      ts: '16:14',
-    },
-    {
-      id: 2,
-      role: 'user',
-      text: 'qual cluster está mais crítico agora?',
-      ts: '16:15',
-    },
-    {
-      id: 3,
-      role: 'bot',
-      text: 'C3 é o cluster mais crítico — Operação Fora do Horário. Taxa de violação: **2.1%** vs média 0.97%. 2.813 incidentes · Team05 · Sáb/Dom/Sex.',
-      badge: { label: 'C3 CRÍTICO', color: 'var(--red)', bg: 'var(--red-dim)' },
-      action: { label: 'VER CENTRO TÉCNICO', route: '/tecnico' },
-      suggestions: ['Por que C3 viola mais?', 'Comparar C1 vs C3', 'Time responsável'],
-      ts: '16:15',
-    },
-  ]);
+  return (
+    <div className={`chat-provider chat-provider--${status.state}`} title={status.model}>
+      <span aria-hidden="true" />
+      {status.state === 'online'
+        ? status.provider === 'openai' ? 'LUNA ONLINE' : 'LOCAL ONLINE'
+        : status.state === 'offline' ? 'LLM OFFLINE' : 'CHECKING'}
+    </div>
+  );
+}
+
+function ReasoningDisclosure({ message, onToggle }) {
+  const complete = message.reasoningComplete || Boolean(message.text);
+  const label = complete ? 'Análise concluída' : 'Pensando...';
+
+  return (
+    <div className={`chat-reasoning ${message.reasoningOpen ? 'chat-reasoning--open' : ''}`}>
+      <button
+        className="chat-reasoning__toggle"
+        onClick={onToggle}
+        aria-expanded={Boolean(message.reasoningOpen)}
+      >
+        <span className={`chat-reasoning__pulse ${complete ? 'chat-reasoning__pulse--done' : ''}`} aria-hidden="true" />
+        <span>{label}</span>
+        <span className="chat-reasoning__chevron" aria-hidden="true">›</span>
+      </button>
+      {message.reasoningOpen && (
+        <div className="chat-reasoning__content">
+          {message.statusLabel && <div className="chat-reasoning__status">{message.statusLabel}</div>}
+          {message.reasoning
+            ? <MarkdownContent text={message.reasoning} compact />
+            : <div className="chat-reasoning__waiting">Aguardando o modelo organizar as evidências…</div>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ChatConversation({
+  user,
+  conversationId,
+  dashboardContext,
+  onConversationLoaded,
+  onConversationUpdated,
+  onLogout,
+  onClose,
+  active,
+}) {
+  const navigate = useNavigate();
+  const [messages, setMessages] = useState(() => initialMessages(user, conversationId));
   const [input, setInput] = useState('');
   const [thinking, setThinking] = useState(false);
-  const messagesEndRef = useRef(null);
+  const [attachedContext, setAttachedContext] = useState(dashboardContext);
+  const [dismissedMismatch, setDismissedMismatch] = useState('');
+  const [analysisMode, setAnalysisMode] = useState(() => {
+    try {
+      return localStorage.getItem(`predictfy_chat_mode:${user.email.toLowerCase()}`) === 'deep'
+        ? 'deep'
+        : 'fast';
+    } catch {
+      return 'fast';
+    }
+  });
+  const endRef = useRef(null);
+  const messagesRef = useRef(null);
   const inputRef = useRef(null);
+  const abortRef = useRef(null);
+  const requestInFlightRef = useRef(false);
+  const shouldAutoScrollRef = useRef(true);
 
   useEffect(() => {
-    if (!isOpen) return;
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, thinking, isOpen]);
-
-  useEffect(() => {
-    if (isOpen) setTimeout(() => inputRef.current?.focus(), 50);
-  }, [isOpen]);
-
-  useEffect(() => {
-    function onKeyDown(e) { if (e.key === 'Escape' && isOpen) closeChat(); }
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isOpen]);
-
-  function sendMessage(text) {
-    if (!text.trim() || thinking) return;
-    const userMsg = {
-      id: Date.now(),
-      role: 'user',
-      text: text.trim(),
-      ts: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+    const controller = new AbortController();
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${user.token}`,
     };
-    setMessages(prev => [...prev, userMsg]);
+    fetch(`${CHAT_API_BASE}/chat/conversations/${conversationId}`, {
+      headers,
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        if (response.status === 404) {
+          const created = await fetch(`${CHAT_API_BASE}/chat/conversations`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+              conversation_id: conversationId,
+              dashboard_context: dashboardContext,
+            }),
+            signal: controller.signal,
+          });
+          const body = await created.json().catch(() => ({}));
+          if (!created.ok) throw new Error(body.detail || 'Falha ao criar conversa.');
+          return body;
+        }
+        const body = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(body.detail || 'Falha ao carregar conversa.');
+        return body;
+      })
+      .then((conversation) => {
+        if (controller.signal.aborted) return;
+        if (conversation.message_count > 0) setMessages(messagesFromArchive(conversation, user));
+        setAttachedContext(conversation.dashboard_context || dashboardContext);
+        onConversationLoaded(conversation);
+      })
+      .catch((error) => {
+        if (error.name !== 'AbortError') onConversationLoaded(null);
+      });
+    return () => controller.abort();
+  }, [conversationId, dashboardContext, onConversationLoaded, user]);
+
+  useEffect(() => {
+    try {
+      const completed = messages.filter((message) => !message.streaming && message.text).slice(-30);
+      if (messages.some((message) => message.streaming) && completed.at(-1)?.role === 'user') completed.pop();
+      localStorage.setItem(historyKey(user.email, conversationId), JSON.stringify(completed));
+    } catch {
+      // Persistência é opcional; o chat continua funcional sem localStorage.
+    }
+  }, [conversationId, messages, user.email]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(`predictfy_chat_mode:${user.email.toLowerCase()}`, analysisMode);
+    } catch {
+      // A escolha continua válida durante a sessão atual.
+    }
+  }, [analysisMode, user.email]);
+
+  const mismatch = contextKey(attachedContext) !== contextKey(dashboardContext);
+  const mismatchId = `${contextKey(attachedContext)}>${contextKey(dashboardContext)}`;
+  const showContextChoice = mismatch && dismissedMismatch !== mismatchId;
+
+  async function useCurrentDashboardContext() {
+    const response = await fetch(`${CHAT_API_BASE}/chat/conversations/${conversationId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${user.token}`,
+      },
+      body: JSON.stringify({ dashboard_context: dashboardContext }),
+    });
+    if (!response.ok) return;
+    const conversation = await response.json();
+    setAttachedContext(conversation.dashboard_context || dashboardContext);
+    setDismissedMismatch('');
+    onConversationUpdated(conversation);
+  }
+
+  useEffect(() => {
+    if (shouldAutoScrollRef.current) endRef.current?.scrollIntoView({ behavior: 'auto' });
+  }, [messages, thinking]);
+
+  useEffect(() => {
+    if (active) inputRef.current?.focus();
+  }, [active]);
+
+  useEffect(() => {
+    return () => abortRef.current?.abort();
+  }, []);
+
+  const updateBot = useCallback((id, updater) => {
+    setMessages((current) => current.map((message) => (
+      message.id === id ? updater(message) : message
+    )));
+  }, []);
+
+  async function sendMessage(rawText) {
+    const text = rawText.trim();
+    if (!text || requestInFlightRef.current) return;
+    requestInFlightRef.current = true;
+    shouldAutoScrollRef.current = true;
+    const startedAt = performance.now();
+
+    const userMessage = { id: `user-${Date.now()}`, role: 'user', text, ts: timeNow() };
+    const botId = `bot-${Date.now()}`;
+    const botMessage = {
+      id: botId,
+      role: 'bot',
+      text: '',
+      reasoning: '',
+      reasoningOpen: true,
+      reasoningComplete: false,
+      statusLabel: 'Preparando consulta…',
+      elapsedMs: null,
+      ts: timeNow(),
+      streaming: true,
+      analysisMode,
+    };
+    const history = messages
+      .filter((message) => message.text)
+      .slice(-8)
+      .map((message) => ({
+        role: message.role === 'user' ? 'user' : 'assistant',
+        content: message.text.slice(0, MAX_MESSAGE_LENGTH),
+      }));
+
+    setMessages((current) => [...current, userMessage, botMessage]);
     setInput('');
     setThinking(true);
+    const controller = new AbortController();
+    abortRef.current = controller;
 
-    setTimeout(() => {
-      const resp = getResponse(text);
-      setMessages(prev => [...prev, {
-        id: Date.now() + 1,
-        role: 'bot',
-        text: resp.text,
-        badge: resp.badge,
-        action: resp.action,
-        suggestions: resp.suggestions,
-        ts: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-      }]);
-      setThinking(false);
-    }, 900 + Math.random() * 600);
+    try {
+      const response = await fetch(`${CHAT_API_BASE}/chat/stream`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: JSON.stringify({
+          message: text,
+          history,
+          conversation_id: conversationId,
+          analysis_mode: analysisMode,
+          dashboard_context: attachedContext || dashboardContext,
+        }),
+        signal: controller.signal,
+      });
+
+      if (response.status === 401) {
+        onLogout();
+        return;
+      }
+      if (!response.ok || !response.body) {
+        const failure = await response.json().catch(() => ({}));
+        throw new Error(readableErrorDetail(
+          failure.detail,
+          `Falha HTTP ${response.status}`,
+        ));
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let finished = false;
+      let receivedDone = false;
+
+      while (!finished) {
+        const { value, done } = await reader.read();
+        buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          const event = JSON.parse(line);
+          if (event.type === 'meta') {
+            updateBot(botId, (message) => ({
+              ...message,
+              mode: event.mode,
+              model: event.model,
+              badge: event.badge,
+              action: event.action,
+              suggestions: event.suggestions,
+              responseId: event.response_id,
+              analysisMode: event.analysis_mode || message.analysisMode,
+            }));
+          } else if (event.type === 'status') {
+            updateBot(botId, (message) => ({
+              ...message,
+              statusLabel: event.label,
+              reasoningComplete: event.phase === 'answer',
+              reasoningOpen: event.phase === 'answer' ? false : message.reasoningOpen,
+            }));
+          } else if (event.type === 'reasoning') {
+            updateBot(botId, (message) => ({
+              ...message,
+              reasoning: message.reasoning + event.delta,
+              reasoningOpen: true,
+            }));
+          } else if (event.type === 'token') {
+            updateBot(botId, (message) => ({
+              ...message,
+              text: message.text + event.delta,
+              reasoningComplete: true,
+              reasoningOpen: false,
+            }));
+          } else if (event.type === 'sources') {
+            updateBot(botId, (message) => ({
+              ...message,
+              sources: Array.isArray(event.items) ? event.items : [],
+            }));
+          } else if (event.type === 'error') {
+            const streamError = new Error(readableErrorDetail(
+              event.detail,
+              'O provedor analítico falhou.',
+            ));
+            streamError.elapsedMs = event.elapsed_ms;
+            throw streamError;
+          } else if (event.type === 'done') {
+            receivedDone = true;
+            finished = true;
+            updateBot(botId, (message) => ({
+              ...message,
+              streaming: false,
+              reasoningComplete: true,
+              reasoningOpen: false,
+              statusLabel: message.mode === 'deterministic'
+                ? 'Consulta direta aos artefatos locais'
+                : 'Evidências e limitações utilizadas na resposta',
+              elapsedMs: event.elapsed_ms,
+              responseId: event.response_id || message.responseId,
+              sources: Array.isArray(event.sources) ? event.sources : message.sources,
+              usage: event.usage || {},
+              cache: event.cache || { hit: false, kind: 'miss' },
+            }));
+            onConversationUpdated({ id: conversationId });
+          }
+        }
+        if (done) break;
+      }
+      if (!receivedDone) throw new Error('A conexão foi encerrada antes da confirmação final.');
+    } catch (requestError) {
+      if (requestError.name === 'AbortError') return;
+      updateBot(botId, (message) => ({
+        ...message,
+        streaming: false,
+        reasoningComplete: true,
+        reasoningOpen: false,
+        statusLabel: 'A análise não pôde ser concluída',
+        elapsedMs: requestError.elapsedMs ?? Math.round(performance.now() - startedAt),
+        text: message.text || `Não consegui concluir a consulta. ${requestError.message}`,
+        badge: { label: 'FALHA NA CONSULTA', tone: 'red' },
+      }));
+    } finally {
+      if (abortRef.current === controller) {
+        abortRef.current = null;
+        requestInFlightRef.current = false;
+        setThinking(false);
+      }
+    }
   }
 
-  function handleKeyDown(e) {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(input); }
+  async function submitFeedback(message, rating) {
+    if (!message.responseId || message.feedbackPending) return;
+    const previous = message.feedback;
+    updateBot(message.id, (current) => ({ ...current, feedback: rating, feedbackPending: true }));
+    try {
+      const response = await fetch(`${CHAT_API_BASE}/chat/feedback`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: JSON.stringify({ response_id: message.responseId, rating }),
+      });
+      if (!response.ok) throw new Error('Feedback não aceito');
+      updateBot(message.id, (current) => ({ ...current, feedbackPending: false }));
+    } catch {
+      updateBot(message.id, (current) => ({
+        ...current,
+        feedback: previous,
+        feedbackPending: false,
+      }));
+    }
   }
 
-  function parseText(text) {
-    const parts = text.split(/\*\*(.*?)\*\*/g);
-    return parts.map((p, i) =>
-      i % 2 === 1
-        ? <strong key={i} style={{ color: 'var(--text-pri)', fontWeight: 600 }}>{p}</strong>
-        : p
-    );
+  function executeAction(action) {
+    if (!ALLOWED_ACTION_ROUTES.has(action?.route)) return;
+    navigate(action.route);
+    onClose();
   }
 
-  const buttonSize = 48;
-  const buttonBottom = 24;
+  function handleSubmit(event) {
+    event.preventDefault();
+    sendMessage(input);
+  }
 
   return (
     <>
-      {/* Backdrop */}
+      {showContextChoice ? (
+        <aside className="chat-context-choice" aria-label="Contexto do dashboard alterado">
+          <div>
+            <span>CONTEXTO ALTERADO</span>
+            <strong>
+              {attachedContext?.route === dashboardContext.route
+                ? `Os filtros de ${dashboardContext.label} mudaram desde a última análise.`
+                : `Esta conversa usa ${attachedContext?.label || 'outro dashboard'}; você está em ${dashboardContext.label}.`}
+            </strong>
+          </div>
+          <div className="chat-context-choice__actions">
+            <button type="button" onClick={useCurrentDashboardContext}>
+              USAR {dashboardContext.label}
+            </button>
+            <button type="button" onClick={() => setDismissedMismatch(mismatchId)}>
+              MANTER {attachedContext?.label || 'ANTERIOR'}
+            </button>
+          </div>
+        </aside>
+      ) : null}
       <div
-        onClick={() => isOpen && closeChat()}
-        style={{
-          position: 'fixed', inset: 0, zIndex: 998,
-          background: 'rgba(0,0,0,0.72)',
-          opacity: isOpen ? 1 : 0,
-          transition: 'opacity 0.22s ease',
-          pointerEvents: isOpen ? 'all' : 'none',
-        }}
-      />
-
-      {/* ── Elemento único — botão E modal ───────────────────────────────── */}
-      <div
-        onClick={isClosed ? openChat : undefined}
-        style={{
-          position: 'fixed',
-          zIndex: 999,
-          cursor: isClosed ? 'pointer' : 'default',
-          overflow: 'hidden',
-
-          top: isClosed ? `calc(100dvh - ${buttonSize + buttonBottom}px)` : '50%',
-          left: '50%',
-          transform: isClosed
-            ? 'translate3d(-50%, 0, 0)'
-            : 'translate3d(-50%, -50%, 0)',
-
-          width:  isClosed ? 48  : 680,
-          height: isClosed ? 48  : 620,
-          maxWidth:  'calc(100vw - 32px)',
-          maxHeight: 'calc(100vh - 60px)',
-
-          borderRadius: isClosed ? 24 : 12,
-
-          background: isOpen ? 'var(--surface1)' : 'var(--purple)',
-          border: isOpen
-            ? '1px solid var(--border)'
-            : '1.5px solid var(--purple)',
-
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: isOpen ? 'stretch' : 'center',
-          justifyContent: isOpen ? 'flex-start' : 'center',
-
-          willChange: 'width, height, transform, border-radius, background',
-          transition: motionReady ? [
-            'top 0.32s cubic-bezier(0.16, 1, 0.3, 1)',
-            'width 0.32s cubic-bezier(0.16, 1, 0.3, 1)',
-            'height 0.32s cubic-bezier(0.16, 1, 0.3, 1)',
-            'transform 0.32s cubic-bezier(0.16, 1, 0.3, 1)',
-            'border-radius 0.32s ease',
-            'background 0.2s ease',
-            'border-color 0.2s ease',
-          ].join(', ') : 'none',
+        ref={messagesRef}
+        className="chat-messages"
+        role="log"
+        aria-live="off"
+        aria-label="Histórico da conversa"
+        onScroll={(event) => {
+          const element = event.currentTarget;
+          shouldAutoScrollRef.current = element.scrollHeight - element.scrollTop - element.clientHeight < 80;
         }}
       >
-        {/* ── Camada roxa — closed + loading ─────────────────────────────── */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: 'var(--purple)',
-          opacity: isOpen ? 0 : 1,
-          transition: motionReady ? 'opacity 0.22s ease' : 'none',
-          pointerEvents: 'none',
-          zIndex: 2,
-          overflow: 'hidden',
-        }}>
-          <div style={{
-            position: 'relative',
-            width:  isLoading ? 160 : 28,
-            height: isLoading ? 160 : 28,
-            transition: motionReady && !isClosed ? 'width 0.3s ease, height 0.3s ease' : 'none',
-            overflow: 'hidden',
-          }}>
-            {isClosed ? (
-              <ChatButtonLogo size={28} color="rgba(255,255,255,0.92)" />
-            ) : (
-              <LogoPredictfy
-                size={160}
-                color="rgba(255,255,255,0.92)"
-                style={{ display: 'block', transition: motionReady ? 'all 0.3s ease' : 'none' }}
-              />
-            )}
-            {isLoading && (
-              <div style={{
-                position: 'absolute',
-                top: 0, left: 0, width: '100%', height: '100%',
-                background: 'linear-gradient(105deg, transparent 25%, rgba(255,255,255,0.5) 50%, transparent 75%)',
-                animation: 'shimmer-logo 1.3s ease-in-out infinite',
-                pointerEvents: 'none',
-              }} />
-            )}
-          </div>
-        </div>
-
-        {/* ── Conteúdo do chat (fase open) ───────────────────────────────── */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          display: 'flex', flexDirection: 'column',
-          opacity: isOpen ? 1 : 0,
-          transition: isOpen ? 'opacity 0.22s ease 0.08s' : 'opacity 0.1s ease',
-          pointerEvents: isOpen ? 'all' : 'none',
-          zIndex: 1,
-        }}>
-          {/* Header */}
-          <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '12px 18px',
-            background: 'var(--surface2)',
-            borderBottom: '1px solid var(--border)',
-            flexShrink: 0,
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{
-                width: 26, height: 26,
-                border: '1.5px solid var(--purple)',
-                borderRadius: 5,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                flexShrink: 0,
-              }}>
-                <LogoPredictfy size={14} color="var(--purple)" />
-              </div>
-              <span style={{
-                fontFamily: 'var(--font-mono)', fontSize: 13,
-                color: 'var(--purple)', letterSpacing: '0.12em', fontWeight: 600,
-              }}>PREDICTFY_ASSISTANT</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                <div style={{
-                  width: 7, height: 7, borderRadius: '50%',
-                  background: 'var(--green)',
-                  boxShadow: '0 0 0 2px var(--green-dim)',
-                  animation: 'pulse-dot 2s ease infinite',
-                }} />
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--green)', letterSpacing: '0.08em' }}>ONLINE</span>
-              </div>
-              <button
-                onClick={closeChat}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: 18, padding: '2px 4px', lineHeight: 1 }}
-              >✕</button>
-            </div>
-          </div>
-
-          {/* Messages area */}
-          <div style={{
-            flex: 1, overflowY: 'auto', overflowX: 'hidden',
-            padding: '18px 18px',
-            display: 'flex', flexDirection: 'column', gap: 14,
-          }}>
-            {messages.map((msg) => (
-              <div key={msg.id} style={{
-                display: 'flex',
-                flexDirection: msg.role === 'user' ? 'row-reverse' : 'row',
-                alignItems: 'flex-start',
-                gap: 10,
-              }}>
-                {msg.role === 'bot' && (
-                  <div style={{
-                    width: 32, height: 32, borderRadius: '50%',
-                    background: 'var(--surface3)',
-                    border: '1px solid var(--border)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    flexShrink: 0, marginTop: 2,
-                  }}>
-                    <LogoPredictfy size={16} color="var(--purple)" />
-                  </div>
-                )}
-
-                <div style={{
-                  display: 'flex', flexDirection: 'column',
-                  alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                  maxWidth: '75%',
-                  gap: 5,
-                }}>
-                  <div style={{
-                    padding: msg.role === 'user' ? '10px 14px' : '11px 15px',
-                    background: msg.role === 'user' ? 'var(--surface4)' : 'transparent',
-                    border: msg.role === 'user' ? '1px solid var(--border)' : 'none',
-                    borderRadius: msg.role === 'user' ? '14px 14px 4px 14px' : '14px 14px 14px 4px',
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 13,
-                    color: msg.role === 'user' ? 'var(--text-pri)' : 'var(--text-sec)',
-                    lineHeight: 1.65,
-                  }}>
-                    {msg.role === 'user' ? msg.text : parseText(msg.text)}
-                  </div>
-
-                  {msg.role === 'bot' && msg.badge && (
-                    <span style={{
-                      fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700,
-                      color: msg.badge.color,
-                      background: msg.badge.bg,
-                      border: `1px solid ${msg.badge.color}55`,
-                      borderRadius: 3, padding: '3px 9px',
-                      alignSelf: 'flex-start',
-                    }}>{msg.badge.label}</span>
-                  )}
-
-                  {msg.role === 'bot' && msg.action && (
-                    <a
-                      href={msg.action.route}
-                      style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 6,
-                        fontFamily: 'var(--font-mono)', fontSize: 11,
-                        color: 'var(--text-muted)', letterSpacing: '0.06em',
-                        background: 'var(--surface2)',
-                        border: '1px solid var(--border)',
-                        borderRadius: 4, padding: '5px 11px',
-                        textDecoration: 'none',
-                        alignSelf: 'flex-start',
-                        transition: 'border-color 0.15s, color 0.15s',
-                      }}
-                      onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--purple)'; e.currentTarget.style.color = 'var(--purple)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
-                    >
-                      [ EXECUTE: {msg.action.label} ] →
-                    </a>
-                  )}
-
-                  {msg.role === 'bot' && msg.suggestions && (
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignSelf: 'flex-start' }}>
-                      {msg.suggestions.map(s => (
-                        <button
-                          key={s}
-                          onClick={() => sendMessage(s)}
-                          style={{
-                            fontFamily: 'var(--font-mono)', fontSize: 11,
-                            color: 'var(--purple)',
-                            background: 'transparent',
-                            border: '1px solid rgba(191,90,242,0.3)',
-                            borderRadius: 4, padding: '4px 9px',
-                            cursor: 'pointer',
-                            transition: 'background 0.15s, border-color 0.15s',
-                          }}
-                          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(191,90,242,0.12)'; e.currentTarget.style.borderColor = 'var(--purple)'; }}
-                          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(191,90,242,0.3)'; }}
-                        >{s}</button>
-                      ))}
-                    </div>
-                  )}
-
-                  <span style={{
-                    fontFamily: 'var(--font-mono)', fontSize: 10,
-                    color: 'var(--text-muted)', letterSpacing: '0.06em',
-                  }}>{msg.ts}</span>
-                </div>
-              </div>
-            ))}
-
-            {thinking && (
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                <div style={{
-                  width: 32, height: 32, borderRadius: '50%',
-                  background: 'var(--surface3)', border: '1px solid var(--border)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0, marginTop: 2,
-                }}>
-                  <LogoPredictfy size={16} color="var(--purple)" />
-                </div>
-                <div style={{ padding: '12px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{ width: 110, height: 3, background: 'var(--surface4)', borderRadius: 2, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: '40%', background: 'var(--purple)', borderRadius: 2, animation: 'scan 1.4s linear infinite' }} />
-                  </div>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>processando...</span>
-                </div>
+        {messages.map((message) => (
+          <article key={message.id} className={`chat-message chat-message--${message.role}`}>
+            {message.role === 'bot' && (
+              <div className="chat-message__avatar" aria-hidden="true">
+                <AgentGlyph size={18} active={message.streaming} />
               </div>
             )}
-
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Input area */}
-          <div style={{
-            padding: '12px 16px',
-            background: 'var(--surface2)',
-            borderTop: '1px solid var(--border)',
-            flexShrink: 0,
-          }}>
-            <div
-              style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                background: 'var(--surface3)',
-                border: '1px solid var(--border)',
-                borderRadius: 6, padding: '10px 12px',
-                transition: 'border-color 0.15s',
-              }}
-              onFocusCapture={e => e.currentTarget.style.borderColor = 'var(--purple)'}
-              onBlurCapture={e => e.currentTarget.style.borderColor = 'var(--border)'}
-            >
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, color: 'var(--purple)', flexShrink: 0 }}>&gt;&nbsp;</span>
-              <input
-                ref={inputRef}
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="consulta operacional..."
-                disabled={thinking}
-                style={{
-                  flex: 1, background: 'none', border: 'none', outline: 'none',
-                  fontFamily: 'var(--font-mono)', fontSize: 13,
-                  color: 'var(--text-pri)',
-                  caretColor: 'var(--purple)',
-                }}
-              />
-              <button
-                onClick={() => sendMessage(input)}
-                disabled={!input.trim() || thinking}
-                style={{
-                  background: 'none', border: 'none', cursor: input.trim() ? 'pointer' : 'default',
-                  fontFamily: 'var(--font-mono)', fontSize: 13,
-                  color: input.trim() ? 'var(--purple)' : 'var(--text-muted)',
-                  padding: '0 2px', transition: 'color 0.15s',
-                }}
-              >↵</button>
+            <div className="chat-message__body">
+              {message.role === 'bot' && (message.streaming || message.reasoning) && (
+                <ReasoningDisclosure
+                  message={message}
+                  onToggle={() => updateBot(message.id, (current) => ({
+                    ...current,
+                    reasoningOpen: !current.reasoningOpen,
+                  }))}
+                />
+              )}
+              {(message.text || !message.streaming) && (
+                <div className="chat-message__bubble">
+                  {message.role === 'bot'
+                    ? <MarkdownContent text={message.text} />
+                    : <span className="chat-message__plain-text">{message.text}</span>}
+                  {message.streaming && <span className="chat-caret" aria-label="Gerando resposta" />}
+                </div>
+              )}
+              {message.badge && (
+                <span className={`chat-badge chat-badge--${message.badge.tone || 'purple'}`}>
+                  {message.badge.label}
+                </span>
+              )}
+              {message.role === 'bot' && message.sources?.length > 0 && (
+                <div className="chat-sources" aria-label="Fontes consultadas">
+                  <span>FONTES</span>
+                  {message.sources.map((source) => (
+                    <span key={source.id || source.label} title={source.kind}>{source.label}</span>
+                  ))}
+                </div>
+              )}
+              {message.role === 'bot' && message.cache?.hit && (
+                <span className={`chat-cache chat-cache--${message.cache.kind}`}>
+                  {message.cache.kind === 'semantic' ? 'CACHE SEMÂNTICO' : 'CACHE VALIDADO'}
+                </span>
+              )}
+              {message.action && (
+                <button className="chat-action" onClick={() => executeAction(message.action)}>
+                  [ {message.action.label} ] →
+                </button>
+              )}
+              {message.suggestions?.length > 0 && (
+                <div className="chat-suggestions" aria-label="Consultas sugeridas">
+                  {message.suggestions.map((suggestion) => (
+                    <button key={suggestion} onClick={() => sendMessage(suggestion)} disabled={thinking}>
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {message.role === 'bot' && message.elapsedMs != null && (
+                <div className="chat-response-meta">
+                  <span className="chat-worked">{formatElapsed(message.elapsedMs)}</span>
+                  {message.analysisMode === 'deep' && <span>ANÁLISE PROFUNDA</span>}
+                  {message.usage?.output_tokens > 0 && (
+                    <span title="Tokens de saída medidos pelo provider">
+                      {message.usage.output_tokens} TOKENS
+                    </span>
+                  )}
+                  {message.usage?.saved_tokens > 0 && (
+                    <span title="Estimativa baseada na geração original reutilizada">
+                      {message.usage.saved_tokens} TOKENS ECONOMIZADOS
+                    </span>
+                  )}
+                  {message.responseId && (
+                    <span className="chat-feedback" aria-label="Avaliar resposta">
+                      <button
+                        type="button"
+                        className={message.feedback === 'up' ? 'chat-feedback--active' : ''}
+                        onClick={() => submitFeedback(message, 'up')}
+                        disabled={message.feedbackPending}
+                        aria-label="Resposta útil"
+                        aria-pressed={message.feedback === 'up'}
+                      >
+                        <ThumbsUp size={12} strokeWidth={1.7} />
+                      </button>
+                      <button
+                        type="button"
+                        className={message.feedback === 'down' ? 'chat-feedback--active' : ''}
+                        onClick={() => submitFeedback(message, 'down')}
+                        disabled={message.feedbackPending}
+                        aria-label="Resposta não útil"
+                        aria-pressed={message.feedback === 'down'}
+                      >
+                        <ThumbsDown size={12} strokeWidth={1.7} />
+                      </button>
+                    </span>
+                  )}
+                </div>
+              )}
+              <time>{message.ts}</time>
             </div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)', marginTop: 6, letterSpacing: '0.06em', textAlign: 'center' }}>
-              ENTER para enviar · ESC para fechar
-            </div>
-          </div>
-        </div>
+          </article>
+        ))}
+        <div ref={endRef} />
       </div>
 
-      <style>{`
-        @keyframes shimmer-logo {
-          0%   { transform: translateX(-150%); }
-          100% { transform: translateX(250%);  }
-        }
-        @keyframes scan {
-          0%   { transform: translateX(-200%); }
-          100% { transform: translateX(400%);  }
-        }
-        @keyframes pulse-dot {
-          0%, 100% { opacity: 1 }
-          50%       { opacity: 0.4 }
-        }
-      `}</style>
+      <form className="chat-composer" onSubmit={handleSubmit}>
+        <div className="chat-mode" role="group" aria-label="Profundidade da análise">
+          <button
+            type="button"
+            className={analysisMode === 'fast' ? 'chat-mode--active' : ''}
+            onClick={() => setAnalysisMode('fast')}
+            disabled={thinking}
+            aria-pressed={analysisMode === 'fast'}
+            title="Menor latência e custo; consulta apenas as evidências necessárias"
+          >
+            <Gauge size={12} /> RÁPIDO
+          </button>
+          <button
+            type="button"
+            className={analysisMode === 'deep' ? 'chat-mode--active' : ''}
+            onClick={() => setAnalysisMode('deep')}
+            disabled={thinking}
+            aria-pressed={analysisMode === 'deep'}
+            title="Mais raciocínio, ferramentas e orçamento de resposta"
+          >
+            <BrainCircuit size={12} /> PROFUNDO
+          </button>
+        </div>
+        <div className="chat-composer__field">
+          <span aria-hidden="true">&gt;</span>
+          <input
+            ref={inputRef}
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            placeholder={thinking ? 'Analisando evidências…' : 'Pergunte sobre riscos, metas ou previsões…'}
+            disabled={thinking}
+            maxLength={MAX_MESSAGE_LENGTH}
+            aria-label="Mensagem para o assistente"
+          />
+          <button type="submit" disabled={!input.trim() || thinking} aria-label="Enviar mensagem">
+            <SendHorizontal size={16} strokeWidth={1.8} />
+          </button>
+        </div>
+        <div className="chat-composer__meta">
+          <span>ENTER envia · ESC recolhe</span>
+          <button type="button" onClick={onLogout}>ENCERRAR SESSÃO</button>
+        </div>
+      </form>
+    </>
+  );
+}
+
+export default function ChatBot() {
+  const { user, logout } = useChatAuth();
+  const { width: viewportWidth } = useBreakpoint();
+  const { filtroAtivo, filtersByRoute, viewMode } = useDashboard();
+  const location = useLocation();
+  const [open, setOpen] = useState(() => (
+    readPanelOpen(user.email) ?? window.innerWidth >= DOCK_BREAKPOINT
+  ));
+  const [panelWidth, setPanelWidth] = useState(() => readPanelWidth(user.email));
+  const [conversationId, setConversationId] = useState(() => readConversationId(user.email));
+  const [activeConversation, setActiveConversation] = useState(null);
+  const [panelView, setPanelView] = useState('chat');
+  const launcherRef = useRef(null);
+  const panelRef = useRef(null);
+  const resizeRef = useRef(null);
+  const isDocked = viewportWidth >= DOCK_BREAKPOINT;
+  const dashboardContext = useMemo(() => {
+    const filters = { ...(filtersByRoute[location.pathname] || {}) };
+    if (filtroAtivo) filters.filtroAtivo = String(filtroAtivo);
+    if (viewMode && viewMode !== 'geral') filters.visualizacaoGlobal = String(viewMode);
+    return {
+      route: ROUTE_LABELS[location.pathname] ? location.pathname : '/gestao',
+      label: ROUTE_LABELS[location.pathname] || 'GESTÃO',
+      filters,
+    };
+  }, [filtroAtivo, filtersByRoute, location.pathname, viewMode]);
+
+  const maximumPanelWidth = useCallback(() => {
+    const sidebarWidth = Number.parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width'),
+    ) || 0;
+    return Math.max(
+      PANEL_MIN_WIDTH,
+      Math.min(PANEL_MAX_WIDTH, window.innerWidth - sidebarWidth - DASHBOARD_MIN_WIDTH),
+    );
+  }, []);
+
+  const effectiveWidth = Math.min(panelWidth, maximumPanelWidth());
+
+  const persistOpen = useCallback((nextOpen) => {
+    setOpen(nextOpen);
+    try {
+      localStorage.setItem(panelPreferenceKey(user.email, 'open'), String(nextOpen));
+    } catch {
+      // Preferências visuais não devem bloquear o uso do agente.
+    }
+  }, [user.email]);
+
+  const close = useCallback(() => {
+    persistOpen(false);
+    window.requestAnimationFrame(() => launcherRef.current?.focus());
+  }, [persistOpen]);
+
+  const openPanel = useCallback(() => {
+    persistOpen(true);
+  }, [persistOpen]);
+
+  const commitPanelWidth = useCallback((nextWidth) => {
+    const bounded = clamp(nextWidth, PANEL_MIN_WIDTH, maximumPanelWidth());
+    setPanelWidth(bounded);
+    panelRef.current?.style.setProperty('--chat-panel-width', `${bounded}px`);
+    try {
+      localStorage.setItem(panelPreferenceKey(user.email, 'width'), String(Math.round(bounded)));
+    } catch {
+      // O redimensionamento continua funcionando sem persistência.
+    }
+  }, [maximumPanelWidth, user.email]);
+
+  function handleResizeStart(event) {
+    if (!isDocked) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    resizeRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startWidth: effectiveWidth,
+      width: effectiveWidth,
+    };
+    document.body.classList.add('chat-is-resizing');
+  }
+
+  function handleResizeMove(event) {
+    const resize = resizeRef.current;
+    if (!resize || resize.pointerId !== event.pointerId) return;
+    const nextWidth = clamp(
+      resize.startWidth + resize.startX - event.clientX,
+      PANEL_MIN_WIDTH,
+      maximumPanelWidth(),
+    );
+    resize.width = nextWidth;
+    panelRef.current?.style.setProperty('--chat-panel-width', `${nextWidth}px`);
+  }
+
+  function handleResizeEnd(event) {
+    const resize = resizeRef.current;
+    if (!resize || resize.pointerId !== event.pointerId) return;
+    resizeRef.current = null;
+    document.body.classList.remove('chat-is-resizing');
+    commitPanelWidth(resize.width);
+  }
+
+  function handleResizeKey(event) {
+    if (!['ArrowLeft', 'ArrowRight', 'Home'].includes(event.key)) return;
+    event.preventDefault();
+    if (event.key === 'Home') {
+      commitPanelWidth(PANEL_DEFAULT_WIDTH);
+      return;
+    }
+    commitPanelWidth(effectiveWidth + (event.key === 'ArrowLeft' ? 24 : -24));
+  }
+
+  const handleConversationLoaded = useCallback((conversation) => {
+    if (conversation) setActiveConversation(conversation);
+  }, []);
+
+  const refreshConversation = useCallback((conversation) => {
+    if (conversation?.dashboard_context || conversation?.title) {
+      setActiveConversation(conversation);
+      return;
+    }
+    fetch(`${CHAT_API_BASE}/chat/conversations/${conversationId}`, {
+      headers: { Authorization: `Bearer ${user.token}` },
+    })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((body) => { if (body) setActiveConversation(body); })
+      .catch(() => {});
+  }, [conversationId, user.token]);
+
+  function persistConversationId(nextId) {
+    setConversationId(nextId);
+    try {
+      localStorage.setItem(conversationPreferenceKey(user.email), nextId);
+    } catch {
+      // A conversa continua ativa durante a sessão.
+    }
+  }
+
+  function startNewConversation() {
+    const nextId = createConversationId();
+    persistConversationId(nextId);
+    setPanelView('chat');
+    setActiveConversation({
+      id: nextId,
+      title: 'Nova análise operacional',
+      dashboard_context: dashboardContext,
+      message_count: 0,
+    });
+    fetch(`${CHAT_API_BASE}/chat/conversations`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${user.token}`,
+      },
+      body: JSON.stringify({
+        conversation_id: nextId,
+        dashboard_context: dashboardContext,
+      }),
+    }).catch(() => {});
+  }
+
+  function selectConversation(conversation) {
+    persistConversationId(conversation.id);
+    setActiveConversation(conversation);
+    setPanelView('chat');
+  }
+
+  useEffect(() => {
+    function handleKeys(event) {
+      if (event.key === 'Escape' && open) {
+        if (panelView === 'history') setPanelView('chat');
+        else close();
+        return;
+      }
+      if (isDocked || event.key !== 'Tab' || !panelRef.current) return;
+      const focusable = [...panelRef.current.querySelectorAll(
+        'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+      )];
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+    if (open) {
+      window.addEventListener('keydown', handleKeys);
+      if (!isDocked) document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeys);
+      document.body.style.overflow = '';
+      document.body.classList.remove('chat-is-resizing');
+    };
+  }, [close, isDocked, open, panelView]);
+
+  return (
+    <>
+      <button
+        ref={launcherRef}
+        className={`chat-launcher ${open ? 'chat-launcher--hidden' : ''}`}
+        onClick={openPanel}
+        aria-label="Abrir assistente Predictfy"
+        aria-expanded={open}
+      >
+        <span className="chat-launcher__icon"><AgentGlyph size={30} active /></span>
+        <span className="chat-launcher__label">PREDICTFY<br />AGENT</span>
+        <span className="chat-launcher__status" aria-hidden="true" />
+      </button>
+
+      {open && !isDocked && (
+        <button className="chat-backdrop" onClick={close} aria-label="Fechar assistente" />
+      )}
+
+      <section
+        ref={panelRef}
+        className={`chat-console ${open ? 'chat-console--open' : 'chat-console--closed'}`}
+        style={{ '--chat-panel-width': `${effectiveWidth}px` }}
+        role={isDocked ? 'complementary' : 'dialog'}
+        aria-modal={isDocked ? undefined : true}
+        aria-hidden={!open}
+        inert={!open}
+        aria-label="Predictfy Agent"
+      >
+        <div
+          className="chat-resizer"
+          role="separator"
+          aria-label="Redimensionar painel do agente"
+          aria-orientation="vertical"
+          aria-valuemin={PANEL_MIN_WIDTH}
+          aria-valuemax={Math.round(maximumPanelWidth())}
+          aria-valuenow={Math.round(effectiveWidth)}
+          tabIndex="0"
+          title="Arraste para redimensionar · Duplo clique para restaurar"
+          onPointerDown={handleResizeStart}
+          onPointerMove={handleResizeMove}
+          onPointerUp={handleResizeEnd}
+          onPointerCancel={handleResizeEnd}
+          onDoubleClick={() => commitPanelWidth(PANEL_DEFAULT_WIDTH)}
+          onKeyDown={handleResizeKey}
+        >
+          <span aria-hidden="true" />
+        </div>
+
+        <header className="chat-header">
+          <div className="chat-header__identity">
+            <div className="chat-header__mark"><AgentGlyph size={24} active /></div>
+            <div>
+              <strong>{panelView === 'history' ? 'CONVERSATION ' : 'PREDICTFY '}<em>{panelView === 'history' ? 'ARCHIVE' : 'AGENT'}</em></strong>
+              <small>{panelView === 'history' ? 'SEARCH / ORGANIZE / RESUME' : 'OPERATIONAL INTELLIGENCE'}</small>
+            </div>
+          </div>
+          <div className="chat-header__tools">
+            <ProviderStatus token={user.token} />
+            <button
+              onClick={() => setPanelView((current) => (current === 'history' ? 'chat' : 'history'))}
+              aria-label={panelView === 'history' ? 'Voltar para conversa' : 'Abrir histórico'}
+              title={panelView === 'history' ? 'Voltar para conversa' : 'Histórico'}
+            >
+              <History size={16} strokeWidth={1.6} />
+            </button>
+            <button onClick={startNewConversation} aria-label="Iniciar nova conversa" title="Nova conversa">
+              <Plus size={16} strokeWidth={1.6} />
+            </button>
+            <button onClick={close} aria-label="Recolher assistente" title="Recolher painel">
+              <PanelRightClose size={17} strokeWidth={1.6} />
+            </button>
+          </div>
+        </header>
+
+        {panelView === 'chat' ? (
+          <>
+            <div className="chat-context-strip">
+              <span className="chat-context-strip__live"><i aria-hidden="true" /> CONTEXTO ATIVO</span>
+              <span>{dashboardContext.label}</span>
+              <span title={activeConversation?.title || 'Nova análise operacional'}>
+                {activeConversation?.title || 'NOVA ANÁLISE'}
+              </span>
+            </div>
+
+            <ChatConversation
+              key={`${user.email}:${conversationId}`}
+              user={user}
+              conversationId={conversationId}
+              dashboardContext={dashboardContext}
+              onConversationLoaded={handleConversationLoaded}
+              onConversationUpdated={refreshConversation}
+              onLogout={logout}
+              onClose={() => { if (!isDocked) close(); }}
+              active={open}
+            />
+          </>
+        ) : (
+          <ChatHistory
+            token={user.token}
+            activeConversationId={conversationId}
+            onBack={() => setPanelView('chat')}
+            onNew={startNewConversation}
+            onSelect={selectConversation}
+          />
+        )}
+      </section>
     </>
   );
 }

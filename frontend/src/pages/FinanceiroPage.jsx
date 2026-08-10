@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { createElement, useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid, ReferenceLine, PieChart, Pie, Cell, LabelList,
@@ -9,7 +9,7 @@ import {
 } from '../data/mockData';
 
 // ─── KPI card ─────────────────────────────────────────────────────────────────
-function KpiCard({ label, value, meta, color, Icon, delay = 0 }) {
+function KpiCard({ label, value, meta, color, Icon: icon, delay = 0 }) {
   return (
     <div style={{
       background: 'var(--surface1)',
@@ -29,7 +29,7 @@ function KpiCard({ label, value, meta, color, Icon, delay = 0 }) {
           alignItems: 'center', justifyContent: 'center',
           background: `${color}18`, color,
         }}>
-          <Icon size={16} strokeWidth={1.8} />
+          {createElement(icon, { size: 16, strokeWidth: 1.8 })}
         </span>
       </div>
       <div style={{

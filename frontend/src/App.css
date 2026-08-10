@@ -17,6 +17,93 @@
   }
 }
 
+/* Microsoft Entra authentication gate */
+.login-screen {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(191, 90, 242, 0.12), transparent 34%),
+    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    var(--bg);
+  background-size: auto, 34px 34px, 34px 34px, auto;
+}
+
+.login-card {
+  width: min(460px, 100%);
+  padding: 42px;
+  background: rgba(14, 14, 14, 0.96);
+  border: 1px solid var(--border-md);
+  border-top: 2px solid var(--purple);
+  border-radius: 10px;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.6);
+}
+
+.login-card__mark {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 24px;
+  background: rgba(191, 90, 242, 0.07);
+  border: 1px solid rgba(191, 90, 242, 0.42);
+  border-radius: 7px;
+}
+
+.login-card__eyebrow { color: var(--purple); font: 700 10px/1 var(--font-mono); letter-spacing: 0.16em; }
+.login-card h1 { margin-top: 13px; font: 600 29px/1.15 var(--font-sans); letter-spacing: -0.025em; }
+.login-card > p { margin-top: 13px; color: var(--text-sec); font-size: 14px; line-height: 1.6; }
+
+.microsoft-login {
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 28px;
+  color: var(--text-pri);
+  background: var(--surface3);
+  border: 1px solid var(--border-hi);
+  border-radius: 5px;
+  font: 700 10px var(--font-mono);
+  letter-spacing: 0.08em;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+
+.microsoft-login:hover:not(:disabled),
+.microsoft-login:focus-visible { background: var(--surface4); border-color: var(--purple); outline: none; }
+.microsoft-login:disabled { cursor: not-allowed; opacity: 0.48; }
+.microsoft-login__logo { width: 17px; height: 17px; display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+.microsoft-login__logo i:nth-child(1) { background: #f35325; }
+.microsoft-login__logo i:nth-child(2) { background: #81bc06; }
+.microsoft-login__logo i:nth-child(3) { background: #05a6f0; }
+.microsoft-login__logo i:nth-child(4) { background: #ffba08; }
+
+.login-card__error {
+  margin-top: 12px;
+  padding: 10px 12px;
+  color: var(--red);
+  background: var(--red-dim);
+  border: 1px solid rgba(255, 45, 85, 0.25);
+  border-radius: 4px;
+  font: 10px/1.5 var(--font-mono);
+}
+
+.login-card > small { display: block; margin-top: 12px; color: var(--orange); font: 9px/1.5 var(--font-mono); }
+.login-card__security { display: flex; justify-content: space-between; gap: 12px; margin-top: 30px; padding-top: 15px; border-top: 1px solid var(--border); color: var(--text-muted); font: 8px var(--font-mono); letter-spacing: 0.06em; }
+
+@media (max-width: 520px) {
+  .login-card { padding: 30px 22px; }
+  .login-card h1 { font-size: 25px; }
+  .login-card__security { flex-direction: column; }
+}
+
 .hero {
   position: relative;
 

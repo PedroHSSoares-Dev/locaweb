@@ -35,6 +35,7 @@
 │  ├── prophet_model.py   → outputs/previsoes_volume.json       ✅        │
 │  │                        outputs/previsoes_volume_mc.json    ✅        │
 │  └── lstm_model.py      → outputs/previsoes_lstm.json         ✅        │
+│  └── long_horizon_projection.py → previsoes_horizonte_prophet.json ✅   │
 │                                                                         │
 │  Orquestrador: src/pipeline.py                                          │
 └──────────────────────────────┬──────────────────────────────────────────┘
@@ -50,6 +51,7 @@
 │  ├── previsoes_volume.json     Prophet: D+1 a D+7 (ensemble v5+v6)      │
 │  ├── previsoes_volume_mc.json  Prophet: Monte Carlo ensemble adaptativo  │
 │  └── previsoes_lstm.json       LSTM v2 (PyTorch): séries temporais      │
+│  └── previsoes_horizonte_prophet.json  Cenários D+1..D+365              │
 └──────────────────┬────────────────────────────────────┬─────────────────┘
                    │                                    │
                    ▼                                    ▼
@@ -65,10 +67,15 @@
 │  │   ├── clusters.py         │   │  ├── 03d_lstm.ipynb               │
 │  │   ├── kpi.py              │   │  ├── 04_eda_xgboost.ipynb         │
 │  │   ├── historico.py        │   │  ├── 05_eda_kmeans.ipynb          │
-│  │   └── context.py          │   │  └── 07_eda_kpi.ipynb             │
+│  │   ├── context.py          │   │  └── 07_eda_kpi.ipynb             │
+│  │   └── chat.py             │   │                                    │
 │  ├── schemas.py              │   └────────────────────────────────────┘
 │  └── services/               │
-│      └── data_loader.py      │
+│      ├── data_loader.py      │
+│      ├── operational_context.py
+│      ├── deterministic_chat.py
+│      ├── openai_provider.py  │
+│      └── ollama_provider.py  │
 └──────────────┬───────────────┘
                │
                ▼
@@ -82,9 +89,9 @@
 │  ├── /financeiro    → Exposição financeira · projeção KPI anual         │
 │  └── /modelos       → Métricas dos modelos com contexto e explicações   │
 │                                                                         │
-│  chatbot/ (Gemini Flash + Pro)               ⏳ Sprint 3               │
-│  ├── Gemini 2.5 Flash — roteador (~1s)                                  │
-│  └── Gemini 2.5 Pro  — analista sênior                                  │
+│  chatbot híbrido                                  ✅ MVP                 │
+│  ├── respostas factuais determinísticas (outputs/)                     │
+│  └── GPT-5.6 Luna/OpenAI; Gemma/Ollama como fallback                   │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -141,12 +148,13 @@ python src/pipeline.py --step kpi        # só projeção KPI
 python src/pipeline.py --step prophet    # Prophet ensemble v5+v6 (2025-only)
 python src/pipeline.py --step prophet-mc # Prophet Monte Carlo (série 2023-2025)
 python src/pipeline.py --step lstm       # LSTM v2 com early stopping
+python src/pipeline.py --step horizon    # Prophet D+1..D+365 exploratório
 ```
 
 ### 4. Camada de Outputs (`outputs/`)
 
 JSONs estáticos consumidos pela API e pelo frontend. Gerados pelo pipeline e
-commitados no repositório (exceto dados brutos/processados). Todos os 6 arquivos
+commitados no repositório (exceto dados brutos/processados). Todos os 7 arquivos
 já estão gerados.
 
 ### 5. API (`api/`)
@@ -154,7 +162,15 @@ já estão gerados.
 FastAPI servindo os JSONs de outputs com:
 - Normalização de formatos (diferentes modelos → resposta uniforme)
 - Hierarquia de fallback para previsões: LSTM v2 > Prophet MC > Prophet Original
-- Snapshot operacional para o chatbot (`/api/context`)
+- Snapshot operacional canônico para o chatbot (`/api/context`)
+- Chat híbrido com sessão assinada, rate limit e streaming NDJSON
+- Function calling read-only para consultar e combinar modelos, metas, clusters e regras
+- Simulação de cota e projeções exploratórias em horizontes D+8..D+365
+- Cache versionado L1 + Redis/Valkey opcional, single-flight e cache semântico conservador
+- Memória curta isolada por usuário/conversa, modos rápido/profundo e fontes estruturadas
+- Arquivo persistente de conversas em SQLite local ou PostgreSQL, isolado por identidade
+- Títulos automáticos, busca, resumo extrativo e contexto de rota/filtros do dashboard
+- Telemetria agregada, feedback por resposta e rate limit distribuído com fallback local
 - `Dockerfile` disponível para containerização
 
 ### 6. Frontend (`frontend/`)
@@ -199,7 +215,7 @@ Prophet e LSTM já foram convertidos para `.py`:
 | Dados | pandas · numpy · pyarrow · openpyxl |
 | API | FastAPI · Uvicorn · Pydantic · Docker |
 | Frontend | React 18 · Vite · Recharts · react-router-dom · lucide-react |
-| Chatbot | Gemini 2.5 Flash (roteador) · Gemini 2.5 Pro (analista) ⏳ Sprint 3 |
+| Chatbot | Respostas determinísticas · GPT-5.6 Luna/OpenAI · Ollama fallback |
 
 ---
 
@@ -209,6 +225,7 @@ Prophet e LSTM já foram convertidos para `.py`:
 1. python src/pipeline.py          # gera todos os outputs/
 2. uvicorn api.main:app            # serve API em :8000
 3. npm run dev (frontend/)         # serve dashboard em :5173
+4. OpenAI Responses API            # análises; Ollama opcional para fallback offline
 ```
 
 ### Atualização de modelos
@@ -225,6 +242,9 @@ Prophet e LSTM já foram convertidos para `.py`:
 |---|---|
 | JSONs estáticos em vez de DB | Pipeline batch, não tempo-real; simplifica deploy |
 | Hierarquia de modelos na API | LSTM tem menor MAE, mas pode estar indisponível |
+| Chatbot híbrido | Fatos locais sem custo; provider analítico selecionado por ambiente e substituível |
+| Ollama sob demanda | Sessão carrega o modelo; logout libera a RAM e encerra somente processos gerenciados pela API |
+| Respostas factuais sem LLM | Menor latência e nenhum risco de alterar números do snapshot |
 | Notebooks só para EDA | Reprodutibilidade: código de produção deve ser testável em `.py` |
 | Odd K only (K-Means) | Evita partições simétricas artificiais em clusters |
 | PR-AUC como métrica principal | Dados muito desbalanceados (1:102); acurácia é enganosa |

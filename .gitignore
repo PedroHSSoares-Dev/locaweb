@@ -5,8 +5,10 @@ AGENTS.md
 # ── Dados — nunca commitar o dataset real ─────────────────
 data/raw/*
 data/processed/*
+data/chat/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
+!data/chat/.gitkeep
 
 # ── Modelos treinados — arquivos grandes, regeneráveis ────
 models_saved/*

@@ -37,6 +37,7 @@ outputs/  (JSONs estáticos consumidos pelo frontend)
   ├── previsoes_volume.json      Prophet ensemble 2025-only
   ├── previsoes_volume_mc.json   Prophet Monte Carlo 2023-2025
   ├── previsoes_lstm.json        LSTM v2 early stopping
+  ├── previsoes_horizonte_prophet.json  Prophet D+1..D+365 para cenários
   ├── risco_ola.json             XGBoost + SHAP
   ├── clusters.json              K-Means K=5
   └── kpi_atingimento.json       Projeção orçamento mensal
@@ -46,7 +47,7 @@ outputs/  (JSONs estáticos consumidos pelo frontend)
   │  (Vercel) ✅       │  (FIAP req.) │
   └────────────────────┴──────────────┘
        ↓
-  Chatbot Gemini Flash + Pro  ⏳ Sprint 3
+  Chatbot híbrido (respostas exatas + GPT-5.6 Luna; Ollama fallback)  ✅ MVP
 ```
 
 ---
@@ -58,7 +59,7 @@ outputs/  (JSONs estáticos consumidos pelo frontend)
 | Modelos ML | Prophet · XGBoost · LSTM (PyTorch) · scikit-learn · SHAP · imbalanced-learn · Optuna |
 | Dados | pandas · numpy · openpyxl · pyarrow |
 | Frontend | React + Vite · Recharts · react-router-dom · lucide-react |
-| Chatbot | Gemini 2.5 Flash (roteador) · Gemini 2.5 Pro (analista) |
+| Chatbot | Respostas determinísticas · GPT-5.6 Luna/OpenAI · Ollama fallback · streaming NDJSON |
 | Deploy | Vercel (frontend) · GitHub Actions (pipeline ML) |
 | Entregável FIAP | Power BI |
 
@@ -89,13 +90,14 @@ locaweb/
 │   │   ├── prophet_model.py           # ensemble v5+v6, Block Bootstrap Monte Carlo
 │   │   ├── lstm_model.py              # LSTM 2 camadas, early stopping, Monte Carlo
 │   │   ├── xgboost_model.py           # classificação risco OLA + SHAP
+│   │   ├── long_horizon_projection.py # inferência Prophet D+1..D+365 para planejamento
 │   │   ├── kmeans_model.py            # segmentação K-Means
 │   │   └── kpi_projection.py          # projeção orçamento mensal dinâmico
-│   └── pipeline.py                    # orquestrador — 7 etapas
+│   └── pipeline.py                    # orquestrador — 8 etapas
 ├── api/                               # FastAPI
 │   ├── main.py
-│   ├── routers/                       # previsoes · risco · clusters · kpi · historico · context
-│   └── services/data_loader.py
+│   ├── routers/                       # previsoes · risco · clusters · kpi · historico · context · chat
+│   └── services/                      # contexto canônico · sessão · providers · respostas exatas
 ├── frontend/                          # React + Vite
 │   └── src/
 │       ├── pages/
@@ -120,6 +122,7 @@ locaweb/
 
 - Python 3.11+ (recomendado: micromamba env `dev`)
 - Node.js 20+
+- Chave da OpenAI com acesso a `gpt-5.6-luna`; Ollama com `gemma4:12b-it-qat` é fallback opcional
 
 ### 1. Clonar o repositório
 
@@ -155,6 +158,7 @@ python src/pipeline.py --step kpi         # projeção KPI (~2s)
 python src/pipeline.py --step prophet     # Prophet 2025-only (~36s)
 python src/pipeline.py --step prophet-mc  # Prophet Monte Carlo (~5min)
 python src/pipeline.py --step lstm        # LSTM v2 (~25s)
+python src/pipeline.py --step horizon     # Prophet D+1..D+365 exploratório (~2s)
 ```
 
 Todos os JSONs são gerados em `outputs/` e os modelos serializados em `models_saved/`.
@@ -162,6 +166,9 @@ Todos os JSONs são gerados em `outputs/` e os modelos serializados em `models_s
 ### 5. Iniciar a API
 
 ```bash
+cp .env.example .env
+# Preencha OPENAI_API_KEY no .env. Para fallback offline:
+# ollama pull gemma4:12b-it-qat
 uvicorn api.main:app --reload
 # API em http://localhost:8000
 # Docs em http://localhost:8000/docs
@@ -213,12 +220,38 @@ As features a seguir nunca podem entrar nos modelos — são conhecidas apenas a
 
 ---
 
-## Chatbot — arquitetura de roteamento
+## Chatbot — arquitetura híbrida
 
-⏳ Sprint 3
+✅ MVP funcional, cloud-agnostic e com custo concentrado apenas nas perguntas analíticas.
 
-- **LLM 1 — Gemini 2.5 Flash**: roteador de intenção. Responde perguntas simples (~1s). Escala para LLM 2 quando necessário.
-- **LLM 2 — Gemini 2.5 Pro**: analista sênior. Recebe contexto com dados históricos e outputs dos modelos.
+- **Camada determinística restrita:** somente comandos factuais explícitos e quick actions, como `Previsão amanhã`, `Status das metas` e `Cluster mais crítico`, leem os JSONs sem LLM.
+- **Camada analítica:** perguntas de causa, comparação ou recomendação usam `gpt-5.6-luna` pela Responses API. `CHAT_LLM_PROVIDER=ollama` ativa o Gemma local sem alterar o frontend.
+- **Roteamento agent-first:** toda pergunta natural, estratégica, futura, comparativa ou ambígua vai ao agente; palavras isoladas como “meta” ou “violação” não reduzem a resposta a um cartão factual.
+- **Agente com ferramentas:** o Luna escolhe consultas read-only para LSTM, Prophet, XGBoost/SHAP, K-Means, metas e regras operacionais. Perguntas amplas podem combinar várias fontes em paralelo.
+- **Cenários de longo prazo:** D+8..D+365 usa inferência offline dos Prophet já treinados. A ferramenta de cota combina volume, taxa real histórica e meta anual em cenários baixo/base/alto; o resultado é exploratório fora de D+7.
+- **Planejamento periódico:** análises mensais ou trimestrais retornam volume do período e acumulado, consumo de cota e score executivo auditável de 0–10; o score combina cenário-base, estresse e ritmo proporcional e não é probabilidade.
+- **Contexto canônico:** `/api/context` é a única fonte de dados injetada no modelo. O prompt proíbe inventar números e diferencia correlação, hipótese e causalidade.
+- **Análise transparente:** o painel `Pensando...` mostra um resumo verificável das evidências, checagens e limitações — nunca o raciocínio interno bruto — e fecha quando a resposta começa.
+- **Tempo de execução:** cada resposta registra `Worked for X min Y sec` a partir do tempo medido no backend.
+- **Cache seguro:** respostas analíticas usam cache versionado por dados, prompt e modelo, single-flight e reutilização semântica local conservadora; prioridades, números e negações diferentes não compartilham resposta.
+- **Conversas persistentes:** o arquivo interno gera títulos automáticos, busca título/conteúdo, permite renomear, fixar e excluir e restaura todo o histórico por identidade.
+- **Resumo + memória curta:** conversas longas ganham um resumo extrativo para o contexto da LLM, mantendo as mensagens completas no arquivo; as últimas interações continuam em memória rápida.
+- **Contexto do dashboard:** cada conversa registra rota e filtros selecionados. Ao reabri-la em outro contexto, a interface permite manter o original ou adotar o atual.
+- **Modos de análise:** `RÁPIDO` reduz latência/custo; `PROFUNDO` amplia esforço, orçamento de saída e rodadas de ferramentas.
+- **Auditabilidade:** fontes read-only, uso de tokens, origem do cache e `response_id` chegam como metadados estruturados, separados do texto da LLM.
+- **Qualidade operacional:** feedback positivo/negativo e métricas agregadas não armazenam prompts na telemetria.
+- **Escala:** `CHAT_REDIS_URL` habilita Redis ou Valkey para cache, memória, feedback e rate limit compartilhados; sem ele existe fallback local sem dependência de cloud.
+- **Acesso:** o Microsoft Entra ID valida a identidade e o backend troca o access token por uma sessão HMAC temporária, revalidada contra a allowlist em cada requisição.
+- **Custo sob controle:** somente consultas analíticas usam a OpenAI; perguntas factuais continuam locais. O modelo e o esforço são configuráveis por ambiente.
+- **Fallback offline:** com Ollama ativo, a sessão inicia e pré-carrega o Gemma sob demanda; o logout descarrega o modelo e encerra somente o servidor iniciado pela API.
+- **Persistência cloud-agnostic:** SQLite funciona sem configuração local; `CHAT_DATABASE_URL` troca o repositório por PostgreSQL em produção sem alterar o frontend.
+- **Endpoints:** além de sessão/status/chat, há CRUD em `/api/chat/conversations`, feedback, reset de memória curta e métricas.
+- **Autenticação:** Microsoft Entra ID + allowlist de e-mail, sem roles nesta fase. Consulte [`docs/autenticacao_entra.md`](docs/autenticacao_entra.md).
+
+O frontend espera `VITE_API_URL=http://localhost:8000/api`. A chave da OpenAI permanece somente no backend. Se a API for executada no Docker com fallback Ollama no macOS, `host.docker.internal:11434` já está configurado.
+
+Em produção, configure `CORS_ALLOWED_ORIGINS` na API com a origem exata do frontend, por exemplo `https://predictfy-locaweb.vercel.app`.
+O arquivo `render.yaml` descreve a API e o workflow `.github/workflows/ci.yml` valida backend e frontend antes do auto-deploy no Render.
 
 ---
 

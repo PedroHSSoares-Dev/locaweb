@@ -10,6 +10,7 @@ Uso:
     python src/pipeline.py --step prophet     # Prophet 2025-only
     python src/pipeline.py --step prophet-mc  # Prophet Monte Carlo (3 anos)
     python src/pipeline.py --step lstm        # LSTM v2 (Monte Carlo 2023-2025)
+    python src/pipeline.py --step horizon     # Prophet D+1..D+365 exploratório
 """
 from __future__ import annotations
 
@@ -102,6 +103,17 @@ def step_kpi() -> None:
     print("OK: outputs/kpi_atingimento.json gerado\n")
 
 
+def step_long_horizon() -> None:
+    print("=" * 50)
+    print("ETAPA — Prophet Long Horizon (Planejamento D+1..D+365)")
+    print("=" * 50)
+    from src.models.long_horizon_projection import build_projection, export_projection
+
+    result = build_projection()
+    export_projection(result)
+    print("OK: outputs/previsoes_horizonte_prophet.json gerado\n")
+
+
 STEPS = {
     "fe": step_feature_engineering,
     "xgb": step_xgboost,
@@ -110,6 +122,7 @@ STEPS = {
     "prophet": lambda: step_prophet(use_monte_carlo=False),
     "prophet-mc": lambda: step_prophet(use_monte_carlo=True),
     "lstm": step_lstm,
+    "horizon": step_long_horizon,
 }
 
 
