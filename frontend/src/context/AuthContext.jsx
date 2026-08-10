@@ -8,16 +8,19 @@ const STORAGE_KEY = 'predictfy_chat_session';
 const PENDING_LOGIN_KEY = 'predictfy_entra_login_pending';
 function readStoredSession() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    // The application token is intentionally tab-scoped. Conversations remain
+    // persistent in the backend, while closing the browser discards credentials.
+    localStorage.removeItem(STORAGE_KEY);
+    const raw = sessionStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const session = JSON.parse(raw);
     if (!session.token || !session.email || session.expiresAt * 1000 <= Date.now()) {
-      localStorage.removeItem(STORAGE_KEY);
+      sessionStorage.removeItem(STORAGE_KEY);
       return null;
     }
     return session;
   } catch {
-    localStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem(STORAGE_KEY);
     return null;
   }
 }
@@ -51,6 +54,7 @@ export function AuthProvider({ children }) {
   const exchangeInFlight = useRef(false);
 
   const clearLocalSession = useCallback(() => {
+    sessionStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(STORAGE_KEY);
     setUser(null);
     setStatus('idle');
@@ -63,8 +67,17 @@ export function AuthProvider({ children }) {
       headers: { Authorization: `Bearer ${initialSession.token}` },
       signal: controller.signal,
     })
-      .then((response) => {
+      .then(async (response) => {
         if (!response.ok) throw new Error('Sessão inválida');
+        const data = await response.json().catch(() => ({}));
+        const refreshedSession = {
+          ...initialSession,
+          role: data.role || initialSession.role || 'member',
+          permissions: Array.isArray(data.permissions) ? data.permissions : (initialSession.permissions || []),
+          isOwner: Boolean(data.is_owner ?? initialSession.isOwner),
+        };
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(refreshedSession));
+        setUser(refreshedSession);
         setStatus('authorized');
       })
       .catch((requestError) => {
@@ -88,8 +101,11 @@ export function AuthProvider({ children }) {
       accessMode: data.access_mode,
       llmStatus: data.llm_status,
       welcome: data.welcome,
+      role: data.role || 'member',
+      permissions: Array.isArray(data.permissions) ? data.permissions : [],
+      isOwner: Boolean(data.is_owner),
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(session));
     sessionStorage.removeItem(PENDING_LOGIN_KEY);
     setUser(session);
     setStatus('authorized');

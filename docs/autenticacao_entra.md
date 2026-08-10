@@ -1,14 +1,19 @@
-# Autenticação com Microsoft Entra ID
+# Autenticação e autorização com Microsoft Entra ID
 
-O Predictfy usa o Entra apenas para comprovar a identidade. Não existem roles nesta fase:
+O Predictfy separa autenticação de autorização:
 
 1. a SPA React autentica a conta Microsoft com MSAL e PKCE;
 2. a SPA solicita um access token destinado à API Predictfy;
 3. o FastAPI valida assinatura, emissor, audiência, versão, cliente e scope;
-4. o e-mail validado pelo Entra precisa existir em `ALLOWED_EMAILS`;
-5. a API emite uma sessão curta usada pela dashboard e pelo chatbot.
+4. no primeiro login, o e-mail validado encontra um convite pendente e o
+   cadastro é vinculado ao par imutável `tid + oid` da Microsoft;
+5. a partir daí, o PostgreSQL/Supabase decide se o usuário está ativo e se é
+   `member` ou `admin`;
+6. a API emite uma sessão curta usada pela dashboard, pelo chatbot e, quando
+   autorizado, pela área `/admin`.
 
-Atualmente a allowlist inclui `pedrohssoares@live.com`.
+`ALLOWED_EMAILS=pedrohssoares@live.com` é apenas o bootstrap idempotente do
+proprietário inicial. Novos usuários são criados pela tela administrativa.
 
 ## 1. Registrar a API
 
@@ -65,18 +70,37 @@ VITE_ENTRA_REDIRECT_URI=http://localhost:5173/auth-redirect.html
 VITE_ENTRA_API_SCOPE=api://<client-id-do-Predictfy-API>/access_as_user
 ```
 
-`common` é necessário neste MVP porque a conta autorizada `@live.com` é uma conta Microsoft pessoal. A allowlist no backend impede que outras contas autenticadas obtenham acesso.
+`common` é necessário neste MVP porque a conta proprietária `@live.com` é uma
+conta Microsoft pessoal. Autenticar na Microsoft não concede acesso por si só:
+o par `tid + oid` também precisa estar ativo no diretório do Predictfy.
 
 ## 4. Produção
 
 Adicione a URL publicada como Redirect URI do tipo SPA e substitua `VITE_ENTRA_REDIRECT_URI`. Configure todas as variáveis no serviço de deploy. Os IDs de aplicação são públicos; segredos da API e `CHAT_SESSION_SECRET` permanecem somente no backend.
 
-Para restringir tenants no futuro, preencha `ENTRA_ALLOWED_TENANT_IDS` com IDs separados por vírgula. Isso só deve ser feito depois de remover contas pessoais da allowlist ou incluir explicitamente o tenant Microsoft de consumidores.
+Para restringir tenants no futuro, preencha `ENTRA_ALLOWED_TENANT_IDS` com IDs separados por vírgula. Isso só deve ser feito depois de remover contas pessoais do diretório autorizado ou incluir explicitamente o tenant Microsoft de consumidores.
 
 ## Verificações implementadas
 
 - `/api/health` permanece público para healthcheck;
 - `POST /api/chat/session` aceita somente access token Entra válido;
 - os demais endpoints `/api/*` exigem sessão Predictfy;
-- a allowlist é reavaliada em toda requisição, permitindo revogação imediata;
+- a autorização dinâmica, o status e a `session_version` são reavaliados no
+  banco em toda requisição, permitindo revogação imediata;
+- alterações de papel, desativação, remoção e logout invalidam sessões emitidas;
+- o proprietário bootstrap não pode ser rebaixado, desativado ou removido;
+- membros recebem `403` em `/api/admin/*`, mesmo que tentem chamar a API fora da interface;
+- convites e mudanças de acesso são registrados em `user_access_audit`;
 - tokens de outro público, outro aplicativo cliente, sem scope ou fora da validade são rejeitados.
+
+## Diretório e papéis
+
+- `member`: dashboards, histórico persistente e agente AIOps;
+- `admin`: tudo de `member` mais gestão de usuários e consulta da auditoria;
+- `pending`: convite criado, ainda sem identidade Microsoft vinculada;
+- `active`: acesso liberado;
+- `disabled`: acesso e sessões bloqueados, com histórico preservado.
+
+O e-mail é usado somente para localizar o convite inicial. Depois do binding,
+uma conta guest, corporativa ou pessoal com o mesmo texto de e-mail não herda o
+acesso de outra identidade Microsoft.

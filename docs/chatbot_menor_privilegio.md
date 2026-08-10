@@ -8,16 +8,17 @@ O modelo nunca decide o papel. Frases como “sou o CEO” não alteram permiss�
 
 ## Situação atual validada
 
-- A sessão contém somente `email` e expiração; não existe papel ou escopo.
-- O e-mail é digitado pelo usuário e comparado com uma allowlist, mas sua propriedade não é verificada.
-- A assinatura HMAC impede adulteração posterior do token, mas não impede que alguém conhecendo um e-mail permitido o personifique.
-- O logout não revoga o token; sem `jti` e denylist ele continua válido até expirar. Também faltam emissor e audiência no token.
+- O Microsoft Entra ID comprova a identidade e a API valida assinatura, emissor, audiência, cliente, scope, `tid` e `oid`.
+- O e-mail localiza somente o convite no primeiro login; depois disso a autorização usa o par imutável `tid + oid`.
+- A sessão HMAC v3 contém `uid`, `jti` e `session_version`; papel, status, binding e versão são revalidados no banco em toda requisição.
+- Logout, alteração de papel, desativação e remoção incrementam a versão e revogam os tokens já emitidos.
+- Existem os papéis de plataforma `member` e `admin`; papéis operacionais e escopos por time/produto continuam como evolução futura.
 - Todas as nove ferramentas analíticas são apresentadas ao provider OpenAI para qualquer sessão permitida.
 - O contexto enviado ao LLM já aplica seleção por intenção e não inclui o dataset bruto.
 - As ferramentas retornam agregados sanitizados e são read-only.
-- Os endpoints de dashboard e `/api/context` não usam a sessão do chatbot; proteger apenas as ferramentas não protege os mesmos dados expostos por essas rotas.
-- CORS está configurado como `*`; o rate limit é local ao processo e reinicia com a aplicação.
-- `CHAT_ALLOW_LOCAL_DEV` e o segredo de desenvolvimento precisam falhar fechados em produção.
+- Todos os endpoints de dashboard, contexto, chatbot e administração usam a mesma sessão verificada no middleware global.
+- CORS usa uma lista exata de origens; Redis/Valkey pode compartilhar o rate limit entre instâncias, com fallback local para desenvolvimento.
+- `CHAT_ALLOW_LOCAL_DEV=false` e um `CHAT_SESSION_SECRET` gerado permanecem obrigatórios em produção.
 
 ## Dados existentes e classificação
 

@@ -10,11 +10,11 @@ from dotenv import load_dotenv
 # Must run before router imports because the local LLM provider is configured at import time.
 load_dotenv()
 
-from api.routers import previsoes, risco, clusters, kpi, historico, context
+from api.routers import previsoes, risco, clusters, kpi, historico, context, admin
 from api.routers.chat import router as chat_router
 from api.schemas import HealthResponse
 from api.services.data_loader import available_models
-from api.services.chat_auth import SessionError, verify_session
+from api.services.chat_auth import SessionBackendError, SessionError, verify_session
 
 
 @asynccontextmanager
@@ -104,6 +104,8 @@ async def protect_predictfy_api(request: Request, call_next):
             return JSONResponse(status_code=401, content={"detail": "Sessão de acesso ausente."})
         try:
             request.state.session = verify_session(authorization.split(" ", 1)[1].strip())
+        except SessionBackendError as exc:
+            return JSONResponse(status_code=503, content={"detail": str(exc)})
         except SessionError as exc:
             return JSONResponse(status_code=401, content={"detail": str(exc)})
     return await call_next(request)
@@ -125,6 +127,7 @@ app.include_router(kpi.router,       prefix="/api")
 app.include_router(historico.router, prefix="/api")
 app.include_router(context.router,   prefix="/api")
 app.include_router(chat_router, prefix="/api")
+app.include_router(admin.router, prefix="/api")
 
 
 @app.get(

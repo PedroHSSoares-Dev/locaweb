@@ -7,8 +7,10 @@ import GestaoPage from './pages/GestaoPage';
 import MonitoramentoPage from './pages/MonitoramentoPage';
 import TecnicoPage from './pages/TecnicoPage';
 import ModelosPage from './pages/ModelosPage';
+import AdminPage from './pages/AdminPage';
 import { useBreakpoint } from './hooks/useBreakpoint';
 import { useChatAuth } from './hooks/useChatAuth';
+import { isAdminUser } from './auth/authorization';
 import LogoPredictfy from './components/LogoPredictfy';
 import './App.css';
 
@@ -16,6 +18,7 @@ import { Analytics } from "@vercel/analytics/react"
 
 function AppInner() {
   const { isMobile } = useBreakpoint();
+  const { user } = useChatAuth();
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100%', overflow: 'hidden' }}>
       <Sidebar />
@@ -38,6 +41,11 @@ function AppInner() {
               <Route path="/monitoramento" element={<MonitoramentoPage />} />
               <Route path="/tecnico"       element={<TecnicoPage />} />
               <Route path="/modelos"       element={<ModelosPage />} />
+              <Route
+                path="/admin"
+                element={isAdminUser(user) ? <AdminPage /> : <Navigate to="/gestao" replace />}
+              />
+              <Route path="*" element={<Navigate to="/gestao" replace />} />
             </Routes>
       </div>
       <ChatBot />
@@ -63,7 +71,7 @@ function LoginScreen() {
         {!entraConfigured && <small>Configuração local pendente: IDs públicos do Entra ainda não informados.</small>}
         <div className="login-card__security">
           <span>IDENTIDADE / MICROSOFT ENTRA ID</span>
-          <span>ACESSO / ALLOWLIST</span>
+          <span>ACESSO / DIRETÓRIO RBAC</span>
         </div>
       </section>
     </main>

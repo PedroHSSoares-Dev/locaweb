@@ -22,6 +22,7 @@ from api.services.entra_auth import (
 )
 from api.services.chat_guardrails import guard_model_output, guard_user_message
 from api.services.conversation_store import ConversationStore
+from api.services.user_store import UserStore
 from api.services.chat_tools import CHAT_TOOLS, execute_chat_tool
 from api.services.deterministic_chat import answer_deterministically
 from api.services.ollama_provider import (
@@ -510,6 +511,13 @@ class SessionTests(unittest.TestCase):
         os.environ["CHAT_ALLOW_LOCAL_DEV"] = "true"
         os.environ["CHAT_SESSION_SECRET"] = "unit-test-secret"
         os.environ.pop("ALLOWED_EMAILS", None)
+        self.user_store = UserStore("sqlite:///:memory:")
+        self.user_store_patcher = patch("api.services.chat_auth.user_store", self.user_store)
+        self.user_store_patcher.start()
+
+    def tearDown(self):
+        self.user_store_patcher.stop()
+        self.user_store.engine.dispose()
 
     def test_signed_session_round_trip(self):
         token, expected = create_session(
@@ -530,7 +538,7 @@ class SessionTests(unittest.TestCase):
         with self.assertRaises(SessionError):
             verify_session(token + "x")
 
-    def test_allowlist_can_revoke_an_existing_session(self):
+    def test_bootstrap_owner_remains_authorized_after_environment_rotation(self):
         with patch.dict(os.environ, {
             "CHAT_ALLOW_LOCAL_DEV": "false",
             "ALLOWED_EMAILS": "pedrohssoares@live.com",
@@ -541,8 +549,7 @@ class SessionTests(unittest.TestCase):
                 tenant_id="test-tenant",
             )
             os.environ["ALLOWED_EMAILS"] = "outro@example.com"
-            with self.assertRaises(SessionError):
-                verify_session(token)
+            self.assertEqual(verify_session(token).email, "pedrohssoares@live.com")
 
 
 class EntraAuthTests(unittest.TestCase):
@@ -946,6 +953,8 @@ class ChatApiTests(unittest.TestCase):
 
     def setUp(self):
         self.conversation_store = ConversationStore("sqlite:///:memory:")
+        self.user_store = UserStore("sqlite:///:memory:")
+        self.user_store_patcher = patch("api.services.chat_auth.user_store", self.user_store)
         self.conversation_store_patcher = patch(
             "api.routers.chat.conversation_store",
             self.conversation_store,
@@ -959,6 +968,7 @@ class ChatApiTests(unittest.TestCase):
             new_callable=AsyncMock,
         )
         self.conversation_store_patcher.start()
+        self.user_store_patcher.start()
         self.acquire_mock = self.acquire_patcher.start()
         self.release_mock = self.release_patcher.start()
         self.acquire_mock.return_value = {
@@ -980,7 +990,9 @@ class ChatApiTests(unittest.TestCase):
         self.acquire_patcher.stop()
         self.release_patcher.stop()
         self.conversation_store_patcher.stop()
+        self.user_store_patcher.stop()
         self.conversation_store.engine.dispose()
+        self.user_store.engine.dispose()
 
     def _token(self):
         response = self.client.post("/api/chat/session", json={"email": "demo@example.com"})

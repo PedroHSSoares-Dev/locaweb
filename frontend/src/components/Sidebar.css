@@ -144,6 +144,29 @@
   border-color: rgba(90, 200, 250, 0.13);
 }
 
+.sidebar-nav__item--admin {
+  margin-top: 12px;
+}
+
+.sidebar-nav__item--admin::before {
+  content: '';
+  position: absolute;
+  inset: -7px 5px auto;
+  height: 1px;
+  background: var(--border);
+}
+
+.sidebar-nav__item--admin.sidebar-nav__item--active {
+  color: var(--purple);
+  background: linear-gradient(90deg, rgba(191,90,242,0.11), rgba(191,90,242,0.025));
+  border-color: rgba(191,90,242,0.15);
+}
+
+.sidebar-nav__item--admin.sidebar-nav__item--active .sidebar-nav__signal {
+  background: var(--purple);
+  box-shadow: 0 0 10px rgba(191,90,242,0.72);
+}
+
 .sidebar-nav__signal {
   position: absolute;
   inset: 11px auto 11px -7px;

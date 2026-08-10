@@ -369,9 +369,9 @@ Campos com modelos indisponíveis retornam `"disponivel": false`.
 
 | Método | Endpoint | Função |
 |---|---|---|
-| `POST` | `/api/chat/session` | Valida o access token Microsoft Entra, aplica a allowlist e emite a sessão Predictfy |
-| `GET` | `/api/chat/session` | Valida a sessão atual e retorna a identidade pública |
-| `DELETE` | `/api/chat/session` | Encerra a sessão e libera recursos locais quando o provider usa Ollama |
+| `POST` | `/api/chat/session` | Valida o access token Microsoft Entra, vincula/consulta o diretório autorizado e emite a sessão Predictfy |
+| `GET` | `/api/chat/session` | Valida a sessão atual e retorna identidade, papel e capacidades públicas |
+| `DELETE` | `/api/chat/session` | Revoga a versão atual da sessão e libera recursos locais quando o provider usa Ollama |
 | `GET` | `/api/chat/status` | Verifica o provider e o modelo configurados |
 | `POST` | `/api/chat` | Resposta completa, útil para integrações e testes |
 | `POST` | `/api/chat/stream` | Eventos NDJSON `meta`, `status`, `reasoning`, `token`, `done` ou `error` |
@@ -380,6 +380,20 @@ Campos com modelos indisponíveis retornam `"disponivel": false`.
 | `GET` | `/api/chat/conversations/{id}` | Restaura metadados e mensagens completas |
 | `PATCH` | `/api/chat/conversations/{id}` | Renomeia, fixa ou atualiza o contexto anexado |
 | `DELETE` | `/api/chat/conversations/{id}` | Exclui permanentemente a conversa do usuário |
+
+## Módulo: Administração de acessos
+
+Todos os endpoints abaixo exigem uma sessão Predictfy ativa com papel `admin`.
+O frontend nunca recebe as chaves imutáveis `oid`/`tid` e nunca acessa o
+Supabase diretamente.
+
+| Método | Endpoint | Função |
+|---|---|---|
+| `GET` | `/api/admin/users` | Lista o diretório autorizado; aceita busca e filtros de papel/status |
+| `POST` | `/api/admin/users` | Cria um convite por e-mail com papel `member` ou `admin` |
+| `PATCH` | `/api/admin/users/{id}` | Altera papel ou status com controle otimista por `version` |
+| `DELETE` | `/api/admin/users/{id}` | Remove o acesso de forma lógica, revoga sessões e preserva a auditoria |
+| `GET` | `/api/admin/audit` | Lista eventos append-only de administração e vinculação |
 
 Os endpoints de consulta exigem `Authorization: Bearer <token>`. Somente quick actions factuais explicitamente reconhecidas são respondidas a partir de `outputs/`, sem custo de LLM. Toda pergunta natural, estratégica, futura, comparativa ou ambígua prefere o agente `gpt-5.6-luna` quando `CHAT_LLM_PROVIDER=openai`, ou `OLLAMA_MODEL` quando o fallback local está ativo.
 

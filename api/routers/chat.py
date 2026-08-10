@@ -18,10 +18,12 @@ from pydantic import BaseModel, Field
 from api.services.chat_auth import (
     ChatSession,
     RateLimitError,
+    SessionBackendError,
     SessionError,
     create_session,
     enforce_rate_limit,
     local_access_enabled,
+    revoke_session,
     verify_session,
 )
 from api.services.entra_auth import EntraIdentity, require_entra_identity
@@ -116,11 +118,21 @@ class ConversationUpdateRequest(BaseModel):
     dashboard_context: DashboardContextSnapshot | None = None
 
 
-def _session_from_header(authorization: Annotated[str | None, Header()] = None) -> ChatSession:
+def _session_from_header(
+    request: Request,
+    authorization: Annotated[str | None, Header()] = None,
+) -> ChatSession:
+    # The global API middleware already verified this request. Reusing its
+    # result avoids a second authorization-database lookup per route.
+    existing = getattr(request.state, "session", None)
+    if isinstance(existing, ChatSession):
+        return existing
     if not authorization or not authorization.lower().startswith("bearer "):
         raise HTTPException(status_code=401, detail="Sessão do chatbot ausente.")
     try:
         return verify_session(authorization.split(" ", 1)[1].strip())
+    except SessionBackendError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
     except SessionError as exc:
         raise HTTPException(status_code=401, detail=str(exc)) from exc
 
@@ -417,6 +429,8 @@ async def start_session(
             object_id=identity.object_id,
             tenant_id=identity.tenant_id,
         )
+    except SessionBackendError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
     except SessionError as exc:
         raise HTTPException(status_code=403, detail=str(exc)) from exc
 
@@ -438,9 +452,12 @@ async def start_session(
     return {
         "allowed": True,
         "email": session.email,
+        "role": session.role,
+        "permissions": list(session.permissions),
+        "is_owner": session.is_owner,
         "token": token,
         "expires_at": session.expires_at,
-        "access_mode": "local-dev" if local_access_enabled() else "allowlist",
+        "access_mode": "local-dev" if local_access_enabled() and not session.is_owner else "entra-rbac",
         "llm_status": llm_status,
         "welcome": (
             f"SYSTEM READY. Monitorando {cluster_summary.get('n_clusters', 0)} clusters · "
@@ -457,12 +474,21 @@ async def current_session(session: Annotated[ChatSession, Depends(_session_from_
         "authenticated": True,
         "email": session.email,
         "expires_at": session.expires_at,
+        "role": session.role,
+        "permissions": list(session.permissions),
+        "is_owner": session.is_owner,
     }
 
 
 @router.delete("/session")
 async def end_session(session: Annotated[ChatSession, Depends(_session_from_header)]):
     """End a chat session and release provider resources when applicable."""
+    try:
+        await asyncio.to_thread(revoke_session, session)
+    except SessionBackendError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except SessionError as exc:
+        raise HTTPException(status_code=401, detail=str(exc)) from exc
     try:
         lifecycle = await provider.release_session()
     except ProviderError as exc:

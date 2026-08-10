@@ -241,12 +241,13 @@ As features a seguir nunca podem entrar nos modelos — são conhecidas apenas a
 - **Auditabilidade:** fontes read-only, uso de tokens, origem do cache e `response_id` chegam como metadados estruturados, separados do texto da LLM.
 - **Qualidade operacional:** feedback positivo/negativo e métricas agregadas não armazenam prompts na telemetria.
 - **Escala:** `CHAT_REDIS_URL` habilita Redis ou Valkey para cache, memória, feedback e rate limit compartilhados; sem ele existe fallback local sem dependência de cloud.
-- **Acesso:** o Microsoft Entra ID valida a identidade e o backend troca o access token por uma sessão HMAC temporária, revalidada contra a allowlist em cada requisição.
+- **Acesso:** o Microsoft Entra ID valida a identidade; o backend vincula o primeiro login ao par imutável `tenant + object ID` e emite uma sessão HMAC temporária, revalidada no PostgreSQL em cada requisição.
+- **Administração:** `/admin` permite ao proprietário e aos administradores convidar e-mails, definir `member/admin`, desativar, reativar ou remover acessos. As mudanças revogam sessões existentes e geram auditoria append-only.
 - **Custo sob controle:** somente consultas analíticas usam a OpenAI; perguntas factuais continuam locais. O modelo e o esforço são configuráveis por ambiente.
 - **Fallback offline:** com Ollama ativo, a sessão inicia e pré-carrega o Gemma sob demanda; o logout descarrega o modelo e encerra somente o servidor iniciado pela API.
 - **Persistência cloud-agnostic:** SQLite funciona sem configuração local; `CHAT_DATABASE_URL` troca o repositório por PostgreSQL em produção sem alterar o frontend.
 - **Endpoints:** além de sessão/status/chat, há CRUD em `/api/chat/conversations`, feedback, reset de memória curta e métricas.
-- **Autenticação:** Microsoft Entra ID + allowlist de e-mail, sem roles nesta fase. Consulte [`docs/autenticacao_entra.md`](docs/autenticacao_entra.md).
+- **Autenticação e autorização:** Microsoft Entra ID + diretório dinâmico no PostgreSQL/Supabase, com papéis `member/admin`. `ALLOWED_EMAILS` serve somente para o bootstrap do proprietário inicial. Consulte [`docs/autenticacao_entra.md`](docs/autenticacao_entra.md).
 
 O frontend espera `VITE_API_URL=http://localhost:8000/api`. A chave da OpenAI permanece somente no backend. Se a API for executada no Docker com fallback Ollama no macOS, `host.docker.internal:11434` já está configurado.
 

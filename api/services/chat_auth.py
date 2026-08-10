@@ -1,8 +1,8 @@
 """Short signed session issued only after Microsoft Entra verification.
 
 The Entra access token is exchanged once; the resulting Predictfy session
-protects both dashboard data and chatbot routes and rechecks the allowlist on
-every request.
+protects every API route and revalidates the bound identity, role, status and
+session version in the authorization database on every request.
 """
 
 from __future__ import annotations
@@ -14,10 +14,18 @@ import json
 import os
 import re
 import time
+import uuid
 from collections import defaultdict, deque
 from dataclasses import dataclass
 
 from api.services.shared_redis import shared_redis
+from api.services.user_store import (
+    UserAccess,
+    UserConflict,
+    UserNotFound,
+    UserStoreUnavailable,
+    user_store,
+)
 
 
 EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
@@ -26,6 +34,10 @@ _requests: dict[str, deque[float]] = defaultdict(deque)
 
 class SessionError(ValueError):
     pass
+
+
+class SessionBackendError(SessionError):
+    """Authorization could not be safely checked due to backend failure."""
 
 
 class RateLimitError(ValueError):
@@ -38,6 +50,12 @@ class ChatSession:
     expires_at: int
     object_id: str = ""
     tenant_id: str = ""
+    user_id: str = ""
+    role: str = "member"
+    permissions: tuple[str, ...] = ("chat:use",)
+    session_version: int = 1
+    is_owner: bool = False
+    token_id: str = ""
 
 
 def _secret() -> bytes:
@@ -65,12 +83,19 @@ def local_access_enabled() -> bool:
     return os.getenv("CHAT_ALLOW_LOCAL_DEV", "true").lower() in {"1", "true", "yes", "on"}
 
 
-def email_is_allowed(email: str) -> bool:
-    normalized = email.strip().lower()
-    if not EMAIL_RE.match(normalized):
-        return False
-    allowed = _allowed_emails()
-    return normalized in allowed or (not allowed and local_access_enabled())
+def _session_from_access(access: UserAccess, expires_at: int, token_id: str = "") -> ChatSession:
+    return ChatSession(
+        email=access.email,
+        expires_at=expires_at,
+        object_id=access.object_id,
+        tenant_id=access.tenant_id,
+        user_id=access.id,
+        role=access.role,
+        permissions=access.permissions,
+        session_version=access.session_version,
+        is_owner=access.is_owner,
+        token_id=token_id,
+    )
 
 
 def create_session(
@@ -80,24 +105,41 @@ def create_session(
     tenant_id: str = "",
 ) -> tuple[str, ChatSession]:
     normalized = email.strip().lower()
-    if not email_is_allowed(normalized):
-        raise SessionError("Email não autorizado.")
+    if not EMAIL_RE.match(normalized):
+        raise SessionError("Acesso não autorizado.")
     if not object_id.strip() or not tenant_id.strip():
         raise SessionError("Identidade Microsoft incompleta.")
 
+    bootstrap_emails = _allowed_emails()
+    try:
+        access = user_store.authorize_login(
+            normalized,
+            object_id,
+            tenant_id,
+            bootstrap_emails=bootstrap_emails,
+            allow_local_unlisted=local_access_enabled() and not bootstrap_emails,
+        )
+    except (UserNotFound, UserConflict) as exc:
+        # Deliberately generic: do not disclose invitation, status, or binding state.
+        raise SessionError("Acesso não autorizado.") from exc
+    except UserStoreUnavailable as exc:
+        raise SessionBackendError("Serviço de autorização temporariamente indisponível.") from exc
+
     ttl_minutes = max(5, int(os.getenv("CHAT_SESSION_TTL_MINUTES", "480")))
-    session = ChatSession(
-        email=normalized,
-        expires_at=int(time.time()) + ttl_minutes * 60,
-        object_id=object_id,
-        tenant_id=tenant_id,
+    session = _session_from_access(
+        access,
+        int(time.time()) + ttl_minutes * 60,
+        token_id=str(uuid.uuid4()),
     )
     payload = _encode(json.dumps({
         "email": session.email,
         "exp": session.expires_at,
         "oid": session.object_id,
         "tid": session.tenant_id,
-        "v": 2,
+        "uid": session.user_id,
+        "sv": session.session_version,
+        "jti": session.token_id,
+        "v": 3,
     }, separators=(",", ":")).encode())
     signature = _encode(hmac.new(_secret(), payload.encode(), hashlib.sha256).digest())
     return f"{payload}.{signature}", session
@@ -110,26 +152,54 @@ def verify_session(token: str) -> ChatSession:
         if not hmac.compare_digest(supplied_signature, expected_signature):
             raise SessionError("Sessão inválida.")
         raw = json.loads(_decode(payload))
-        if raw.get("v") != 2:
+        if raw.get("v") != 3:
             raise SessionError("Sessão anterior ao SSO não é mais válida.")
-        session = ChatSession(
-            email=str(raw["email"]),
-            expires_at=int(raw["exp"]),
-            object_id=str(raw.get("oid", "")),
-            tenant_id=str(raw.get("tid", "")),
-        )
+        email = str(raw["email"])
+        expires_at = int(raw["exp"])
+        object_id = str(raw.get("oid", ""))
+        tenant_id = str(raw.get("tid", ""))
+        session_version = int(raw.get("sv", 0))
+        user_id = str(raw.get("uid", ""))
+        token_id = str(raw.get("jti", ""))
     except (KeyError, TypeError, ValueError, json.JSONDecodeError) as exc:
         if isinstance(exc, SessionError):
             raise
         raise SessionError("Sessão inválida.") from exc
 
-    if session.expires_at <= int(time.time()):
+    if expires_at <= int(time.time()):
         raise SessionError("Sessão expirada.")
-    if not session.object_id or not session.tenant_id:
+    if not object_id or not tenant_id or not user_id or not token_id:
         raise SessionError("Sessão sem identidade Microsoft.")
-    if not email_is_allowed(session.email):
-        raise SessionError("Email não autorizado.")
-    return session
+    try:
+        access = user_store.authorize_session(
+            user_id,
+            object_id,
+            tenant_id,
+            session_version,
+            bootstrap_emails=_allowed_emails(),
+            allow_local_unlisted=local_access_enabled() and not _allowed_emails(),
+            email=email,
+        )
+    except UserNotFound as exc:
+        raise SessionError(str(exc)) from exc
+    except UserStoreUnavailable as exc:
+        raise SessionBackendError("Serviço de autorização temporariamente indisponível.") from exc
+    return _session_from_access(access, expires_at, token_id)
+
+
+def revoke_session(session: ChatSession) -> None:
+    try:
+        user_store.revoke_session(
+            session.user_id,
+            session.object_id,
+            session.tenant_id,
+            session.session_version,
+            session.email,
+        )
+    except UserNotFound as exc:
+        raise SessionError("Acesso não autorizado.") from exc
+    except UserStoreUnavailable as exc:
+        raise SessionBackendError("Serviço de autorização temporariamente indisponível.") from exc
 
 
 async def enforce_rate_limit(identity: str) -> None:

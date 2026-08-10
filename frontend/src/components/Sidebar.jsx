@@ -7,8 +7,10 @@ import {
   LogOut,
   Menu,
   Server,
+  ShieldCheck,
   X,
 } from 'lucide-react';
+import { isAdminUser } from '../auth/authorization';
 import { useApi } from '../hooks/useApi';
 import { useBreakpoint } from '../hooks/useBreakpoint';
 import { useChatAuth } from '../hooks/useChatAuth';
@@ -22,6 +24,13 @@ const NAV = [
   { to: '/modelos', label: 'MODELOS', icon: <FlaskConical size={18} strokeWidth={1.7} /> },
 ];
 
+const ADMIN_NAV = {
+  to: '/admin',
+  label: 'ADMINISTRAÇÃO',
+  icon: <ShieldCheck size={18} strokeWidth={1.7} />,
+  admin: true,
+};
+
 const SIDEBAR_FULL = 232;
 const SIDEBAR_COMPACT = 60;
 
@@ -29,12 +38,15 @@ function SidebarInner({
   expanded,
   clock,
   email,
+  role,
+  permissions,
   p2Critical,
   p3Critical,
   kpiDisponivel,
   onLogout,
   onNavClick,
 }) {
+  const visibleNav = isAdminUser({ role, permissions }) ? [...NAV, ADMIN_NAV] : NAV;
   let kpiLabel = 'KPIS SINCRONIZANDO';
   let kpiTone = 'neutral';
   if (p2Critical) {
@@ -61,7 +73,7 @@ function SidebarInner({
       </div>
 
       <nav className="sidebar-nav" aria-label="Navegação principal">
-        {NAV.map(({ to, label, icon }) => (
+        {visibleNav.map(({ to, label, icon, admin }) => (
           <NavLink
             key={to}
             to={to}
@@ -69,7 +81,7 @@ function SidebarInner({
             aria-label={label}
             title={expanded ? undefined : label}
             className={({ isActive }) => (
-              `sidebar-nav__item${isActive ? ' sidebar-nav__item--active' : ''}`
+              `sidebar-nav__item${isActive ? ' sidebar-nav__item--active' : ''}${admin ? ' sidebar-nav__item--admin' : ''}`
             )}
           >
             <span className="sidebar-nav__icon" aria-hidden="true">
@@ -167,6 +179,8 @@ export default function Sidebar() {
   const innerProps = {
     clock,
     email: user.email,
+    role: user.role,
+    permissions: user.permissions,
     p2Critical,
     p3Critical,
     kpiDisponivel,
