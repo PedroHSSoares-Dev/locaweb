@@ -187,3 +187,16 @@ def access_audit(
         return {"events": items, "count": len(items)}
     except Exception as exc:
         _raise_store_error(exc)
+
+
+@router.get("/usage")
+def usage_report(
+    session: Annotated[ChatSession, Depends(require_admin)],
+    days: Annotated[int, Query(ge=0, le=3650)] = 30,
+):
+    if "usage:read" not in session.permissions:
+        raise HTTPException(status_code=403, detail="Permissão de leitura de consumo necessária.")
+    try:
+        return user_store.usage_report(days)
+    except Exception as exc:
+        _raise_store_error(exc)

@@ -93,6 +93,7 @@ class AdminUsersApiTests(unittest.TestCase):
         self.assertEqual(member["permissions"], ["chat:use"])
         member_headers = self._headers(member["token"])
         self.assertEqual(self.client.get("/api/admin/users", headers=member_headers).status_code, 403)
+        self.assertEqual(self.client.get("/api/admin/usage", headers=member_headers).status_code, 403)
 
         disabled = self.client.patch(
             f"/api/admin/users/{invited_user['id']}",
@@ -244,6 +245,77 @@ class AdminUsersApiTests(unittest.TestCase):
             response = self.client.get("/api/context", headers=headers)
         self.assertEqual(response.status_code, 503)
         self.assertIn("temporariamente indisponível", response.json()["detail"])
+
+    def test_usage_report_is_per_user_idempotent_and_does_not_expose_content(self):
+        owner = self._login()
+        headers = self._headers(owner["token"])
+        owner_user = self.client.get("/api/admin/users", headers=headers).json()["users"][0]
+
+        recorded = self.store.record_usage(
+            response_id="response-generated",
+            user_id=owner_user["id"],
+            provider="openai",
+            model="gpt-5.6-luna",
+            response_mode="llm",
+            analysis_mode="deep",
+            usage={
+                "input_tokens": 100,
+                "output_tokens": 25,
+                "reasoning_tokens": 10,
+                "cached_tokens": 20,
+            },
+            cache_hit=False,
+        )
+        duplicate = self.store.record_usage(
+            response_id="response-generated",
+            user_id=owner_user["id"],
+            provider="openai",
+            model="gpt-5.6-luna",
+            response_mode="llm",
+            analysis_mode="deep",
+            usage={"input_tokens": 999, "output_tokens": 999},
+            cache_hit=False,
+        )
+        self.store.record_usage(
+            response_id="response-cache-hit",
+            user_id=owner_user["id"],
+            provider="openai",
+            model="gpt-5.6-luna",
+            response_mode="llm",
+            analysis_mode="deep",
+            # Even if stale counters are replayed with a cache hit, they must
+            # be treated as avoided work rather than new consumption.
+            usage={"input_tokens": 100, "output_tokens": 25, "total_tokens": 125, "saved_tokens": 125},
+            cache_hit=True,
+        )
+        self.store.record_usage(
+            response_id="response-deterministic",
+            user_id=owner_user["id"],
+            provider="outputs",
+            model=None,
+            response_mode="deterministic",
+            analysis_mode="fast",
+            usage={},
+            cache_hit=False,
+        )
+
+        self.assertTrue(recorded)
+        self.assertFalse(duplicate)
+        response = self.client.get("/api/admin/usage?days=30", headers=headers)
+        self.assertEqual(response.status_code, 200, response.text)
+        report = response.json()
+        self.assertEqual(report["totals"]["requests"], 3)
+        self.assertEqual(report["totals"]["generated_responses"], 1)
+        self.assertEqual(report["totals"]["cache_hits"], 1)
+        self.assertEqual(report["totals"]["input_tokens"], 100)
+        self.assertEqual(report["totals"]["output_tokens"], 25)
+        self.assertEqual(report["totals"]["total_tokens"], 125)
+        self.assertEqual(report["totals"]["reasoning_tokens"], 10)
+        self.assertEqual(report["totals"]["cached_tokens"], 20)
+        self.assertEqual(report["totals"]["saved_tokens"], 125)
+        self.assertNotIn("entra_object_id", response.text)
+        self.assertNotIn("entra_tenant_id", response.text)
+        self.assertNotIn("prompt", response.text.lower())
 
 
 if __name__ == "__main__":

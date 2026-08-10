@@ -23,6 +23,7 @@ from api.services.chat_auth import (
     create_session,
     enforce_rate_limit,
     local_access_enabled,
+    record_session_usage,
     revoke_session,
     verify_session,
 )
@@ -44,6 +45,7 @@ from api.services.chat_runtime import (
     identity_namespace,
 )
 from api.services.conversation_store import ConversationNotFound, conversation_store
+from api.services.user_store import UserStoreUnavailable
 
 router = APIRouter(prefix="/chat", tags=["Chatbot"])
 provider = build_llm_provider()
@@ -288,9 +290,11 @@ def _provider_result(result: GenerationResult | tuple[str, str]) -> dict[str, An
 def _cached_answer(value: dict[str, Any], kind: str) -> dict[str, Any]:
     """Do not report or count the original generation tokens on a cache hit."""
     original_usage = value.get("usage", {})
+    # OpenAI reports reasoning as a subset of output, so input + output is the
+    # complete total and does not double-count internal reasoning.
     saved_tokens = sum(
         int(original_usage.get(field, 0) or 0)
-        for field in ("input_tokens", "output_tokens", "reasoning_tokens")
+        for field in ("input_tokens", "output_tokens")
     )
     return {
         **value,
@@ -416,6 +420,21 @@ async def _remember_and_register(
         "provider": payload.get("provider", provider.name),
         "cache_kind": payload.get("cache", {}).get("kind", "bypass"),
     })
+    try:
+        await asyncio.to_thread(
+            record_session_usage,
+            session,
+            response_id=response_id,
+            provider=str(payload.get("provider") or provider.name),
+            model=payload.get("model"),
+            response_mode=str(payload.get("mode") or "llm"),
+            analysis_mode=req.analysis_mode,
+            usage=payload.get("usage", {}),
+            cache_hit=bool(payload.get("cache", {}).get("hit")),
+        )
+    except (UserStoreUnavailable, TypeError, ValueError):
+        # Telemetry must never make an otherwise valid analytical answer fail.
+        logger.error("chat_usage_persist_failed backend=database")
 
 
 @router.post("/session")

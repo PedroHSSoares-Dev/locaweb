@@ -11,7 +11,7 @@ import os
 import threading
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -73,8 +73,30 @@ user_access_audit = Table(
     Column("created_at", DateTime(timezone=True), nullable=False),
 )
 
+llm_usage_events = Table(
+    "llm_usage_events",
+    metadata,
+    Column("id", String(36), primary_key=True),
+    Column("response_id", String(80), nullable=False, unique=True),
+    Column("user_id", String(128), nullable=False),
+    Column("provider", String(64), nullable=False),
+    Column("model", String(128), nullable=False, default=""),
+    Column("response_mode", String(24), nullable=False),
+    Column("analysis_mode", String(16), nullable=False),
+    Column("input_tokens", Integer, nullable=False, default=0),
+    Column("output_tokens", Integer, nullable=False, default=0),
+    Column("total_tokens", Integer, nullable=False, default=0),
+    Column("reasoning_tokens", Integer, nullable=False, default=0),
+    Column("cached_tokens", Integer, nullable=False, default=0),
+    Column("saved_tokens", Integer, nullable=False, default=0),
+    Column("cache_hit", Boolean, nullable=False, default=False),
+    Column("created_at", DateTime(timezone=True), nullable=False),
+)
+
 Index("ix_app_users_role_status", app_users.c.role, app_users.c.status)
 Index("ix_user_access_audit_created", user_access_audit.c.created_at)
+Index("ix_llm_usage_user_created", llm_usage_events.c.user_id, llm_usage_events.c.created_at)
+Index("ix_llm_usage_created", llm_usage_events.c.created_at)
 
 
 class UserStoreError(RuntimeError):
@@ -111,7 +133,7 @@ class UserAccess:
     @property
     def permissions(self) -> tuple[str, ...]:
         if self.role == "admin":
-            return ("chat:use", "users:read", "users:write")
+            return ("chat:use", "users:read", "users:write", "usage:read")
         return ("chat:use",)
 
 
@@ -184,7 +206,7 @@ class UserStore:
         if self.engine.dialect.name != "postgresql":
             return
         with self.engine.begin() as connection:
-            for table_name in ("app_users", "user_access_audit"):
+            for table_name in ("app_users", "user_access_audit", "llm_usage_events"):
                 connection.execute(text(f'ALTER TABLE "{table_name}" ENABLE ROW LEVEL SECURITY'))
                 connection.execute(text(f'REVOKE ALL ON TABLE "{table_name}" FROM PUBLIC'))
             public_roles = {
@@ -195,7 +217,7 @@ class UserStore:
             }
             for role_name in public_roles:
                 # Values originate from the constant allowlist in the query above.
-                for table_name in ("app_users", "user_access_audit"):
+                for table_name in ("app_users", "user_access_audit", "llm_usage_events"):
                     connection.execute(text(
                         f'REVOKE ALL ON TABLE "{table_name}" FROM "{role_name}"'
                     ))
@@ -545,6 +567,149 @@ class UserStore:
             } for row in rows]
         except SQLAlchemyError as exc:
             raise UserStoreUnavailable("Banco de autorização indisponível.") from exc
+
+    @staticmethod
+    def _token_count(usage: dict[str, Any], field: str) -> int:
+        try:
+            return min(2_147_483_647, max(0, int(usage.get(field, 0) or 0)))
+        except (TypeError, ValueError):
+            return 0
+
+    def record_usage(
+        self,
+        *,
+        response_id: str,
+        user_id: str,
+        provider: str,
+        model: str | None,
+        response_mode: str,
+        analysis_mode: str,
+        usage: dict[str, Any] | None,
+        cache_hit: bool,
+    ) -> bool:
+        """Persist provider-reported counters without storing prompts or answers."""
+        counters = usage if isinstance(usage, dict) else {}
+        input_tokens = self._token_count(counters, "input_tokens")
+        output_tokens = self._token_count(counters, "output_tokens")
+        reasoning_tokens = self._token_count(counters, "reasoning_tokens")
+        cached_tokens = self._token_count(counters, "cached_tokens")
+        if cache_hit:
+            # A cache response performs no provider generation. Enforce zero
+            # actual usage even if a caller accidentally replays old counters.
+            input_tokens = output_tokens = reasoning_tokens = cached_tokens = 0
+        # Reasoning tokens are a subset of output tokens in the OpenAI usage
+        # contract and therefore must not be added to the total again.
+        total_tokens = 0 if cache_hit else (
+            self._token_count(counters, "total_tokens") or input_tokens + output_tokens
+        )
+        values = {
+            "id": str(uuid.uuid4()),
+            "response_id": response_id[:80],
+            "user_id": user_id[:128],
+            "provider": (provider or "unknown")[:64],
+            "model": (model or "")[:128],
+            "response_mode": (response_mode or "unknown")[:24],
+            "analysis_mode": (analysis_mode or "fast")[:16],
+            "input_tokens": input_tokens,
+            "output_tokens": output_tokens,
+            "total_tokens": total_tokens,
+            "reasoning_tokens": reasoning_tokens,
+            "cached_tokens": cached_tokens,
+            "saved_tokens": self._token_count(counters, "saved_tokens"),
+            "cache_hit": bool(cache_hit),
+            "created_at": _now(),
+        }
+        try:
+            with self.engine.begin() as connection:
+                connection.execute(insert(llm_usage_events).values(**values))
+            return True
+        except IntegrityError:
+            # response_id is an idempotency key. A retry must never double-count.
+            return False
+        except SQLAlchemyError as exc:
+            raise UserStoreUnavailable("Banco de telemetria indisponível.") from exc
+
+    def usage_report(self, days: int = 30) -> dict[str, Any]:
+        """Return per-user token consumption for an admin-selected UTC window."""
+        since = _now() - timedelta(days=days) if days > 0 else None
+        query = select(
+            llm_usage_events.c.user_id,
+            func.count(llm_usage_events.c.id).label("requests"),
+            func.sum(llm_usage_events.c.input_tokens).label("input_tokens"),
+            func.sum(llm_usage_events.c.output_tokens).label("output_tokens"),
+            func.sum(llm_usage_events.c.total_tokens).label("total_tokens"),
+            func.sum(llm_usage_events.c.reasoning_tokens).label("reasoning_tokens"),
+            func.sum(llm_usage_events.c.cached_tokens).label("cached_tokens"),
+            func.sum(llm_usage_events.c.saved_tokens).label("saved_tokens"),
+            func.sum(func.cast(llm_usage_events.c.cache_hit, Integer)).label("cache_hits"),
+        )
+        if since is not None:
+            query = query.where(llm_usage_events.c.created_at >= since)
+        query = query.group_by(llm_usage_events.c.user_id)
+
+        try:
+            with self.engine.connect() as connection:
+                aggregate_rows = connection.execute(query).all()
+                tracked_since = connection.execute(select(func.min(llm_usage_events.c.created_at))).scalar()
+                generated_rows = connection.execute(
+                    select(
+                        llm_usage_events.c.user_id,
+                        func.count(llm_usage_events.c.id).label("generated_responses"),
+                    ).where(
+                        llm_usage_events.c.response_mode == "llm",
+                        llm_usage_events.c.cache_hit.is_(False),
+                        *((llm_usage_events.c.created_at >= since,) if since is not None else ()),
+                    ).group_by(llm_usage_events.c.user_id)
+                ).all()
+        except SQLAlchemyError as exc:
+            raise UserStoreUnavailable("Banco de telemetria indisponível.") from exc
+
+        generated_by_user = {
+            str(self._row_dict(row)["user_id"]): int(self._row_dict(row)["generated_responses"] or 0)
+            for row in generated_rows
+        }
+        empty_metrics = {
+            "requests": 0,
+            "generated_responses": 0,
+            "cache_hits": 0,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "total_tokens": 0,
+            "reasoning_tokens": 0,
+            "cached_tokens": 0,
+            "saved_tokens": 0,
+        }
+        metrics_by_user: dict[str, dict[str, int]] = {}
+        for row in aggregate_rows:
+            data = self._row_dict(row)
+            user_id = str(data["user_id"])
+            metrics_by_user[user_id] = {
+                **empty_metrics,
+                **{key: int(data.get(key) or 0) for key in empty_metrics if key != "generated_responses"},
+                "generated_responses": generated_by_user.get(user_id, 0),
+            }
+
+        users = []
+        totals = dict(empty_metrics)
+        for user in self.list_users():
+            metrics = metrics_by_user.get(str(user["id"]), dict(empty_metrics))
+            users.append({
+                "id": user["id"],
+                "email": user["email"],
+                "role": user["role"],
+                "status": user["status"],
+                "is_owner": user["is_owner"],
+                **metrics,
+            })
+            for key in totals:
+                totals[key] += metrics[key]
+        users.sort(key=lambda item: (-item["total_tokens"], item["email"]))
+        return {
+            "period": {"days": days, "since": _iso(since)},
+            "tracking_since": _iso(tracked_since),
+            "totals": totals,
+            "users": users,
+        }
 
 
 user_store = UserStore()

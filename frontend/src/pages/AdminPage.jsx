@@ -17,6 +17,7 @@ import {
   X,
 } from 'lucide-react';
 import { useChatAuth } from '../hooks/useChatAuth';
+import AdminUsagePanel from '../components/AdminUsagePanel';
 import {
   createAdminUser,
   deleteAdminUser,
@@ -296,7 +297,7 @@ export default function AdminPage() {
         <div>
           <div className="admin-header__eyebrow"><KeyRound size={13} /> CONTROLE DE ACESSO / DIRETÓRIO</div>
           <h1>Administração</h1>
-          <p>Autorize identidades Microsoft e governe os privilégios da plataforma.</p>
+          <p>Autorize identidades Microsoft, governe privilégios e acompanhe o uso do agente.</p>
         </div>
         <div className="admin-header__identity">
           <span>OPERADOR AUTORIZADO</span>
@@ -501,6 +502,8 @@ export default function AdminPage() {
             </div>
           )}
         </section>
+
+        <AdminUsagePanel token={sessionUser.token} onUnauthorized={logout} />
 
         <footer className="admin-footnote">
           <ShieldCheck size={13} />

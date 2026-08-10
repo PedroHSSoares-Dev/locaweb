@@ -202,6 +202,30 @@ def revoke_session(session: ChatSession) -> None:
         raise SessionBackendError("Serviço de autorização temporariamente indisponível.") from exc
 
 
+def record_session_usage(
+    session: ChatSession,
+    *,
+    response_id: str,
+    provider: str,
+    model: str | None,
+    response_mode: str,
+    analysis_mode: str,
+    usage: dict,
+    cache_hit: bool,
+) -> bool:
+    """Associate content-free model counters with the authenticated app user."""
+    return user_store.record_usage(
+        response_id=response_id,
+        user_id=session.user_id,
+        provider=provider,
+        model=model,
+        response_mode=response_mode,
+        analysis_mode=analysis_mode,
+        usage=usage,
+        cache_hit=cache_hit,
+    )
+
+
 async def enforce_rate_limit(identity: str) -> None:
     """Enforce a shared limit through Redis, with a safe local fallback."""
     limit = max(1, int(os.getenv("CHAT_RATE_LIMIT_PER_MINUTE", "20")))
