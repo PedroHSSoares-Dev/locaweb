@@ -39,14 +39,13 @@ def get_risco():
 )
 def get_risco_produtos():
     """
-    Retorna a lista de produtos com incidentes em aberto, ordenada por
-    **probabilidade de violação de OLA decrescente**.
+    Retorna prioridades ordenadas pelo **score não calibrado do XGBoost**.
 
     Campos por produto:
     - **produto**: código interno do produto Locaweb (ex.: `lhco`, `lhdns`)
-    - **probViolacao**: probabilidade XGBoost de violar OLA (0–100%)
+    - **probViolacao**: score médio do XGBoost (não é probabilidade calibrada)
     - **incidentesPendentes**: incidentes em aberto no produto
-    - **criticos**: incidentes com probabilidade > 50%
+    - **criticos**: campo legado; não usar como probabilidade real
 
     Usado na tabela de alertas do MonitoramentoPage com semáforo:
     - > 30%: 🔴 ALTO RISCO

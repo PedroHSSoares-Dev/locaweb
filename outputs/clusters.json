@@ -207,7 +207,7 @@
       "id": 4,
       "nome": "Fim de Semana / Noturno",
       "label": "Fim de Semana / Noturno",
-      "descricao": "Incidentes concentrados nos fins de semana e horários noturnos. Menor cobertura de equipe.",
+      "descricao": "Incidentes concentrados nos fins de semana e horários noturnos. Cobertura de equipe é uma hipótese a validar.",
       "tamanho": 3497,
       "pct_total": 13.67,
       "taxaViolacao": 1.601,

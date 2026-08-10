@@ -1,201 +1,134 @@
+import { AlertTriangle, Gauge, ScanSearch } from 'lucide-react';
 import { useApi } from '../hooks/useApi';
 import SemDados from './SemDados';
 
-function Skeleton({ height = 80 }) {
-  return <div className="skeleton" style={{ height }} />;
+const SHAP_LABELS = {
+  grupo_viol_rate: 'Histórico de violação do grupo',
+  rolling_30d: 'Volume médio em 30 dias',
+  rolling_7d: 'Volume médio em 7 dias',
+  aberto_por_enc: 'Origem da abertura',
+  produto_freq: 'Frequência do produto',
+  produto_enc: 'Produto',
+  categoria_enc: 'Categoria',
+  lag_7d: 'Volume há 7 dias',
+  hora: 'Hora de abertura',
+};
+
+function validDistribution(distribution, total) {
+  const entries = Object.values(distribution ?? {});
+  if (!entries.length || !total) return false;
+  const countSum = entries.reduce((sum, item) => sum + (item.count ?? 0), 0);
+  const pctSum = entries.reduce((sum, item) => sum + (item.pct ?? 0), 0);
+  const ordered = entries.every((item) => (
+    item.limite_inferior == null
+    || item.limite_superior == null
+    || item.limite_inferior <= item.limite_superior
+  ));
+  return countSum === total && Math.abs(pctSum - 100) <= 0.2 && ordered;
 }
 
-const SHAP_LABELS = {
-  prioridade_bin:   'Prioridade (P2 vs P3)',
-  grupo_freq:       'Freq. Histórica Grupo',
-  subcategoria_enc: 'Subcategoria',
-  aberto_por_enc:   'Usuário',
-  produto_freq:     'Freq. Histórica Produto',
-  rolling_7d:       'Volume Médio 7 dias',
-  categoria_enc:    'Categoria',
-  grupo_enc:        'Grupo Designado',
-  produto_enc:      'Produto',
-  hora:             'Hora de Abertura',
-};
+function bandLabel(name, item) {
+  const from = ((item?.limite_inferior ?? 0) * 100).toFixed(1);
+  const to = ((item?.limite_superior ?? 1) * 100).toFixed(1);
+  return `${name.toUpperCase()} · score ${from}–${to}`;
+}
 
 export default function RiscoUnificado() {
   const { data, loading, disponivel } = useApi('/risco');
 
-  if (loading) return <Skeleton height={280} />;
-  if (!disponivel) return <SemDados mensagem="Modelo XGBoost não treinado — execute o notebook 04" />;
+  if (loading) return <div className="skeleton" style={{ height: 300 }} />;
+  if (!disponivel) return <SemDados mensagem="Modelo XGBoost indisponível" />;
 
-  const prio    = data?.risco_por_prioridade ?? {};
-  const dist    = data?.distribuicao_risco ?? {};
-  const shap    = (data?.feature_importance_shap ?? []).slice(0, 5);
-  const m       = data?.metricas ?? {};
-  const maxShap = shap[0]?.shap_mean_abs ?? 1;
-
-  const P3 = prio['P3'] ?? {};
-  const P2 = prio['P2'] ?? {};
-
-  const DIST_CONFIG = {
-    alto:  { label: 'ALTO (>0.55)',      cor: 'var(--red)'    },
-    medio: { label: 'MÉDIO (0.20–0.55)', cor: 'var(--orange)' },
-    baixo: { label: 'BAIXO (<0.20)',     cor: 'var(--green)'  },
-  };
+  const priorities = data?.risco_por_prioridade ?? {};
+  const distribution = data?.distribuicao_risco ?? {};
+  const metrics = data?.metricas ?? {};
+  const shap = (data?.feature_importance_shap ?? []).slice(0, 5);
+  const maxShap = shap[0]?.shap_mean_abs || 1;
+  const distributionIsValid = validDistribution(distribution, metrics.total_teste);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+    <div className="risk-analysis">
+      <div className="risk-analysis__notice">
+        <Gauge size={15} />
+        <span>O valor exibido é um <strong>score de ordenação</strong>, não a probabilidade real de violação.</span>
+      </div>
 
-      {/* ── Título interno ─────────────────────────────────────────────── */}
-      <div style={{
-        fontFamily: 'var(--font-mono)', fontSize: 9,
-        color: 'var(--green)', letterSpacing: '0.14em',
-        marginBottom: 16,
-      }}>■ ANÁLISE PREDITIVA DE VIOLAÇÃO (XGBOOST_V4)</div>
+      <div className="risk-analysis__grid">
+        <section>
+          <header><ScanSearch size={15} /> Score por prioridade</header>
+          <div className="risk-priorities">
+            {['P2', 'P3'].map((priority) => {
+              const item = priorities[priority] ?? {};
+              return (
+                <article key={priority} style={{ '--risk-color': priority === 'P2' ? 'var(--teal)' : 'var(--yellow)' }}>
+                  <span>{priority}</span>
+                  <strong>{((item.media_prob ?? 0) * 100).toFixed(2)}</strong>
+                  <small>score médio / 100</small>
+                  <footer>
+                    <span>{item.taxa_violacao_real ?? '—'}% taxa real</span>
+                    <span>{item.pct_alto_risco ?? '—'}% acima do corte</span>
+                  </footer>
+                </article>
+              );
+            })}
+          </div>
+          <p className="risk-analysis__inference">
+            P3 apresenta score médio e taxa real maiores neste teste. A hipótese de gargalo por priorização de P2 ainda precisa ser testada com fila, escala e tempo de atendimento.
+          </p>
+        </section>
 
-      {/* ── 3 colunas ──────────────────────────────────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '30% 40% 30%', gap: 20, minHeight: 220 }}>
-
-        {/* Coluna 1 — Âncoras de risco */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div style={{
-            fontFamily: 'var(--font-mono)', fontSize: 8,
-            color: 'var(--text-muted)', letterSpacing: '0.14em', marginBottom: 4,
-          }}>ÂNCORAS DE RISCO</div>
-
-          {[
-            { id: 'P3', d: P3, cor: '#ffcc00', status: 'RISCO MÉDIO'   },
-            { id: 'P2', d: P2, cor: '#5ac8fa', status: 'RISCO NOMINAL' },
-          ].map(({ id, d, cor, status }) => (
-            <div key={id} style={{
-              borderLeft: `3px solid ${cor}`,
-              paddingLeft: 12,
-              paddingBottom: 8,
-              borderBottom: '1px solid var(--border)',
-            }}>
-              <div style={{
-                fontFamily: 'var(--font-mono)', fontSize: 9,
-                color: 'var(--text-muted)', marginBottom: 2,
-              }}>PRIORITY_{id}</div>
-              <div style={{
-                fontFamily: 'var(--font-mono)', fontSize: 28,
-                fontWeight: 700, color: cor, lineHeight: 1,
-              }}>
-                {((d.media_prob ?? 0) * 100).toFixed(1)}%
+        <section>
+          <header>Distribuição da triagem</header>
+          {!distributionIsValid ? (
+            <div className="risk-analysis__invalid" role="status">
+              <AlertTriangle size={17} />
+              <div>
+                <strong>Distribuição ocultada</strong>
+                <span>O artefato atual possui faixas sobrepostas. As métricas principais continuam válidas; regenere o XGBoost para exibir as bandas.</span>
               </div>
-              <div style={{
-                fontFamily: 'var(--font-mono)', fontSize: 8,
-                color: cor, fontWeight: 700, marginTop: 2, marginBottom: 4,
-              }}>{status}</div>
-              <div style={{
-                fontFamily: 'var(--font-mono)', fontSize: 9,
-                color: 'var(--text-muted)',
-              }}>{(d.n_incidentes ?? 0).toLocaleString('pt-BR')} incidentes</div>
             </div>
-          ))}
+          ) : (
+            <div className="risk-bands">
+              {['alto', 'medio', 'baixo'].map((name) => {
+                const item = distribution[name] ?? {};
+                const color = name === 'alto' ? 'var(--red)' : name === 'medio' ? 'var(--orange)' : 'var(--green)';
+                return (
+                  <div key={name} style={{ '--band-color': color }}>
+                    <span>{bandLabel(name, item)}</span>
+                    <strong>{item.count?.toLocaleString('pt-BR')} · {item.pct}%</strong>
+                    <i><b style={{ width: `${item.pct ?? 0}%` }} /></i>
+                    <small>{item.violacoes_reais} violações reais</small>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
 
-          {/* Insight box */}
-          <div style={{
-            background: 'var(--surface3)',
-            border: '1px solid var(--border)',
-            borderRadius: 4, padding: '10px 12px',
-            fontFamily: 'var(--font-mono)', fontSize: 9,
-            color: 'var(--text-sec)', lineHeight: 1.6,
-            marginTop: 4,
-          }}>
-            <span style={{ color: 'var(--orange)', fontWeight: 700 }}>INSIGHT: </span>
-            P3 viola {(P3.taxa_violacao_real / (P2.taxa_violacao_real || 1)).toFixed(0)}× mais que P2
-            ({P3.taxa_violacao_real}% vs {P2.taxa_violacao_real}%).
-            A priorização manual de P2 gera gargalo em P3.
-          </div>
-        </div>
-
-        {/* Coluna 2 — Distribuição de alertas */}
-        <div>
-          <div style={{
-            fontFamily: 'var(--font-mono)', fontSize: 8,
-            color: 'var(--text-muted)', letterSpacing: '0.14em', marginBottom: 12,
-          }}>DISTRIBUIÇÃO DE ALERTAS</div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {['alto', 'medio', 'baixo'].map(cat => {
-              const d   = dist[cat] ?? {};
-              const cfg = DIST_CONFIG[cat];
+        <section>
+          <header>Vetores globais SHAP</header>
+          <div className="shap-list">
+            {shap.map((feature) => {
+              const relative = feature.shap_mean_abs / maxShap * 100;
               return (
-                <div key={cat}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-                    <span style={{
-                      fontFamily: 'var(--font-mono)', fontSize: 9,
-                      color: cfg.cor, fontWeight: 700,
-                    }}>{cfg.label}</span>
-                    <span style={{
-                      fontFamily: 'var(--font-mono)', fontSize: 9,
-                      color: 'var(--text-muted)',
-                    }}>
-                      {(d.count ?? 0).toLocaleString('pt-BR')} inc ({d.pct ?? 0}%)
-                    </span>
-                  </div>
-                  <div style={{ height: 8, background: 'var(--surface4)', borderRadius: 2, overflow: 'hidden' }}>
-                    <div style={{
-                      height: '100%',
-                      width: `${d.pct ?? 0}%`,
-                      background: cfg.cor,
-                      borderRadius: 2,
-                      opacity: 0.85,
-                    }} />
-                  </div>
-                  <div style={{
-                    fontFamily: 'var(--font-mono)', fontSize: 8,
-                    color: 'var(--text-muted)', marginTop: 3,
-                  }}>{d.violacoes_reais ?? 0} violações reais neste grupo</div>
+                <div key={feature.feature}>
+                  <span>{SHAP_LABELS[feature.feature] ?? feature.feature}</span>
+                  <strong>{feature.shap_mean_abs.toFixed(3)}</strong>
+                  <i><b style={{ width: `${relative}%` }} /></i>
                 </div>
               );
             })}
           </div>
-        </div>
-
-        {/* Coluna 3 — Vetores de risco SHAP */}
-        <div>
-          <div style={{
-            fontFamily: 'var(--font-mono)', fontSize: 8,
-            color: 'var(--text-muted)', letterSpacing: '0.14em', marginBottom: 12,
-          }}>VETORES DE RISCO (SHAP_VALUES)</div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {shap.map(f => {
-              const pct = ((f.shap_mean_abs / maxShap) * 100).toFixed(0);
-              return (
-                <div key={f.feature}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                    <span style={{
-                      fontFamily: 'var(--font-mono)', fontSize: 9,
-                      color: 'var(--text-sec)', textTransform: 'uppercase',
-                    }}>{SHAP_LABELS[f.feature] ?? f.feature}</span>
-                    <span style={{
-                      fontFamily: 'var(--font-mono)', fontSize: 9,
-                      color: '#5ac8fa', fontWeight: 700,
-                    }}>{pct}%</span>
-                  </div>
-                  <div style={{ height: 5, background: 'var(--surface4)', borderRadius: 2 }}>
-                    <div style={{
-                      width: `${pct}%`, height: '100%',
-                      background: '#5ac8fa', borderRadius: 2, opacity: 0.8,
-                    }} />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+          <p className="risk-analysis__footnote">SHAP mostra contribuição média global para o score; não comprova causalidade.</p>
+        </section>
       </div>
 
-      {/* ── Rodapé — métricas do modelo ────────────────────────────────── */}
-      <div style={{
-        marginTop: 16,
-        paddingTop: 10,
-        borderTop: '1px solid var(--green)33',
-        fontFamily: 'var(--font-mono)', fontSize: 9,
-        color: 'var(--green)', letterSpacing: '0.08em',
-      }}>
-        METRICS: ROC-AUC: {m.roc_auc ?? '—'} | PR-AUC: {m.pr_auc ?? '—'} | RECALL: {m.recall_violacao ? `${(m.recall_violacao * 100).toFixed(1)}%` : '—'} | F1-SCORE: {m.f1_violacao ?? '—'} | THRESHOLD: {data?.threshold_otimizado ?? '—'}
+      <div className="risk-analysis__metrics">
+        <span>Recall <strong>{((metrics.recall_violacao ?? 0) * 100).toFixed(1)}%</strong></span>
+        <span>Precisão <strong>{((metrics.precision_violacao ?? 0) * 100).toFixed(1)}%</strong></span>
+        <span>PR-AUC <strong>{metrics.pr_auc?.toFixed(4) ?? '—'}</strong></span>
+        <span>Teste <strong>{metrics.total_teste?.toLocaleString('pt-BR') ?? '—'} casos</strong></span>
       </div>
-
     </div>
   );
 }

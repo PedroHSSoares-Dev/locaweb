@@ -32,6 +32,7 @@ const ROUTE_LABELS = {
   '/monitoramento': 'MONITORAMENTO',
   '/tecnico': 'TÉCNICO',
   '/modelos': 'MODELOS',
+  '/admin': 'ADMINISTRAÇÃO',
 };
 
 function clamp(value, minimum, maximum) {

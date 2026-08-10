@@ -269,3 +269,31 @@
     border-right-color: var(--border);
   }
 }
+.route-fallback {
+  min-height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--text-sec);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.route-fallback__pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.35);
+  animation: route-pulse 1.3s ease-out infinite;
+}
+
+@keyframes route-pulse {
+  70% { box-shadow: 0 0 0 8px rgba(56, 189, 248, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-fallback__pulse { animation: none; }
+}

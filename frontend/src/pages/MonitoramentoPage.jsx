@@ -1,15 +1,14 @@
 import { useState, useMemo, useRef } from 'react';
-import PeriodoToggle from '../components/PeriodoToggle';
 import { useBreakpoint } from '../hooks/useBreakpoint';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid, ReferenceLine,
 } from 'recharts';
-import { AlertTriangle, Users, Package, Activity } from 'lucide-react';
 import { useApi } from '../hooks/useApi';
 import SemDados from '../components/SemDados';
-import DrillDownPanel from '../components/DrillDownPanel';
 import { useDashboard } from '../hooks/useDashboard';
+import { grupos as gruposHistoricos } from '../data/mockData';
+import './DashboardPages.css';
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 function Skeleton({ height = 80 }) {
@@ -20,67 +19,30 @@ function Skeleton({ height = 80 }) {
 function PageHeader({ title, sub, rightSlot }) {
   const { isMobile } = useBreakpoint();
   return (
-    <div style={{
-      padding: isMobile ? '12px 16px 12px 56px' : '16px 28px',
-      borderBottom: '1px solid var(--border)',
-      background: 'var(--surface1)',
-      marginBottom: 0,
-      flexShrink: 0,
-      position: 'sticky',
-      top: 0,
-      zIndex: 10,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-    }}>
+    <header className="dashboard-page-header">
       <div>
-        <div style={{
-          fontFamily: 'var(--font-mono)', fontSize: isMobile ? 13 : 18, fontWeight: 600,
-          color: 'var(--text-pri)', letterSpacing: '0.08em', textTransform: 'uppercase',
-        }}>{title}</div>
-        {!isMobile && sub && (
-          <div style={{
-            fontFamily: 'var(--font-mono)', fontSize: 11,
-            color: 'var(--text-sec)', marginTop: 3, letterSpacing: '0.08em',
-          }}>{sub}</div>
-        )}
+        <h1>{title}</h1>
+        {!isMobile && sub && <p>{sub}</p>}
       </div>
       {!isMobile && rightSlot && <div>{rightSlot}</div>}
-    </div>
+    </header>
   );
 }
 
 // ─── Module card ──────────────────────────────────────────────────────────────
 function Module({ n, title, sub, action, children, noPad = false }) {
   return (
-    <div style={{
-      background: 'var(--surface2)', border: '1px solid var(--border)',
-      borderRadius: 6, overflow: 'hidden',
-    }}>
-      <div style={{
-        padding: '10px 16px', borderBottom: '1px solid var(--border)',
-        display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
-      }}>
+    <section className="dashboard-module">
+      <header className="dashboard-module__header">
         <div>
-          <div style={{
-            fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)',
-            letterSpacing: '0.16em', marginBottom: 3,
-          }}>MODULE {String(n).padStart(2, '0')}</div>
-          <div style={{
-            fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 600,
-            color: 'var(--text-pri)', textTransform: 'uppercase', letterSpacing: '0.04em',
-          }}>{title}</div>
-          {sub && (
-            <div style={{
-              fontFamily: 'var(--font-mono)', fontSize: 11,
-              color: 'var(--text-sec)', marginTop: 3,
-            }}>{sub}</div>
-          )}
+          <span>MÓDULO {String(n).padStart(2, '0')}</span>
+          <h2>{title}</h2>
+          {sub && <p>{sub}</p>}
         </div>
         {action}
-      </div>
-      <div style={noPad ? {} : { padding: '20px 24px 24px' }}>{children}</div>
-    </div>
+      </header>
+      <div className={noPad ? undefined : 'dashboard-module__body'}>{children}</div>
+    </section>
   );
 }
 
@@ -290,10 +252,7 @@ function fmtDia(ds) {
 export default function MonitoramentoPage() {
   const { isMobile } = useBreakpoint();
   const { filtersByRoute, updateDashboardFilter } = useDashboard();
-  const [panelItem, setPanelItem] = useState(null);
-  const periodo = filtersByRoute['/monitoramento']?.periodo || 'ANO';
   const heatmapMode = filtersByRoute['/monitoramento']?.visualizacao || 'VOLUME';
-  const setPeriodo = (value) => updateDashboardFilter('/monitoramento', 'periodo', value);
   const setHeatmapMode = (value) => updateDashboardFilter('/monitoramento', 'visualizacao', value);
 
   // ── Dados de modelo via API ────────────────────────────────────────────────
@@ -335,18 +294,24 @@ export default function MonitoramentoPage() {
     'prophet_original':    { label: 'PROPHET ORIGINAL', cor: 'var(--text-sec)' },
   };
   const modeloMeta = MODELO_META[modeloAtivo] ?? { label: 'MODELO ATIVO', cor: 'var(--text-sec)' };
+  const fallbackGroups = gruposHistoricos.toSorted((left, right) => right.taxaViolacao - left.taxaViolacao);
+  const groupsForBriefing = gruposDisponivel && gruposData?.grupos?.length ? gruposData.grupos : fallbackGroups;
+  const topGroup = groupsForBriefing[0] ?? null;
 
-  // Pico previsto hoje via sazonalidade histórica
-  const picoHoje = useMemo(() => {
+  // Referência sazonal para o dia previsto, ancorada no último dia do dataset.
+  const picoProximoDia = useMemo(() => {
     if (!sazonalidadeDisponivel || !sazonalidadeData?.length) return null;
     const JS_DIA = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-    const hojeNome = JS_DIA[new Date().getDay()];
-    const row = sazonalidadeData.find(r => r.dia === hojeNome);
+    const forecastDate = serieData?.serie?.[0]?.ds;
+    if (!forecastDate) return null;
+    const [year, month, day] = forecastDate.split('-').map(Number);
+    const forecastDay = JS_DIA[new Date(Date.UTC(year, month - 1, day)).getUTCDay()];
+    const row = sazonalidadeData.find(r => r.dia === forecastDay);
     if (!row) return null;
     const picoVal  = Math.max(...row.horas);
     const picoHora = row.horas.indexOf(picoVal);
-    return { dia: hojeNome, hora: picoHora, volume: picoVal };
-  }, [sazonalidadeData, sazonalidadeDisponivel]);
+    return { dia: forecastDay, data: forecastDate, hora: picoHora, volume: picoVal };
+  }, [sazonalidadeData, sazonalidadeDisponivel, serieData]);
 
   const axisProps = {
     tick: { fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--text-muted)' },
@@ -356,23 +321,16 @@ export default function MonitoramentoPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <PageHeader
-        title="Centro de Monitoramento"
-        sub="CENTRAL OPERACIONAL AIOPS // NODE: PREDICTFY-01"
-        rightSlot={<PeriodoToggle value={periodo} onChange={setPeriodo} />}
+        title="Monitoramento Preditivo"
+        sub="BRIEFING OPERACIONAL · D+1 A D+7 · BASE HISTÓRICA ATÉ 31/12/2025"
       />
 
       <main style={{ flex: 1, padding: isMobile ? '12px 12px 40px' : '20px 28px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>
 
-        {isMobile && (
-          <div style={{ padding: '0 0 4px' }}>
-            <PeriodoToggle value={periodo} onChange={setPeriodo} />
-          </div>
-        )}
-
         {/* ── MODULE 01: D+1 Forecast Metrics ───────────────────────────── */}
         <Module
           n={1}
-          title="Previsão do Próximo Dia"
+          title="Briefing Operacional D+1"
           sub={modeloAtivo
             ? `${modeloMeta.label}${maeAtivo ? ` · MAE: ${typeof maeAtivo === 'number' ? maeAtivo.toFixed(2) : maeAtivo}` : ''} · previsão de volume para o próximo dia`
             : 'PROPHET-ENSEMBLE · previsão de volume para o próximo dia'
@@ -385,36 +343,19 @@ export default function MonitoramentoPage() {
           ) : !d1Disponivel ? (
             <SemDados mensagem="Previsão Prophet indisponível — execute o notebook 03" />
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 12 }}>
-              <KpiCard
-                label="Total Incidentes D+1"
-                value={d1Total ?? '—'}
-                sub={`Previsão ${modeloMeta.label}`}
-                color="var(--orange)"
-                delay={0}
-              />
-              <KpiCard
-                label="P2 Estimado em Aberto"
-                value={d1P2 ?? '—'}
-                sub={d1P2 != null ? 'Alta prioridade · OLA ≤ 4h' : 'Indisponível neste modelo'}
-                color="var(--red)"
-                delay={60}
-              />
-              <KpiCard
-                label="P3 Estimado em Aberto"
-                value={d1P3 ?? '—'}
-                sub={d1P3 != null ? 'Média prioridade · OLA ≤ 12h' : 'Indisponível neste modelo'}
-                color="var(--yellow)"
-                delay={120}
-              />
-              <KpiCard
-                label="Grupo Crítico"
-                value="Team07"
-                sub="8,94% de taxa de violação"
-                color="var(--red)"
-                delay={180}
-              />
-            </div>
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 12 }}>
+                <KpiCard label="Total Incidentes D+1" value={d1Total ?? '—'} sub={`Previsão ${modeloMeta.label}`} color="var(--orange)" delay={0} />
+                <KpiCard label="Volume P2 previsto" value={d1P2 ?? '—'} sub={d1P2 != null ? 'Alta prioridade · OLA ≤ 4h' : 'Indisponível neste modelo'} color="var(--red)" delay={60} />
+                <KpiCard label="Volume P3 previsto" value={d1P3 ?? '—'} sub={d1P3 != null ? 'Média prioridade · OLA ≤ 12h' : 'Indisponível neste modelo'} color="var(--yellow)" delay={120} />
+                <KpiCard label="Grupo crítico histórico" value={topGroup?.grupo ?? topGroup?.id ?? '—'} sub={topGroup ? `${topGroup.taxaViolacao.toFixed(2)}% de taxa real` : 'Ranking indisponível'} color="var(--red)" delay={180} />
+              </div>
+              <div className="operational-actions">
+                <span><strong>ANTES DO TURNO</strong> validar escala e cobertura P2</span>
+                <span><strong>DURANTE O PICO</strong> acompanhar fila e tempo até reconhecimento</span>
+                <span><strong>GATILHO</strong> escalar se P2 superar o volume previsto + MAE</span>
+              </div>
+            </>
           )}
         </Module>
 
@@ -433,6 +374,7 @@ export default function MonitoramentoPage() {
             <SemDados mensagem="Dados históricos indisponíveis" />
           ) : (
             <>
+              <div style={{ width: '100%', minWidth: 0, minHeight: isMobile ? 220 : 380 }}>
               <ResponsiveContainer width="100%" height={isMobile ? 220 : 380}>
                 <AreaChart data={volumeComPrevisao} margin={{ top: 8, right: 16, bottom: 0, left: -10 }}>
                   <defs>
@@ -486,6 +428,7 @@ export default function MonitoramentoPage() {
                   <Area type="monotone" dataKey="P3" name="P3" stroke="var(--teal)" strokeWidth={2} fill="url(#gradP3)" dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
+              </div>
               <div style={{ display: 'flex', gap: 16, marginTop: 8, justifyContent: 'flex-end' }}>
                 {[['var(--red)', 'P2'], ['var(--teal)', 'P3']].map(([c, l]) => (
                   <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
@@ -556,8 +499,8 @@ export default function MonitoramentoPage() {
         {/* ── MODULE 04: Alertas Operacionais ───────────────────────────── */}
         <Module
           n={4}
-          title="Alertas Operacionais"
-          sub="Grupos em risco · pico previsto · orçamento OLA acumulado"
+          title="Fila de Atenção Operacional"
+          sub="Evidências priorizadas para preparar o próximo turno"
         >
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 20 }}>
 
@@ -566,18 +509,14 @@ export default function MonitoramentoPage() {
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)', letterSpacing: '0.14em', marginBottom: 10, textTransform: 'uppercase' }}>
                 Top grupos por taxa de violação OLA
               </div>
-              {!gruposDisponivel ? (
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>
-                  Modelo XGBoost não disponível
-                </div>
-              ) : (
+              {groupsForBriefing.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {(gruposData?.grupos ?? []).slice(0, 6).map((g, i) => {
+                  {groupsForBriefing.slice(0, 6).map((g, i) => {
                     const taxa = g.taxaViolacao ?? 0;
                     const cor = taxa > 5 ? 'var(--red)' : taxa > 2 ? 'var(--orange)' : 'var(--green)';
                     const barW = Math.min(100, taxa * 8);
                     return (
-                      <div key={g.grupo ?? i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div key={g.grupo ?? g.id ?? i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: cor, fontWeight: 700, width: 52, flexShrink: 0, textAlign: 'right' }}>
                           {taxa.toFixed(1)}%
                         </div>
@@ -585,7 +524,7 @@ export default function MonitoramentoPage() {
                           <div style={{ width: `${barW}%`, height: '100%', background: cor, borderRadius: 3 }} />
                         </div>
                         <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-sec)', flexShrink: 0 }}>
-                          {g.grupo}
+                          {g.grupo ?? g.id}
                         </div>
                       </div>
                     );
@@ -596,29 +535,29 @@ export default function MonitoramentoPage() {
                     <span style={{ color: 'var(--green)' }}>█ </span>&lt;2% normal
                   </div>
                 </div>
-              )}
+              ) : <SemDados mensagem="Ranking histórico indisponível" />}
             </div>
 
             {/* Pico previsto + Orçamento KPI */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-              {/* Pico de hoje */}
+              {/* Referência sazonal do dia previsto */}
               <div style={{ background: 'var(--surface3)', border: '1px solid var(--border)', borderRadius: 6, padding: '14px 16px' }}>
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)', letterSpacing: '0.14em', marginBottom: 8, textTransform: 'uppercase' }}>
-                  Pico de volume previsto hoje
+                  Pico histórico para o próximo dia previsto
                 </div>
-                {picoHoje ? (
+                {picoProximoDia ? (
                   <>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
                       <span style={{ fontFamily: 'var(--font-mono)', fontSize: 24, fontWeight: 700, color: 'var(--orange)' }}>
-                        {picoHoje.hora}h–{picoHoje.hora + 1}h
+                        {picoProximoDia.hora}h–{picoProximoDia.hora + 1}h
                       </span>
                       <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--text-sec)' }}>
-                        {picoHoje.dia}
+                        {picoProximoDia.dia} · {picoProximoDia.data.split('-').reverse().join('/')}
                       </span>
                     </div>
                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-sec)', marginTop: 4 }}>
-                      {picoHoje.volume} incidentes esperados · média histórica 2023–2025
+                      {picoProximoDia.volume} incidentes na média histórica dessa faixa · não é previsão horária
                     </div>
                   </>
                 ) : (
@@ -668,9 +607,6 @@ export default function MonitoramentoPage() {
 
       </main>
 
-      {panelItem && (
-        <DrillDownPanel item={panelItem} onClose={() => setPanelItem(null)} />
-      )}
     </div>
   );
 }

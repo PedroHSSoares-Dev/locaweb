@@ -1,1419 +1,171 @@
-import { useState, useRef } from 'react';
-import { useBreakpoint } from '../hooks/useBreakpoint';
+import { useState } from 'react';
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  Cell, LabelList,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  LabelList,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from 'recharts';
-import { Terminal, AlertTriangle, Activity, Users } from 'lucide-react';
-import { grupos, categorias, categoriaNomes } from '../data/mockData';
-import { useApi } from '../hooks/useApi';
-import SemDados from '../components/SemDados';
-import PeriodoToggle from '../components/PeriodoToggle';
+import { AlertTriangle, Clock3, Layers3, Users } from 'lucide-react';
 import RiscoUnificado from '../components/RiscoUnificado';
-import { useDashboard } from '../hooks/useDashboard';
+import SemDados from '../components/SemDados';
+import { grupos } from '../data/mockData';
+import { useApi } from '../hooks/useApi';
+import { useBreakpoint } from '../hooks/useBreakpoint';
+import './DashboardPages.css';
 
-// ─── Skeleton ─────────────────────────────────────────────────────────────────
-function Skeleton({ height = 80 }) {
-  return <div className="skeleton" style={{ height }} />;
-}
+const CLUSTER_COLORS = ['var(--teal)', 'var(--yellow)', 'var(--orange)', 'var(--purple)', 'var(--red)'];
 
-// ─── Page header ──────────────────────────────────────────────────────────────
-function PageHeader({ title, sub, rightSlot }) {
-  const { isMobile } = useBreakpoint();
+function Module({ n, title, sub, children }) {
   return (
-    <div style={{
-      padding: isMobile ? '12px 16px 12px 56px' : '16px 28px',
-      borderBottom: '1px solid var(--border)',
-      background: 'var(--surface1)',
-      marginBottom: 0,
-      flexShrink: 0,
-      position: 'sticky',
-      top: 0,
-      zIndex: 10,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-    }}>
-      <div>
-        <div style={{
-          fontFamily: 'var(--font-mono)', fontSize: isMobile ? 13 : 18, fontWeight: 600,
-          color: 'var(--text-pri)', letterSpacing: '0.08em', textTransform: 'uppercase',
-        }}>{title}</div>
-        {!isMobile && sub && (
-          <div style={{
-            fontFamily: 'var(--font-mono)', fontSize: 11,
-            color: 'var(--text-sec)', marginTop: 3, letterSpacing: '0.08em',
-          }}>{sub}</div>
-        )}
-      </div>
-      {!isMobile && rightSlot && <div>{rightSlot}</div>}
-    </div>
-  );
-}
-
-// ─── Module card ──────────────────────────────────────────────────────────────
-function Module({ n, title, sub, action, children, noPad = false }) {
-  return (
-    <div style={{
-      background: 'var(--surface2)', border: '1px solid var(--border)',
-      borderRadius: 6, overflow: 'hidden',
-    }}>
-      <div style={{
-        padding: '10px 16px', borderBottom: '1px solid var(--border)',
-        display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
-      }}>
+    <section className="dashboard-module">
+      <header className="dashboard-module__header">
         <div>
-          <div style={{
-            fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)',
-            letterSpacing: '0.16em', marginBottom: 3,
-          }}>MODULE {String(n).padStart(2, '0')}</div>
-          <div style={{
-            fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 600,
-            color: 'var(--text-pri)', textTransform: 'uppercase', letterSpacing: '0.04em',
-          }}>{title}</div>
-          {sub && (
-            <div style={{
-              fontFamily: 'var(--font-mono)', fontSize: 11,
-              color: 'var(--text-sec)', marginTop: 3,
-            }}>{sub}</div>
-          )}
+          <span>MÓDULO {String(n).padStart(2, '0')}</span>
+          <h2>{title}</h2>
+          {sub && <p>{sub}</p>}
         </div>
-        {action}
-      </div>
-      <div style={noPad ? {} : { padding: '20px 24px 24px' }}>{children}</div>
-    </div>
+      </header>
+      <div className="dashboard-module__body">{children}</div>
+    </section>
   );
 }
 
-// ─── KPI Card ─────────────────────────────────────────────────────────────────
-function KpiCard({ label, value, sub, color, delay = 0 }) {
-  return (
-    <div style={{
-      background: 'var(--surface3)', border: '1px solid var(--border)',
-      borderTop: `2px solid ${color}`,
-      borderRadius: 6, padding: '20px 24px',
-      minHeight: 120,
-      display: 'flex', flexDirection: 'column', gap: 8,
-      animation: `fadeInUp 0.4s ease ${delay}ms both`,
-    }}>
-      <div style={{
-        fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
-        color: 'var(--text-sec)', textTransform: 'uppercase', letterSpacing: '0.14em',
-      }}>{label}</div>
-      <div style={{
-        fontFamily: 'var(--font-mono)', fontSize: 30, fontWeight: 400,
-        color: 'var(--text-pri)', lineHeight: 1,
-      }}>{value}</div>
-      {sub && (
-        <div style={{
-          fontFamily: 'var(--font-mono)', fontSize: 11,
-          color: 'var(--text-sec)', letterSpacing: '0.04em',
-        }}>{sub}</div>
-      )}
-    </div>
-  );
-}
-
-// ─── Group tooltip ─────────────────────────────────────────────────────────────
-function GrupoTooltip({ active, payload, label }) {
-  if (!active || !payload?.length) return null;
-  const d = payload[0]?.payload;
-  return (
-    <div style={{
-      background: 'var(--surface3)', border: '1px solid var(--border-md)',
-      borderRadius: 4, padding: '8px 12px',
-    }}>
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-sec)', marginBottom: 6 }}>{label}</div>
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-sec)', marginBottom: 2 }}>total: {d?.total}</div>
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--red)', marginBottom: 2 }}>violações: {d?.violacoes}</div>
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--orange)', fontWeight: 700 }}>taxa: {d?.taxaViolacao}%</div>
-    </div>
-  );
-}
-
-
-// ─── Cluster Heatmap (layout unificado: identidade + grid de métricas) ────────
-function ClusterHeatmap({ clusters }) {
-  const [tooltip, setTooltip] = useState(null);
-  const wrapperRef = useRef(null);
-  const CORES = ['#5ac8fa', '#ffcc00', '#ff9f0a', '#ff2d55'];
-
-  function heatColor(norm) {
-    if (norm < 0.5) {
-      const t = norm * 2;
-      const r = Math.round(52  + (255 - 52)  * t);
-      const g = Math.round(199 + (204 - 199) * t);
-      const b = Math.round(89  * (1 - t));
-      return { bar: `rgba(${r},${g},${b},0.85)`, bg: `rgba(${r},${g},${b},0.08)` };
-    } else {
-      const t = (norm - 0.5) * 2;
-      const r = 255;
-      const g = Math.round(204 * (1 - t));
-      const b = Math.round(85  * t);
-      return { bar: `rgba(${r},${g},${b},0.85)`, bg: `rgba(${r},${g},${b},0.08)` };
-    }
-  }
-
-  const METRICAS = [
-    { label: 'Temporalidade', key: c => c.score_T,           fmt: v => `${(v*100).toFixed(0)}%`, desc: 'Incidentes fora do horário comercial' },
-    { label: 'Gravidade',     key: c => c.score_G,           fmt: v => `${(v*100).toFixed(0)}%`, desc: 'Prioridade + violação + duração' },
-    { label: 'Volume',        key: c => c.score_V,           fmt: v => `${(v*100).toFixed(0)}%`, desc: 'Frequência relativa por grupo' },
-    { label: 'Violação OLA',  key: c => c.taxaViolacao,      fmt: v => `${v.toFixed(1)}%`,        desc: '% de incidentes que violaram OLA' },
-    { label: 'P2 Alta',       key: c => c.perfil.pctP2 ?? 0, fmt: v => `${v.toFixed(0)}%`,        desc: '% de incidentes com prioridade alta' },
-    { label: 'Fim de Semana', key: c => c.perfil.pctFds ?? 0,fmt: v => `${v.toFixed(0)}%`,        desc: '% de incidentes em fins de semana' },
+function ClusterCard({ cluster, selected, onSelect }) {
+  const color = CLUSTER_COLORS[cluster.id % CLUSTER_COLORS.length];
+  const profile = cluster.perfil ?? {};
+  const scores = [
+    ['Temporalidade', cluster.score_T],
+    ['Gravidade', cluster.score_G],
+    ['Pressão OLA', cluster.score_V],
   ];
 
-  const normPorMetrica = METRICAS.map(m => {
-    const vals = clusters.map(c => m.key(c));
-    const min  = Math.min(...vals);
-    const max  = Math.max(...vals);
-    return clusters.map(c => max === min ? 0.5 : (m.key(c) - min) / (max - min));
-  });
-
-  const maxTamanho = Math.max(...clusters.map(c => c.tamanho));
-
-  function handleCellEnter(e, cluster, metrica, norm) {
-    if (!wrapperRef.current) return;
-    const wrap = wrapperRef.current.getBoundingClientRect();
-    const cell = e.currentTarget.getBoundingClientRect();
-    const mi   = METRICAS.indexOf(metrica);
-    setTooltip({
-      x:      cell.left - wrap.left + cell.width / 2,
-      y:      cell.top  - wrap.top,
-      wrapWidth: wrap.width,
-      cluster, metrica, norm,
-      valor:  metrica.fmt(metrica.key(cluster)),
-      isMax:  norm === Math.max(...normPorMetrica[mi]),
-      isMin:  norm === Math.min(...normPorMetrica[mi]),
-    });
-  }
-
   return (
-    <div ref={wrapperRef} style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 10 }}>
-
-      {clusters.map((c, ri) => {
-        const cor        = CORES[ri];
-        const isCritical = c.taxaViolacao > 2;
-
-        return (
-          <div key={c.id} style={{
-            display: 'grid',
-            gridTemplateColumns: '220px 1fr',
-            background: 'var(--surface3)',
-            border: `1px solid ${isCritical ? cor + '55' : 'var(--border)'}`,
-            borderLeft: `3px solid ${cor}`,
-            borderRadius: 6,
-            overflow: 'hidden',
-          }}>
-
-            {/* ── Identidade ──────────────────────────────────────────── */}
-            <div style={{
-              padding: '14px 16px',
-              borderRight: '1px solid var(--border)',
-              display: 'flex', flexDirection: 'column', gap: 8,
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{
-                  fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
-                  color: cor, letterSpacing: '0.12em',
-                }}>CLUSTER {c.id}</span>
-                <span style={{
-                  fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
-                  color: isCritical ? 'var(--red)' : 'var(--green)',
-                  background: isCritical ? 'rgba(255,45,85,0.12)' : 'rgba(52,199,89,0.12)',
-                  border: `1px solid ${isCritical ? 'var(--red)' : 'var(--green)'}44`,
-                  borderRadius: 3, padding: '1px 6px',
-                }}>{c.taxaViolacao}% viol.</span>
-              </div>
-
-              <div style={{
-                fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700,
-                color: 'var(--text-pri)', lineHeight: 1.35,
-                textTransform: 'uppercase', letterSpacing: '0.03em',
-              }}>{c.label}</div>
-
-              <div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', marginBottom: 4 }}>TAMANHO</div>
-                <div style={{ height: 4, background: 'var(--surface4)', borderRadius: 2, overflow: 'hidden', marginBottom: 3 }}>
-                  <div style={{
-                    width: `${(c.tamanho / maxTamanho) * 100}%`,
-                    height: '100%', background: cor, borderRadius: 2, opacity: 0.8,
-                  }} />
-                </div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, color: 'var(--text-pri)' }}>
-                  {c.tamanho.toLocaleString('pt-BR')}{' '}
-                  <span style={{ fontSize: 9, color: 'var(--text-muted)', fontWeight: 400 }}>incidentes</span>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: 14 }}>
-                {[
-                  { l: 'GRUPO', v: c.perfil.grupo },
-                  { l: 'HORA',  v: `${c.perfil.horaMedia}h` },
-                ].map(({ l, v }) => (
-                  <div key={l}>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', marginBottom: 2 }}>{l}</div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600, color: 'var(--text-sec)' }}>{v}</div>
-                  </div>
-                ))}
-              </div>
-
-              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                {c.perfil.diasCriticos.map(d => (
-                  <span key={d} style={{
-                    fontFamily: 'var(--font-mono)', fontSize: 8,
-                    color: 'var(--text-muted)', background: 'var(--surface4)',
-                    border: '1px solid var(--border)', borderRadius: 3, padding: '1px 5px',
-                  }}>{d}</span>
-                ))}
-              </div>
-            </div>
-
-            {/* ── Métricas (grid 3×2) ──────────────────────────────────── */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gridTemplateRows: 'repeat(2, 1fr)',
-            }}>
-              {METRICAS.map((m, mi) => {
-                const norm  = normPorMetrica[mi][ri];
-                const cores = heatColor(norm);
-                const isMax = norm === Math.max(...normPorMetrica[mi]);
-                const isMin = norm === Math.min(...normPorMetrica[mi]);
-
-                return (
-                  <div
-                    key={m.label}
-                    onMouseEnter={e => handleCellEnter(e, c, m, norm)}
-                    onMouseLeave={() => setTooltip(null)}
-                    style={{
-                      padding: '10px 12px',
-                      background: cores.bg,
-                      borderRight: mi % 3 !== 2 ? '1px solid var(--border)' : 'none',
-                      borderBottom: mi < 3 ? '1px solid var(--border)' : 'none',
-                      cursor: 'crosshair',
-                      display: 'flex', flexDirection: 'column', gap: 5,
-                    }}
-                  >
-                    <div style={{
-                      fontFamily: 'var(--font-mono)', fontSize: 8,
-                      color: 'var(--text-muted)', letterSpacing: '0.1em',
-                      textTransform: 'uppercase',
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    }}>
-                      {m.label}
-                      {isMax && <span style={{ color: 'var(--red)',   fontSize: 8 }}>▲</span>}
-                      {isMin && <span style={{ color: 'var(--green)', fontSize: 8 }}>▼</span>}
-                    </div>
-                    <div style={{ height: 3, background: 'var(--surface4)', borderRadius: 2 }}>
-                      <div style={{ width: `${norm * 100}%`, height: '100%', background: cores.bar, borderRadius: 2 }} />
-                    </div>
-                    <div style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: isMax ? 14 : 12,
-                      fontWeight: isMax ? 700 : 500,
-                      color: isMax ? cores.bar : 'var(--text-sec)',
-                    }}>{m.fmt(m.key(c))}</div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })}
-
-      {/* ── Legenda ──────────────────────────────────────────────────────── */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end',
-        fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)',
-        marginTop: 2,
-      }}>
-        <span style={{ color: 'var(--green)' }}>▼ menor</span>
-        <div style={{
-          width: 60, height: 6, borderRadius: 3,
-          background: 'linear-gradient(to right, #34c759, #ffcc00, #ff2d55)',
-        }} />
-        <span style={{ color: 'var(--red)' }}>▲ maior</span>
-        <span style={{ marginLeft: 8 }}>· valores relativos entre clusters</span>
+    <button
+      type="button"
+      className="cluster-card"
+      aria-pressed={selected}
+      onClick={onSelect}
+      style={{ '--cluster-color': color }}
+    >
+      <div className="cluster-card__identity">
+        <span>C{cluster.id}</span>
+        <strong>{cluster.label}</strong>
+        <small>{cluster.descricao}</small>
       </div>
-
-      {/* ── Tooltip ──────────────────────────────────────────────────────── */}
-      {tooltip && (() => {
-        const TWIDTH    = 210;
-        const left      = Math.max(4, Math.min(tooltip.x - TWIDTH / 2, tooltip.wrapWidth - TWIDTH - 4));
-        const showBelow = tooltip.y < 100;
-        const top       = showBelow ? tooltip.y + 36 : tooltip.y - 148;
-        const normColor = tooltip.norm > 0.65 ? 'var(--red)' : tooltip.norm > 0.35 ? 'var(--orange)' : 'var(--green)';
-        const corCluster = CORES[tooltip.cluster.id];
-
-        return (
-          <div style={{
-            position: 'absolute', left, top, width: TWIDTH,
-            pointerEvents: 'none', zIndex: 50,
-            background: 'var(--surface2)',
-            border: '1px solid var(--border-md)',
-            borderRadius: 6, padding: '10px 12px',
-            boxShadow: '0 8px 28px rgba(0,0,0,0.65)',
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700, color: corCluster }}>
-                C{tooltip.cluster.id} · {tooltip.metrica.label}
-              </span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700, color: normColor }}>
-                {tooltip.valor}
-              </span>
-            </div>
-            <div style={{ height: '0.5px', background: 'var(--border)', marginBottom: 8 }} />
-            {[
-              { label: 'descrição',    value: tooltip.metrica.desc,                                                                                         color: 'var(--text-sec)' },
-              { label: 'intensidade',  value: `${(tooltip.norm * 100).toFixed(0)}% relativo ao maior`,                                                      color: normColor },
-              { label: 'ranking',      value: tooltip.isMax ? '▲ maior entre clusters' : tooltip.isMin ? '▼ menor entre clusters' : 'intermediário',        color: tooltip.isMax ? 'var(--red)' : tooltip.isMin ? 'var(--green)' : 'var(--text-sec)' },
-              { label: 'cluster',      value: tooltip.cluster.label.split('—')[0].trim(),                                                                   color: 'var(--text-sec)' },
-              { label: 'violação OLA', value: `${tooltip.cluster.taxaViolacao}%`,                                                                            color: tooltip.cluster.taxaViolacao > 2 ? 'var(--red)' : 'var(--green)' },
-              { label: 'tamanho',      value: `${tooltip.cluster.tamanho.toLocaleString('pt-BR')} incidentes`,                                              color: 'var(--text-sec)' },
-            ].map(({ label, value, color }) => (
-              <div key={label} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 4 }}>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', flexShrink: 0 }}>{label}</span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color, fontWeight: 600, textAlign: 'right' }}>{value}</span>
-              </div>
-            ))}
+      <div className="cluster-card__metrics">
+        <div><strong>{cluster.tamanho.toLocaleString('pt-BR')}</strong><span>incidentes</span></div>
+        <div><strong>{cluster.taxaViolacao.toFixed(3)}%</strong><span>violação OLA</span></div>
+        <div><strong>{profile.pctP2?.toFixed(1) ?? '—'}%</strong><span>P2</span></div>
+      </div>
+      <div className="cluster-card__scores">
+        {scores.map(([label, value]) => (
+          <div key={label}>
+            <span>{label}</span>
+            <i><b style={{ width: `${Math.min(100, (value ?? 0) * 10)}%` }} /></i>
+            <strong>{value?.toFixed(1) ?? '—'}/10</strong>
           </div>
-        );
-      })()}
-    </div>
+        ))}
+      </div>
+      <footer>
+        <span><Clock3 size={13} /> hora média {profile.horaMedia ?? '—'}h</span>
+        <span><Users size={13} /> {profile.grupo || 'grupo não identificado'}</span>
+      </footer>
+    </button>
   );
 }
 
-// ─── Cluster card (reservado para uso futuro) ─────────────────────────────────
-function ClusterCard({ cluster, accentColor }) {
-  const badgeColor = accentColor ?? (
-    cluster.taxaViolacao > 5 ? 'var(--red)' :
-    cluster.taxaViolacao > 2 ? 'var(--orange)' :
-                                'var(--green)'
-  );
-  const isCritical = cluster.taxaViolacao > 2;
-  return (
-    <div style={{
-      background: 'var(--surface3)',
-      border: `1px solid ${isCritical ? badgeColor + '66' : 'var(--border)'}`,
-      borderTop: `2px solid ${badgeColor}`,
-      borderRadius: 6, padding: '16px 18px',
-      display: 'flex', flexDirection: 'column', gap: 10,
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700, color: badgeColor, letterSpacing: '0.12em' }}>
-          CLUSTER {cluster.id}
-        </span>
-        <span style={{
-          fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
-          color: badgeColor, background: `${badgeColor}18`,
-          border: `1px solid ${badgeColor}44`, borderRadius: 3, padding: '2px 8px',
-        }}>{cluster.taxaViolacao}% VIOLAÇÃO</span>
-      </div>
-      <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, fontSize: 12, color: 'var(--text-pri)', textTransform: 'uppercase' }}>
-        {cluster.label}
-      </div>
-      <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--text-sec)', lineHeight: 1.55 }}>
-        {cluster.descricao}
-      </div>
-    </div>
-  );
-}
-
-// ─── Cluster Quadrant (Gartner-style scatter com retângulos proporcionais) ────
-function ClusterQuadrant({ clusters, selected, onToggle }) {
-  const [hovered, setHovered] = useState(null);
-  const [tooltip, setTooltip] = useState(null);
-  const [activeKeys, setActiveKeys] = useState(new Set());
-  const wrapperRef = useRef(null);
-
-  function toggleKey(key) {
-    setActiveKeys(prev => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key); else next.add(key);
-      return next;
-    });
-  }
-
-  const CORES = ['#5ac8fa', '#ffcc00', '#ff9f0a', '#ff2d55'];
-  const maxTamanho = Math.max(...clusters.map(c => c.tamanho));
-
-  // Ancoragem: cada retângulo "cresce para fora" a partir do centro da grade
-  const ALIGN = {
-    0: { alignItems: 'flex-end',   justifyContent: 'flex-end'   }, // topo-esq  → canto inf-dir
-    2: { alignItems: 'flex-end',   justifyContent: 'flex-start'  }, // topo-dir  → canto inf-esq
-    1: { alignItems: 'flex-start', justifyContent: 'flex-end'   }, // baixo-esq → canto sup-dir
-    3: { alignItems: 'flex-start', justifyContent: 'flex-start'  }, // baixo-dir → canto sup-esq
-  };
-
-  // Label no canto oposto ao retângulo dentro da célula
-  const LABEL_POS = {
-    0: { top: 8,      left: 8,      bottom: 'auto', right: 'auto' },
-    2: { top: 8,      left: 'auto', bottom: 'auto', right: 8      },
-    1: { top: 'auto', left: 8,      bottom: 8,      right: 'auto' },
-    3: { top: 'auto', left: 'auto', bottom: 8,      right: 8      },
-  };
-
-  const LABEL_TEXT = {
-    0: 'COMERCIAL · ALTO VOL',
-    1: 'COMERCIAL · BAIXO VOL',
-    2: 'FORA HORÁRIO · ALTO VOL',
-    3: 'FORA HORÁRIO · BAIXO VOL',
-  };
-
-  function getRectSize(tamanho) {
-    const min = 60, max = 140;
-    return min + ((tamanho / maxTamanho) * (max - min));
-  }
-
-  function handleMouseEnter(e, cluster) {
-    if (!wrapperRef.current) return;
-    const wrap = wrapperRef.current.getBoundingClientRect();
-    const rect = e.currentTarget.getBoundingClientRect();
-    setHovered(cluster.id);
-    setTooltip({
-      x: rect.left - wrap.left + rect.width / 2,
-      y: rect.top  - wrap.top,
-      wrapWidth: wrap.width,
-      cluster,
-    });
-  }
-
-  return (
-    <div ref={wrapperRef} style={{ display: 'flex', flexDirection: 'column', position: 'relative', gap: 12 }}>
-
-      {/* ── Scatter Quadrant — grid 2×2 fixo (largura total) ─────────────── */}
-      <div style={{
-        width: '100%',
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gridTemplateRows: '1fr 1fr',
-        height: 380,
-        position: 'relative',
-        background: 'var(--surface1)',
-        border: '1px solid var(--border)',
-        borderRadius: 6,
-        overflow: 'hidden',
-      }}>
-        {/* Divisórias */}
-        <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1, background: 'var(--border)', pointerEvents: 'none', zIndex: 1 }} />
-        <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: 1, background: 'var(--border)', pointerEvents: 'none', zIndex: 1 }} />
-
-        {/* Células na ordem: topo-esq(C0), topo-dir(C2), baixo-esq(C1), baixo-dir(C3) */}
-        {[0, 2, 1, 3].map(id => {
-          const c          = clusters.find(cl => cl.id === id);
-          if (!c) return null;
-          const cor        = CORES[id];
-          const size       = getRectSize(c.tamanho);
-          const isCritical = c.taxaViolacao > 2;
-          const isHov      = hovered === id;
-          const isSel      = selected.has(id);
-          const dimmed     = selected.size > 0 && !isSel;
-
-          return (
-            <div key={id} style={{
-              display: 'flex',
-              alignItems:     ALIGN[id].alignItems,
-              justifyContent: ALIGN[id].justifyContent,
-              padding: 8,
-              position: 'relative',
-              overflow: 'hidden',
-              opacity: dimmed ? 0.25 : 1,
-              transition: 'opacity 0.2s',
-            }}>
-              {/* Label do quadrante — canto oposto ao retângulo */}
-              <div style={{
-                position: 'absolute',
-                top:    LABEL_POS[id].top,
-                left:   LABEL_POS[id].left,
-                bottom: LABEL_POS[id].bottom,
-                right:  LABEL_POS[id].right,
-                fontFamily: 'var(--font-mono)', fontSize: 8,
-                color: 'var(--text-muted)', letterSpacing: '0.08em',
-                pointerEvents: 'none',
-              }}>{LABEL_TEXT[id]}</div>
-
-              {/* Wrapper: retângulo + label externo */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-                <div
-                  onMouseEnter={e => handleMouseEnter(e, c)}
-                  onMouseLeave={() => { setHovered(null); setTooltip(null); }}
-                  onClick={() => onToggle(id)}
-                  style={{
-                    width: size, height: size,
-                    background: `${cor}${isHov || isSel ? '30' : '15'}`,
-                    border: `${isCritical ? 2 : 1}px solid ${cor}${isHov || isSel ? 'ff' : '77'}`,
-                    borderRadius: 6,
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    display: 'flex', flexDirection: 'column',
-                    alignItems: 'center', justifyContent: 'center', gap: 4,
-                    boxShadow: isCritical
-                      ? `0 0 ${isHov ? 20 : 10}px ${cor}44`
-                      : isHov ? `0 0 12px ${cor}33` : 'none',
-                    position: 'relative', zIndex: 2,
-                    outline: isSel ? `2px solid ${cor}` : 'none',
-                    outlineOffset: 2,
-                  }}
-                >
-                  <div style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: size > 120 ? 20 : 15,
-                    fontWeight: 700, color: 'var(--text-pri)', lineHeight: 1,
-                  }}>
-                    {c.tamanho >= 1000 ? `${(c.tamanho / 1000).toFixed(1)}k` : c.tamanho}
-                  </div>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700, color: isCritical ? 'var(--red)' : 'var(--green)' }}>
-                    {c.taxaViolacao}% viol.
-                  </div>
-                  {isCritical && (
-                    <div style={{
-                      position: 'absolute', top: -5, right: -5,
-                      width: 10, height: 10, borderRadius: '50%',
-                      background: 'var(--red)', border: '2px solid var(--bg)',
-                      animation: 'pulse-dot 2s ease infinite',
-                    }} />
-                  )}
-                </div>
-                {/* Label externo — abaixo do retângulo */}
-                <div style={{ textAlign: 'center', pointerEvents: 'none' }}>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700, color: cor, letterSpacing: '0.1em' }}>C{c.id}</div>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-muted)', maxWidth: size, lineHeight: 1.3 }}>
-                    {c.label.split('—')[0].trim()}
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-
-        {/* Label eixo Y */}
-        <div style={{
-          position: 'absolute', left: 6, top: '50%',
-          transform: 'translateY(-50%) rotate(180deg)',
-          writingMode: 'vertical-rl',
-          textOrientation: 'mixed',
-          fontFamily: 'var(--font-mono)', fontSize: 8,
-          color: 'var(--text-muted)', letterSpacing: '0.1em',
-          pointerEvents: 'none', userSelect: 'none',
-        }}>VOLUME ↑ ALTO</div>
-
-        {/* Label eixo X */}
-        <div style={{
-          position: 'absolute', bottom: 6, left: '50%',
-          transform: 'translateX(-50%)',
-          fontFamily: 'var(--font-mono)', fontSize: 8,
-          color: 'var(--text-muted)', letterSpacing: '0.1em',
-          whiteSpace: 'nowrap', pointerEvents: 'none',
-        }}>TEMPORALIDADE → FORA DO HORÁRIO</div>
-      </div>
-
-      {/* Tooltip (relativo ao wrapperRef externo) */}
-      {tooltip && (() => {
-        const TWIDTH = 220;
-        const left   = Math.max(4, Math.min(tooltip.x - TWIDTH / 2, tooltip.wrapWidth - TWIDTH - 4));
-        const top    = tooltip.y < 200 ? tooltip.y + 60 : tooltip.y - 180;
-        const c      = tooltip.cluster;
-        const cor    = CORES[c.id];
-        return (
-          <div style={{
-            position: 'absolute', left, top, width: TWIDTH,
-            pointerEvents: 'none', zIndex: 50,
-            background: 'var(--surface2)',
-            border: `1px solid ${cor}66`,
-            borderRadius: 6, padding: '10px 12px',
-            boxShadow: '0 8px 28px rgba(0,0,0,0.65)',
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700, color: cor }}>
-                C{c.id} — {c.label.split('—')[0].trim()}
-              </span>
-              <span style={{
-                fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
-                color: c.taxaViolacao > 2 ? 'var(--red)' : 'var(--green)',
-              }}>{c.taxaViolacao}% VIOL.</span>
-            </div>
-            <div style={{ height: '0.5px', background: 'var(--border)', marginBottom: 8 }} />
-            {[
-              { l: 'incidentes',     v: c.tamanho.toLocaleString('pt-BR'),  col: 'var(--text-pri)' },
-              { l: 'hora pico',      v: `${c.perfil.horaMedia}h`,            col: 'var(--text-sec)' },
-              { l: 'grupo',          v: c.perfil.grupo,                      col: cor },
-              { l: 'fins de semana', v: `${c.perfil.pctFds ?? 0}%`,          col: 'var(--text-sec)' },
-              { l: 'P2 (alta)',      v: `${c.perfil.pctP2 ?? 0}%`,           col: (c.perfil.pctP2 ?? 0) > 25 ? 'var(--orange)' : 'var(--text-sec)' },
-              { l: 'duração med.',   v: `${c.perfil.duracaoMediana ?? 0}h`,  col: 'var(--text-sec)' },
-              { l: 'descrição',      v: c.descricao,                         col: 'var(--text-muted)' },
-            ].map(({ l, v, col }) => (
-              <div key={l} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 4 }}>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', flexShrink: 0 }}>{l}</span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: col, fontWeight: 600, textAlign: 'right', maxWidth: 130 }}>{v}</span>
-              </div>
-            ))}
-            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}>
-              {c.perfil.diasCriticos.map(d => (
-                <span key={d} style={{
-                  fontFamily: 'var(--font-mono)', fontSize: 8,
-                  color: cor, background: `${cor}18`,
-                  border: `1px solid ${cor}33`,
-                  borderRadius: 3, padding: '1px 5px',
-                }}>{d}</span>
-              ))}
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* ── Perfil de risco — abaixo do gráfico, largura total ───────────── */}
-      <div style={{ display: 'flex', gap: 12 }}>
-
-        {/* Alerta compacto */}
-        <div style={{
-          flex: '0 0 210px',
-          background: 'rgba(255,45,85,0.08)',
-          border: '1px solid var(--red)',
-          borderLeft: '3px solid var(--red)',
-          borderRadius: 6, padding: '12px 14px',
-          alignSelf: 'flex-start',
-        }}>
-          <div style={{
-            fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
-            color: 'var(--red)', letterSpacing: '0.12em', marginBottom: 6,
-          }}>⚠ ALERTA: TEAM05</div>
-          <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--text-sec)', lineHeight: 1.5 }}>
-            Risco operacional aumenta <strong style={{ color: 'var(--red)' }}>3× fora do horário comercial</strong>.
-            C3 viola {clusters.find(c => c.id === 3)?.taxaViolacao}% vs C1 viola {clusters.find(c => c.id === 1)?.taxaViolacao}% — mesma equipe, contextos opostos.
-          </div>
-          <div style={{
-            display: 'flex', gap: 8, marginTop: 8,
-            fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-muted)',
-          }}>
-            <span>SEVERITY: CRITICAL</span><span>·</span><span>TAG: OUT_OF_HOURS</span>
-          </div>
-        </div>
-
-        {/* Perfil — clusters lado a lado usando largura restante */}
-        <div style={{
-          flex: 1,
-          background: 'var(--surface2)',
-          border: '1px solid var(--border)',
-          borderRadius: 6, padding: '12px 16px',
-        }}>
-          <div style={{
-            fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
-            color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 12,
-          }}>PERFIL DE RISCO · por cluster</div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${clusters.length}, 1fr)`, gap: 14 }}>
-            {[...clusters].sort((a, b) => b.taxaViolacao - a.taxaViolacao).map(c => {
-              const cor = CORES[c.id];
-              return (
-                <div key={c.id}>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: cor, fontWeight: 700, marginBottom: 2 }}>
-                    C{c.id}
-                  </div>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 7, color: 'var(--text-muted)', marginBottom: 4, lineHeight: 1.3 }}>
-                    {c.label.split(' ').slice(0, 3).join(' ')}
-                  </div>
-                  <div style={{
-                    fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700, marginBottom: 10,
-                    color: c.taxaViolacao > 2 ? 'var(--red)' : c.taxaViolacao > 1.2 ? 'var(--orange)' : 'var(--green)',
-                  }}>
-                    {c.taxaViolacao}% viol.
-                  </div>
-                  {[
-                    { l: 'TEMPORAL',  desc: 'fora do horário', v: c.score_T },
-                    { l: 'GRAVIDADE', desc: '% prioridade P2', v: c.score_G },
-                    { l: 'VIOLAÇÃO',  desc: 'taxa OLA',        v: c.score_V },
-                  ].map(({ l, desc, v }) => (
-                    <div key={l} style={{ marginBottom: 8 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-sec)', fontWeight: 600 }}>{l}</span>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-pri)', fontWeight: 700 }}>
-                          {(v * 100).toFixed(0)}%
-                        </span>
-                      </div>
-                      <div style={{ height: 5, background: 'var(--surface1)', borderRadius: 3 }}>
-                        <div style={{ width: `${v * 100}%`, height: '100%', background: cor, borderRadius: 3, opacity: 0.85 }} />
-                      </div>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 7, color: 'var(--text-muted)', marginTop: 2 }}>{desc}</div>
-                    </div>
-                  ))}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Painel expandido — detalhamento (1) ou comparação (2+) ────── */}
-      {selected.size === 1 && (() => {
-        const selId = [...selected][0];
-        const c     = clusters.find(cl => cl.id === selId);
-        const cor   = CORES[selId];
-        if (!c) return null;
-        return (
-          <div style={{
-            marginTop: 12,
-            background: 'var(--surface2)',
-            border: `1px solid ${cor}55`,
-            borderTop: `2px solid ${cor}`,
-            borderRadius: 6,
-            padding: '16px 20px',
-            animation: 'fadeInUp 0.2s ease both',
-          }}>
-            {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-              <div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: cor, fontWeight: 700, letterSpacing: '0.12em', marginBottom: 4 }}>
-                  CLUSTER {c.id} — DETALHAMENTO
-                </div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700, color: 'var(--text-pri)', textTransform: 'uppercase' }}>
-                  {c.label}
-                </div>
-                <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--text-sec)', marginTop: 4, lineHeight: 1.5, maxWidth: 500 }}>
-                  {c.descricao}
-                </div>
-              </div>
-            </div>
-
-            {/* Grid 3 colunas */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
-
-              {/* Coluna 1 — KPI cards */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {[
-                  { l: 'INCIDENTES',       v: c.tamanho.toLocaleString('pt-BR'),  sub: `${((c.tamanho / 25006) * 100).toFixed(1)}% do total` },
-                  { l: 'VIOLAÇÃO OLA',     v: `${c.taxaViolacao}%`,               sub: c.taxaViolacao > 2 ? '⚠ CRÍTICO' : '✓ Normal' },
-                  { l: 'P2 (ALTA PRIOR.)', v: `${c.perfil.pctP2 ?? 0}%`,          sub: 'dos incidentes' },
-                  { l: 'FINS DE SEMANA',   v: `${c.perfil.pctFds ?? 0}%`,         sub: 'dos incidentes' },
-                  { l: 'DURAÇÃO MEDIANA',  v: `${c.perfil.duracaoMediana ?? 0}h`, sub: 'por incidente' },
-                  { l: 'HORA PICO',        v: `${c.perfil.horaMedia}h`,           sub: 'horário de abertura' },
-                ].map(({ l, v, sub }) => (
-                  <div key={l} style={{ background: 'var(--surface3)', border: '1px solid var(--border)', borderRadius: 4, padding: '8px 12px' }}>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-muted)', letterSpacing: '0.1em', marginBottom: 2 }}>{l}</div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700, color: 'var(--text-pri)' }}>{v}</div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-sec)' }}>{sub}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Coluna 2 — Scores TGV + equipe */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4 }}>SCORES TGV</div>
-                {[
-                  { l: 'TEMPORALIDADE', v: c.score_T, desc: 'Fora do horário comercial' },
-                  { l: 'GRAVIDADE',     v: c.score_G, desc: 'Prioridade + violação + duração' },
-                  { l: 'VOLUME',        v: c.score_V, desc: 'Frequência relativa' },
-                ].map(({ l, v, desc }) => (
-                  <div key={l}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-sec)' }}>{l}</span>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700, color: cor }}>{(v * 100).toFixed(0)}%</span>
-                    </div>
-                    <div style={{ height: 6, background: 'var(--surface4)', borderRadius: 3 }}>
-                      <div style={{ width: `${v * 100}%`, height: '100%', background: cor, borderRadius: 3, opacity: 0.85 }} />
-                    </div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-muted)', marginTop: 3 }}>{desc}</div>
-                  </div>
-                ))}
-                <div style={{ marginTop: 8 }}>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 8 }}>EQUIPE E PRODUTOS</div>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: cor, marginBottom: 6 }}>{c.perfil.grupo}</div>
-                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                    {c.perfil.produtos.map(p => (
-                      <span key={p} style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: cor, background: `${cor}15`, border: `1px solid ${cor}33`, borderRadius: 3, padding: '2px 6px' }}>{p}</span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Coluna 3 — Dias críticos + comparação vs média */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4 }}>DIAS CRÍTICOS</div>
-                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 8 }}>
-                  {['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'].map(d => {
-                    const isCrit = c.perfil.diasCriticos.includes(d);
-                    return (
-                      <span key={d} style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: isCrit ? cor : 'var(--text-muted)', background: isCrit ? `${cor}20` : 'var(--surface4)', border: `1px solid ${isCrit ? cor + '55' : 'var(--border)'}`, borderRadius: 3, padding: '3px 7px', fontWeight: isCrit ? 700 : 400 }}>{d}</span>
-                    );
-                  })}
-                </div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4 }}>VS MÉDIA GERAL</div>
-                {[
-                  { l: 'Violação OLA', cluster: c.taxaViolacao,       media: 0.95,  unit: '%' },
-                  { l: 'P2 %',         cluster: c.perfil.pctP2 ?? 0,  media: 20.2,  unit: '%' },
-                  { l: 'FDS %',        cluster: c.perfil.pctFds ?? 0, media: 14.3,  unit: '%' },
-                ].map(({ l, cluster: val, media, unit }) => {
-                  const diff    = val - media;
-                  const isAbove = diff > 0;
-                  return (
-                    <div key={l} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-sec)' }}>{l}</span>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)' }}>média {media}{unit}</span>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700, color: isAbove ? 'var(--red)' : 'var(--green)' }}>
-                          {isAbove ? '▲' : '▼'} {Math.abs(diff).toFixed(1)}{unit}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* ── Painel de comparação — 2+ clusters selecionados ─────────── */}
-      {selected.size >= 2 && (() => {
-        const selIds = [...selected];
-        const selClusters = selIds.map(id => ({ c: clusters.find(cl => cl.id === id), cor: CORES[id] })).filter(x => x.c);
-        const [a, b] = selClusters;
-        const METRICS = [
-          { l: 'INCIDENTES',     get: c => c.tamanho,                    fmt: v => v.toLocaleString('pt-BR'), unit: ''  },
-          { l: 'VIOLAÇÃO OLA',   get: c => c.taxaViolacao,               fmt: v => `${v}`,                    unit: '%' },
-          { l: 'P2 (ALTA)',      get: c => c.perfil.pctP2 ?? 0,          fmt: v => `${v}`,                    unit: '%' },
-          { l: 'FINS DE SEMANA', get: c => c.perfil.pctFds ?? 0,         fmt: v => `${v}`,                    unit: '%' },
-          { l: 'DUR. MEDIANA',   get: c => c.perfil.duracaoMediana ?? 0, fmt: v => `${v}`,                    unit: 'h' },
-          { l: 'HORA PICO',      get: c => c.perfil.horaMedia,           fmt: v => `${v}`,                    unit: 'h' },
-        ];
-        const ALL_DIAS  = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
-        const TGV_KEYS  = new Set(['score_T', 'score_G', 'score_V']);
-        const MET_KEYS  = new Set(METRICS.map(m => m.l));
-        const activeDias   = ALL_DIAS.filter(d => activeKeys.has(d));
-        const hasActiveMet = [...activeKeys].some(k => MET_KEYS.has(k));
-        const hasActiveTgv = [...activeKeys].some(k => TGV_KEYS.has(k));
-        const hasActiveDia = activeDias.length > 0;
-        const showDiff = selClusters.length === 2;
-        return (
-          <div style={{
-            marginTop: 12,
-            background: 'var(--surface2)',
-            border: '1px solid var(--border)',
-            borderTop: '2px solid var(--text-muted)',
-            borderRadius: 6,
-            padding: '16px 20px',
-            animation: 'fadeInUp 0.2s ease both',
-          }}>
-            {/* Header */}
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.12em', marginBottom: activeKeys.size > 0 ? 8 : 14 }}>
-              COMPARAÇÃO — {selIds.length} CLUSTERS SELECIONADOS
-            </div>
-
-            {/* Indicador de itens ativos */}
-            {activeKeys.size > 0 && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, fontFamily: 'var(--font-mono)', fontSize: 9, flexWrap: 'wrap' }}>
-                <span style={{ color: 'var(--text-muted)' }}>DESTACANDO:</span>
-                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                  {[...activeKeys].map(k => (
-                    <span
-                      key={k}
-                      onClick={() => toggleKey(k)}
-                      style={{ color: 'var(--text-pri)', fontWeight: 700, cursor: 'pointer', background: 'var(--surface3)', border: '1px solid var(--border)', borderRadius: 3, padding: '1px 6px' }}
-                    >{MET_KEYS.has(k) ? k : TGV_KEYS.has(k) ? k.replace('score_', '') : `DIA ${k}`} ✕</span>
-                  ))}
-                </div>
-                <button
-                  onClick={() => setActiveKeys(new Set())}
-                  style={{ background: 'transparent', border: '1px solid var(--border)', borderRadius: 3, padding: '1px 6px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: 8, cursor: 'pointer' }}
-                >LIMPAR</button>
-              </div>
-            )}
-
-            {/* Colunas por cluster + coluna DIFF (só quando 2 clusters) */}
-            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${selClusters.length}, 1fr)${showDiff ? ' 1fr' : ''}`, gap: 16 }}>
-
-              {/* Coluna por cluster */}
-              {selClusters.map(({ c, cor }) => {
-                const colOpacity = hasActiveDia
-                  ? (activeDias.some(d => c.perfil.diasCriticos.includes(d)) ? 1 : 0.25)
-                  : 1;
-                return (
-                  <div key={c.id} style={{ display: 'flex', flexDirection: 'column', gap: 8, opacity: colOpacity, transition: 'opacity 0.2s ease' }}>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, color: cor, letterSpacing: '0.08em', marginBottom: 4 }}>
-                      C{c.id} — {c.label.split('—')[0].trim()}
-                    </div>
-
-                    {/* Cards de métrica clicáveis */}
-                    {METRICS.map(m => {
-                      const val      = m.get(c);
-                      const isActive = activeKeys.has(m.l);
-                      return (
-                        <div
-                          key={m.l}
-                          onClick={() => toggleKey(m.l)}
-                          style={{
-                            background: 'var(--surface3)',
-                            border: `1px solid ${isActive ? cor : 'var(--border)'}`,
-                            borderRadius: 4, padding: '8px 12px',
-                            cursor: 'pointer',
-                            opacity: hasActiveMet && !isActive ? 0.3 : 1,
-                            transition: 'opacity 0.15s, border-color 0.15s',
-                          }}
-                        >
-                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-muted)', letterSpacing: '0.1em', marginBottom: 2 }}>{m.l}</div>
-                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700, color: 'var(--text-pri)' }}>{m.fmt(val)}{m.unit}</div>
-                        </div>
-                      );
-                    })}
-
-                    {/* Barras TGV clicáveis */}
-                    <div style={{ marginTop: 4 }}>
-                      {[{ l: 'T', v: c.score_T }, { l: 'G', v: c.score_G }, { l: 'V', v: c.score_V }].map(({ l, v }) => {
-                        const tgvKey   = `score_${l}`;
-                        const isActive = activeKeys.has(tgvKey);
-                        return (
-                          <div
-                            key={l}
-                            onClick={() => toggleKey(tgvKey)}
-                            style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5, cursor: 'pointer', opacity: hasActiveTgv && !isActive ? 0.3 : 1, transition: 'opacity 0.15s' }}
-                          >
-                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: isActive ? cor : 'var(--text-muted)', width: 8, fontWeight: isActive ? 700 : 400 }}>{l}</span>
-                            <div style={{ flex: 1, height: isActive ? 6 : 4, background: 'var(--surface4)', borderRadius: 2, transition: 'height 0.15s' }}>
-                              <div style={{ width: `${v * 100}%`, height: '100%', background: cor, borderRadius: 2, opacity: 0.85 }} />
-                            </div>
-                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: cor, width: 28, textAlign: 'right', fontWeight: 700 }}>{(v * 100).toFixed(0)}%</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {/* Dias críticos clicáveis */}
-                    <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-                      {ALL_DIAS.map(d => {
-                        const isCrit   = c.perfil.diasCriticos.includes(d);
-                        const isActive = activeKeys.has(d);
-                        return (
-                          <span
-                            key={d}
-                            onClick={() => toggleKey(d)}
-                            style={{
-                              fontFamily: 'var(--font-mono)', fontSize: 8,
-                              cursor: 'pointer',
-                              opacity: hasActiveDia && !isActive ? 0.2 : 1,
-                              color: isCrit ? cor : isActive ? 'var(--text-pri)' : 'var(--text-muted)',
-                              background: isCrit ? `${cor}20` : isActive ? 'var(--surface3)' : 'var(--surface4)',
-                              border: `1px solid ${isCrit ? cor + '55' : isActive ? 'var(--border-md)' : 'var(--border)'}`,
-                              borderRadius: 3, padding: '2px 5px',
-                              fontWeight: isCrit ? 700 : 400,
-                              transition: 'opacity 0.15s',
-                            }}
-                          >{d}</span>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-
-              {/* Coluna DIFF — só quando 2 clusters */}
-              {showDiff && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.08em', marginBottom: 4 }}>
-                    DIFF C{a.c.id} → C{b.c.id}
-                  </div>
-                  {METRICS.map(m => {
-                    const diff     = m.get(b.c) - m.get(a.c);
-                    const isAbove  = diff > 0;
-                    const isZero   = Math.abs(diff) < 0.01;
-                    const isActive = activeKeys.has(m.l);
-                    return (
-                      <div key={m.l} style={{
-                        background: 'var(--surface3)',
-                        border: `1px solid ${isZero ? 'var(--border)' : isAbove ? 'var(--red)33' : 'var(--green)33'}`,
-                        borderRadius: 4, padding: '8px 12px',
-                        opacity: hasActiveMet && !isActive ? 0.3 : 1,
-                        transition: 'opacity 0.15s',
-                      }}>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-muted)', letterSpacing: '0.1em', marginBottom: 2 }}>{m.l}</div>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 700, color: isZero ? 'var(--text-muted)' : isAbove ? 'var(--red)' : 'var(--green)' }}>
-                          {isZero ? '—' : `${isAbove ? '▲' : '▼'} ${Math.abs(diff).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}${m.unit}`}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-            </div>
-          </div>
-        );
-      })()}
-    </div>
-  );
-}
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
 export default function TecnicoPage() {
   const { isMobile } = useBreakpoint();
-  const { filtersByRoute, updateDashboardFilter } = useDashboard();
-  const periodo = filtersByRoute['/tecnico']?.periodo || 'ANO';
-  const setPeriodo = (value) => updateDashboardFilter('/tecnico', 'periodo', value);
-  const [clusterSelected, setClusterSelected] = useState(() => {
-    const saved = filtersByRoute['/tecnico']?.clusters || 'TODOS';
-    if (saved === 'TODOS') return new Set();
-    return new Set(saved.split(',').map(Number).filter(Number.isFinite));
-  });
-
-  function clearClusterSelection() {
-    setClusterSelected(new Set());
-    updateDashboardFilter('/tecnico', 'clusters', 'TODOS');
-  }
-
-  function toggleCluster(id) {
-    const next = new Set(clusterSelected);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    setClusterSelected(next);
-    updateDashboardFilter(
-      '/tecnico',
-      'clusters',
-      next.size > 0 ? [...next].sort((a, b) => a - b).join(',') : 'TODOS',
-    );
-  }
-
-  // ── Dados de modelo via API ────────────────────────────────────────────────
-  const { data: clustersApiData, loading: clustersLoading, disponivel: clustersDisponivel } = useApi('/clusters');
-  const { data: riscoApiData,    loading: riscoLoading,    disponivel: riscoDisponivel    } = useApi('/risco');
-
-  // Clusters: usa API se disponível
-  const clustersData = (clustersDisponivel && clustersApiData?.clusters)
-    ? clustersApiData.clusters
-    : null;
-
-  // Dados históricos (mockData — referência imutável do dataset)
-  const gruposOrdenados = [...grupos].sort((a, b) => b.taxaViolacao - a.taxaViolacao);
-  const topCats = categorias.slice(0, 5);
-
-  const axisProps = {
-    tick: { fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--text-muted)' },
-    tickLine: false,
-  };
+  const [selectedCluster, setSelectedCluster] = useState(null);
+  const { data: clusters, loading: clustersLoading, disponivel: clustersAvailable } = useApi('/clusters');
+  const { disponivel: riskAvailable } = useApi('/risco');
+  const rankedGroups = [...grupos].sort((left, right) => right.taxaViolacao - left.taxaViolacao);
+  const clusterList = clustersAvailable ? clusters?.clusters ?? [] : [];
+  const topCluster = clusterList.toSorted((left, right) => right.taxaViolacao - left.taxaViolacao)[0];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <PageHeader
-        title="Centro Técnico"
-        sub="MÉTRICAS DEVOPS/SRE // EXPLICABILIDADE DO MODELO // ANÁLISE DE CLUSTERS"
-        rightSlot={<PeriodoToggle value={periodo} onChange={setPeriodo} />}
-      />
+    <div className="dashboard-page">
+      <header className="dashboard-page-header">
+        <div>
+          <h1>Investigação Técnica</h1>
+          {!isMobile && <p>Equipes · triagem de risco · perfis operacionais</p>}
+        </div>
+      </header>
 
-      <main style={{ flex: 1, padding: isMobile ? '12px 12px 40px' : '20px 28px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <main className="dashboard-page__content">
+        <section className="technical-brief">
+          <div><AlertTriangle size={18} /></div>
+          <section>
+            <span>FOCO DA INVESTIGAÇÃO</span>
+            <h2>{topCluster ? `${topCluster.label} concentra a maior taxa entre os clusters` : 'Aguardando perfis operacionais'}</h2>
+            <p>Use os clusters como associação estatística e o XGBoost apenas para ordenar a triagem. Nenhum dos dois comprova causa raiz.</p>
+          </section>
+          <aside>
+            <strong>{riskAvailable ? 'XGBOOST DISPONÍVEL' : 'RISCO INDISPONÍVEL'}</strong>
+            <span>{clustersAvailable ? `K=${clusters?.k} · silhouette ${clusters?.silhouette?.toFixed(4)}` : 'clusters indisponíveis'}</span>
+          </aside>
+        </section>
 
-        {isMobile && (
-          <div style={{ padding: '0 0 4px' }}>
-            <PeriodoToggle value={periodo} onChange={setPeriodo} />
-          </div>
-        )}
-
-        {/* ── MODULE 01: System Metrics ──────────────────────────────────── */}
-        <Module n={1} title="Indicadores Operacionais" sub="Dataset KPI 2025 · apenas incidentes P2 + P3">
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 12 }}>
-            <KpiCard label="Total Incidentes KPI (2025)" value="25.600" sub="P2 + P3 · Jan–Dez 2025"         color="var(--text-muted)" delay={0}   />
-            <KpiCard label="Taxa de Violação P2"         value="0.81%"  sub="42 violações / 5.159 inc."    color="var(--red)"        delay={60}  />
-            <KpiCard label="Taxa de Violação P3"         value="0.96%"  sub="196 violações / 20.097 inc."  color="var(--orange)"     delay={120} />
-            <KpiCard label="Grupo Crítico"               value="Team07" sub="8,94% taxa · 16/179 incidentes" color="var(--red)"     delay={180} />
-          </div>
-        </Module>
-
-        {/* ── MODULE 02: OLA Violation Rate by Team ─────────────────────── */}
-        <Module
-          n={2}
-          title="Taxa de Violação OLA por Equipe"
-          sub="Ordem decrescente · vermelho >3% · laranja >1% · verde <1%"
-        >
-          <ResponsiveContainer width="100%" height={320}>
-            <BarChart
-              data={gruposOrdenados} layout="vertical"
-              margin={{ top: 4, right: 70, bottom: 4, left: 8 }}
-              barSize={13}
-            >
-              <XAxis
-                type="number" domain={[0, 12]}
-                {...axisProps}
-                axisLine={{ stroke: 'var(--border)' }}
-                tickFormatter={v => `${v}%`}
-              />
-              <YAxis
-                type="category" dataKey="id" width={58}
-                tick={{ fontFamily: 'var(--font-mono)', fontSize: 10, fill: 'var(--text-sec)' }}
-                tickLine={false} axisLine={false}
-              />
-              <Tooltip content={<GrupoTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
-              <Bar dataKey="taxaViolacao" name="Taxa de violação" radius={[0, 3, 3, 0]}>
-                {gruposOrdenados.map((g, i) => (
-                  <Cell
-                    key={i}
-                    fill={g.taxaViolacao > 3 ? 'var(--red)' : g.taxaViolacao > 1 ? 'var(--orange)' : 'var(--green)'}
-                    fillOpacity={0.85}
-                  />
-                ))}
-                <LabelList
-                  dataKey="taxaViolacao"
-                  position="right"
-                  formatter={v => `${v}%`}
-                  style={{ fill: 'var(--text-muted)', fontSize: 10, fontFamily: 'var(--font-mono)' }}
+        <Module n={1} title="Risco histórico por equipe" sub="Taxa real de violação OLA · use para selecionar onde investigar">
+          <div style={{ width: '100%', minWidth: 0, minHeight: 330 }}>
+            <ResponsiveContainer width="100%" height={330}>
+              <BarChart data={rankedGroups} layout="vertical" margin={{ top: 0, right: 58, bottom: 0, left: 4 }} barSize={14}>
+                <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" horizontal={false} />
+                <XAxis type="number" domain={[0, 'dataMax + 1']} tickFormatter={(value) => `${value}%`} tick={{ fontSize: 10, fill: 'var(--text-muted)' }} tickLine={false} axisLine={{ stroke: 'var(--border)' }} />
+                <YAxis type="category" dataKey="id" width={58} tick={{ fontSize: 10, fill: 'var(--text-sec)' }} tickLine={false} axisLine={false} />
+                <Tooltip
+                  cursor={{ fill: 'rgba(255,255,255,.025)' }}
+                  contentStyle={{ background: 'var(--surface3)', border: '1px solid var(--border-md)', borderRadius: 8, fontSize: 12 }}
+                  formatter={(value) => [`${value}%`, 'Taxa real']}
                 />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+                <Bar dataKey="taxaViolacao" name="Taxa real" radius={[0, 4, 4, 0]}>
+                  {rankedGroups.map((group) => (
+                    <Cell key={group.id} fill={group.taxaViolacao > 3 ? 'var(--red)' : group.taxaViolacao > 1 ? 'var(--orange)' : 'var(--green)'} />
+                  ))}
+                  <LabelList dataKey="taxaViolacao" position="right" formatter={(value) => `${value}%`} style={{ fill: 'var(--text-muted)', fontSize: 10 }} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </Module>
 
-        {/* ── MODULE 03: Análise Preditiva de Violação ──────────────────── */}
-        <Module
-          n={3}
-          title="Análise Preditiva de Violação"
-          sub={riscoDisponivel
-            ? 'Valores SHAP reais — outputs/risco_ola.json'
-            : 'Valores SHAP simulados · execute o notebook 04'}
-        >
+        <Module n={2} title="Triagem preditiva XGBoost" sub="Score não calibrado · SHAP global · conjunto de teste temporal histórico">
           <RiscoUnificado />
         </Module>
 
-        {/* ── MODULE 04: XGBoost Model Metrics ──────────────────────────── */}
         <Module
-          n={4}
-          title="Performance do Modelo XGBoost"
-          sub={riscoDisponivel
-            ? `THRESHOLD F1-ÓTIMO: ${riscoApiData?.threshold_otimizado} · SCALE_POS_WEIGHT: ${riscoApiData?.scale_pos_weight}`
-            : 'Execute o notebook 04 para ver métricas reais'}
+          n={3}
+          title="Perfis operacionais K-Means"
+          sub={clustersAvailable
+            ? `K=${clusters?.k} · silhouette ${clusters?.silhouette?.toFixed(4)} · ${clusters?.metricas?.total_incidentes?.toLocaleString('pt-BR')} incidentes`
+            : 'Segmentação indisponível'}
         >
-          {riscoLoading ? <Skeleton height={200} /> :
-           !riscoDisponivel ? <SemDados mensagem="Modelo XGBoost não treinado — execute o notebook 04" /> : (() => {
-            const m = riscoApiData?.metricas;
-            if (!m) return <SemDados mensagem="Métricas não disponíveis" />;
-            return (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-
-                {/* KPI Cards */}
-                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2,1fr)' : 'repeat(4,1fr)', gap: 10 }}>
-                  {[
-                    { l: 'ROC-AUC',  v: m.roc_auc.toFixed(4),                     sub: 'Discriminação geral',   color: m.roc_auc > 0.8          ? 'var(--green)' : 'var(--orange)' },
-                    { l: 'PR-AUC',   v: m.pr_auc.toFixed(4),                      sub: 'Precisão-Recall',        color: m.pr_auc > 0.5           ? 'var(--green)' : 'var(--orange)' },
-                    { l: 'RECALL',   v: `${(m.recall_violacao * 100).toFixed(1)}%`, sub: 'Violações detectadas', color: m.recall_violacao > 0.5   ? 'var(--green)' : 'var(--orange)' },
-                    { l: 'F1-SCORE', v: m.f1_violacao.toFixed(4),                  sub: 'Equilíbrio P×R',       color: m.f1_violacao > 0.5       ? 'var(--green)' : 'var(--orange)' },
-                  ].map(({ l, v, sub, color }) => (
-                    <div key={l} style={{ background: 'var(--surface3)', border: '1px solid var(--border)', borderRadius: 6, padding: '12px 14px' }}>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', letterSpacing: '0.1em', marginBottom: 4 }}>{l}</div>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 20, fontWeight: 700, color }}>{v}</div>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-sec)' }}>{sub}</div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Matriz de confusão + Distribuição de risco */}
-                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12 }}>
-
-                  {/* Matriz de confusão */}
-                  <div style={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 6, padding: '12px 14px' }}>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 10 }}>
-                      MATRIZ DE CONFUSÃO · TESTE ({m.total_teste.toLocaleString('pt-BR')} incidentes)
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-                      {[
-                        { l: 'VERDADEIRO POSITIVO', v: m.tp, sub: 'Violações capturadas', color: 'var(--green)'    },
-                        { l: 'FALSO POSITIVO',      v: m.fp, sub: 'Alarmes falsos',        color: 'var(--orange)'  },
-                        { l: 'FALSO NEGATIVO',      v: m.fn, sub: 'Violações perdidas',    color: 'var(--red)'     },
-                        { l: 'VERDADEIRO NEGATIVO', v: m.tn, sub: 'OK confirmados',        color: 'var(--text-sec)' },
-                      ].map(({ l, v, sub, color }) => (
-                        <div key={l} style={{ background: 'var(--surface3)', border: `1px solid ${color}33`, borderRadius: 4, padding: '8px 10px' }}>
-                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-muted)', marginBottom: 2 }}>{l}</div>
-                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 16, fontWeight: 700, color }}>{v.toLocaleString('pt-BR')}</div>
-                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-sec)' }}>{sub}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Distribuição de risco + risco por prioridade */}
-                  <div style={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 6, padding: '12px 14px' }}>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 10 }}>
-                      DISTRIBUIÇÃO DE RISCO · CONJUNTO DE TESTE
-                    </div>
-                    {riscoApiData?.distribuicao_risco && Object.entries(riscoApiData.distribuicao_risco).map(([cat, d]) => {
-                      const cor   = cat === 'alto' ? 'var(--red)' : cat === 'medio' ? 'var(--orange)' : 'var(--green)';
-                      const label = cat === 'alto' ? 'ALTO' : cat === 'medio' ? 'MÉDIO' : 'BAIXO';
-                      return (
-                        <div key={cat} style={{ marginBottom: 10 }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: cor, fontWeight: 700 }}>{label}</span>
-                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-sec)' }}>
-                              {d.count.toLocaleString('pt-BR')} inc. · {d.violacoes_reais} viol. reais
-                            </span>
-                          </div>
-                          <div style={{ height: 6, background: 'var(--surface4)', borderRadius: 3 }}>
-                            <div style={{ width: `${d.pct}%`, height: '100%', background: cor, borderRadius: 3, opacity: 0.8 }} />
-                          </div>
-                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-muted)', marginTop: 2 }}>{d.pct}% dos incidentes</div>
-                        </div>
-                      );
-                    })}
-                    <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 8 }}>RISCO POR PRIORIDADE</div>
-                      {riscoApiData?.risco_por_prioridade && Object.entries(riscoApiData.risco_por_prioridade).map(([prio, d]) => {
-                        const cor = prio === 'P3' ? '#ffcc00' : '#5ac8fa';
-                        return (
-                          <div key={prio} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700, color: cor }}>{prio}</span>
-                            <div style={{ display: 'flex', gap: 12 }}>
-                              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-sec)' }}>
-                                prob. média: <strong style={{ color: cor }}>{(d.media_prob * 100).toFixed(1)}%</strong>
-                              </span>
-                              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-sec)' }}>
-                                violação real: <strong style={{ color: d.taxa_violacao_real > 10 ? 'var(--red)' : 'var(--green)' }}>{d.taxa_violacao_real}%</strong>
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Insight P3 > P2 */}
-                <div style={{ background: 'var(--surface2)', border: '1px solid var(--orange)33', borderLeft: '3px solid var(--orange)', borderRadius: 6, padding: '10px 14px' }}>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--orange)', fontWeight: 700, letterSpacing: '0.1em', marginBottom: 4 }}>
-                    INSIGHT: P3 VIOLA MAIS QUE P2
-                  </div>
-                  <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--text-sec)', lineHeight: 1.6 }}>
-                    Contra-intuitivo: P2 tem OLA mais curto (4h vs 12h) mas viola menos (0.97%) que P3 (13.86%).
-                    A priorização humana das equipes resolve P2 antes do prazo mesmo sob pressão.
-                    P3 acumula na fila e frequentemente ultrapassa as 12h — o modelo captura esse padrão.
-                  </div>
-                </div>
-
-              </div>
-            );
-          })()}
-        </Module>
-
-        {/* ── MODULE 05: Cluster Analysis ───────────────────────────────── */}
-        <Module
-          n={5}
-          title="Análise de Clusters"
-          sub={clustersDisponivel && clustersData
-            ? `K-MEANS TGV · K=4 · Silhouette=0.608 · Temporalidade × Volume`
-            : 'K-MEANS TGV · execute o notebook 05 para gerar dados de cluster'}
-          action={clusterSelected.size > 0 ? (
-            <button
-              onClick={clearClusterSelection}
-              style={{
-                background: 'transparent',
-                border: '1px solid var(--border)',
-                borderRadius: 4,
-                padding: '4px 10px',
-                color: 'var(--text-muted)',
-                fontFamily: 'var(--font-mono)',
-                fontSize: 10,
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-              }}
-            >✕ LIMPAR SELEÇÃO ({clusterSelected.size})</button>
-          ) : null}
-        >
-          {clustersLoading ? (
-            <Skeleton height={400} />
-          ) : !clustersDisponivel ? (
-            <SemDados mensagem="Modelo K-Means não treinado — execute o notebook 05" />
+          {clustersLoading ? <div className="skeleton" style={{ height: 360 }} /> : !clustersAvailable ? (
+            <SemDados mensagem="Modelo K-Means indisponível" />
           ) : (
-            <ClusterQuadrant
-              key={[...clusterSelected].sort().join(',')}
-              clusters={clustersData}
-              selected={clusterSelected}
-              onToggle={toggleCluster}
-            />
+            <>
+              <div className="cluster-grid">
+                {clusterList.map((cluster) => (
+                  <ClusterCard
+                    key={cluster.id}
+                    cluster={cluster}
+                    selected={selectedCluster === cluster.id}
+                    onSelect={() => setSelectedCluster((current) => current === cluster.id ? null : cluster.id)}
+                  />
+                ))}
+              </div>
+              <div className="model-boundary-note">
+                <Layers3 size={15} />
+                <span>Os scores T/G/V usam escala de 0 a 10. Taxa de violação e participação P2 permanecem percentuais reais.</span>
+              </div>
+            </>
           )}
         </Module>
-
-        {/* ── MODULE 06: Group × Category Matrix ────────────────────────── */}
-        <Module
-          n={6}
-          title="Matriz Grupo × Categoria"
-          sub="Taxa de violação histórica (%) por equipe e categoria · ordenado pela maior taxa global · scroll horizontal disponível"
-          noPad
-        >
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 640 }}>
-              <thead>
-                <tr style={{ background: 'var(--surface3)' }}>
-                  <th style={{
-                    padding: '8px 16px', textAlign: 'left',
-                    fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
-                    color: 'var(--text-sec)', letterSpacing: '0.12em',
-                    borderBottom: '1px solid var(--border)', minWidth: 80,
-                  }}>GRUPO</th>
-                  {topCats.map(c => (
-                    <th key={c.id} title={c.id} style={{
-                      padding: '8px 14px', textAlign: 'center',
-                      fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
-                      color: 'var(--text-sec)', letterSpacing: '0.1em',
-                      borderBottom: '1px solid var(--border)', minWidth: 100, cursor: 'help',
-                    }}>
-                      {categoriaNomes[c.id] ?? c.id}
-                    </th>
-                  ))}
-                  <th style={{
-                    padding: '8px 14px', textAlign: 'center',
-                    fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
-                    color: 'var(--text-muted)', letterSpacing: '0.1em',
-                    borderBottom: '1px solid var(--border)', borderLeft: '1px solid var(--border)', minWidth: 80,
-                  }}>TOTAL</th>
-                </tr>
-              </thead>
-              <tbody>
-                {gruposOrdenados.map((g, gi) => (
-                  <tr key={g.id} style={{ borderBottom: gi < gruposOrdenados.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                    <td style={{
-                      padding: '8px 16px',
-                      fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700,
-                      color: g.taxaViolacao > 5 ? 'var(--red)' : g.taxaViolacao > 2 ? 'var(--orange)' : 'var(--text-pri)',
-                    }}>{g.id}</td>
-                    {topCats.map((c, ci) => {
-                      const rate = +((g.taxaViolacao * 0.6 + c.taxaViolacao * 0.4) * (0.8 + (gi * ci % 5) * 0.08)).toFixed(2);
-                      const alpha = Math.min(rate / 8, 1);
-                      return (
-                        <td key={c.id} style={{
-                          padding: '8px 14px', textAlign: 'center',
-                          fontFamily: 'var(--font-mono)', fontSize: 11,
-                          color: rate > 3 ? 'var(--red)' : rate > 1.5 ? 'var(--orange)' : 'var(--text-sec)',
-                          background: `rgba(255,45,85,${alpha * 0.2})`,
-                          fontWeight: rate > 3 ? 700 : 400,
-                        }}>
-                          {rate}%
-                        </td>
-                      );
-                    })}
-                    <td style={{
-                      padding: '8px 14px', textAlign: 'center',
-                      fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700,
-                      color: g.taxaViolacao > 5 ? 'var(--red)' : g.taxaViolacao > 2 ? 'var(--orange)' : 'var(--text-sec)',
-                      background: `rgba(255,45,85,${Math.min(g.taxaViolacao / 10, 1) * 0.25})`,
-                      borderLeft: '1px solid var(--border)',
-                    }}>
-                      {g.taxaViolacao.toFixed(2)}%
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div style={{ padding: '10px 16px 14px', display: 'flex', gap: 20, flexWrap: 'wrap' }}>
-            {[
-              { cor: 'var(--red)',      label: '> 3% — crítico' },
-              { cor: 'var(--orange)',   label: '1,5–3% — atenção' },
-              { cor: 'var(--text-sec)', label: '< 1,5% — normal' },
-            ].map(({ cor, label }) => (
-              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <div style={{ width: 8, height: 8, borderRadius: 2, background: cor }} />
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)' }}>{label}</span>
-              </div>
-            ))}
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)', marginLeft: 'auto' }}>
-              coluna TOTAL = taxa real histórica do grupo · demais células = estimativa combinada
-            </span>
-          </div>
-        </Module>
-
       </main>
     </div>
   );

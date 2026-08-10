@@ -166,7 +166,7 @@ def train(df: pd.DataFrame) -> dict:
 
         descricoes = {
             "Alta Prioridade P2-dominante": "Incidentes de alta prioridade com predominância de P2. Maior risco de violação de OLA.",
-            "Fim de Semana / Noturno": "Incidentes concentrados nos fins de semana e horários noturnos. Menor cobertura de equipe.",
+            "Fim de Semana / Noturno": "Incidentes concentrados nos fins de semana e horários noturnos. Cobertura de equipe é uma hipótese a validar.",
             "Fora do Horário Comercial": "Incidentes abertos fora do horário comercial (antes das 8h ou após 18h).",
         }
         descricao = descricoes.get(nome, f"Incidentes com perfil {periodo_m}. Padrão operacional identificado por clustering.")

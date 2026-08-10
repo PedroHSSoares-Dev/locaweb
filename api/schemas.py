@@ -234,9 +234,12 @@ class DistRisco(BaseModel):
 class RiscoResponse(BaseModel):
     disponivel:              bool
     modelo:                  Optional[str]   = None
+    gerado_em:               Optional[str]   = None
     versao:                  Optional[str]   = None
     abordagem:               Optional[str]   = None
     threshold_otimizado:     Optional[float] = None
+    threshold_f1_referencia: Optional[float] = None
+    recall_target:           Optional[float] = None
     threshold_recall_70:     Optional[float] = None
     scale_pos_weight:        Optional[int]   = None
     metricas:                Optional[MetricasRisco]              = None
@@ -246,9 +249,9 @@ class RiscoResponse(BaseModel):
 
 
 class RiscoProdutoItem(BaseModel):
-    """Risco de violação de OLA por produto/prioridade."""
+    """Score de risco de violação de OLA por produto/prioridade."""
     produto: str = Field(..., example="P3", description="Prioridade ou produto")
-    probViolacao: float = Field(..., example=28.2, description="Probabilidade média de violar OLA (%)")
+    probViolacao: float = Field(..., example=28.2, description="Score médio não calibrado do XGBoost (%)")
     pctAltoRisco: Optional[float] = Field(None, example=14.17, description="% de incidentes classificados como alto risco")
     nIncidentes: Optional[int] = Field(None, example=3881, description="Incidentes no conjunto de teste")
     taxaViolacaoReal: Optional[float] = Field(None, example=13.86, description="Taxa real de violação (%)")
@@ -263,7 +266,7 @@ class RiscoGrupoItem(BaseModel):
 
 
 class RiscoProdutosResponse(BaseModel):
-    """Lista de produtos com risco de violação, ordenada decrescente por probabilidade."""
+    """Produtos ordenados pelo score não calibrado do XGBoost."""
     disponivel: bool = Field(True, example=True)
     produtos: list[RiscoProdutoItem]
 
@@ -279,10 +282,12 @@ class RiscoGruposResponse(BaseModel):
 # ────────────────────────────────────────────────────────────────────────────────
 
 class KpiPrioridade(BaseModel):
-    """KPI de atingimento de OLA por prioridade — calculado via SPC (média + 1σ)."""
+    """KPI de atingimento de OLA por prioridade — meta de negócio distribuída no período."""
     violacoesAno:    int   = Field(..., example=42,  description="Total de violações no período")
-    metaAnual:       int   = Field(..., example=63,  description="Meta derivada via SPC (média + 1σ × meses)")
-    metaMensal:      float = Field(..., example=5.2, description="Meta mensal (média + 1σ)")
+    metaAnual:       int   = Field(..., example=37,  description="Referência central da meta no período")
+    metaMensal:      float = Field(..., example=3.12, description="Referência mensal distribuída")
+    metaMin:         Optional[int] = Field(None, example=36, description="Limite inferior da faixa de negócio no período")
+    metaMax:         Optional[int] = Field(None, example=39, description="Limite superior da faixa de negócio no período")
     pctUtilizado:    float = Field(..., example=66.7, description="% da cota utilizada (real/meta × 100)")
     margemRestante:  int   = Field(..., example=21,  description="Violações restantes antes de atingir a meta")
     tendencia:       str   = Field(..., example="dentro_da_meta")
@@ -293,13 +298,13 @@ class KpiPrioridade(BaseModel):
 
 
 class KpiResponse(BaseModel):
-    """KPI de atingimento das metas de OLA — P2 e P3 via metodologia SPC."""
+    """KPI de atingimento das metas anuais de negócio de OLA."""
     disponivel:     bool            = Field(True,  example=True)
-    metodologia:    Optional[str]   = Field(None,  example="SPC — meta derivada da distribuição histórica")
+    metodologia:    Optional[str]   = Field(None,  example="meta_negocio_distribuida")
     gerado_em:      Optional[str]   = Field(None,  example="2026-03-28")
     periodo_filtro: Optional[str]   = Field(None,  example="ano")
-    P2:             KpiPrioridade   = Field(...,   description="P2 — meta SPC 63 violações/ano")
-    P3:             KpiPrioridade   = Field(...,   description="P3 — meta SPC 280 violações/ano")
+    P2:             KpiPrioridade   = Field(...,   description="P2 — faixa anual 36–39; referência central 37")
+    P3:             KpiPrioridade   = Field(...,   description="P3 — faixa anual 231–263; referência central 247")
     por_mes:        Optional[dict]  = Field(None,  description="Violações mensais por prioridade")
 
 
@@ -323,7 +328,7 @@ class ContextPrevisoes(BaseModel):
 
 class ContextRisco(BaseModel):
     disponivel: bool
-    top_produtos: Optional[list[dict]] = Field(None, description="Top 3 produtos por probabilidade de violação")
+    top_produtos: Optional[list[dict]] = Field(None, description="Top 3 produtos pelo score não calibrado do XGBoost")
     top_grupos: Optional[list[dict]] = Field(None, description="Top 3 grupos por taxa de violação")
     metricas: Optional[dict] = Field(None, description="Métricas do classificador de risco")
     por_prioridade: Optional[dict] = Field(None, description="Risco agregado para P2 e P3")

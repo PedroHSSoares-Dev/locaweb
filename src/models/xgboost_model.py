@@ -233,10 +233,21 @@ def train(df: pd.DataFrame, recall_target: float = 0.70) -> dict:
     df_test["prob"] = y_prob_final
     df_test["real"] = y_test
 
-    limites = {"baixo": (0.0, 0.2), "medio": (0.2, threshold_otm), "alto": (threshold_otm, 1.0)}
+    # Faixas mutuamente exclusivas. O threshold de recall costuma ser menor
+    # que o threshold de F1; usar 0.20 como corte fixo gerava sobreposição e
+    # percentuais acima de 100% quando threshold_otm < 0.20.
+    limite_recall = min(threshold_otm, threshold_f1)
+    limite_f1 = max(threshold_otm, threshold_f1)
+    limites = {
+        "baixo": (0.0, limite_recall),
+        "medio": (limite_recall, limite_f1),
+        "alto": (limite_f1, 1.0),
+    }
     dist_risco = {}
     for cat, (lo, hi) in limites.items():
-        mask = (df_test["prob"] >= lo) & (df_test["prob"] < hi)
+        mask = (df_test["prob"] >= lo) & (
+            df_test["prob"] <= hi if hi == 1.0 else df_test["prob"] < hi
+        )
         dist_risco[cat] = {
             "count": int(mask.sum()),
             "pct": round(float(mask.sum() / len(df_test) * 100), 2),

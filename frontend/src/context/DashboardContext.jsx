@@ -3,8 +3,8 @@ import { DashboardContext } from './dashboard-context';
 
 const INITIAL_FILTERS = {
   '/gestao': { periodo: 'ANO', prioridade: 'AMBOS' },
-  '/monitoramento': { periodo: 'ANO', visualizacao: 'VOLUME' },
-  '/tecnico': { periodo: 'ANO', clusters: 'TODOS' },
+  '/monitoramento': { visualizacao: 'VOLUME' },
+  '/tecnico': { clusters: 'TODOS' },
   '/modelos': {},
 };
 

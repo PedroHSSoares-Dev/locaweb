@@ -1,7 +1,9 @@
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, Cell, LabelList } from 'recharts';
+import { useState } from 'react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
 import { useBreakpoint } from '../hooks/useBreakpoint';
 import { useApi } from '../hooks/useApi';
 import SemDados from '../components/SemDados';
+import './DashboardPages.css';
 
 function Skeleton({ height = 80 }) {
   return <div className="skeleton" style={{ height }} />;
@@ -10,49 +12,27 @@ function Skeleton({ height = 80 }) {
 function PageHeader({ title, sub }) {
   const { isMobile } = useBreakpoint();
   return (
-    <div style={{
-      padding: isMobile ? '12px 16px 12px 56px' : '16px 28px',
-      borderBottom: '1px solid var(--border)',
-      background: 'var(--surface1)',
-      flexShrink: 0, position: 'sticky', top: 0, zIndex: 10,
-    }}>
-      <div style={{
-        fontFamily: 'var(--font-mono)', fontSize: isMobile ? 13 : 18, fontWeight: 600,
-        color: 'var(--text-pri)', letterSpacing: '0.08em', textTransform: 'uppercase',
-      }}>{title}</div>
-      {!isMobile && sub && (
-        <div style={{
-          fontFamily: 'var(--font-mono)', fontSize: 11,
-          color: 'var(--text-sec)', marginTop: 3, letterSpacing: '0.08em',
-        }}>{sub}</div>
-      )}
-    </div>
+    <header className="dashboard-page-header">
+      <div>
+        <h1>{title}</h1>
+        {!isMobile && sub && <p>{sub}</p>}
+      </div>
+    </header>
   );
 }
 
 function Module({ n, title, sub, children }) {
   return (
-    <div style={{
-      background: 'var(--surface2)', border: '1px solid var(--border)',
-      borderRadius: 6, overflow: 'hidden',
-    }}>
-      <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--border)' }}>
-        <div style={{
-          fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)',
-          letterSpacing: '0.16em', marginBottom: 3,
-        }}>MODULE {String(n).padStart(2, '0')}</div>
-        <div style={{
-          fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 600,
-          color: 'var(--text-pri)', textTransform: 'uppercase', letterSpacing: '0.04em',
-        }}>{title}</div>
-        {sub && (
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-sec)', marginTop: 3 }}>
-            {sub}
-          </div>
-        )}
-      </div>
-      <div style={{ padding: '20px 24px 24px' }}>{children}</div>
-    </div>
+    <section className="dashboard-module">
+      <header className="dashboard-module__header">
+        <div>
+          <span>MÓDULO {String(n).padStart(2, '0')}</span>
+          <h2>{title}</h2>
+          {sub && <p>{sub}</p>}
+        </div>
+      </header>
+      <div className="dashboard-module__body">{children}</div>
+    </section>
   );
 }
 
@@ -172,6 +152,7 @@ function Divider({ label }) {
 
 export default function ModelosPage() {
   const { isMobile } = useBreakpoint();
+  const [activeTab, setActiveTab] = useState('xgb');
 
   const { data: riscoData,    loading: riscoLoading,    disponivel: riscoDisponivel    } = useApi('/risco');
   const { data: clustersData, loading: clustersLoading, disponivel: clustersDisponivel } = useApi('/clusters');
@@ -191,13 +172,44 @@ export default function ModelosPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <PageHeader
-        title="Avaliação dos Modelos"
-        sub="MÉTRICAS DE PERFORMANCE · CLASSIFICAÇÃO · REGRESSÃO TEMPORAL · CLUSTERING"
+        title="Modelos & Governança"
+        sub="STATUS · VALIDAÇÃO · LIMITAÇÕES · USO PERMITIDO"
       />
 
       <main style={{ flex: 1, padding: isMobile ? '12px 12px 40px' : '20px 28px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>
 
+        <section className="model-registry" aria-label="Registro de modelos">
+          {[
+            { id: 'xgb', name: 'XGBoost OLA', version: riscoData?.versao ?? '—', status: riscoDisponivel ? 'TRIAGEM' : 'INDISPONÍVEL', meta: riscoData?.gerado_em ?? 'sem artefato', color: 'var(--purple)' },
+            { id: 'forecast', name: 'Previsão de volume', version: modelosData?.modelo_ativo ?? '—', status: modelosDisponivel ? 'ATIVO' : 'INDISPONÍVEL', meta: 'D+1 a D+7', color: 'var(--teal)' },
+            { id: 'clusters', name: 'K-Means', version: clustersData?.k ? `K=${clustersData.k}` : '—', status: clustersDisponivel ? 'EXPLORATÓRIO' : 'INDISPONÍVEL', meta: clustersData?.gerado_em ?? 'sem artefato', color: 'var(--orange)' },
+          ].map((model) => (
+            <button
+              key={model.id}
+              type="button"
+              aria-pressed={activeTab === model.id}
+              onClick={() => setActiveTab(model.id)}
+              style={{ '--registry-color': model.color }}
+            >
+              <span>{model.status}</span>
+              <strong>{model.name}</strong>
+              <small>{model.version} · {model.meta}</small>
+            </button>
+          ))}
+        </section>
+
+        <nav className="model-tabs" aria-label="Selecionar modelo">
+          {[
+            ['xgb', 'XGBoost'],
+            ['forecast', 'Prophet & LSTM'],
+            ['clusters', 'K-Means'],
+          ].map(([id, label]) => (
+            <button key={id} type="button" aria-pressed={activeTab === id} onClick={() => setActiveTab(id)}>{label}</button>
+          ))}
+        </nav>
+
         {/* ── Banner: Por que não acurácia? ─────────────────────────────────── */}
+        {activeTab === 'xgb' && <>
         <div style={{
           background: 'rgba(255,204,0,0.06)',
           border: '1px solid rgba(255,204,0,0.35)',
@@ -260,13 +272,13 @@ export default function ModelosPage() {
                   sub="Validação cruzada 5-fold estratificada"
                   color="var(--green)"
                   badge={{ text: 'GENERALIZAÇÃO', color: 'var(--green)' }}
-                  explain="ROC-AUC medido em 5 subconjuntos de dados não vistos durante o treino. Confirma que o modelo generaliza — não apenas memoriza o conjunto de treino."
-                  context={`Desvio padrão ${(m?.roc_auc_cv_std ?? 0).toFixed(4)} indica ${(m?.roc_auc_cv_std ?? 0) < 0.04 ? 'alta estabilidade' : 'variabilidade moderada'}`}
+                  explain="ROC-AUC medido em 5 subconjuntos estratificados não usados no respectivo treino. Sustenta consistência entre folds, mas não substitui validação temporal recente."
+                  context={`Desvio padrão entre folds: ${(m?.roc_auc_cv_std ?? 0).toFixed(4)}`}
                 />
               </div>
 
               {/* Métricas de threshold */}
-              <Divider label="MÉTRICAS NO THRESHOLD ÓTIMO (F1-MÁXIMO)" />
+              <Divider label="MÉTRICAS NO CORTE OPERACIONAL — RECALL ≥70%" />
               <div style={grid3}>
                 <MetricCard
                   label="RECALL"
@@ -289,8 +301,8 @@ export default function ModelosPage() {
                   value={`${((m?.f1_violacao ?? 0) * 100).toFixed(1)}%`}
                   sub="Média harmônica Precision × Recall"
                   color="var(--orange)"
-                  explain="Equilibra Precision e Recall em um único valor. O threshold foi otimizado para maximizar este score — representa o melhor equilíbrio dado o desbalanceamento 1:102."
-                  context={`Threshold ótimo: ${(riscoData?.threshold_otimizado ?? 0).toFixed(4)} · scale_pos_weight: ${riscoData?.scale_pos_weight ?? '—'}`}
+                  explain="Equilibra Precision e Recall no corte operacional escolhido para atingir recall mínimo de 70%. Não corresponde ao corte que maximiza F1."
+                  context={`Corte recall: ${(riscoData?.threshold_otimizado ?? 0).toFixed(4)} · corte F1 de referência: ${(riscoData?.threshold_f1_referencia ?? 0).toFixed(4)}`}
                 />
               </div>
 
@@ -375,7 +387,7 @@ export default function ModelosPage() {
               {/* SHAP Feature Importance Chart */}
               {riscoData?.feature_importance_shap?.length > 0 && (<>
                 <Divider label="FEATURE IMPORTANCE — SHAP (TOP 10)" />
-                <ResponsiveContainer width="100%" height={280}>
+                <ResponsiveContainer width="100%" height={280} minWidth={0}>
                   <BarChart
                     layout="vertical"
                     data={riscoData.feature_importance_shap.slice(0, 10).map(f => ({
@@ -414,10 +426,10 @@ export default function ModelosPage() {
                 <MetricCard
                   label="INTERPRETAÇÃO DO MODELO"
                   value="Uso contínuo"
-                  sub="Probabilidades > threshold binário"
+                  sub="Score não calibrado para ordenação"
                   color="var(--text-sec)"
-                  explain="O modelo é mais útil como score contínuo do que como classificador binário. Probabilidades acima de 15% indicam atenção; acima de 30% indicam alto risco — independente do threshold ótimo."
-                  context={`Threshold F1-ótimo: ${(riscoData?.threshold_otimizado ?? 0).toFixed(4)} · threshold p/ recall ≥70%: ${riscoData?.threshold_recall_70 ?? '—'}`}
+                  explain="O modelo é mais útil para ordenar a fila de revisão humana. O score não é probabilidade e não deve receber faixas percentuais arbitrárias."
+                  context={`Corte recall ≥70%: ${(riscoData?.threshold_otimizado ?? 0).toFixed(4)} · corte F1 de referência: ${(riscoData?.threshold_f1_referencia ?? 0).toFixed(4)}`}
                 />
               </div>
 
@@ -445,7 +457,7 @@ export default function ModelosPage() {
                         text: <>
                           <strong style={{ color: 'var(--text-pri)' }}>{SHAP_LABELS[top3[1].feature] ?? top3[1].feature}</strong>
                           {' '}(SHAP {top3[1].shap_mean_abs.toFixed(3)}) e <strong style={{ color: 'var(--text-pri)' }}>{SHAP_LABELS[top3[2].feature] ?? top3[2].feature}</strong>
-                          {' '}(SHAP {top3[2].shap_mean_abs.toFixed(3)}) indicam que períodos de alta demanda elevam o risco de violação — sobrecarga operacional é um fator independente do grupo.
+                          {' '}(SHAP {top3[2].shap_mean_abs.toFixed(3)}) estão associados ao score em períodos de maior demanda. Isso não comprova que sobrecarga seja a causa da violação.
                         </>,
                       },
                       {
@@ -465,14 +477,16 @@ export default function ModelosPage() {
             </>
           )}
         </Module>
+        </>}
 
         {/* ── MODULE 02: Previsão de Volume ─────────────────────────────────── */}
+        {activeTab === 'forecast' && (
         <Module
           n={2}
           title="Previsão de Volume — Prophet & LSTM"
           sub={modelosDisponivel
             ? `modelo ativo: ${modelosData?.modelo_ativo ?? '—'} · MAE holdout: ${fmtMae(modelosData?.mae_modelo_ativo)}`
-            : 'Erro médio absoluto (MAE) em incidentes/dia · hierarquia LSTM v2 > Prophet MC > Prophet Original'}
+            : 'Erro médio absoluto (MAE) em incidentes/dia · protocolos de validação separados'}
         >
           {/* Callout: o que é MAE */}
           <div style={{
@@ -495,7 +509,7 @@ export default function ModelosPage() {
             <SemDados mensagem="Modelos de previsão não disponíveis — execute: python src/pipeline.py --step lstm" />
           ) : (
             <>
-              <Divider label="LSTM V2 — MELHOR MODELO ATIVO" />
+              <Divider label="LSTM V2 — MODELO ATIVO · HOLDOUT REAL" />
               <div style={grid3}>
                 <MetricCard
                   label="MAE HOLDOUT — TOTAL"
@@ -511,7 +525,7 @@ export default function ModelosPage() {
                   value={fmtMae(ml?.mae_p2)}
                   sub="Alta prioridade · OLA ≤ 4h"
                   color="var(--green)"
-                  explain="Incidentes P2 têm menor volume diário — mais fáceis de prever com precisão. MAE baixo representa alta qualidade de previsão para a classe mais crítica."
+                  explain="P2 possui menor volume diário, portanto o MAE absoluto tende a ser menor. Para declarar maior precisão seria necessário comparar também erro normalizado e baseline por prioridade."
                   context="P2 é a prioridade que excedeu a meta em 2025 (42 vs meta 37)"
                 />
                 <MetricCard
@@ -519,7 +533,7 @@ export default function ModelosPage() {
                   value={fmtMae(ml?.mae_p3)}
                   sub="Média prioridade · OLA ≤ 12h"
                   color="var(--teal)"
-                  explain="P3 tem maior volume diário e mais variabilidade. O erro é aceitável dado que o volume médio diário de P3 é ~50 incidentes."
+                  explain="P3 tem maior volume diário e MAE absoluto maior. A adequação operacional deve ser avaliada contra baseline, erro normalizado e tolerância de capacidade."
                   context="P3 ficou dentro da meta em 2025 (196 vs meta 247)"
                 />
               </div>
@@ -548,13 +562,13 @@ export default function ModelosPage() {
                   sub="Redução de erro no holdout de 92 dias"
                   color="var(--green)"
                   badge={{ text: 'MELHORA', color: 'var(--green)' }}
-                  explain={`No holdout de 92 dias (out–dez 2025), o LSTM v2 reduziu o MAE vs Prophet rolling. O LSTM captura melhor padrões de longo prazo após 3 anos de dados.`}
+                  explain="No mesmo holdout de 92 dias (out–dez 2025), o LSTM v2 apresentou MAE menor que o Prophet rolling. O teste sustenta a diferença observada, mas não identifica sozinho a causa do ganho."
                   context={`Prophet holdout MAE = ${fmtMae(ml?.mae_prophet_holdout_92d)} · LSTM holdout MAE = ${fmtMae(ml?.mae_total)}`}
                 />
               </div>
 
               {/* Tabela comparativa */}
-              <Divider label="COMPARAÇÃO DIRETA — HOLDOUT 92 DIAS" />
+              <Divider label="VALIDAÇÕES DISPONÍVEIS — PROTOCOLO EXPLÍCITO" />
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: 11 }}>
                   <thead>
@@ -568,7 +582,7 @@ export default function ModelosPage() {
                     {[
                       { model: 'LSTM v2', period: 'Holdout real 92d', total: fmtMae(ml?.mae_total), p2: fmtMae(ml?.mae_p2), p3: fmtMae(ml?.mae_p3), status: 'ATIVO', statusColor: 'var(--teal)' },
                       { model: 'Prophet MC', period: 'Holdout real 92d', total: fmtMae(ml?.mae_prophet_holdout_92d), p2: '—', p3: '—', status: 'FALLBACK', statusColor: 'var(--text-muted)' },
-                      { model: 'Prophet Orig.', period: 'Cross-validation', total: fmtMae(mp?.mae_d1_total), p2: fmtMae(mp?.mae_d1_p2), p3: fmtMae(mp?.mae_d1_p3), status: 'FALLBACK', statusColor: 'var(--text-muted)' },
+                      { model: 'Prophet Orig.', period: 'Cross-validation', total: fmtMae(mp?.mae_d1_total), p2: fmtMae(mp?.mae_d1_p2), p3: fmtMae(mp?.mae_d1_p3), status: 'NÃO COMPARÁVEL', statusColor: 'var(--orange)' },
                     ].map((row, i) => (
                       <tr key={i} style={{ borderBottom: '0.5px solid var(--border)', background: i === 0 ? 'rgba(90,200,250,0.04)' : 'transparent' }}>
                         <td style={{ padding: '8px 12px', color: i === 0 ? 'var(--teal)' : 'var(--text-sec)', fontWeight: i === 0 ? 700 : 400 }}>{row.model}</td>
@@ -590,12 +604,11 @@ export default function ModelosPage() {
               {/* MAE Comparison Chart */}
               {modelosDisponivel && ml && (<>
                 <Divider label="COMPARATIVO MAE — GRÁFICO" />
-                <ResponsiveContainer width="100%" height={200}>
+                <ResponsiveContainer width="100%" height={200} minWidth={0}>
                   <BarChart
                     data={[
                       { modelo: 'LSTM v2',       total: ml.mae_total,                    p2: ml.mae_p2,    p3: ml.mae_p3 },
                       { modelo: 'Prophet MC',     total: ml.mae_prophet_holdout_92d ?? null, p2: null,     p3: null },
-                      { modelo: 'Prophet Orig.',  total: mp?.mae_d1_total ?? null,        p2: mp?.mae_d1_p2 ?? null, p3: mp?.mae_d1_p3 ?? null },
                     ]}
                     margin={{ top: 8, right: 20, left: 0, bottom: 0 }}
                   >
@@ -605,7 +618,6 @@ export default function ModelosPage() {
                       contentStyle={{ background: 'var(--surface3)', border: '1px solid var(--border)', borderRadius: 6, fontFamily: 'var(--font-mono)', fontSize: 10 }}
                       formatter={(v, name) => [v != null ? `${v.toFixed(2)} inc/dia` : '—', name.toUpperCase()]}
                     />
-                    <Legend wrapperStyle={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-muted)' }} />
                     <Bar dataKey="total" name="Total" fill="var(--teal)"   radius={[3,3,0,0]}>
                       <LabelList dataKey="total" position="top" formatter={v => v != null ? v.toFixed(1) : ''} style={{ fontFamily: 'var(--font-mono)', fontSize: 9, fill: 'var(--text-muted)' }} />
                     </Bar>
@@ -635,19 +647,19 @@ export default function ModelosPage() {
                         tag: 'PRECISÃO',
                         text: <>
                           O LSTM v2 erra em média <strong style={{ color: 'var(--text-pri)' }}>{fmtMae(maeTotal)} incidentes/dia</strong> no conjunto de holdout real (out–dez 2025).
-                          {pctErro && <> Isso representa <strong style={{ color: 'var(--text-pri)' }}>{pctErro}%</strong> do volume médio diário — margem operacionalmente aceitável para planejamento de capacidade.</>}
+                          {pctErro && <> Isso representa <strong style={{ color: 'var(--text-pri)' }}>{pctErro}%</strong> do volume médio diário usado como referência; a tolerância aceitável deve ser definida pela operação.</>}
                         </>,
                       },
                       {
                         tag: 'P2 CRÍTICO',
                         text: <>
-                          Para incidentes P2 (OLA ≤ 4h), o erro médio é de apenas <strong style={{ color: 'var(--text-pri)' }}>{fmtMae(maeP2)} incidentes/dia</strong> — a classe mais crítica é também a mais previsível por ter menor variabilidade de volume.
+                          Para incidentes P2 (OLA ≤ 4h), o erro médio absoluto é de <strong style={{ color: 'var(--text-pri)' }}>{fmtMae(maeP2)} incidentes/dia</strong>. O menor valor absoluto acompanha o menor volume e não basta para declarar maior previsibilidade.
                         </>,
                       },
                       {
                         tag: 'EVOLUÇÃO',
                         text: <>
-                          O LSTM reduziu o erro em <strong style={{ color: 'var(--text-pri)' }}>{fmtPct(melhora)}</strong> comparado ao Prophet no mesmo período de holdout. O ganho vem da capacidade do LSTM de capturar dependências de longo prazo nos 3 anos de histórico.
+                          O LSTM reduziu o erro em <strong style={{ color: 'var(--text-pri)' }}>{fmtPct(melhora)}</strong> comparado ao Prophet no mesmo período de holdout. O resultado é comparável; a causa do ganho não foi isolada pelo protocolo.
                         </>,
                       },
                       {
@@ -661,8 +673,10 @@ export default function ModelosPage() {
             </>
           )}
         </Module>
+        )}
 
         {/* ── MODULE 03: K-Means ────────────────────────────────────────────── */}
+        {activeTab === 'clusters' && (
         <Module
           n={3}
           title="K-Means — Qualidade da Segmentação"
@@ -696,7 +710,7 @@ export default function ModelosPage() {
                   sub="Coesão interna vs separação entre clusters"
                   color={(km?.silhouette_score ?? 0) > 0.4 ? 'var(--green)' : (km?.silhouette_score ?? 0) > 0.2 ? 'var(--orange)' : 'var(--red)'}
                   explain="Mede quão similar cada ponto é ao seu próprio cluster em comparação aos outros clusters. Varia de −1 a +1. Valores > 0.5 são excelentes; 0.2–0.5 são razoáveis; < 0.2 indicam sobreposição natural dos dados."
-                  context="Dados de comportamento operacional raramente excedem 0.3 — sobreposição é esperada"
+                  context="Valor abaixo de 0,2: interprete os perfis com cautela e valide-os com evidência operacional"
                 />
                 <MetricCard
                   label="CALINSKI-HARABÁSZ"
@@ -747,7 +761,7 @@ export default function ModelosPage() {
               {/* Cluster Violation Rate Chart */}
               {clustersDisponivel && clustersData?.clusters?.length > 0 && (<>
                 <Divider label="TAXA DE VIOLAÇÃO OLA POR CLUSTER" />
-                <ResponsiveContainer width="100%" height={200}>
+                <ResponsiveContainer width="100%" height={200} minWidth={0}>
                   <BarChart
                     data={[...clustersData.clusters]
                       .sort((a, b) => b.taxaViolacao - a.taxaViolacao)
@@ -862,12 +876,12 @@ export default function ModelosPage() {
                       {
                         tag: 'SILHOUETTE',
                         text: <>
-                          Score de {clustersData.silhouette?.toFixed(4)} indica sobreposição moderada entre grupos — esperado em dados operacionais de TI sem segmentação natural rígida. O valor é consistente entre K=5, 7 e 9, confirmando que os grupos identificados são estáveis e não artefatos do algoritmo.
+                          Score de {clustersData.silhouette?.toFixed(4)} indica sobreposição relevante entre grupos. A proximidade entre candidatos K não confirma estabilidade por si só; os perfis ainda precisam de validação operacional.
                         </>,
                       },
                       {
                         tag: 'USO',
-                        text: 'Os clusters permitem criar políticas diferenciadas por perfil operacional — SLAs mais apertados para grupos de alto risco, roteiros de escalada distintos por período do dia e prioridade.',
+                        text: 'Os clusters podem apoiar roteiros de investigação, cobertura e escalada por perfil. Não devem alterar OLAs contratuais sem validação de negócio.',
                       },
                     ]}
                   />
@@ -876,6 +890,7 @@ export default function ModelosPage() {
             </>
           )}
         </Module>
+        )}
 
       </main>
     </div>

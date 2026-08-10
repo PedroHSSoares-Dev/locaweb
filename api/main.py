@@ -40,7 +40,7 @@ API AIOps para previsão de incidentes e monitoramento de OLA em operações ITS
 | **Prophet original** (ensemble v5+v6) — Volume D+1 a D+7 | ✅ Disponível | 12.43 (CV D+1) | `src/models/prophet_model.py` |
 | **XGBoost** — Risco de violação de OLA | ✅ Disponível | — | `src/models/xgboost_model.py` |
 | **K-Means** — Segmentação de incidentes | ✅ Disponível | — | `src/models/kmeans_model.py` |
-| **KPI OLA** — Meta dinâmica mensal | ✅ Disponível | — | `src/models/kpi_projection.py` |
+| **KPI OLA** — Consumo das metas de negócio | ✅ Disponível | — | `src/models/kpi_projection.py` |
 
 ### Fallback de disponibilidade
 Os endpoints `/previsoes/*` usam o primeiro artefato disponível nesta ordem operacional:

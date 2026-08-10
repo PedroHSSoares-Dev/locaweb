@@ -1,13 +1,8 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './index.css';
 import { DashboardProvider } from './context/DashboardContext';
 import Sidebar from './components/Sidebar';
-import ChatBot from './components/ChatBot';
-import GestaoPage from './pages/GestaoPage';
-import MonitoramentoPage from './pages/MonitoramentoPage';
-import TecnicoPage from './pages/TecnicoPage';
-import ModelosPage from './pages/ModelosPage';
-import AdminPage from './pages/AdminPage';
 import { useBreakpoint } from './hooks/useBreakpoint';
 import { useChatAuth } from './hooks/useChatAuth';
 import { isAdminUser } from './auth/authorization';
@@ -15,6 +10,22 @@ import LogoPredictfy from './components/LogoPredictfy';
 import './App.css';
 
 import { Analytics } from "@vercel/analytics/react"
+
+const GestaoPage = lazy(() => import('./pages/GestaoPage'));
+const MonitoramentoPage = lazy(() => import('./pages/MonitoramentoPage'));
+const TecnicoPage = lazy(() => import('./pages/TecnicoPage'));
+const ModelosPage = lazy(() => import('./pages/ModelosPage'));
+const AdminPage = lazy(() => import('./pages/AdminPage'));
+const ChatBot = lazy(() => import('./components/ChatBot'));
+
+function RouteFallback() {
+  return (
+    <div className="route-fallback" role="status" aria-live="polite">
+      <span className="route-fallback__pulse" aria-hidden="true" />
+      Carregando área…
+    </div>
+  );
+}
 
 function AppInner() {
   const { isMobile } = useBreakpoint();
@@ -35,20 +46,24 @@ function AppInner() {
         transition: 'margin-left 0.25s cubic-bezier(0.4,0,0.2,1)',
         background: 'var(--bg)',
       }}>
-            <Routes>
-              <Route path="/" element={<Navigate to="/gestao" replace />} />
-              <Route path="/gestao"        element={<GestaoPage />} />
-              <Route path="/monitoramento" element={<MonitoramentoPage />} />
-              <Route path="/tecnico"       element={<TecnicoPage />} />
-              <Route path="/modelos"       element={<ModelosPage />} />
-              <Route
-                path="/admin"
-                element={isAdminUser(user) ? <AdminPage /> : <Navigate to="/gestao" replace />}
-              />
-              <Route path="*" element={<Navigate to="/gestao" replace />} />
-            </Routes>
+            <Suspense fallback={<RouteFallback />}>
+              <Routes>
+                <Route path="/" element={<Navigate to="/gestao" replace />} />
+                <Route path="/gestao"        element={<GestaoPage />} />
+                <Route path="/monitoramento" element={<MonitoramentoPage />} />
+                <Route path="/tecnico"       element={<TecnicoPage />} />
+                <Route path="/modelos"       element={<ModelosPage />} />
+                <Route
+                  path="/admin"
+                  element={isAdminUser(user) ? <AdminPage /> : <Navigate to="/gestao" replace />}
+                />
+                <Route path="*" element={<Navigate to="/gestao" replace />} />
+              </Routes>
+            </Suspense>
       </div>
-      <ChatBot />
+      <Suspense fallback={null}>
+        <ChatBot />
+      </Suspense>
     </div>
   );
 }
