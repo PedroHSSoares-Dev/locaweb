@@ -12,7 +12,6 @@ export const msalConfig = {
     authority: import.meta.env.VITE_ENTRA_AUTHORITY || 'https://login.microsoftonline.com/common',
     redirectUri: import.meta.env.VITE_ENTRA_REDIRECT_URI
       || new URL('/auth-redirect.html', window.location.origin).href,
-    postLogoutRedirectUri: window.location.origin,
     navigateToLoginRequestUrl: true,
   },
   cache: {

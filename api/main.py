@@ -89,14 +89,6 @@ cors_origins = [
     if origin.strip()
 ]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=cors_origins,
-    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type"],
-)
-
-
 @app.middleware("http")
 async def protect_predictfy_api(request: Request, call_next):
     """Require a verified Predictfy session for every non-public data route."""
@@ -115,6 +107,16 @@ async def protect_predictfy_api(request: Request, call_next):
         except SessionError as exc:
             return JSONResponse(status_code=401, content={"detail": str(exc)})
     return await call_next(request)
+
+
+# Added after the authentication middleware so Starlette wraps every response,
+# including early 401 responses returned above, with the appropriate CORS headers.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=cors_origins,
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
+)
 
 app.include_router(previsoes.router, prefix="/api")
 app.include_router(risco.router,     prefix="/api")

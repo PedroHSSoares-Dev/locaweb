@@ -313,7 +313,7 @@ function ChatConversation({
   dashboardContext,
   onConversationLoaded,
   onConversationUpdated,
-  onLogout,
+  onSessionExpired,
   onClose,
   active,
 }) {
@@ -490,7 +490,7 @@ function ChatConversation({
       });
 
       if (response.status === 401) {
-        onLogout();
+        onSessionExpired();
         return;
       }
       if (!response.ok || !response.body) {
@@ -815,7 +815,6 @@ function ChatConversation({
         </div>
         <div className="chat-composer__meta">
           <span>ENTER envia · ESC recolhe</span>
-          <button type="button" onClick={onLogout}>ENCERRAR SESSÃO</button>
         </div>
       </form>
     </>
@@ -1111,7 +1110,7 @@ export default function ChatBot() {
               dashboardContext={dashboardContext}
               onConversationLoaded={handleConversationLoaded}
               onConversationUpdated={refreshConversation}
-              onLogout={logout}
+              onSessionExpired={logout}
               onClose={() => { if (!isDocked) close(); }}
               active={open}
             />

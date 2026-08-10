@@ -1032,6 +1032,18 @@ class ChatApiTests(unittest.TestCase):
         )
         self.assertNotIn("access-control-allow-origin", blocked.headers)
 
+    def test_cors_wraps_authentication_errors_for_allowed_frontend(self):
+        response = self.client.get(
+            "/api/context",
+            headers={"Origin": "http://localhost:5173"},
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(
+            response.headers.get("access-control-allow-origin"),
+            "http://localhost:5173",
+        )
+
     def test_dashboard_data_requires_session(self):
         response = self.client.get("/api/context")
         self.assertEqual(response.status_code, 401)

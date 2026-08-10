@@ -144,7 +144,7 @@ export function AuthProvider({ children }) {
       });
   }, [accounts, exchangeAccessToken, inProgress, instance, user]);
 
-  const releaseSession = useCallback(async (signOutMicrosoft) => {
+  const releaseSession = useCallback(async () => {
     const token = user?.token;
     const account = instance.getActiveAccount() || instance.getAllAccounts()[0];
     clearLocalSession();
@@ -158,30 +158,25 @@ export function AuthProvider({ children }) {
       }).catch(() => {});
     }
 
-    if (account && signOutMicrosoft) {
-      try {
-        await instance.logoutRedirect({
-          account,
-          postLogoutRedirectUri: window.location.origin,
-        });
-      } catch {
-        await instance.clearCache({ account }).catch(() => {});
-      }
-    } else if (account) {
+    // End only the Predictfy application session. Calling logoutRedirect here
+    // would also sign the user out of Microsoft and remove the remembered
+    // account from Microsoft's account picker.
+    if (account) {
+      instance.setActiveAccount(null);
       await instance.clearCache({ account }).catch(() => {});
     }
   }, [clearLocalSession, instance, user?.token]);
 
-  const logout = useCallback(() => releaseSession(true), [releaseSession]);
+  const logout = useCallback(() => releaseSession(), [releaseSession]);
 
   useEffect(() => {
     if (!user?.expiresAt) return undefined;
     const remaining = user.expiresAt * 1000 - Date.now() - 1_000;
     if (remaining <= 0) {
-      queueMicrotask(() => releaseSession(false));
+      queueMicrotask(() => releaseSession());
       return undefined;
     }
-    const timer = window.setTimeout(() => releaseSession(false), remaining);
+    const timer = window.setTimeout(() => releaseSession(), remaining);
     return () => window.clearTimeout(timer);
   }, [releaseSession, user?.expiresAt]);
 

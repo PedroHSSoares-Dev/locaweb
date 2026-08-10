@@ -1,177 +1,160 @@
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import {
+  Activity,
+  FlaskConical,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Server,
+  X,
+} from 'lucide-react';
 import { useApi } from '../hooks/useApi';
 import { useBreakpoint } from '../hooks/useBreakpoint';
+import { useChatAuth } from '../hooks/useChatAuth';
 import LogoPredictfy from './LogoPredictfy';
-import { LayoutDashboard, Activity, Server, FlaskConical } from 'lucide-react';
+import './Sidebar.css';
 
 const NAV = [
-  { to: '/gestao',        label: 'GESTÃO',       icon: <LayoutDashboard size={18} /> },
-  { to: '/monitoramento', label: 'MONITORAMENTO', icon: <Activity size={18} /> },
-  { to: '/tecnico',       label: 'TÉCNICO',       icon: <Server size={18} /> },
-  { to: '/modelos',       label: 'MODELOS',       icon: <FlaskConical size={18} /> },
+  { to: '/gestao', label: 'GESTÃO', icon: <LayoutDashboard size={18} strokeWidth={1.7} /> },
+  { to: '/monitoramento', label: 'MONITORAMENTO', icon: <Activity size={18} strokeWidth={1.7} /> },
+  { to: '/tecnico', label: 'TÉCNICO', icon: <Server size={18} strokeWidth={1.7} /> },
+  { to: '/modelos', label: 'MODELOS', icon: <FlaskConical size={18} strokeWidth={1.7} /> },
 ];
 
-const SIDEBAR_FULL      = 220;
-const SIDEBAR_COLLAPSED = 52;
+const SIDEBAR_FULL = 232;
+const SIDEBAR_COMPACT = 60;
 
-// ─── Conteúdo interno da sidebar (reutilizado em mobile e desktop) ────────────
-function SidebarInner({ collapsed, onToggle, clock, p2Critical, p3Critical, kpiDisponivel, onNavClick }) {
+function SidebarInner({
+  expanded,
+  clock,
+  email,
+  p2Critical,
+  p3Critical,
+  kpiDisponivel,
+  onLogout,
+  onNavClick,
+}) {
+  let kpiLabel = 'KPIS SINCRONIZANDO';
+  let kpiTone = 'neutral';
+  if (p2Critical) {
+    kpiLabel = 'KPI P2 CRÍTICO';
+    kpiTone = 'critical';
+  } else if (p3Critical) {
+    kpiLabel = 'KPI P3 CRÍTICO';
+    kpiTone = 'critical';
+  } else if (kpiDisponivel) {
+    kpiLabel = 'KPIS DENTRO DA META';
+    kpiTone = 'healthy';
+  }
+
   return (
     <>
-      {/* ── Logo ── */}
-      <div
-        onClick={onToggle}
-        style={{
-          padding: collapsed ? '20px 0 18px' : '20px 20px 18px',
-          borderBottom: '1px solid var(--border)',
-          cursor: onToggle ? 'pointer' : 'default',
-          display: 'flex', alignItems: 'center',
-          justifyContent: collapsed ? 'center' : 'flex-start',
-          gap: collapsed ? 0 : 10,
-          userSelect: 'none',
-          transition: 'padding 0.25s ease',
-        }}
-      >
-        <div style={{
-          width: 24, height: 24, color: 'var(--teal)',
-          flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
+      <div className="sidebar-brand" aria-label="Predictfy AIOps">
+        <span className="sidebar-brand__mark" aria-hidden="true">
           <LogoPredictfy />
-        </div>
-        <div style={{
-          overflow: 'hidden', opacity: collapsed ? 0 : 1,
-          width: collapsed ? 0 : 'auto',
-          transition: 'opacity 0.2s ease, width 0.25s ease', whiteSpace: 'nowrap',
-        }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 700, color: 'var(--teal)', letterSpacing: '0.1em' }}>
-            PREDICTFY
-          </div>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-sec)', letterSpacing: '0.08em', marginTop: 2 }}>
-            AIOPS // LOCAWEB
-          </div>
-        </div>
+        </span>
+        <span className="sidebar-brand__copy" aria-hidden={!expanded}>
+          <strong>PREDICTFY</strong>
+          <small>AIOPS // LOCAWEB</small>
+        </span>
       </div>
 
-      {/* ── Nav ── */}
-      <nav style={{ flex: 1, padding: '10px 0' }}>
+      <nav className="sidebar-nav" aria-label="Navegação principal">
         {NAV.map(({ to, label, icon }) => (
           <NavLink
-            key={to} to={to}
+            key={to}
+            to={to}
             onClick={onNavClick}
-            title={collapsed ? label : undefined}
-            style={({ isActive }) => ({
-              display: 'flex', alignItems: 'center',
-              justifyContent: collapsed ? 'center' : 'flex-start',
-              gap: collapsed ? 0 : 10,
-              padding: collapsed ? '12px 0' : '10px 20px',
-              textDecoration: 'none',
-              fontFamily: 'var(--font-mono)', fontSize: 12,
-              fontWeight: isActive ? 600 : 400, letterSpacing: '0.1em',
-              color: isActive ? 'var(--teal)' : 'var(--text-sec)',
-              background: isActive ? 'var(--teal-dim)' : 'transparent',
-              borderLeft: `2px solid ${isActive ? 'var(--teal)' : 'transparent'}`,
-              transition: 'all 0.15s', overflow: 'hidden', whiteSpace: 'nowrap',
-            })}
+            aria-label={label}
+            title={expanded ? undefined : label}
+            className={({ isActive }) => (
+              `sidebar-nav__item${isActive ? ' sidebar-nav__item--active' : ''}`
+            )}
           >
-            <div style={{ width: 24, display: 'flex', justifyContent: 'center', flexShrink: 0 }}>
+            <span className="sidebar-nav__icon" aria-hidden="true">
               {icon}
-            </div>
-            <span style={{
-              opacity: collapsed ? 0 : 1,
-              width: collapsed ? 0 : 'auto',
-              transition: 'opacity 0.2s ease, width 0.25s ease',
-              overflow: 'hidden',
-            }}>{label}</span>
+            </span>
+            <span className="sidebar-nav__label" aria-hidden="true">{label}</span>
+            <span className="sidebar-nav__signal" aria-hidden="true" />
           </NavLink>
         ))}
       </nav>
 
-      {/* ── Footer ── */}
-      <div style={{
-        padding: collapsed ? '14px 0' : '14px 20px',
-        borderTop: '1px solid var(--border)',
-        display: 'flex', flexDirection: 'column',
-        alignItems: collapsed ? 'center' : 'flex-start',
-        gap: 6, transition: 'padding 0.25s ease',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: collapsed ? 0 : 10 }}>
-          <div style={{ width: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}>
-            <span style={{
-              width: 7, height: 7, borderRadius: '50%',
-              background: 'var(--green)', display: 'inline-block',
-              animation: 'pulse-dot 2s ease infinite', flexShrink: 0,
-            }} />
-          </div>
-          <span style={{
-            fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--green)', letterSpacing: '0.1em',
-            opacity: collapsed ? 0 : 1, width: collapsed ? 0 : 'auto',
-            overflow: 'hidden', transition: 'opacity 0.2s ease, width 0.25s ease', whiteSpace: 'nowrap',
-          }}>ONLINE</span>
+      <div className="sidebar-telemetry" aria-label="Status operacional">
+        <div className="sidebar-telemetry__row">
+          <span className="sidebar-online-dot" aria-hidden="true" />
+          <span className="sidebar-telemetry__copy" aria-hidden={!expanded}>
+            <strong>ONLINE</strong>
+            <time>{clock}</time>
+          </span>
         </div>
+        <div
+          className={`sidebar-kpi sidebar-kpi--${kpiTone}`}
+          title={expanded ? undefined : kpiLabel}
+        >
+          <span aria-hidden="true" />
+          <small aria-hidden={!expanded}>{kpiLabel}</small>
+        </div>
+      </div>
 
-        {!collapsed && (
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-sec)', marginLeft: 34 }}>
-            {clock}
-          </div>
-        )}
-
-        {!collapsed && p2Critical && (
-          <div style={{
-            fontFamily: 'var(--font-mono)', fontSize: 10,
-            color: 'var(--red)', letterSpacing: '0.06em',
-            marginLeft: 34, animation: 'pulse-dot 2s ease infinite',
-          }}>⚠ KPI P2 CRÍTICO</div>
-        )}
-        {!collapsed && p3Critical && (
-          <div style={{
-            fontFamily: 'var(--font-mono)', fontSize: 10,
-            color: 'var(--red)', letterSpacing: '0.06em',
-            marginLeft: 34, animation: 'pulse-dot 2s ease infinite',
-          }}>⚠ KPI P3 CRÍTICO</div>
-        )}
-        {!collapsed && kpiDisponivel && !p2Critical && !p3Critical && (
-          <div style={{
-            fontFamily: 'var(--font-mono)', fontSize: 10,
-            color: 'var(--green)', letterSpacing: '0.06em',
-            marginLeft: 34,
-          }}>✓ KPI DENTRO DA META</div>
-        )}
+      <div className="sidebar-session">
+        <div className="sidebar-session__identity" title={expanded ? undefined : email}>
+          <span className="sidebar-session__avatar" aria-hidden="true">
+            {email?.slice(0, 1).toUpperCase() || 'P'}
+          </span>
+          <span className="sidebar-session__copy" aria-hidden={!expanded}>
+            <small>SESSÃO ATIVA</small>
+            <strong>{email}</strong>
+          </span>
+        </div>
+        <button
+          type="button"
+          className="sidebar-session__logout"
+          onClick={onLogout}
+          aria-label="Encerrar sessão do Predictfy"
+          title={expanded
+            ? 'Encerra somente o Predictfy e mantém sua conta Microsoft conectada'
+            : 'Encerrar sessão do Predictfy'}
+        >
+          <span className="sidebar-session__logout-icon" aria-hidden="true">
+            <LogOut size={17} strokeWidth={1.7} />
+          </span>
+          <span className="sidebar-session__logout-label" aria-hidden="true">
+            ENCERRAR SESSÃO
+          </span>
+        </button>
       </div>
     </>
   );
 }
 
-// ─── Sidebar principal ────────────────────────────────────────────────────────
 export default function Sidebar() {
   const { isMobile, isTablet } = useBreakpoint();
-  const [clock, setClock]         = useState('');
-  const [desktopCollapsed, setDesktopCollapsed] = useState(false);
+  const { user, logout } = useChatAuth();
+  const [clock, setClock] = useState('');
+  const [hovered, setHovered] = useState(false);
+  const [focusWithin, setFocusWithin] = useState(false);
+  const [tabletExpanded, setTabletExpanded] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const collapsed = isTablet || desktopCollapsed;
+  const expanded = hovered || focusWithin || tabletExpanded;
 
   const { data: kpiData, disponivel: kpiDisponivel } = useApi('/kpi');
 
-  // Sincronizar CSS var
   useEffect(() => {
-    if (isMobile) {
-      document.documentElement.style.setProperty('--sidebar-width', '0px');
-    } else {
-      document.documentElement.style.setProperty(
-        '--sidebar-width',
-        collapsed ? `${SIDEBAR_COLLAPSED}px` : `${SIDEBAR_FULL}px`
-      );
-    }
-  }, [collapsed, isMobile]);
+    document.documentElement.style.setProperty(
+      '--sidebar-width',
+      isMobile ? '0px' : `${SIDEBAR_COMPACT}px`,
+    );
+  }, [isMobile]);
 
-  // Relógio
   useEffect(() => {
     const tick = () => setClock(new Date().toLocaleTimeString('pt-BR', {
       hour: '2-digit', minute: '2-digit', second: '2-digit',
     }));
     tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
+    const id = window.setInterval(tick, 1_000);
+    return () => window.clearInterval(id);
   }, []);
 
   const p2Critical = kpiDisponivel
@@ -181,42 +164,48 @@ export default function Sidebar() {
     ? kpiData?.P3?.tendencia === 'critico' || kpiData?.P3?.margemRestante < 0
     : false;
 
-  // ── Mobile: hambúrguer + drawer deslizante ────────────────────────────────
+  const innerProps = {
+    clock,
+    email: user.email,
+    p2Critical,
+    p3Critical,
+    kpiDisponivel,
+    onLogout: logout,
+  };
+
   if (isMobile) {
     return (
       <>
         <button
-          onClick={() => setMobileOpen(o => !o)}
-          style={{
-            position: 'fixed', top: 12, left: 12, zIndex: 200,
-            background: 'var(--surface2)', border: '1px solid var(--border-md)',
-            borderRadius: 6, padding: '8px 10px',
-            cursor: 'pointer', color: 'var(--teal)',
-            fontFamily: 'var(--font-mono)', fontSize: 16,
-          }}
+          type="button"
+          className="sidebar-mobile-trigger"
+          onClick={() => setMobileOpen((current) => !current)}
+          aria-expanded={mobileOpen}
+          aria-controls="predictfy-mobile-navigation"
+          aria-label={mobileOpen ? 'Fechar navegação' : 'Abrir navegação'}
         >
-          {mobileOpen ? '✕' : '☰'}
+          {mobileOpen ? <X size={19} /> : <Menu size={19} />}
         </button>
 
-        {mobileOpen && (
-          <div
+        {mobileOpen ? (
+          <button
+            type="button"
+            className="sidebar-mobile-backdrop"
             onClick={() => setMobileOpen(false)}
-            style={{ position: 'fixed', inset: 0, zIndex: 150, background: 'rgba(0,0,0,0.6)' }}
+            aria-label="Fechar navegação"
           />
-        )}
+        ) : null}
 
-        <aside style={{
-          position: 'fixed', top: 0, left: 0, zIndex: 160,
-          width: SIDEBAR_FULL, height: '100vh',
-          background: 'var(--surface1)', borderRight: '1px solid var(--border)',
-          display: 'flex', flexDirection: 'column',
-          transform: mobileOpen ? 'translateX(0)' : 'translateX(-100%)',
-          transition: 'transform 0.25s cubic-bezier(0.4,0,0.2,1)',
-        }}>
+        <aside
+          id="predictfy-mobile-navigation"
+          className={`sidebar sidebar--mobile${mobileOpen ? ' sidebar--mobile-open' : ''}`}
+          style={{ '--sidebar-expanded-width': `${SIDEBAR_FULL}px` }}
+          aria-hidden={!mobileOpen}
+          inert={!mobileOpen}
+        >
           <SidebarInner
-            collapsed={false} onToggle={null} clock={clock}
-            p2Critical={p2Critical} p3Critical={p3Critical}
-            kpiDisponivel={kpiDisponivel}
+            {...innerProps}
+            expanded
             onNavClick={() => setMobileOpen(false)}
           />
         </aside>
@@ -224,24 +213,29 @@ export default function Sidebar() {
     );
   }
 
-  // ── Tablet / Desktop: sidebar fixa colapsável ─────────────────────────────
-  const w = collapsed ? SIDEBAR_COLLAPSED : SIDEBAR_FULL;
-
   return (
-    <aside style={{
-      width: w, height: '100vh',
-      background: 'var(--surface1)', borderRight: '1px solid var(--border)',
-      display: 'flex', flexDirection: 'column',
-      flexShrink: 0, position: 'fixed', top: 0, left: 0, zIndex: 100,
-      transition: 'width 0.25s cubic-bezier(0.4,0,0.2,1)', overflow: 'hidden',
-    }}>
+    <aside
+      className={`sidebar ${expanded ? 'sidebar--expanded' : 'sidebar--compact'}`}
+      style={{ '--sidebar-expanded-width': `${SIDEBAR_FULL}px` }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocusCapture={() => setFocusWithin(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setFocusWithin(false);
+      }}
+      onPointerDown={(event) => {
+        if (isTablet && event.pointerType === 'touch' && !expanded) {
+          event.preventDefault();
+          setTabletExpanded(true);
+        }
+      }}
+      data-expanded={expanded}
+      aria-label="Barra lateral Predictfy"
+    >
       <SidebarInner
-        collapsed={collapsed}
-        onToggle={isTablet ? null : () => setDesktopCollapsed(current => !current)}
-        clock={clock}
-        p2Critical={p2Critical} p3Critical={p3Critical}
-        kpiDisponivel={kpiDisponivel}
-        onNavClick={null}
+        {...innerProps}
+        expanded={expanded}
+        onNavClick={isTablet ? () => setTabletExpanded(false) : undefined}
       />
     </aside>
   );
