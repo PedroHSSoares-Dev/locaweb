@@ -1,0 +1,1053 @@
+{
+  "status": "NO-GO: RAW-ONLY CEILING",
+  "generated_at": "2026-08-10T21:33:02.305803-03:00",
+  "protocol": {
+    "outer_months": [
+      "2025-07",
+      "2025-08",
+      "2025-09",
+      "2025-10",
+      "2025-11",
+      "2025-12"
+    ],
+    "training_rule": "opened before month AND target known before month",
+    "evaluation_segment": "P2 only",
+    "top_k_share": 0.05,
+    "q4_fresh_holdout": false,
+    "selection_note": "All 2025 outer folds are already inspected; evidence is paired temporal, not independent confirmation."
+  },
+  "champion": {
+    "aggregate": {
+      "incidents": 2490,
+      "violations": 20,
+      "prevalence": 0.008032128514056224,
+      "pr_auc": 0.01597796985050664,
+      "monthly_pr_auc_mean": 0.02261743218288192,
+      "monthly_pr_auc_std": 0.019310805568297337,
+      "precision_at_top_5pct": 0.024193548387096774,
+      "recall_at_top_5pct": 0.15,
+      "lift_at_top_5pct": 3.0120967741935485,
+      "alerts": 124,
+      "hits": 3,
+      "alerts_per_day": 0.6739130434782609,
+      "incidents_reviewed_per_true_violation": 41.333333333333336
+    },
+    "monthly": [
+      {
+        "month": "2025-07",
+        "train_incidents": 13244,
+        "train_violations": 129,
+        "test_incidents": 386,
+        "test_violations": 6,
+        "pr_auc": 0.030020242602502294,
+        "roc_auc_secondary": 0.530921052631579,
+        "top_5pct": {
+          "k": 19,
+          "hits": 1,
+          "precision": 0.05263157894736842,
+          "recall": 0.16666666666666666,
+          "lift": 3.3859649122807016
+        },
+        "feature_count": 41
+      },
+      {
+        "month": "2025-08",
+        "train_incidents": 15263,
+        "train_violations": 161,
+        "test_incidents": 414,
+        "test_violations": 3,
+        "pr_auc": 0.02112676056338028,
+        "roc_auc_secondary": 0.7104622871046229,
+        "top_5pct": {
+          "k": 21,
+          "hits": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "lift": 0.0
+        },
+        "feature_count": 41
+      },
+      {
+        "month": "2025-09",
+        "train_incidents": 17338,
+        "train_violations": 182,
+        "test_incidents": 442,
+        "test_violations": 2,
+        "pr_auc": 0.007164404223227753,
+        "roc_auc_secondary": 0.3914772727272728,
+        "top_5pct": {
+          "k": 22,
+          "hits": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "lift": 0.0
+        },
+        "feature_count": 41
+      },
+      {
+        "month": "2025-10",
+        "train_incidents": 19593,
+        "train_violations": 194,
+        "test_incidents": 436,
+        "test_violations": 2,
+        "pr_auc": 0.010809451985922574,
+        "roc_auc_secondary": 0.7569124423963134,
+        "top_5pct": {
+          "k": 22,
+          "hits": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "lift": 0.0
+        },
+        "feature_count": 41
+      },
+      {
+        "month": "2025-11",
+        "train_incidents": 22060,
+        "train_violations": 207,
+        "test_incidents": 448,
+        "test_violations": 6,
+        "pr_auc": 0.06134813162801778,
+        "roc_auc_secondary": 0.8940422322775264,
+        "top_5pct": {
+          "k": 22,
+          "hits": 2,
+          "precision": 0.09090909090909091,
+          "recall": 0.3333333333333333,
+          "lift": 6.787878787878788
+        },
+        "feature_count": 41
+      },
+      {
+        "month": "2025-12",
+        "train_incidents": 23934,
+        "train_violations": 223,
+        "test_incidents": 364,
+        "test_violations": 1,
+        "pr_auc": 0.005235602094240838,
+        "roc_auc_secondary": 0.49586776859504134,
+        "top_5pct": {
+          "k": 18,
+          "hits": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "lift": 0.0
+        },
+        "feature_count": 41
+      }
+    ],
+    "config": {
+      "kind": "xgboost",
+      "seed": 42,
+      "families": [],
+      "champion_group_included": true,
+      "p2_specialist": false,
+      "evaluation_priority": "2 - Alta",
+      "params": {
+        "n_estimators": 500,
+        "max_depth": 7,
+        "learning_rate": 0.03607939886307854,
+        "subsample": 0.7454404070203796,
+        "colsample_bytree": 0.9630659181130072,
+        "min_child_weight": 2,
+        "gamma": 2.9282357199398956,
+        "max_delta_step": 4,
+        "reg_alpha": 0.4520071476614973,
+        "reg_lambda": 0.11537349692556405
+      }
+    }
+  },
+  "champion_p3_diagnostic": {
+    "aggregate": {
+      "incidents": 9473,
+      "violations": 87,
+      "prevalence": 0.009183996621978253,
+      "pr_auc": 0.014675912000970943,
+      "monthly_pr_auc_mean": 0.01695888624341428,
+      "monthly_pr_auc_std": 0.00469301177200932,
+      "precision_at_top_5pct": 0.02748414376321353,
+      "recall_at_top_5pct": 0.14942528735632185,
+      "lift_at_top_5pct": 2.9926125732059976,
+      "alerts": 473,
+      "hits": 13,
+      "alerts_per_day": 2.5706521739130435,
+      "incidents_reviewed_per_true_violation": 36.38461538461539
+    },
+    "monthly": [
+      {
+        "month": "2025-07",
+        "train_incidents": 13244,
+        "train_violations": 129,
+        "test_incidents": 1740,
+        "test_violations": 23,
+        "pr_auc": 0.01697215811487696,
+        "roc_auc_secondary": 0.603352662631992,
+        "top_5pct": {
+          "k": 87,
+          "hits": 2,
+          "precision": 0.022988505747126436,
+          "recall": 0.08695652173913043,
+          "lift": 1.7391304347826086
+        },
+        "feature_count": 41
+      },
+      {
+        "month": "2025-08",
+        "train_incidents": 15263,
+        "train_violations": 161,
+        "test_incidents": 1916,
+        "test_violations": 14,
+        "pr_auc": 0.011804279121339661,
+        "roc_auc_secondary": 0.6362100045065345,
+        "top_5pct": {
+          "k": 96,
+          "hits": 2,
+          "precision": 0.020833333333333332,
+          "recall": 0.14285714285714285,
+          "lift": 2.8511904761904763
+        },
+        "feature_count": 41
+      },
+      {
+        "month": "2025-09",
+        "train_incidents": 17338,
+        "train_violations": 182,
+        "test_incidents": 1882,
+        "test_violations": 9,
+        "pr_auc": 0.009789250746848638,
+        "roc_auc_secondary": 0.6520733226552767,
+        "top_5pct": {
+          "k": 94,
+          "hits": 2,
+          "precision": 0.02127659574468085,
+          "recall": 0.2222222222222222,
+          "lift": 4.449172576832151
+        },
+        "feature_count": 41
+      },
+      {
+        "month": "2025-10",
+        "train_incidents": 19593,
+        "train_violations": 194,
+        "test_incidents": 1690,
+        "test_violations": 9,
+        "pr_auc": 0.021582764499501687,
+        "roc_auc_secondary": 0.7106880824905811,
+        "top_5pct": {
+          "k": 84,
+          "hits": 3,
+          "precision": 0.03571428571428571,
+          "recall": 0.3333333333333333,
+          "lift": 6.706349206349206
+        },
+        "feature_count": 41
+      },
+      {
+        "month": "2025-11",
+        "train_incidents": 22060,
+        "train_violations": 207,
+        "test_incidents": 1186,
+        "test_violations": 15,
+        "pr_auc": 0.022076478693728713,
+        "roc_auc_secondary": 0.6052092228864219,
+        "top_5pct": {
+          "k": 59,
+          "hits": 3,
+          "precision": 0.05084745762711865,
+          "recall": 0.2,
+          "lift": 4.020338983050848
+        },
+        "feature_count": 41
+      },
+      {
+        "month": "2025-12",
+        "train_incidents": 23934,
+        "train_violations": 223,
+        "test_incidents": 1059,
+        "test_violations": 17,
+        "pr_auc": 0.019528386284190024,
+        "roc_auc_secondary": 0.5652026645591057,
+        "top_5pct": {
+          "k": 53,
+          "hits": 1,
+          "precision": 0.018867924528301886,
+          "recall": 0.058823529411764705,
+          "lift": 1.1753607103218644
+        },
+        "feature_count": 41
+      }
+    ],
+    "config": {
+      "kind": "xgboost",
+      "seed": 42,
+      "families": [],
+      "champion_group_included": true,
+      "p2_specialist": false,
+      "evaluation_priority": "3 - Média",
+      "params": {
+        "n_estimators": 500,
+        "max_depth": 7,
+        "learning_rate": 0.03607939886307854,
+        "subsample": 0.7454404070203796,
+        "colsample_bytree": 0.9630659181130072,
+        "min_child_weight": 2,
+        "gamma": 2.9282357199398956,
+        "max_delta_step": 4,
+        "reg_alpha": 0.4520071476614973,
+        "reg_lambda": 0.11537349692556405
+      }
+    }
+  },
+  "safe_base": {
+    "aggregate": {
+      "incidents": 2490,
+      "violations": 20,
+      "prevalence": 0.008032128514056224,
+      "pr_auc": 0.015988811287918264,
+      "monthly_pr_auc_mean": 0.023456876473634748,
+      "monthly_pr_auc_std": 0.02435163795691329,
+      "precision_at_top_5pct": 0.016129032258064516,
+      "recall_at_top_5pct": 0.1,
+      "lift_at_top_5pct": 2.0080645161290325,
+      "alerts": 124,
+      "hits": 2,
+      "alerts_per_day": 0.6739130434782609,
+      "incidents_reviewed_per_true_violation": 62.0
+    },
+    "monthly": [
+      {
+        "month": "2025-07",
+        "train_incidents": 13244,
+        "train_violations": 129,
+        "test_incidents": 386,
+        "test_violations": 6,
+        "pr_auc": 0.05244171885352228,
+        "roc_auc_secondary": 0.656140350877193,
+        "top_5pct": {
+          "k": 19,
+          "hits": 1,
+          "precision": 0.05263157894736842,
+          "recall": 0.16666666666666666,
+          "lift": 3.3859649122807016
+        },
+        "feature_count": 38
+      },
+      {
+        "month": "2025-08",
+        "train_incidents": 15263,
+        "train_violations": 161,
+        "test_incidents": 414,
+        "test_violations": 3,
+        "pr_auc": 0.007246376811594203,
+        "roc_auc_secondary": 0.3856447688564477,
+        "top_5pct": {
+          "k": 21,
+          "hits": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "lift": 0.0
+        },
+        "feature_count": 38
+      },
+      {
+        "month": "2025-09",
+        "train_incidents": 17338,
+        "train_violations": 182,
+        "test_incidents": 442,
+        "test_violations": 2,
+        "pr_auc": 0.007432543503275955,
+        "roc_auc_secondary": 0.6397727272727273,
+        "top_5pct": {
+          "k": 22,
+          "hits": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "lift": 0.0
+        },
+        "feature_count": 38
+      },
+      {
+        "month": "2025-10",
+        "train_incidents": 19593,
+        "train_violations": 194,
+        "test_incidents": 436,
+        "test_violations": 2,
+        "pr_auc": 0.007026449954246372,
+        "roc_auc_secondary": 0.6244239631336407,
+        "top_5pct": {
+          "k": 22,
+          "hits": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "lift": 0.0
+        },
+        "feature_count": 38
+      },
+      {
+        "month": "2025-11",
+        "train_incidents": 22060,
+        "train_violations": 207,
+        "test_incidents": 448,
+        "test_violations": 6,
+        "pr_auc": 0.06274801587301587,
+        "roc_auc_secondary": 0.8001508295625943,
+        "top_5pct": {
+          "k": 22,
+          "hits": 1,
+          "precision": 0.045454545454545456,
+          "recall": 0.16666666666666666,
+          "lift": 3.393939393939394
+        },
+        "feature_count": 38
+      },
+      {
+        "month": "2025-12",
+        "train_incidents": 23934,
+        "train_violations": 223,
+        "test_incidents": 364,
+        "test_violations": 1,
+        "pr_auc": 0.0038461538461538464,
+        "roc_auc_secondary": 0.44077134986225897,
+        "top_5pct": {
+          "k": 18,
+          "hits": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "lift": 0.0
+        },
+        "feature_count": 38
+      }
+    ],
+    "config": {
+      "kind": "xgboost",
+      "seed": 42,
+      "families": [],
+      "champion_group_included": false,
+      "p2_specialist": false,
+      "evaluation_priority": "2 - Alta",
+      "params": {
+        "n_estimators": 500,
+        "max_depth": 7,
+        "learning_rate": 0.03607939886307854,
+        "subsample": 0.7454404070203796,
+        "colsample_bytree": 0.9630659181130072,
+        "min_child_weight": 2,
+        "gamma": 2.9282357199398956,
+        "max_delta_step": 4,
+        "reg_alpha": 0.4520071476614973,
+        "reg_lambda": 0.11537349692556405
+      }
+    }
+  },
+  "safe_base_p3_diagnostic": {
+    "aggregate": {
+      "incidents": 9473,
+      "violations": 87,
+      "prevalence": 0.009183996621978253,
+      "pr_auc": 0.016709623829349318,
+      "monthly_pr_auc_mean": 0.01745981691241918,
+      "monthly_pr_auc_std": 0.01220578082252096,
+      "precision_at_top_5pct": 0.012684989429175475,
+      "recall_at_top_5pct": 0.06896551724137931,
+      "lift_at_top_5pct": 1.3812058030181527,
+      "alerts": 473,
+      "hits": 6,
+      "alerts_per_day": 2.5706521739130435,
+      "incidents_reviewed_per_true_violation": 78.83333333333333
+    },
+    "monthly": [
+      {
+        "month": "2025-07",
+        "train_incidents": 13244,
+        "train_violations": 129,
+        "test_incidents": 1740,
+        "test_violations": 23,
+        "pr_auc": 0.04051532918225488,
+        "roc_auc_secondary": 0.6488440404142716,
+        "top_5pct": {
+          "k": 87,
+          "hits": 4,
+          "precision": 0.04597701149425287,
+          "recall": 0.17391304347826086,
+          "lift": 3.4782608695652173
+        },
+        "feature_count": 38
+      },
+      {
+        "month": "2025-08",
+        "train_incidents": 15263,
+        "train_violations": 161,
+        "test_incidents": 1916,
+        "test_violations": 14,
+        "pr_auc": 0.009443893004664939,
+        "roc_auc_secondary": 0.5982987832356919,
+        "top_5pct": {
+          "k": 96,
+          "hits": 1,
+          "precision": 0.010416666666666666,
+          "recall": 0.07142857142857142,
+          "lift": 1.4255952380952381
+        },
+        "feature_count": 38
+      },
+      {
+        "month": "2025-09",
+        "train_incidents": 17338,
+        "train_violations": 182,
+        "test_incidents": 1882,
+        "test_violations": 9,
+        "pr_auc": 0.006170643189137491,
+        "roc_auc_secondary": 0.6122679005754287,
+        "top_5pct": {
+          "k": 94,
+          "hits": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "lift": 0.0
+        },
+        "feature_count": 38
+      },
+      {
+        "month": "2025-10",
+        "train_incidents": 19593,
+        "train_violations": 194,
+        "test_incidents": 1690,
+        "test_violations": 9,
+        "pr_auc": 0.005733182444056442,
+        "roc_auc_secondary": 0.507733491969066,
+        "top_5pct": {
+          "k": 84,
+          "hits": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "lift": 0.0
+        },
+        "feature_count": 38
+      },
+      {
+        "month": "2025-11",
+        "train_incidents": 22060,
+        "train_violations": 207,
+        "test_incidents": 1186,
+        "test_violations": 15,
+        "pr_auc": 0.022255822275661856,
+        "roc_auc_secondary": 0.6436094506120125,
+        "top_5pct": {
+          "k": 59,
+          "hits": 1,
+          "precision": 0.01694915254237288,
+          "recall": 0.06666666666666667,
+          "lift": 1.3401129943502825
+        },
+        "feature_count": 38
+      },
+      {
+        "month": "2025-12",
+        "train_incidents": 23934,
+        "train_violations": 223,
+        "test_incidents": 1059,
+        "test_violations": 17,
+        "pr_auc": 0.020640031378739484,
+        "roc_auc_secondary": 0.5902958112227616,
+        "top_5pct": {
+          "k": 53,
+          "hits": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "lift": 0.0
+        },
+        "feature_count": 38
+      }
+    ],
+    "config": {
+      "kind": "xgboost",
+      "seed": 42,
+      "families": [],
+      "champion_group_included": false,
+      "p2_specialist": false,
+      "evaluation_priority": "3 - Média",
+      "params": {
+        "n_estimators": 500,
+        "max_depth": 7,
+        "learning_rate": 0.03607939886307854,
+        "subsample": 0.7454404070203796,
+        "colsample_bytree": 0.9630659181130072,
+        "min_child_weight": 2,
+        "gamma": 2.9282357199398956,
+        "max_delta_step": 4,
+        "reg_alpha": 0.4520071476614973,
+        "reg_lambda": 0.11537349692556405
+      }
+    }
+  },
+  "final_candidate_name": "text_tfidf",
+  "final_candidate": {
+    "aggregate": {
+      "incidents": 2490,
+      "violations": 20,
+      "prevalence": 0.008032128514056224,
+      "pr_auc": 0.02720245101773821,
+      "monthly_pr_auc_mean": 0.05360462809957146,
+      "monthly_pr_auc_std": 0.08104087349483521,
+      "precision_at_top_5pct": 0.03225806451612903,
+      "recall_at_top_5pct": 0.2,
+      "lift_at_top_5pct": 4.016129032258065,
+      "alerts": 124,
+      "hits": 4,
+      "alerts_per_day": 0.6739130434782609,
+      "incidents_reviewed_per_true_violation": 31.0
+    },
+    "monthly": [
+      {
+        "month": "2025-07",
+        "train_incidents": 13244,
+        "train_violations": 129,
+        "test_incidents": 386,
+        "test_violations": 6,
+        "pr_auc": 0.04406229049425658,
+        "roc_auc_secondary": 0.6570175438596491,
+        "top_5pct": {
+          "k": 19,
+          "hits": 1,
+          "precision": 0.05263157894736842,
+          "recall": 0.16666666666666666,
+          "lift": 3.3859649122807016
+        },
+        "feature_count": 5298
+      },
+      {
+        "month": "2025-08",
+        "train_incidents": 15263,
+        "train_violations": 161,
+        "test_incidents": 414,
+        "test_violations": 3,
+        "pr_auc": 0.012761698767466613,
+        "roc_auc_secondary": 0.6301703163017031,
+        "top_5pct": {
+          "k": 21,
+          "hits": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "lift": 0.0
+        },
+        "feature_count": 5789
+      },
+      {
+        "month": "2025-09",
+        "train_incidents": 17338,
+        "train_violations": 182,
+        "test_incidents": 442,
+        "test_violations": 2,
+        "pr_auc": 0.009801594835769888,
+        "roc_auc_secondary": 0.6409090909090909,
+        "top_5pct": {
+          "k": 22,
+          "hits": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "lift": 0.0
+        },
+        "feature_count": 6443
+      },
+      {
+        "month": "2025-10",
+        "train_incidents": 19593,
+        "train_violations": 194,
+        "test_incidents": 436,
+        "test_violations": 2,
+        "pr_auc": 0.012681159420289856,
+        "roc_auc_secondary": 0.7390552995391705,
+        "top_5pct": {
+          "k": 22,
+          "hits": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "lift": 0.0
+        },
+        "feature_count": 7105
+      },
+      {
+        "month": "2025-11",
+        "train_incidents": 22060,
+        "train_violations": 207,
+        "test_incidents": 448,
+        "test_violations": 6,
+        "pr_auc": 0.23279721555583624,
+        "roc_auc_secondary": 0.9177978883861238,
+        "top_5pct": {
+          "k": 22,
+          "hits": 3,
+          "precision": 0.13636363636363635,
+          "recall": 0.5,
+          "lift": 10.181818181818182
+        },
+        "feature_count": 7832
+      },
+      {
+        "month": "2025-12",
+        "train_incidents": 23934,
+        "train_violations": 223,
+        "test_incidents": 364,
+        "test_violations": 1,
+        "pr_auc": 0.009523809523809525,
+        "roc_auc_secondary": 0.7272727272727273,
+        "top_5pct": {
+          "k": 18,
+          "hits": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "lift": 0.0
+        },
+        "feature_count": 8424
+      }
+    ],
+    "config": {
+      "kind": "tfidf_logistic_rank_blend",
+      "seed": 42,
+      "p2_only": false,
+      "blend_weight": 0.5,
+      "evaluation_priority": "2 - Alta",
+      "vectorizer": {
+        "ngram_range": [
+          1,
+          2
+        ],
+        "min_df": 2,
+        "max_df": 0.995,
+        "max_features": 30000,
+        "sublinear_tf": true
+      },
+      "logistic": {
+        "C": 1.0,
+        "class_weight": "balanced",
+        "solver": "liblinear",
+        "max_iter": 2000
+      }
+    }
+  },
+  "final_candidate_p3_diagnostic": {
+    "aggregate": {
+      "incidents": 9473,
+      "violations": 87,
+      "prevalence": 0.009183996621978253,
+      "pr_auc": 0.018793380952895157,
+      "monthly_pr_auc_mean": 0.02775538972692802,
+      "monthly_pr_auc_std": 0.01665863800364835,
+      "precision_at_top_5pct": 0.02748414376321353,
+      "recall_at_top_5pct": 0.14942528735632185,
+      "lift_at_top_5pct": 2.9926125732059976,
+      "alerts": 473,
+      "hits": 13,
+      "alerts_per_day": 2.5706521739130435,
+      "incidents_reviewed_per_true_violation": 36.38461538461539
+    },
+    "monthly": [
+      {
+        "month": "2025-07",
+        "train_incidents": 13244,
+        "train_violations": 129,
+        "test_incidents": 1740,
+        "test_violations": 23,
+        "pr_auc": 0.0202147958919543,
+        "roc_auc_secondary": 0.6676204704869464,
+        "top_5pct": {
+          "k": 87,
+          "hits": 1,
+          "precision": 0.011494252873563218,
+          "recall": 0.043478260869565216,
+          "lift": 0.8695652173913043
+        },
+        "feature_count": 5298
+      },
+      {
+        "month": "2025-08",
+        "train_incidents": 15263,
+        "train_violations": 161,
+        "test_incidents": 1916,
+        "test_violations": 14,
+        "pr_auc": 0.02266543260582793,
+        "roc_auc_secondary": 0.7339454709328527,
+        "top_5pct": {
+          "k": 96,
+          "hits": 2,
+          "precision": 0.020833333333333332,
+          "recall": 0.14285714285714285,
+          "lift": 2.8511904761904763
+        },
+        "feature_count": 5789
+      },
+      {
+        "month": "2025-09",
+        "train_incidents": 17338,
+        "train_violations": 182,
+        "test_incidents": 1882,
+        "test_violations": 9,
+        "pr_auc": 0.019640615726396783,
+        "roc_auc_secondary": 0.8165747167348876,
+        "top_5pct": {
+          "k": 94,
+          "hits": 2,
+          "precision": 0.02127659574468085,
+          "recall": 0.2222222222222222,
+          "lift": 4.449172576832151
+        },
+        "feature_count": 6443
+      },
+      {
+        "month": "2025-10",
+        "train_incidents": 19593,
+        "train_violations": 194,
+        "test_incidents": 1690,
+        "test_violations": 9,
+        "pr_auc": 0.014125980587467743,
+        "roc_auc_secondary": 0.6741357657479013,
+        "top_5pct": {
+          "k": 84,
+          "hits": 1,
+          "precision": 0.011904761904761904,
+          "recall": 0.1111111111111111,
+          "lift": 2.2354497354497354
+        },
+        "feature_count": 7105
+      },
+      {
+        "month": "2025-11",
+        "train_incidents": 22060,
+        "train_violations": 207,
+        "test_incidents": 1186,
+        "test_violations": 15,
+        "pr_auc": 0.06417647169541744,
+        "roc_auc_secondary": 0.6949046399089098,
+        "top_5pct": {
+          "k": 59,
+          "hits": 4,
+          "precision": 0.06779661016949153,
+          "recall": 0.26666666666666666,
+          "lift": 5.36045197740113
+        },
+        "feature_count": 7832
+      },
+      {
+        "month": "2025-12",
+        "train_incidents": 23934,
+        "train_violations": 223,
+        "test_incidents": 1059,
+        "test_violations": 17,
+        "pr_auc": 0.025709041854503924,
+        "roc_auc_secondary": 0.5811787286891723,
+        "top_5pct": {
+          "k": 53,
+          "hits": 3,
+          "precision": 0.05660377358490566,
+          "recall": 0.17647058823529413,
+          "lift": 3.5260821309655936
+        },
+        "feature_count": 8424
+      }
+    ],
+    "config": {
+      "kind": "tfidf_logistic_rank_blend",
+      "seed": 42,
+      "p2_only": false,
+      "blend_weight": 0.5,
+      "evaluation_priority": "3 - Média",
+      "vectorizer": {
+        "ngram_range": [
+          1,
+          2
+        ],
+        "min_df": 2,
+        "max_df": 0.995,
+        "max_features": 30000,
+        "sublinear_tf": true
+      },
+      "logistic": {
+        "C": 1.0,
+        "class_weight": "balanced",
+        "solver": "liblinear",
+        "max_iter": 2000
+      }
+    }
+  },
+  "promotion_gate": {
+    "passes": false,
+    "required_pr_auc": 0.05,
+    "checks": {
+      "aggregate_pr_auc": false,
+      "precision_at_top_5pct": false,
+      "recall_at_top_5pct": false,
+      "monthly_pr_auc_wins": true,
+      "point_in_time_safe": true,
+      "five_seed_stability": false
+    },
+    "comparison": {
+      "aggregate_pr_auc_delta": 0.01122448116723157,
+      "top5_precision_delta": 0.008064516129032258,
+      "top5_recall_delta": 0.05000000000000002,
+      "monthly_pr_auc_wins": 5,
+      "monthly": [
+        {
+          "month": "2025-07",
+          "pr_auc_delta": 0.014042047891754283,
+          "candidate_pr_auc": 0.04406229049425658,
+          "champion_pr_auc": 0.030020242602502294,
+          "candidate_top5_hits": 1,
+          "champion_top5_hits": 1
+        },
+        {
+          "month": "2025-08",
+          "pr_auc_delta": -0.008365061795913668,
+          "candidate_pr_auc": 0.012761698767466613,
+          "champion_pr_auc": 0.02112676056338028,
+          "candidate_top5_hits": 0,
+          "champion_top5_hits": 0
+        },
+        {
+          "month": "2025-09",
+          "pr_auc_delta": 0.0026371906125421344,
+          "candidate_pr_auc": 0.009801594835769888,
+          "champion_pr_auc": 0.007164404223227753,
+          "candidate_top5_hits": 0,
+          "champion_top5_hits": 0
+        },
+        {
+          "month": "2025-10",
+          "pr_auc_delta": 0.001871707434367282,
+          "candidate_pr_auc": 0.012681159420289856,
+          "champion_pr_auc": 0.010809451985922574,
+          "candidate_top5_hits": 0,
+          "champion_top5_hits": 0
+        },
+        {
+          "month": "2025-11",
+          "pr_auc_delta": 0.17144908392781846,
+          "candidate_pr_auc": 0.23279721555583624,
+          "champion_pr_auc": 0.06134813162801778,
+          "candidate_top5_hits": 3,
+          "champion_top5_hits": 2
+        },
+        {
+          "month": "2025-12",
+          "pr_auc_delta": 0.004288207429568687,
+          "candidate_pr_auc": 0.009523809523809525,
+          "champion_pr_auc": 0.005235602094240838,
+          "candidate_top5_hits": 0,
+          "champion_top5_hits": 0
+        }
+      ]
+    },
+    "stability": {
+      "principal_metric": "recall_at_top_5pct",
+      "seeds": [
+        {
+          "seed": 11,
+          "pr_auc": 0.02925261687433851,
+          "precision_at_top_5pct": 0.04032258064516129,
+          "recall_at_top_5pct": 0.25
+        },
+        {
+          "seed": 23,
+          "pr_auc": 0.038150876957638705,
+          "precision_at_top_5pct": 0.04032258064516129,
+          "recall_at_top_5pct": 0.25
+        },
+        {
+          "seed": 42,
+          "pr_auc": 0.02720245101773821,
+          "precision_at_top_5pct": 0.03225806451612903,
+          "recall_at_top_5pct": 0.2
+        },
+        {
+          "seed": 67,
+          "pr_auc": 0.02756958909834113,
+          "precision_at_top_5pct": 0.04032258064516129,
+          "recall_at_top_5pct": 0.25
+        },
+        {
+          "seed": 101,
+          "pr_auc": 0.0290790825793975,
+          "precision_at_top_5pct": 0.04032258064516129,
+          "recall_at_top_5pct": 0.25
+        }
+      ],
+      "median": 0.25,
+      "minimum": 0.2,
+      "max_regression_from_median": 0.19999999999999996,
+      "passes": false
+    }
+  },
+  "ablations": [],
+  "stability": [
+    {
+      "seed": 11,
+      "pr_auc": 0.02925261687433851,
+      "precision_at_top_5pct": 0.04032258064516129,
+      "recall_at_top_5pct": 0.25
+    },
+    {
+      "seed": 23,
+      "pr_auc": 0.038150876957638705,
+      "precision_at_top_5pct": 0.04032258064516129,
+      "recall_at_top_5pct": 0.25
+    },
+    {
+      "seed": 42,
+      "pr_auc": 0.02720245101773821,
+      "precision_at_top_5pct": 0.03225806451612903,
+      "recall_at_top_5pct": 0.2
+    },
+    {
+      "seed": 67,
+      "pr_auc": 0.02756958909834113,
+      "precision_at_top_5pct": 0.04032258064516129,
+      "recall_at_top_5pct": 0.25
+    },
+    {
+      "seed": 101,
+      "pr_auc": 0.0290790825793975,
+      "precision_at_top_5pct": 0.04032258064516129,
+      "recall_at_top_5pct": 0.25
+    }
+  ],
+  "cycles_completed": 12,
+  "feature_families_evaluated": [
+    "historical_outcomes",
+    "arrival_burst",
+    "recurrence",
+    "segmented_bursts",
+    "description_history",
+    "config_identity",
+    "text_tfidf",
+    "novelty_support",
+    "active_workload",
+    "queue_growth",
+    "interactions",
+    "calendar_context"
+  ],
+  "self_checks": {
+    "recent_count_excludes_current": true,
+    "active_count_uses_prior_end_state": true,
+    "historical_rate_excludes_future_known_outcomes": true
+  },
+  "data_hashes": {
+    "raw": "5aa75370425d669b16be8d88509200e0fdab3cfc7f5f473e9a3c70c297ef1f26",
+    "processed": "6fd9377b87174be733b90d4dfa5ef07cec0c4ff1672a68984002d946da448237"
+  },
+  "environment": {
+    "python": "3.11.11",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "pandas": "3.0.1",
+    "numpy": "1.26.4",
+    "scikit_learn": "1.8.0",
+    "xgboost": "2.1.3",
+    "joblib": "1.5.3"
+  },
+  "runtime_seconds": 119.52572229102952,
+  "previous_opened_q4_artifact_context": {
+    "source": "outputs/experiments/xgboost_specialists.json",
+    "global_pr_auc": 0.2132110268129056,
+    "p2_pr_auc": 0.027591671968852045,
+    "p3_pr_auc": 0.26335456388810125,
+    "comparability_note": "Previously opened fixed train-through-June Q4 result; not directly comparable with monthly label-available walk-forward folds."
+  }
+}

@@ -20,7 +20,7 @@ def get_risco():
     **Gerado por** `src/models/xgboost_model.py` via `python src/pipeline.py --step xgb`.
 
     **Contexto do modelo:**
-    - Target: `KPI Violado?` — 1 se duração > OLA, 0 caso contrário
+    - Target: `KPI Violado?` — ground truth oficial já considera pausas e exceções aprovadas
     - Desbalanceamento: ~1:102 — tratado com `scale_pos_weight`
     - Métricas: Recall, F1-Score, ROC-AUC, PR-AUC (acurácia descartada)
 
@@ -39,37 +39,15 @@ def get_risco():
 )
 def get_risco_produtos():
     """
-    Retorna prioridades ordenadas pelo **score não calibrado do XGBoost**.
+    Retorna produtos ordenados pela **taxa histórica observada de violação**.
 
-    Campos por produto:
-    - **produto**: código interno do produto Locaweb (ex.: `lhco`, `lhdns`)
-    - **probViolacao**: score médio do XGBoost (não é probabilidade calibrada)
-    - **incidentesPendentes**: incidentes em aberto no produto
-    - **criticos**: campo legado; não usar como probabilidade real
-
-    Usado na tabela de alertas do MonitoramentoPage com semáforo:
-    - > 30%: 🔴 ALTO RISCO
-    - > 15%: 🟡 ATENÇÃO
-    - ≤ 15%: 🟢 NORMAL
-
-    Retorna `disponivel: false` se `outputs/risco_ola.json` não existir.
+    Para preservar o menor privilégio, segmentos com menos de 100 incidentes
+    ou 10 violações são suprimidos. Nenhum registro individual é exposto.
     """
-    data = load_json("risco_ola.json")
+    data = load_json("segmentos_ola.json")
     if data is None:
-        return _NOT_TRAINED
-    risco_prio = data.get("risco_por_prioridade", {})
-    produtos = [
-        {
-            "produto":          prio,
-            "probViolacao":     round(v["media_prob"] * 100, 1),
-            "pctAltoRisco":     v["pct_alto_risco"],
-            "nIncidentes":      v["n_incidentes"],
-            "taxaViolacaoReal": v["taxa_violacao_real"],
-        }
-        for prio, v in risco_prio.items()
-    ]
-    produtos.sort(key=lambda x: x["probViolacao"], reverse=True)
-    return {"disponivel": True, "produtos": produtos}
+        return {"disponivel": False, "mensagem": "Agregados por produto indisponíveis — execute: python src/pipeline.py --step segments"}
+    return {"disponivel": True, "produtos": data.get("produtos", [])}
 
 
 @router.get(
@@ -86,19 +64,15 @@ def get_risco_grupos():
     - **grupo**: identificador do grupo (ex.: `Team07`, `Team03`)
     - **taxaViolacao**: percentual de incidentes que violaram OLA no histórico 2025
 
-    **Grupo mais crítico:** Team07 — 8.94% de taxa de violação
-    (16 violações em 179 incidentes).
-
     Usado no ranking de grupos do TecnicoPage.
 
-    Retorna `disponivel: false` se `outputs/risco_ola.json` não existir.
+    Segmentos pequenos são suprimidos para reduzir risco de reidentificação.
     """
-    data = load_json("risco_ola.json")
+    data = load_json("segmentos_ola.json")
     if data is None:
-        return _NOT_TRAINED
-    grupos = sorted(
-        data.get("grupos", []),
-        key=lambda x: x.get("taxaViolacao", 0),
-        reverse=True,
-    )
-    return {"disponivel": True, "grupos": grupos}  # lista vazia se o modelo não gerou grupos
+        return {"disponivel": False, "mensagem": "Agregados por grupo indisponíveis — execute: python src/pipeline.py --step segments"}
+    grupos = [
+        {**item, "taxaViolacao": item["taxaViolacaoReal"]}
+        for item in data.get("grupos", [])
+    ]
+    return {"disponivel": True, "grupos": grupos}

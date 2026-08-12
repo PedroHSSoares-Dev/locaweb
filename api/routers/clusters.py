@@ -19,18 +19,15 @@ def get_clusters():
     O JSON gerado em `outputs/clusters.json` deve conter uma lista de clusters,
     cada um com:
 
-    - `id`: índice do cluster (0–3)
+    - `id`: índice técnico do cluster (não é estável entre retreinos)
     - `label`: nome descritivo (ex.: "Cluster Noturno", "Picos P2")
     - `tamanho`: número de incidentes no cluster
     - `taxaViolacao`: percentual de violações de OLA no cluster
-    - `perfil`: hora média, grupo dominante, dias críticos, produtos frequentes
+    - `perfil`: hora média, concentração P2, fim de semana e dias críticos
     - `descricao`: interpretação do padrão identificado
 
-    **Clusters esperados (baseado na EDA):**
-    - Cluster 0: Incidentes noturnos — baixo volume, horário comercial ausente
-    - Cluster 1: Picos P2 — alta concentração em horas pico, Alta prioridade
-    - Cluster 2: Volume alto P3 — maior cluster, horário comercial, Média prioridade
-    - Cluster 3: Team07 anomalias — grupo específico com taxa de violação extrema
+    Os IDs podem mudar após o retreino; consumidores devem ordenar por métricas
+    e usar `label`, nunca assumir que um perfil continuará sendo “cluster 4”.
 
     Retorna `disponivel: false` se `outputs/clusters.json` não existir.
     """

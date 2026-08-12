@@ -1,0 +1,606 @@
+{
+  "passed": true,
+  "tolerance": 1e-10,
+  "absolute_differences": {
+    "global.pr_auc": 0.0,
+    "global.robust_pr_auc": 0.0,
+    "global.precision_at_top_5pct": 0.0,
+    "global.recall_at_top_5pct": 0.0,
+    "P2.pr_auc": 0.0,
+    "P2.robust_pr_auc": 0.0,
+    "P2.precision_at_top_5pct": 0.0,
+    "P2.recall_at_top_5pct": 0.0,
+    "P3.pr_auc": 0.0,
+    "P3.robust_pr_auc": 0.0,
+    "P3.precision_at_top_5pct": 0.0,
+    "P3.recall_at_top_5pct": 0.0
+  },
+  "data_hashes_verified": true,
+  "clean_process_pid": 44871,
+  "candidate_name": "linear_svm_structured",
+  "reproduced_candidate": {
+    "name": "linear_svm_structured",
+    "family": "linear_margin",
+    "config": {
+      "kind": "linear_svm_structured",
+      "seed": 42,
+      "C": 0.08,
+      "class_weight": "balanced",
+      "max_iter": 5000
+    },
+    "segments": {
+      "global": {
+        "aggregate": {
+          "incidents": 11963,
+          "violations": 107,
+          "prevalence": 0.008944244754660203,
+          "pr_auc": 0.02687683495412771,
+          "robust_pr_auc": 0.039835281764133715,
+          "monthly_pr_auc_mean": 0.04849234191162808,
+          "monthly_pr_auc_std": 0.022841063804063692,
+          "precision_at_top_5pct": 0.048576214405360134,
+          "recall_at_top_5pct": 0.27102803738317754,
+          "lift_at_top_5pct": 5.431002363844143,
+          "alerts": 597,
+          "hits": 29,
+          "alerts_per_day": 3.244565217391304,
+          "incidents_reviewed_per_true_violation": 20.586206896551722
+        },
+        "monthly": [
+          {
+            "month": "2025-07",
+            "train_incidents": 13244,
+            "train_violations": 129,
+            "test_incidents": 2126,
+            "test_violations": 29,
+            "pr_auc": 0.04045883820390604,
+            "roc_auc_secondary": 0.7208820482462631,
+            "top_5pct": {
+              "k": 106,
+              "hits": 5,
+              "precision": 0.04716981132075472,
+              "recall": 0.1724137931034483,
+              "lift": 3.458035133376708
+            },
+            "feature_count": 373
+          },
+          {
+            "month": "2025-08",
+            "train_incidents": 15263,
+            "train_violations": 161,
+            "test_incidents": 2330,
+            "test_violations": 17,
+            "pr_auc": 0.03104072341620085,
+            "roc_auc_secondary": 0.802344803031459,
+            "top_5pct": {
+              "k": 116,
+              "hits": 5,
+              "precision": 0.04310344827586207,
+              "recall": 0.29411764705882354,
+              "lift": 5.907707910750507
+            },
+            "feature_count": 387
+          },
+          {
+            "month": "2025-09",
+            "train_incidents": 17338,
+            "train_violations": 182,
+            "test_incidents": 2324,
+            "test_violations": 11,
+            "pr_auc": 0.03921172532436139,
+            "roc_auc_secondary": 0.6644656683567189,
+            "top_5pct": {
+              "k": 116,
+              "hits": 2,
+              "precision": 0.017241379310344827,
+              "recall": 0.18181818181818182,
+              "lift": 3.6426332288401255
+            },
+            "feature_count": 402
+          },
+          {
+            "month": "2025-10",
+            "train_incidents": 19593,
+            "train_violations": 194,
+            "test_incidents": 2126,
+            "test_violations": 11,
+            "pr_auc": 0.02265782594742517,
+            "roc_auc_secondary": 0.7530195572748763,
+            "top_5pct": {
+              "k": 106,
+              "hits": 3,
+              "precision": 0.02830188679245283,
+              "recall": 0.2727272727272727,
+              "lift": 5.469982847341337
+            },
+            "feature_count": 408
+          },
+          {
+            "month": "2025-11",
+            "train_incidents": 22060,
+            "train_violations": 207,
+            "test_incidents": 1634,
+            "test_violations": 21,
+            "pr_auc": 0.08805101957418929,
+            "roc_auc_secondary": 0.7563841407610781,
+            "top_5pct": {
+              "k": 82,
+              "hits": 7,
+              "precision": 0.08536585365853659,
+              "recall": 0.3333333333333333,
+              "lift": 6.642276422764228
+            },
+            "feature_count": 424
+          },
+          {
+            "month": "2025-12",
+            "train_incidents": 23934,
+            "train_violations": 223,
+            "test_incidents": 1423,
+            "test_violations": 18,
+            "pr_auc": 0.06953391900368573,
+            "roc_auc_secondary": 0.696045867931989,
+            "top_5pct": {
+              "k": 71,
+              "hits": 7,
+              "precision": 0.09859154929577464,
+              "recall": 0.3888888888888889,
+              "lift": 7.794209702660406
+            },
+            "feature_count": 432
+          }
+        ]
+      },
+      "P2": {
+        "aggregate": {
+          "incidents": 2490,
+          "violations": 20,
+          "prevalence": 0.008032128514056224,
+          "pr_auc": 0.025453620396785795,
+          "robust_pr_auc": 0.03508619604285354,
+          "monthly_pr_auc_mean": 0.07106789931229954,
+          "monthly_pr_auc_std": 0.08510154355481453,
+          "precision_at_top_5pct": 0.024193548387096774,
+          "recall_at_top_5pct": 0.15,
+          "lift_at_top_5pct": 3.0120967741935485,
+          "alerts": 124,
+          "hits": 3,
+          "alerts_per_day": 0.6739130434782609,
+          "incidents_reviewed_per_true_violation": 41.333333333333336
+        },
+        "monthly": [
+          {
+            "month": "2025-07",
+            "train_incidents": 13244,
+            "train_violations": 129,
+            "test_incidents": 386,
+            "test_violations": 6,
+            "pr_auc": 0.04259312606499307,
+            "roc_auc_secondary": 0.5877192982456141,
+            "top_5pct": {
+              "k": 19,
+              "hits": 1,
+              "precision": 0.05263157894736842,
+              "recall": 0.16666666666666666,
+              "lift": 3.3859649122807016
+            },
+            "feature_count": 373
+          },
+          {
+            "month": "2025-08",
+            "train_incidents": 15263,
+            "train_violations": 161,
+            "test_incidents": 414,
+            "test_violations": 3,
+            "pr_auc": 0.022029644582730917,
+            "roc_auc_secondary": 0.5863746958637469,
+            "top_5pct": {
+              "k": 21,
+              "hits": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "lift": 0.0
+            },
+            "feature_count": 387
+          },
+          {
+            "month": "2025-09",
+            "train_incidents": 17338,
+            "train_violations": 182,
+            "test_incidents": 442,
+            "test_violations": 2,
+            "pr_auc": 0.2545045045045045,
+            "roc_auc_secondary": 0.7488636363636364,
+            "top_5pct": {
+              "k": 22,
+              "hits": 1,
+              "precision": 0.045454545454545456,
+              "recall": 0.5,
+              "lift": 10.045454545454545
+            },
+            "feature_count": 402
+          },
+          {
+            "month": "2025-10",
+            "train_incidents": 19593,
+            "train_violations": 194,
+            "test_incidents": 436,
+            "test_violations": 2,
+            "pr_auc": 0.07692307692307691,
+            "roc_auc_secondary": 0.7857142857142857,
+            "top_5pct": {
+              "k": 22,
+              "hits": 1,
+              "precision": 0.045454545454545456,
+              "recall": 0.5,
+              "lift": 9.909090909090908
+            },
+            "feature_count": 408
+          },
+          {
+            "month": "2025-11",
+            "train_incidents": 22060,
+            "train_violations": 207,
+            "test_incidents": 448,
+            "test_violations": 6,
+            "pr_auc": 0.027579266020714012,
+            "roc_auc_secondary": 0.5667420814479638,
+            "top_5pct": {
+              "k": 22,
+              "hits": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "lift": 0.0
+            },
+            "feature_count": 424
+          },
+          {
+            "month": "2025-12",
+            "train_incidents": 23934,
+            "train_violations": 223,
+            "test_incidents": 364,
+            "test_violations": 1,
+            "pr_auc": 0.002777777777777778,
+            "roc_auc_secondary": 0.011019283746556474,
+            "top_5pct": {
+              "k": 18,
+              "hits": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "lift": 0.0
+            },
+            "feature_count": 432
+          }
+        ]
+      },
+      "P3": {
+        "aggregate": {
+          "incidents": 9473,
+          "violations": 87,
+          "prevalence": 0.009183996621978253,
+          "pr_auc": 0.029698584145996,
+          "robust_pr_auc": 0.04148593182219398,
+          "monthly_pr_auc_mean": 0.059527600965486295,
+          "monthly_pr_auc_std": 0.05138722933385359,
+          "precision_at_top_5pct": 0.05496828752642706,
+          "recall_at_top_5pct": 0.2988505747126437,
+          "lift_at_top_5pct": 5.985225146411995,
+          "alerts": 473,
+          "hits": 26,
+          "alerts_per_day": 2.5706521739130435,
+          "incidents_reviewed_per_true_violation": 18.192307692307693
+        },
+        "monthly": [
+          {
+            "month": "2025-07",
+            "train_incidents": 13244,
+            "train_violations": 129,
+            "test_incidents": 1740,
+            "test_violations": 23,
+            "pr_auc": 0.04632475900387999,
+            "roc_auc_secondary": 0.7582740371223823,
+            "top_5pct": {
+              "k": 87,
+              "hits": 4,
+              "precision": 0.04597701149425287,
+              "recall": 0.17391304347826086,
+              "lift": 3.4782608695652173
+            },
+            "feature_count": 373
+          },
+          {
+            "month": "2025-08",
+            "train_incidents": 15263,
+            "train_violations": 161,
+            "test_incidents": 1916,
+            "test_violations": 14,
+            "pr_auc": 0.03664710464050799,
+            "roc_auc_secondary": 0.8410695508487307,
+            "top_5pct": {
+              "k": 96,
+              "hits": 5,
+              "precision": 0.052083333333333336,
+              "recall": 0.35714285714285715,
+              "lift": 7.127976190476191
+            },
+            "feature_count": 387
+          },
+          {
+            "month": "2025-09",
+            "train_incidents": 17338,
+            "train_violations": 182,
+            "test_incidents": 1882,
+            "test_violations": 9,
+            "pr_auc": 0.008813181162045495,
+            "roc_auc_secondary": 0.6492258408969568,
+            "top_5pct": {
+              "k": 94,
+              "hits": 1,
+              "precision": 0.010638297872340425,
+              "recall": 0.1111111111111111,
+              "lift": 2.2245862884160754
+            },
+            "feature_count": 402
+          },
+          {
+            "month": "2025-10",
+            "train_incidents": 19593,
+            "train_violations": 194,
+            "test_incidents": 1690,
+            "test_violations": 9,
+            "pr_auc": 0.014959833650854217,
+            "roc_auc_secondary": 0.7543129089827484,
+            "top_5pct": {
+              "k": 84,
+              "hits": 2,
+              "precision": 0.023809523809523808,
+              "recall": 0.2222222222222222,
+              "lift": 4.470899470899471
+            },
+            "feature_count": 408
+          },
+          {
+            "month": "2025-11",
+            "train_incidents": 22060,
+            "train_violations": 207,
+            "test_incidents": 1186,
+            "test_violations": 15,
+            "pr_auc": 0.15651022781998192,
+            "roc_auc_secondary": 0.8257899231426131,
+            "top_5pct": {
+              "k": 59,
+              "hits": 7,
+              "precision": 0.11864406779661017,
+              "recall": 0.4666666666666667,
+              "lift": 9.380790960451977
+            },
+            "feature_count": 424
+          },
+          {
+            "month": "2025-12",
+            "train_incidents": 23934,
+            "train_violations": 223,
+            "test_incidents": 1059,
+            "test_violations": 17,
+            "pr_auc": 0.0939104995156482,
+            "roc_auc_secondary": 0.7271085017500282,
+            "top_5pct": {
+              "k": 53,
+              "hits": 7,
+              "precision": 0.1320754716981132,
+              "recall": 0.4117647058823529,
+              "lift": 8.227524972253052
+            },
+            "feature_count": 432
+          }
+        ]
+      }
+    },
+    "runtime": {
+      "seconds": 2.2803549999953248,
+      "rss_start_mb": 389.15625,
+      "rss_end_mb": 437.578125,
+      "process_peak_rss_mb": 437.578125
+    }
+  },
+  "reproduced_comparison": {
+    "global": {
+      "pooled_pr_auc_delta": 0.012427604023118977,
+      "pooled_pr_auc_relative": 0.860087577149089,
+      "robust_pr_auc_delta": 0.023469293220249664,
+      "robust_pr_auc_relative": 1.434028452196376,
+      "monthly_pr_auc_wins": 6,
+      "precision_at_top_5pct_delta": 0.023450586264656615,
+      "recall_at_top_5pct_delta": 0.1308411214953271,
+      "monthly": [
+        {
+          "month": "2025-07",
+          "candidate_pr_auc": 0.04045883820390604,
+          "champion_pr_auc": 0.01782603130707173,
+          "delta": 0.022632806896834314,
+          "candidate_hits": 5,
+          "champion_hits": 3
+        },
+        {
+          "month": "2025-08",
+          "candidate_pr_auc": 0.03104072341620085,
+          "champion_pr_auc": 0.010831835603271025,
+          "delta": 0.020208887812929826,
+          "candidate_hits": 5,
+          "champion_hits": 2
+        },
+        {
+          "month": "2025-09",
+          "candidate_pr_auc": 0.03921172532436139,
+          "champion_pr_auc": 0.007917830743858998,
+          "delta": 0.03129389458050239,
+          "candidate_hits": 2,
+          "champion_hits": 2
+        },
+        {
+          "month": "2025-10",
+          "candidate_pr_auc": 0.02265782594742517,
+          "champion_pr_auc": 0.01598038681442157,
+          "delta": 0.006677439133003598,
+          "candidate_hits": 3,
+          "champion_hits": 3
+        },
+        {
+          "month": "2025-11",
+          "candidate_pr_auc": 0.08805101957418929,
+          "champion_pr_auc": 0.027125439661727327,
+          "delta": 0.06092557991246196,
+          "candidate_hits": 7,
+          "champion_hits": 4
+        },
+        {
+          "month": "2025-12",
+          "candidate_pr_auc": 0.06953391900368573,
+          "champion_pr_auc": 0.01675159027334653,
+          "delta": 0.0527823287303392,
+          "candidate_hits": 7,
+          "champion_hits": 1
+        }
+      ],
+      "gate_checks": {
+        "robust_pr_auc_improvement_at_least_15pct": true,
+        "monthly_pr_auc_wins_at_least_4": true,
+        "recall_at_top_5pct_no_more_than_5pct_relative_degradation": true,
+        "point_in_time_safe": true
+      },
+      "passes": true
+    },
+    "P2": {
+      "pooled_pr_auc_delta": 0.009475650546279156,
+      "pooled_pr_auc_relative": 0.5930447131228438,
+      "robust_pr_auc_delta": 0.01911808976820211,
+      "robust_pr_auc_relative": 1.1972671924504361,
+      "monthly_pr_auc_wins": 4,
+      "precision_at_top_5pct_delta": 0.0,
+      "recall_at_top_5pct_delta": 0.0,
+      "monthly": [
+        {
+          "month": "2025-07",
+          "candidate_pr_auc": 0.04259312606499307,
+          "champion_pr_auc": 0.030020242602502294,
+          "delta": 0.012572883462490775,
+          "candidate_hits": 1,
+          "champion_hits": 1
+        },
+        {
+          "month": "2025-08",
+          "candidate_pr_auc": 0.022029644582730917,
+          "champion_pr_auc": 0.02112676056338028,
+          "delta": 0.0009028840193506353,
+          "candidate_hits": 0,
+          "champion_hits": 0
+        },
+        {
+          "month": "2025-09",
+          "candidate_pr_auc": 0.2545045045045045,
+          "champion_pr_auc": 0.007164404223227753,
+          "delta": 0.24734010028127676,
+          "candidate_hits": 1,
+          "champion_hits": 0
+        },
+        {
+          "month": "2025-10",
+          "candidate_pr_auc": 0.07692307692307691,
+          "champion_pr_auc": 0.010809451985922574,
+          "delta": 0.06611362493715434,
+          "candidate_hits": 1,
+          "champion_hits": 0
+        },
+        {
+          "month": "2025-11",
+          "candidate_pr_auc": 0.027579266020714012,
+          "champion_pr_auc": 0.06134813162801778,
+          "delta": -0.033768865607303765,
+          "candidate_hits": 0,
+          "champion_hits": 2
+        },
+        {
+          "month": "2025-12",
+          "candidate_pr_auc": 0.002777777777777778,
+          "champion_pr_auc": 0.005235602094240838,
+          "delta": -0.00245782431646306,
+          "candidate_hits": 0,
+          "champion_hits": 0
+        }
+      ],
+      "gate_checks": {
+        "robust_pr_auc_improvement_at_least_15pct": true,
+        "monthly_pr_auc_wins_at_least_4": true,
+        "recall_at_top_5pct_no_more_than_5pct_relative_degradation": true,
+        "point_in_time_safe": true
+      },
+      "passes": true
+    },
+    "P3": {
+      "pooled_pr_auc_delta": 0.015022672145025057,
+      "pooled_pr_auc_relative": 1.023627842960027,
+      "robust_pr_auc_delta": 0.02323565962266049,
+      "robust_pr_auc_relative": 1.2731678392859496,
+      "monthly_pr_auc_wins": 4,
+      "precision_at_top_5pct_delta": 0.02748414376321353,
+      "recall_at_top_5pct_delta": 0.14942528735632185,
+      "monthly": [
+        {
+          "month": "2025-07",
+          "candidate_pr_auc": 0.04632475900387999,
+          "champion_pr_auc": 0.01697215811487696,
+          "delta": 0.029352600889003027,
+          "candidate_hits": 4,
+          "champion_hits": 2
+        },
+        {
+          "month": "2025-08",
+          "candidate_pr_auc": 0.03664710464050799,
+          "champion_pr_auc": 0.011804279121339661,
+          "delta": 0.024842825519168325,
+          "candidate_hits": 5,
+          "champion_hits": 2
+        },
+        {
+          "month": "2025-09",
+          "candidate_pr_auc": 0.008813181162045495,
+          "champion_pr_auc": 0.009789250746848638,
+          "delta": -0.000976069584803143,
+          "candidate_hits": 1,
+          "champion_hits": 2
+        },
+        {
+          "month": "2025-10",
+          "candidate_pr_auc": 0.014959833650854217,
+          "champion_pr_auc": 0.021582764499501687,
+          "delta": -0.006622930848647471,
+          "candidate_hits": 2,
+          "champion_hits": 3
+        },
+        {
+          "month": "2025-11",
+          "candidate_pr_auc": 0.15651022781998192,
+          "champion_pr_auc": 0.022076478693728713,
+          "delta": 0.1344337491262532,
+          "candidate_hits": 7,
+          "champion_hits": 3
+        },
+        {
+          "month": "2025-12",
+          "candidate_pr_auc": 0.0939104995156482,
+          "champion_pr_auc": 0.019528386284190024,
+          "delta": 0.07438211323145817,
+          "candidate_hits": 7,
+          "champion_hits": 1
+        }
+      ],
+      "gate_checks": {
+        "robust_pr_auc_improvement_at_least_15pct": true,
+        "monthly_pr_auc_wins_at_least_4": true,
+        "recall_at_top_5pct_no_more_than_5pct_relative_degradation": true,
+        "point_in_time_safe": true
+      },
+      "passes": true
+    }
+  }
+}

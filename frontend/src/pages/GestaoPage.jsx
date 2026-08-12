@@ -112,6 +112,7 @@ function ForecastCard({ label, data, available, color }) {
       <span>{label}</span>
       <strong>{available ? data?.total ?? '—' : '—'}</strong>
       <p>{available && data?.p2 != null ? `P2 ${data.p2} · P3 ${data.p3}` : 'Detalhamento indisponível'}</p>
+      {available && data?.reconciliado ? <small className="forecast-summary__reconciled">P2/P3 reconciliados ao Total</small> : null}
     </article>
   );
 }

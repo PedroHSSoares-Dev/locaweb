@@ -1,0 +1,56 @@
+{
+  "status": "PASS",
+  "process": "fresh Python interpreter",
+  "tolerance": 1e-12,
+  "source_hashes": {
+    "csv": "010a6d84593941a1e1da1386b86466a3ea85542448192a02e9adcfca3f6cc0bb",
+    "generator": "f98b9cf2c0c459aa3480fc796d0610e330ee88c02b941e74ec19135c549037a7"
+  },
+  "candidate": "calendar_adjusted_seasonal",
+  "baseline_mae": 12.46054250691528,
+  "candidate_mae": 10.18475079814182,
+  "promotion_gate_passed": true,
+  "seed_labels": [
+    11,
+    29,
+    47
+  ],
+  "seed_maes": [
+    10.18475079814182,
+    10.18475079814182,
+    10.18475079814182
+  ],
+  "max_seed_difference": 0.0,
+  "reconciliation": {
+    "period": "2025-01-01/2025-12-31",
+    "raw_priority_labels": {
+      "p2": "2 - Alta",
+      "p3": "3 - Média"
+    },
+    "daily_rows": 365,
+    "total_incidents": 25156,
+    "p2_incidents": 5159,
+    "p3_incidents": 19997,
+    "p2_plus_p3": 25156,
+    "identity_holds_annual": true,
+    "identity_holds_every_day": true,
+    "mismatched_days": 0,
+    "maximum_absolute_daily_gap": 0.0
+  },
+  "segment_mae": {
+    "total": {
+      "baseline": 12.46054250691528,
+      "candidate": 10.18475079814182
+    },
+    "p2": {
+      "baseline": 4.283192295090157,
+      "candidate": 4.355352521259531
+    },
+    "p3": {
+      "baseline": 11.372929805295014,
+      "candidate": 9.42297062009435
+    }
+  },
+  "numeric_values_checked": 363,
+  "maximum_absolute_numeric_difference": 0.0
+}

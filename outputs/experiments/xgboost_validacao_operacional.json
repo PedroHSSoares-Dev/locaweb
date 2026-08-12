@@ -1,0 +1,416 @@
+{
+  "relatorio": "xgboost_validacao_operacional",
+  "protocolo": "inner_cv_ate_jun_selecao_threshold_q3_teste_unico_q4",
+  "seguranca": {
+    "sobrescreve_producao": false,
+    "artefato_producao_preservado": "outputs/risco_ola.json"
+  },
+  "ambiente": {
+    "python": "3.11.11",
+    "xgboost": "2.1.3",
+    "sklearn": "1.8.0",
+    "platform": "macOS-26.5.2-arm64-arm-64bit"
+  },
+  "configuracao": {
+    "run_optuna": true,
+    "n_trials": 30,
+    "inner_splits": 4,
+    "bootstrap": 500
+  },
+  "splits": {
+    "treino": {
+      "inicio": "2023-02-02T15:52:32",
+      "fim": "2025-06-30T23:08:03",
+      "incidentes": 13625,
+      "violacoes": 141,
+      "prevalencia_pct": 1.0349
+    },
+    "validacao_q3": {
+      "inicio": "2025-07-01T00:30:46",
+      "fim": "2025-09-30T22:25:22",
+      "incidentes": 6780,
+      "violacoes": 57,
+      "prevalencia_pct": 0.8407
+    },
+    "teste_q4": {
+      "inicio": "2025-10-01T00:11:30",
+      "fim": "2025-12-31T18:06:15",
+      "incidentes": 5183,
+      "violacoes": 50,
+      "prevalencia_pct": 0.9647
+    }
+  },
+  "comparacao_cv_interno": [
+    {
+      "modelo": "xgb_optuna_temporal",
+      "pr_auc_media": 0.0255156708,
+      "pr_auc_std": 0.0118012147,
+      "roc_auc_media": 0.6154649102,
+      "score_robusto": 0.0225653671,
+      "folds": 4
+    },
+    {
+      "modelo": "xgb_atual_ponderado",
+      "pr_auc_media": 0.0241306886,
+      "pr_auc_std": 0.0087618913,
+      "roc_auc_media": 0.5454174208,
+      "score_robusto": 0.0219402158,
+      "folds": 4
+    },
+    {
+      "modelo": "xgb_raso_smote",
+      "pr_auc_media": 0.0204201776,
+      "pr_auc_std": 0.0052610284,
+      "roc_auc_media": 0.5348359767,
+      "score_robusto": 0.0191049205,
+      "folds": 4
+    },
+    {
+      "modelo": "xgb_medio_ponderado",
+      "pr_auc_media": 0.0214956302,
+      "pr_auc_std": 0.0101859816,
+      "roc_auc_media": 0.5136466708,
+      "score_robusto": 0.0189491348,
+      "folds": 4
+    },
+    {
+      "modelo": "xgb_raso_ponderado",
+      "pr_auc_media": 0.0192164055,
+      "pr_auc_std": 0.006395721,
+      "roc_auc_media": 0.5207224755,
+      "score_robusto": 0.0176174752,
+      "folds": 4
+    },
+    {
+      "modelo": "xgb_raso_sem_peso",
+      "pr_auc_media": 0.0170891922,
+      "pr_auc_std": 0.004755558,
+      "roc_auc_media": 0.5782800543,
+      "score_robusto": 0.0159003027,
+      "folds": 4
+    }
+  ],
+  "vencedor": {
+    "nome": "xgb_optuna_temporal",
+    "spec": {
+      "balance": "none",
+      "params": {
+        "n_estimators": 500,
+        "max_depth": 7,
+        "learning_rate": 0.03607939886307854,
+        "subsample": 0.7454404070203796,
+        "colsample_bytree": 0.9630659181130072,
+        "min_child_weight": 2,
+        "gamma": 2.9282357199398956,
+        "max_delta_step": 4,
+        "reg_alpha": 0.4520071476614973,
+        "reg_lambda": 0.11537349692556405
+      }
+    },
+    "params_concretos": {
+      "objective": "binary:logistic",
+      "eval_metric": "aucpr",
+      "random_state": 42,
+      "n_jobs": -1,
+      "tree_method": "hist",
+      "n_estimators": 500,
+      "max_depth": 7,
+      "learning_rate": 0.03607939886307854,
+      "subsample": 0.7454404070203796,
+      "colsample_bytree": 0.9630659181130072,
+      "min_child_weight": 2,
+      "gamma": 2.9282357199398956,
+      "max_delta_step": 4,
+      "reg_alpha": 0.4520071476614973,
+      "reg_lambda": 0.11537349692556405
+    }
+  },
+  "validacao_q3": {
+    "pr_auc": 0.08917639208233426,
+    "roc_auc": 0.7758819553718448,
+    "prevalencia": 0.008407079646017699
+  },
+  "thresholds_definidos_q3": {
+    "recall_30_validacao": 0.01911613903939724,
+    "recall_50_validacao": 0.01074754074215889,
+    "recall_70_validacao": 0.0058065359480679035,
+    "max_f1_validacao": 0.05824514850974083,
+    "top_1pct_validacao": 0.04783412914723158,
+    "top_5pct_validacao": 0.021076742559671402
+  },
+  "teste_q4": {
+    "pr_auc": 0.2132110268129056,
+    "roc_auc": 0.8651996882914474,
+    "prevalencia": 0.009646922631680493,
+    "lift_pr_auc_sobre_acaso": 22.101455039425797,
+    "incidentes": 5183,
+    "violacoes": 50,
+    "dias": 92
+  },
+  "politicas_no_teste": [
+    {
+      "politica": "max_f1_validacao",
+      "threshold": 0.0582451485,
+      "alertas": 92,
+      "alertas_por_dia": 1.0,
+      "tp": 17,
+      "fp": 75,
+      "fn": 33,
+      "tn": 5058,
+      "precision": 0.1847826087,
+      "recall": 0.34,
+      "f1": 0.2394366197,
+      "falsos_positivos_pct": 0.8152173913,
+      "incidentes_por_acerto": 5.4117647059
+    },
+    {
+      "politica": "top_1pct_validacao",
+      "threshold": 0.0478341291,
+      "alertas": 129,
+      "alertas_por_dia": 1.402173913,
+      "tp": 20,
+      "fp": 109,
+      "fn": 30,
+      "tn": 5024,
+      "precision": 0.1550387597,
+      "recall": 0.4,
+      "f1": 0.2234636872,
+      "falsos_positivos_pct": 0.8449612403,
+      "incidentes_por_acerto": 6.45
+    },
+    {
+      "politica": "top_5pct_validacao",
+      "threshold": 0.0210767426,
+      "alertas": 465,
+      "alertas_por_dia": 5.0543478261,
+      "tp": 30,
+      "fp": 435,
+      "fn": 20,
+      "tn": 4698,
+      "precision": 0.064516129,
+      "recall": 0.6,
+      "f1": 0.1165048544,
+      "falsos_positivos_pct": 0.935483871,
+      "incidentes_por_acerto": 15.5
+    },
+    {
+      "politica": "recall_30_validacao",
+      "threshold": 0.019116139,
+      "alertas": 512,
+      "alertas_por_dia": 5.5652173913,
+      "tp": 30,
+      "fp": 482,
+      "fn": 20,
+      "tn": 4651,
+      "precision": 0.05859375,
+      "recall": 0.6,
+      "f1": 0.1067615658,
+      "falsos_positivos_pct": 0.94140625,
+      "incidentes_por_acerto": 17.0666666667
+    },
+    {
+      "politica": "recall_50_validacao",
+      "threshold": 0.0107475407,
+      "alertas": 933,
+      "alertas_por_dia": 10.1413043478,
+      "tp": 35,
+      "fp": 898,
+      "fn": 15,
+      "tn": 4235,
+      "precision": 0.0375133976,
+      "recall": 0.7,
+      "f1": 0.0712105799,
+      "falsos_positivos_pct": 0.9624866024,
+      "incidentes_por_acerto": 26.6571428571
+    },
+    {
+      "politica": "recall_70_validacao",
+      "threshold": 0.0058065359,
+      "alertas": 1718,
+      "alertas_por_dia": 18.6739130435,
+      "tp": 43,
+      "fp": 1675,
+      "fn": 7,
+      "tn": 3458,
+      "precision": 0.0250291036,
+      "recall": 0.86,
+      "f1": 0.0486425339,
+      "falsos_positivos_pct": 0.9749708964,
+      "incidentes_por_acerto": 39.9534883721
+    }
+  ],
+  "ranking_top_k_teste": [
+    {
+      "top_k": 25,
+      "alertas_por_dia": 0.2717391304,
+      "violacoes_encontradas": 11,
+      "precision_at_k": 0.44,
+      "recall_at_k": 0.22,
+      "lift_at_k": 45.6104,
+      "incidentes_por_acerto": 2.2727272727
+    },
+    {
+      "top_k": 50,
+      "alertas_por_dia": 0.5434782609,
+      "violacoes_encontradas": 13,
+      "precision_at_k": 0.26,
+      "recall_at_k": 0.26,
+      "lift_at_k": 26.9516,
+      "incidentes_por_acerto": 3.8461538462
+    },
+    {
+      "top_k": 100,
+      "alertas_por_dia": 1.0869565217,
+      "violacoes_encontradas": 18,
+      "precision_at_k": 0.18,
+      "recall_at_k": 0.36,
+      "lift_at_k": 18.6588,
+      "incidentes_por_acerto": 5.5555555556
+    },
+    {
+      "top_k": 250,
+      "alertas_por_dia": 2.7173913043,
+      "violacoes_encontradas": 26,
+      "precision_at_k": 0.104,
+      "recall_at_k": 0.52,
+      "lift_at_k": 10.78064,
+      "incidentes_por_acerto": 9.6153846154
+    },
+    {
+      "top_k": 500,
+      "alertas_por_dia": 5.4347826087,
+      "violacoes_encontradas": 30,
+      "precision_at_k": 0.06,
+      "recall_at_k": 0.6,
+      "lift_at_k": 6.2196,
+      "incidentes_por_acerto": 16.6666666667
+    },
+    {
+      "top_k": 1000,
+      "alertas_por_dia": 10.8695652174,
+      "violacoes_encontradas": 35,
+      "precision_at_k": 0.035,
+      "recall_at_k": 0.7,
+      "lift_at_k": 3.6281,
+      "incidentes_por_acerto": 28.5714285714
+    }
+  ],
+  "segmentos_teste": [
+    {
+      "prioridade": "P2",
+      "incidentes": 1248,
+      "violacoes": 9,
+      "prevalencia": 0.0072115385,
+      "pr_auc": 0.027591672,
+      "roc_auc": 0.8007353601,
+      "precision_top_1pct": 0.0,
+      "recall_top_1pct": 0.0,
+      "precision_top_5pct": 0.0322580645,
+      "recall_top_5pct": 0.2222222222,
+      "precision_top_10pct": 0.032,
+      "recall_top_10pct": 0.4444444444
+    },
+    {
+      "prioridade": "P3",
+      "incidentes": 3935,
+      "violacoes": 41,
+      "prevalencia": 0.0104193139,
+      "pr_auc": 0.2633545639,
+      "roc_auc": 0.8883992885,
+      "precision_top_1pct": 0.3333333333,
+      "recall_top_1pct": 0.3170731707,
+      "precision_top_5pct": 0.116751269,
+      "recall_top_5pct": 0.5609756098,
+      "precision_top_10pct": 0.0659898477,
+      "recall_top_10pct": 0.6341463415
+    }
+  ],
+  "pr_auc_bootstrap_ic95": {
+    "n_bootstrap_validos": 500,
+    "p2_5": 0.11787524229212168,
+    "mediana": 0.2196282213891449,
+    "p97_5": 0.3447779490166032
+  },
+  "top_features_gain": [
+    {
+      "feature": "grupo_viol_rate",
+      "gain": 6.6450443268
+    },
+    {
+      "feature": "categoria_enc",
+      "gain": 6.0578393936
+    },
+    {
+      "feature": "produto_freq",
+      "gain": 5.9867291451
+    },
+    {
+      "feature": "produto_enc",
+      "gain": 5.6783938408
+    },
+    {
+      "feature": "prioridade_bin",
+      "gain": 5.5129442215
+    },
+    {
+      "feature": "mes",
+      "gain": 5.312959671
+    },
+    {
+      "feature": "aberto_por_enc",
+      "gain": 5.1742482185
+    },
+    {
+      "feature": "periodo_dia",
+      "gain": 5.1673007011
+    },
+    {
+      "feature": "lag_7d",
+      "gain": 5.1221270561
+    },
+    {
+      "feature": "subcategoria_enc",
+      "gain": 5.1032624245
+    },
+    {
+      "feature": "dia_semana",
+      "gain": 5.1015906334
+    },
+    {
+      "feature": "mes_cos",
+      "gain": 4.9935379028
+    },
+    {
+      "feature": "is_horario_comercial",
+      "gain": 4.9767889977
+    },
+    {
+      "feature": "grupo_freq",
+      "gain": 4.9653010368
+    },
+    {
+      "feature": "hora",
+      "gain": 4.8539991379
+    },
+    {
+      "feature": "is_fim_de_semana",
+      "gain": 4.8281049728
+    },
+    {
+      "feature": "rolling_30d",
+      "gain": 4.7296533585
+    },
+    {
+      "feature": "dias_ate_feriado",
+      "gain": 4.6944432259
+    },
+    {
+      "feature": "lag_1d_p2",
+      "gain": 4.6570272446
+    },
+    {
+      "feature": "rolling_7d",
+      "gain": 4.6545615196
+    }
+  ]
+}

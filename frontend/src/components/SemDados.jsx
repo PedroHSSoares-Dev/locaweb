@@ -1,5 +1,6 @@
 /**
- * SemDados — fallback terminal-style quando modelo não disponível.
+ * SemDados — estado neutro quando um artefato ainda não está disponível.
+ * Evita expor instruções de desenvolvimento na interface de produção.
  */
 export default function SemDados({ mensagem }) {
   return (
@@ -19,7 +20,7 @@ export default function SemDados({ mensagem }) {
       <div style={{
         fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700,
         color: 'var(--text-sec)', letterSpacing: '0.12em', textTransform: 'uppercase',
-      }}>MODELO NÃO TREINADO</div>
+      }}>DADOS TEMPORARIAMENTE INDISPONÍVEIS</div>
       {mensagem && (
         <div style={{
           fontFamily: 'var(--font-mono)', fontSize: 10,
@@ -27,13 +28,13 @@ export default function SemDados({ mensagem }) {
           textAlign: 'center', maxWidth: 280, letterSpacing: '0.04em',
         }}>{mensagem}</div>
       )}
-      <div style={{
+      <div role="status" style={{
         marginTop: 4,
         fontFamily: 'var(--font-mono)', fontSize: 10,
         color: 'var(--text-sec)',
         border: '1px solid var(--border-md)', borderRadius: 3,
         padding: '3px 10px', letterSpacing: '0.08em',
-      }}>[EXECUTAR_NOTEBOOK]</div>
+      }}>CONSULTE O STATUS DO SISTEMA</div>
     </div>
   );
 }

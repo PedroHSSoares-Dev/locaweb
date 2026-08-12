@@ -1,0 +1,311 @@
+{
+  "safe_base_numeric": [
+    "priority_p2",
+    "hour",
+    "dow",
+    "month",
+    "day",
+    "week",
+    "is_weekend",
+    "is_business",
+    "hour_sin",
+    "hour_cos",
+    "dow_sin",
+    "dow_cos",
+    "month_sin",
+    "month_cos",
+    "lag1_all",
+    "lag7_all",
+    "roll7_all",
+    "roll30_all",
+    "lag1_p2",
+    "lag7_p2",
+    "roll7_p2",
+    "roll30_p2",
+    "lag1_p3",
+    "lag7_p3",
+    "roll7_p3",
+    "roll30_p3"
+  ],
+  "safe_base_categorical": [
+    "Produto",
+    "Categoria",
+    "Subcategoria",
+    "Aberto por"
+  ],
+  "champion_additional_uncertain": [
+    "Grupo designado"
+  ],
+  "families": {
+    "arrival_burst": {
+      "numeric_features": [
+        "arrivals_15m",
+        "arrivals_1h",
+        "arrivals_4h",
+        "arrivals_12h",
+        "arrivals_24h",
+        "arrivals_7d"
+      ],
+      "categorical_sources": [],
+      "mechanism": "Arrival bursts may overload triage before an incident is assigned.",
+      "raw_columns": [
+        "Aberto"
+      ],
+      "availability": "Prior opening timestamps only.",
+      "leakage_risk": "Exclude simultaneous/current arrivals with left-open search.",
+      "segment": "P2 during bursty periods.",
+      "falsification": "No positive paired PR-AUC delta and no Top-5% recall gain."
+    },
+    "active_workload": {
+      "numeric_features": [
+        "active_all",
+        "active_p2",
+        "active_p3",
+        "active_product"
+      ],
+      "categorical_sources": [],
+      "mechanism": "Open workload at arrival may proxy queue pressure.",
+      "raw_columns": [
+        "Aberto",
+        "Resolvido",
+        "Encerrado",
+        "Prioridade",
+        "Produto"
+      ],
+      "availability": "Uses prior incidents and whether each had ended by scoring time.",
+      "leakage_risk": "Outcome timestamps only determine prior incident state; never current outcome.",
+      "segment": "P2 arriving under elevated backlog.",
+      "falsification": "No temporal gain or instability caused by closure-coverage regime."
+    },
+    "recurrence": {
+      "numeric_features": [
+        "product_since_hours",
+        "product_count_3600s",
+        "product_count_86400s",
+        "product_count_604800s",
+        "category_since_hours",
+        "category_count_3600s",
+        "category_count_86400s",
+        "category_count_604800s",
+        "subcategory_since_hours",
+        "subcategory_count_3600s",
+        "subcategory_count_86400s",
+        "subcategory_count_604800s",
+        "config_since_hours",
+        "config_count_3600s",
+        "config_count_86400s",
+        "config_count_604800s",
+        "description_since_hours",
+        "description_count_3600s",
+        "description_count_86400s",
+        "description_count_604800s"
+      ],
+      "categorical_sources": [],
+      "mechanism": "Rapid recurrence can identify correlated operational episodes.",
+      "raw_columns": [
+        "Aberto",
+        "Produto",
+        "Categoria",
+        "Subcategoria",
+        "Item de configuração",
+        "Descrição resumida"
+      ],
+      "availability": "Prior openings for the same safe key only.",
+      "leakage_risk": "No future/current row in cumulative support.",
+      "segment": "Repeated P2 patterns.",
+      "falsification": "No paired PR-AUC/Top-5% improvement."
+    },
+    "novelty_support": {
+      "numeric_features": [
+        "product_prior_log",
+        "category_prior_log",
+        "subcategory_prior_log",
+        "config_prior_log",
+        "description_prior_log",
+        "product_first_seen",
+        "category_first_seen",
+        "subcategory_first_seen",
+        "config_first_seen",
+        "description_first_seen"
+      ],
+      "categorical_sources": [],
+      "mechanism": "Rare or first-seen classifications may be harder to resolve inside OLA.",
+      "raw_columns": [
+        "Produto",
+        "Categoria",
+        "Subcategoria",
+        "Item de configuração",
+        "Descrição resumida",
+        "Aberto"
+      ],
+      "availability": "Cumulative support from prior openings.",
+      "leakage_risk": "Future category frequencies excluded.",
+      "segment": "Novel and low-support P2 records.",
+      "falsification": "Ablation is neutral/negative across paired folds."
+    },
+    "historical_outcomes": {
+      "numeric_features": [
+        "product_hist_rate",
+        "product_hist_support_log",
+        "category_hist_rate",
+        "category_hist_support_log",
+        "subcategory_hist_rate",
+        "subcategory_hist_support_log"
+      ],
+      "categorical_sources": [],
+      "mechanism": "Previously resolved patterns may carry persistent OLA risk.",
+      "raw_columns": [
+        "KPI Violado?",
+        "Resolvido",
+        "Encerrado",
+        "Produto",
+        "Categoria",
+        "Subcategoria"
+      ],
+      "availability": "Only outcomes known before each new opening.",
+      "leakage_risk": "Strict known-time event ordering and smoothing.",
+      "segment": "Recurring P2 failure modes.",
+      "falsification": "No operational lift after point-in-time restriction."
+    },
+    "config_identity": {
+      "numeric_features": [
+        "config_hist_rate",
+        "config_hist_support_log"
+      ],
+      "categorical_sources": [
+        "Item de configuração"
+      ],
+      "mechanism": "Configuration-item identity/frequency may expose fragile assets.",
+      "raw_columns": [
+        "Item de configuração"
+      ],
+      "availability": "Value known at opening; mappings fitted inside each fold.",
+      "leakage_risk": "High cardinality and rare-level overfit.",
+      "segment": "Repeated affected assets.",
+      "falsification": "Temporal PR-AUC fails to improve or fold variance increases materially."
+    },
+    "description_history": {
+      "numeric_features": [
+        "description_hist_rate",
+        "description_hist_support_log"
+      ],
+      "categorical_sources": [
+        "Descrição resumida"
+      ],
+      "mechanism": "Exact alert summaries may recur with consistent operational risk.",
+      "raw_columns": [
+        "Descrição resumida"
+      ],
+      "availability": "Opening text identity; no text leaves memory.",
+      "leakage_risk": "Rare exact strings and sensitive content; only encoded aggregates retained.",
+      "segment": "Repeated machine-generated alerts.",
+      "falsification": "No paired gain or only one-fold win."
+    },
+    "interactions": {
+      "numeric_features": [],
+      "categorical_sources": [
+        "product_category",
+        "product_subcategory",
+        "category_source"
+      ],
+      "mechanism": "Supported classification combinations may be more informative than marginal levels.",
+      "raw_columns": [
+        "Produto",
+        "Categoria",
+        "Subcategoria",
+        "Aberto por"
+      ],
+      "availability": "Opening values; encoders trained per fold.",
+      "leakage_risk": "Sparse combinations; smoothing and unknown buckets required.",
+      "segment": "Specific P2 operational paths.",
+      "falsification": "No incremental ablation value."
+    },
+    "calendar_context": {
+      "numeric_features": [
+        "minute",
+        "minute_sin",
+        "minute_cos",
+        "is_month_end",
+        "is_shift_boundary"
+      ],
+      "categorical_sources": [],
+      "mechanism": "Minute, shift boundary and holiday proximity may proxy coverage constraints.",
+      "raw_columns": [
+        "Aberto"
+      ],
+      "availability": "Deterministic at opening.",
+      "leakage_risk": "None beyond fixed calendar definition.",
+      "segment": "Off-hours and holiday-adjacent P2.",
+      "falsification": "No temporal incremental value."
+    },
+    "segmented_bursts": {
+      "numeric_features": [
+        "burst_priority_count_3600s",
+        "burst_priority_count_14400s",
+        "burst_priority_count_86400s",
+        "burst_product_count_3600s",
+        "burst_product_count_14400s",
+        "burst_product_count_86400s",
+        "burst_category_count_3600s",
+        "burst_category_count_14400s",
+        "burst_category_count_86400s"
+      ],
+      "categorical_sources": [],
+      "mechanism": "Local bursts within product/priority may matter more than global volume.",
+      "raw_columns": [
+        "Aberto",
+        "Prioridade",
+        "Produto",
+        "Categoria"
+      ],
+      "availability": "Prior openings only.",
+      "leakage_risk": "Same-timestamp events excluded.",
+      "segment": "Correlated P2 alert storms.",
+      "falsification": "No gain over global burst features."
+    },
+    "queue_growth": {
+      "numeric_features": [
+        "arrival_ratio_1h",
+        "arrival_diff_1h",
+        "arrival_ratio_4h",
+        "arrival_diff_4h",
+        "net_queue_growth_1h"
+      ],
+      "categorical_sources": [],
+      "mechanism": "Acceleration in arrivals and net open-queue growth may precede violations.",
+      "raw_columns": [
+        "Aberto",
+        "Resolvido",
+        "Encerrado"
+      ],
+      "availability": "Prior arrival/end event counts only.",
+      "leakage_risk": "End events included only when they occurred before scoring.",
+      "segment": "Rapidly deteriorating workload.",
+      "falsification": "No paired operational improvement."
+    },
+    "text_tfidf": {
+      "numeric_features": [],
+      "categorical_sources": [],
+      "mechanism": "Fold-fitted lexical patterns may generalize beyond exact description identity.",
+      "raw_columns": [
+        "Descrição resumida"
+      ],
+      "availability": "Opening text; vocabulary fitted on training rows only.",
+      "leakage_risk": "Sensitive tokens never persisted; vocabulary never reported.",
+      "segment": "Machine-generated and templated P2 descriptions.",
+      "falsification": "Blended ranking does not improve paired PR-AUC and Top-5% recall."
+    }
+  },
+  "final_candidate_families": [],
+  "forbidden_fields_confirmed_absent": [
+    "Duração",
+    "Resolvido",
+    "Encerrado",
+    "Código de fechamento",
+    "Solução",
+    "KPI Violado?",
+    "Status",
+    "Incidente Pai",
+    "Entrou para KPI?"
+  ]
+}

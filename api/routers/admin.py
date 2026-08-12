@@ -16,6 +16,8 @@ from api.services.user_store import (
     UserStoreUnavailable,
     user_store,
 )
+from api.services.operational_queue_store import operational_queue_store
+from api.services.preflight import run_preflight
 
 
 router = APIRouter(prefix="/admin", tags=["Administração"])
@@ -58,6 +60,16 @@ def require_admin(request: Request) -> ChatSession:
     if session.role != "admin" or "users:write" not in session.permissions:
         raise HTTPException(status_code=403, detail="Permissão de administrador necessária.")
     return session
+
+
+@router.get("/preflight")
+async def release_preflight(session: Annotated[ChatSession, Depends(require_admin)]):
+    """Run secret-free readiness checks for a release or live demonstration."""
+    del session
+    # Imported lazily to avoid coupling provider initialization to the admin router.
+    from api.routers.chat import provider
+
+    return await run_preflight(provider, user_store, operational_queue_store)
 
 
 def _raise_store_error(exc: Exception) -> None:

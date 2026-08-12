@@ -4,6 +4,7 @@ import { DashboardContext } from './dashboard-context';
 const INITIAL_FILTERS = {
   '/gestao': { periodo: 'ANO', prioridade: 'AMBOS' },
   '/monitoramento': { visualizacao: 'VOLUME' },
+  '/operacoes': { status: 'TODOS' },
   '/tecnico': { clusters: 'TODOS' },
   '/modelos': {},
 };

@@ -90,20 +90,24 @@ class PrevisaoD1Response(BaseModel):
     """Resumo do D+1 para KPI cards do dashboard."""
     disponivel: bool = Field(True, example=True)
     total: int = Field(..., example=69, description="Total de incidentes previstos para amanhã")
-    p2: Optional[int] = Field(None, example=15, description="Incidentes P2 previstos — None quando LSTM (só total)")
-    p3: Optional[int] = Field(None, example=54, description="Incidentes P3 previstos — None quando LSTM (só total)")
-    modelo_usado: str = Field(..., example="lstm_v2", description="Modelo ativo: lstm_v2 | prophet_mc_ensemble | prophet_original")
-    mae: Optional[float] = Field(None, example=13.15, description="MAE holdout do modelo (disponível apenas para LSTM)")
+    p2: Optional[int] = Field(None, example=10, description="Incidentes P2 previstos; pode ser None em artefato legado")
+    p3: Optional[int] = Field(None, example=32, description="Incidentes P3 previstos; pode ser None em artefato legado")
+    modelo_usado: str = Field(..., example="baseline_sazonal_7d", description="Modelo ativo validado ou fallback disponível")
+    mae: Optional[float] = Field(None, example=21.62, description="MAE D+1 no holdout comum, quando publicado")
+    reconciliado: bool = Field(False, description="Indica ajuste proporcional de P2/P3 para fechar o Total")
+    valores_brutos: Optional[dict] = Field(None, description="Valores arredondados antes da reconciliação, apenas quando houve ajuste")
 
 
 class PrevisaoD7Response(BaseModel):
     """Resumo do D+7 para KPI cards do dashboard."""
     disponivel: bool = Field(True, example=True)
     total: int = Field(..., example=65, description="Total de incidentes previstos em 7 dias")
-    p2: Optional[int] = Field(None, example=15, description="Incidentes P2 previstos — None quando LSTM (só total)")
-    p3: Optional[int] = Field(None, example=50, description="Incidentes P3 previstos — None quando LSTM (só total)")
-    modelo_usado: str = Field(..., example="lstm_v2", description="Modelo ativo: lstm_v2 | prophet_mc_ensemble | prophet_original")
-    mae: Optional[float] = Field(None, example=13.15, description="MAE holdout do modelo (disponível apenas para LSTM)")
+    p2: Optional[int] = Field(None, example=10, description="Incidentes P2 previstos; pode ser None em artefato legado")
+    p3: Optional[int] = Field(None, example=32, description="Incidentes P3 previstos; pode ser None em artefato legado")
+    modelo_usado: str = Field(..., example="baseline_sazonal_7d", description="Modelo ativo validado ou fallback disponível")
+    mae: Optional[float] = Field(None, example=20.86, description="MAE D+7 no holdout comum, quando publicado")
+    reconciliado: bool = Field(False, description="Indica ajuste proporcional de P2/P3 para fechar o Total")
+    valores_brutos: Optional[dict] = Field(None, description="Valores arredondados antes da reconciliação, apenas quando houve ajuste")
 
 
 class PrevisaoDia(BaseModel):
@@ -111,8 +115,9 @@ class PrevisaoDia(BaseModel):
     dia: str = Field(..., example="01/01", description="Label do eixo X no formato DD/MM")
     ds: str = Field(..., example="2026-01-01", description="Data ISO 8601")
     total: int = Field(..., example=69, description="Volume total previsto")
-    P2: Optional[int] = Field(None, example=15, description="Incidentes P2 previstos — None quando LSTM")
-    P3: Optional[int] = Field(None, example=54, description="Incidentes P3 previstos — None quando LSTM")
+    P2: Optional[int] = Field(None, example=10, description="Incidentes P2 previstos")
+    P3: Optional[int] = Field(None, example=32, description="Incidentes P3 previstos")
+    reconciliado: bool = Field(False, description="Indica ajuste proporcional de P2/P3 para fechar o Total")
 
 
 class PrevisaoSerieResponse(BaseModel):
@@ -124,33 +129,37 @@ class PrevisaoSerieResponse(BaseModel):
 
 class MetricasLSTM(BaseModel):
     """Métricas do LSTM v2 extraídas do previsoes_lstm.json."""
-    mae_total: float = Field(..., example=14.67, description="MAE total no holdout de 92 dias")
-    mae_p2: float = Field(..., example=4.15, description="MAE P2 no holdout de 92 dias")
-    mae_p3: float = Field(..., example=13.32, description="MAE P3 no holdout de 92 dias")
-    mae_prophet_holdout_92d: float = Field(..., example=23.80, description="MAE Prophet MC no mesmo holdout de 92 dias")
-    melhora_pct_vs_prophet: float = Field(..., example=38.3, description="Redução percentual de erro LSTM vs Prophet")
+    mae_total: float = Field(..., example=21.62, description="MAE D+1 total no holdout temporal comum")
+    mae_p2: float = Field(..., example=4.43, description="MAE D+1 P2 no holdout temporal comum")
+    mae_p3: float = Field(..., example=19.32, description="MAE D+1 P3 no holdout temporal comum")
+    mae_prophet_holdout_comum: Optional[float] = Field(None, description="MAE D+1 Prophet no mesmo holdout temporal")
+    melhora_pct_vs_prophet: Optional[float] = Field(None, description="Redução percentual de MAE D+1 LSTM vs Prophet")
+    protocolo_validacao: str = Field(..., example="rolling_origin_2025Q4_D1_D7")
     arquitetura: str = Field(..., example="LSTM 2 camadas hidden=128 dropout=0.3 lookback=30")
-    treino: str = Field(..., example="2023-01-01 a 2025-09-30 (Monte Carlo + real)")
+    treino: str = Field(..., example="2025-01-01 a 2025-09-30 (100% real)")
     holdout: str = Field(..., example="2025-10-01 a 2025-12-31 (92 dias 100% real)")
 
 
 class MetricasProphet(BaseModel):
     """Métricas do Prophet Ensemble extraídas do previsoes_volume.json."""
-    mae_d1_total: float = Field(..., example=12.43, description="MAE D+1 total (cross-validation)")
-    mae_d7_total: float = Field(..., example=10.58, description="MAE D+7 total (cross-validation)")
-    mae_d1_p2: float = Field(..., example=7.70, description="MAE D+1 P2 (cross-validation)")
-    mae_d1_p3: float = Field(..., example=9.98, description="MAE D+1 P3 (cross-validation)")
+    mae_d1_total: float = Field(..., description="MAE D+1 total no holdout temporal comum")
+    mae_d7_total: float = Field(..., description="MAE D+7 total no holdout temporal comum")
+    mae_d1_p2: float = Field(..., description="MAE D+1 P2 no holdout temporal comum")
+    mae_d1_p3: float = Field(..., description="MAE D+1 P3 no holdout temporal comum")
+    protocolo_validacao: str = Field(..., example="rolling_origin_2025Q4_D1_D7")
 
 
 class ModelosDisponiveisResponse(BaseModel):
     """Status de disponibilidade dos modelos de previsão e métricas completas."""
     lstm: bool = Field(..., description="previsoes_lstm.json presente em outputs/")
+    baseline_sazonal: bool = Field(..., description="previsoes_baseline.json presente em outputs/")
     prophet_mc: bool = Field(..., description="previsoes_volume_mc.json presente em outputs/")
     prophet_original: bool = Field(..., description="previsoes_volume.json presente em outputs/")
     modelo_ativo: str = Field(..., example="lstm_v2", description="Modelo sendo usado pelos endpoints /previsoes/*")
-    mae_modelo_ativo: Optional[float] = Field(None, example=14.67, description="MAE holdout do modelo ativo (só LSTM tem)")
+    mae_modelo_ativo: Optional[float] = Field(None, example=21.19, description="MAE médio D+1…D+7 do modelo ativo no holdout comum")
     metricas_lstm: Optional[MetricasLSTM] = Field(None, description="Métricas detalhadas do LSTM (None se não treinado)")
     metricas_prophet: Optional[MetricasProphet] = Field(None, description="Métricas detalhadas do Prophet (None se não treinado)")
+    comparacao: Optional[dict] = Field(None, description="Comparação auditável LSTM × Prophet no holdout comum")
 
 
 # ────────────────────────────────────────────────────────────────────────────────
@@ -249,24 +258,27 @@ class RiscoResponse(BaseModel):
 
 
 class RiscoProdutoItem(BaseModel):
-    """Score de risco de violação de OLA por produto/prioridade."""
-    produto: str = Field(..., example="P3", description="Prioridade ou produto")
-    probViolacao: float = Field(..., example=28.2, description="Score médio não calibrado do XGBoost (%)")
-    pctAltoRisco: Optional[float] = Field(None, example=14.17, description="% de incidentes classificados como alto risco")
-    nIncidentes: Optional[int] = Field(None, example=3881, description="Incidentes no conjunto de teste")
-    taxaViolacaoReal: Optional[float] = Field(None, example=13.86, description="Taxa real de violação (%)")
-    incidentesPendentes: Optional[int] = Field(None, example=23, description="Incidentes em aberto (legado)")
-    criticos: Optional[int] = Field(None, example=2, description="Incidentes com risco > 50% (legado)")
+    """Agregado histórico, com supressão de segmentos pequenos, por produto."""
+    produto: str
+    nIncidentes: int
+    violacoes: int
+    taxaViolacaoReal: float
+    intervaloConfianca95: list[float]
+    pctP2: float
 
 
 class RiscoGrupoItem(BaseModel):
     """Taxa histórica de violação de OLA por grupo de atendimento."""
     grupo: str = Field(..., example="Team07", description="Grupo de atendimento ITSM")
     taxaViolacao: float = Field(..., example=8.94, description="% de incidentes que violaram OLA (histórico 2025)")
+    nIncidentes: int
+    violacoes: int
+    intervaloConfianca95: list[float]
+    pctP2: float
 
 
 class RiscoProdutosResponse(BaseModel):
-    """Produtos ordenados pelo score não calibrado do XGBoost."""
+    """Produtos ordenados pela taxa histórica observada, sem score individual."""
     disponivel: bool = Field(True, example=True)
     produtos: list[RiscoProdutoItem]
 
@@ -284,12 +296,12 @@ class RiscoGruposResponse(BaseModel):
 class KpiPrioridade(BaseModel):
     """KPI de atingimento de OLA por prioridade — meta de negócio distribuída no período."""
     violacoesAno:    int   = Field(..., example=42,  description="Total de violações no período")
-    metaAnual:       int   = Field(..., example=37,  description="Referência central da meta no período")
+    metaAnual:       float = Field(..., example=37.5, description="Referência central exata da meta no período")
     metaMensal:      float = Field(..., example=3.12, description="Referência mensal distribuída")
-    metaMin:         Optional[int] = Field(None, example=36, description="Limite inferior da faixa de negócio no período")
-    metaMax:         Optional[int] = Field(None, example=39, description="Limite superior da faixa de negócio no período")
+    metaMin:         Optional[float] = Field(None, example=36, description="Limite inferior da faixa de negócio no período")
+    metaMax:         Optional[float] = Field(None, example=39, description="Limite superior da faixa de negócio no período")
     pctUtilizado:    float = Field(..., example=66.7, description="% da cota utilizada (real/meta × 100)")
-    margemRestante:  int   = Field(..., example=21,  description="Violações restantes antes de atingir a meta")
+    margemRestante:  float = Field(..., example=-4.5, description="Saldo até a referência central; negativo indica excesso")
     tendencia:       str   = Field(..., example="dentro_da_meta")
     olaHoras:        int   = Field(..., example=4)
     pctAtingimento:  int   = Field(..., example=100, description="Para o gauge: 100 = dentro da meta, <100 = acima")
@@ -303,7 +315,7 @@ class KpiResponse(BaseModel):
     metodologia:    Optional[str]   = Field(None,  example="meta_negocio_distribuida")
     gerado_em:      Optional[str]   = Field(None,  example="2026-03-28")
     periodo_filtro: Optional[str]   = Field(None,  example="ano")
-    P2:             KpiPrioridade   = Field(...,   description="P2 — faixa anual 36–39; referência central 37")
+    P2:             KpiPrioridade   = Field(...,   description="P2 — faixa anual 36–39; referência central 37,5")
     P3:             KpiPrioridade   = Field(...,   description="P3 — faixa anual 231–263; referência central 247")
     por_mes:        Optional[dict]  = Field(None,  description="Violações mensais por prioridade")
 
@@ -314,21 +326,21 @@ class KpiResponse(BaseModel):
 
 class ContextD1D7(BaseModel):
     total: int = Field(..., example=69)
-    p2: Optional[int] = Field(None, example=15, description="None quando LSTM (só prevê total)")
-    p3: Optional[int] = Field(None, example=54, description="None quando LSTM (só prevê total)")
+    p2: Optional[int] = Field(None, example=10, description="Volume P2 previsto")
+    p3: Optional[int] = Field(None, example=32, description="Volume P3 previsto")
 
 
 class ContextPrevisoes(BaseModel):
     disponivel: bool
     modelo_ativo: Optional[str] = Field(None, example="lstm_v2")
-    mae_92_dias: Optional[float] = Field(None, example=13.15)
+    mae_92_dias: Optional[float] = Field(None, example=21.62)
     D1: Optional[ContextD1D7] = None
     D7: Optional[ContextD1D7] = None
 
 
 class ContextRisco(BaseModel):
     disponivel: bool
-    top_produtos: Optional[list[dict]] = Field(None, description="Top 3 produtos pelo score não calibrado do XGBoost")
+    top_produtos: Optional[list[dict]] = Field(None, description="Top produtos por taxa histórica agregada")
     top_grupos: Optional[list[dict]] = Field(None, description="Top 3 grupos por taxa de violação")
     metricas: Optional[dict] = Field(None, description="Métricas do classificador de risco")
     por_prioridade: Optional[dict] = Field(None, description="Risco agregado para P2 e P3")

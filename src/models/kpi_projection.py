@@ -41,7 +41,7 @@ NOMES_MESES = {
 
 def calcular_meta_ajustada(
     violacoes_por_mes: list[int],
-    meta_anual: int,
+    meta_anual: float,
     mes_atual: int,
 ) -> float:
     """
@@ -116,13 +116,15 @@ def calcular_projecao(kpi: pd.DataFrame, ano_referencia: int | None = None) -> d
 
         # pct e margem
         pct_utilizado = round(total_violacoes / meta_centro * 100, 1) if meta_centro > 0 else 0.0
-        margem_restante = int(meta_centro - total_violacoes)
+        margem_restante = round(meta_centro - total_violacoes, 2)
         pct_atingimento = min(100, int(meta_centro / total_violacoes * 100)) if total_violacoes > 0 else 100
 
         resultado[prio_key] = {
             "violacoesAno":   total_violacoes,
-            "metaAnual":      int(meta_centro),
+            "metaAnual":      meta_centro,
             "metaMensal":     round(meta_mensal, 2),
+            "metaMin":        float(meta_min),
+            "metaMax":        float(meta_max),
             "pctUtilizado":   pct_utilizado,
             "margemRestante": margem_restante,
             "tendencia":      tendencia,

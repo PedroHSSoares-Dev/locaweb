@@ -1,0 +1,587 @@
+{
+  "summary": {
+    "material_feature_families": [
+      "calendar/cyclical/Fourier",
+      "weekly/seasonal lags",
+      "general autoregressive lags",
+      "rolling distributions",
+      "recency weighting/EWM",
+      "trend/change/residual",
+      "regime/seasonal residual",
+      "holidays/year-end event windows",
+      "causal event-factor estimation",
+      "fold-safe categorical/sparse identity",
+      "historical target backoff",
+      "novelty/missingness/support",
+      "word sparse text",
+      "character sparse text",
+      "NB log-count ratios",
+      "fixed-rank component scores",
+      "long-lag synthetic initialization"
+    ],
+    "material_feature_family_count": 17,
+    "track_specific_labels": [
+      "calendar",
+      "calendar/Fourier",
+      "calendar_volume",
+      "causal factor estimation",
+      "char_binary_counts",
+      "char_tfidf",
+      "fixed_rank_hybrid",
+      "fold_safe_encoded_categories",
+      "historical_backoff",
+      "holiday",
+      "lag_levels",
+      "lags",
+      "long-lag initialization",
+      "naive_bayes_log_count_ratio",
+      "novelty_missingness",
+      "recency weighting",
+      "rolling distribution",
+      "rolling_distribution",
+      "seasonal_residual",
+      "sparse_categories",
+      "trend/residual",
+      "trend_regime",
+      "weekly seasonal lags",
+      "word_binary_counts",
+      "word_tfidf",
+      "year-end operational window"
+    ],
+    "explicit_ablation_count": 10,
+    "availability_policy": "All predictors are available at scoring/origin time; past targets enter only after outcome time."
+  },
+  "tracks": {
+    "risk": {
+      "families": {
+        "calendar_volume": {
+          "availability": "Computed at incident opening from the current opening record or strictly prior events/outcomes.",
+          "missing_behavior": "Categorical absence is an explicit level; numeric absence is fold-fitted median imputation.",
+          "affected_track": "incident-level OLA risk",
+          "mechanism": "Opening calendar plus D-1/D-7 and left-shifted rolling incident volumes proxy operating regime.",
+          "source_columns": [
+            "Aberto",
+            "Prioridade"
+          ],
+          "leakage_analysis": "All lags and rolling windows end before the opening date; current-day total is excluded.",
+          "compute_memory_cost": "low; dense float32",
+          "ablation_result": {
+            "feature_or_mechanism": "volume_context",
+            "full": "elastic_structured_full",
+            "ablated_or_reference": "elastic_no_volume_context",
+            "segments": {
+              "global": {
+                "pooled_pr_auc_delta": -0.000530805725864409,
+                "robust_pr_auc_delta": 0.0008948241612301913,
+                "recall_at_top_5pct_delta": -0.028037383177570097
+              },
+              "P2": {
+                "pooled_pr_auc_delta": 0.0006766263128753711,
+                "robust_pr_auc_delta": -0.0003122263921668082,
+                "recall_at_top_5pct_delta": -0.05
+              },
+              "P3": {
+                "pooled_pr_auc_delta": -0.0009841946578513679,
+                "robust_pr_auc_delta": 0.000905784394203836,
+                "recall_at_top_5pct_delta": -0.011494252873563204
+              }
+            }
+          }
+        },
+        "sparse_categories": {
+          "availability": "Computed at incident opening from the current opening record or strictly prior events/outcomes.",
+          "missing_behavior": "Categorical absence is an explicit level; numeric absence is fold-fitted median imputation.",
+          "affected_track": "incident-level OLA risk",
+          "mechanism": "Fold-fitted one-hot identity represents additive opening classification effects without ordinal assumptions.",
+          "source_columns": [
+            "Produto",
+            "Categoria",
+            "Subcategoria",
+            "Aberto por"
+          ],
+          "leakage_analysis": "Vocabulary is fitted only on pre-month training rows; unknown levels are ignored.",
+          "compute_memory_cost": "low; CSR sparse matrix",
+          "ablation_result": {
+            "feature_or_mechanism": "sparse_categories",
+            "full": "elastic_structured_full",
+            "ablated_or_reference": "elastic_no_categories",
+            "segments": {
+              "global": {
+                "pooled_pr_auc_delta": 0.001914662665076939,
+                "robust_pr_auc_delta": 0.003505412086549281,
+                "recall_at_top_5pct_delta": 0.018691588785046717
+              },
+              "P2": {
+                "pooled_pr_auc_delta": 0.0019223435319508705,
+                "robust_pr_auc_delta": 0.0011653292466149764,
+                "recall_at_top_5pct_delta": 0.0
+              },
+              "P3": {
+                "pooled_pr_auc_delta": 0.001834773440627279,
+                "robust_pr_auc_delta": 0.0037953212143431413,
+                "recall_at_top_5pct_delta": 0.03448275862068967
+              }
+            }
+          }
+        },
+        "historical_backoff": {
+          "availability": "Computed at incident opening from the current opening record or strictly prior events/outcomes.",
+          "missing_behavior": "Categorical absence is an explicit level; numeric absence is fold-fitted median imputation.",
+          "affected_track": "incident-level OLA risk",
+          "mechanism": "Smoothed violation history and support for product/category/subcategory using outcomes known before each opening.",
+          "source_columns": [
+            "Produto",
+            "Categoria",
+            "Subcategoria",
+            "KPI Violado?",
+            "Resolvido",
+            "Encerrado"
+          ],
+          "leakage_analysis": "Target appears only in strictly prior known outcomes; current/future outcomes are excluded by event-time search.",
+          "compute_memory_cost": "low; six dense float32 features",
+          "ablation_result": {
+            "feature_or_mechanism": "historical_backoff_plus_novelty",
+            "full": "elastic_structured_full",
+            "ablated_or_reference": "elastic_no_history_novelty",
+            "segments": {
+              "global": {
+                "pooled_pr_auc_delta": 0.00248552097862627,
+                "robust_pr_auc_delta": 0.003968237508743946,
+                "recall_at_top_5pct_delta": 0.009345794392523366
+              },
+              "P2": {
+                "pooled_pr_auc_delta": 0.0013331543686880016,
+                "robust_pr_auc_delta": -0.0012408991527460243,
+                "recall_at_top_5pct_delta": 0.0
+              },
+              "P3": {
+                "pooled_pr_auc_delta": 0.0028520768101662035,
+                "robust_pr_auc_delta": 0.0038391648907040443,
+                "recall_at_top_5pct_delta": 0.0
+              }
+            }
+          }
+        },
+        "novelty_missingness": {
+          "availability": "Computed at incident opening from the current opening record or strictly prior events/outcomes.",
+          "missing_behavior": "Categorical absence is an explicit level; numeric absence is fold-fitted median imputation.",
+          "affected_track": "incident-level OLA risk",
+          "mechanism": "Prior support and first-seen indicators expose unfamiliar classifications while preserving informative missingness.",
+          "source_columns": [
+            "Produto",
+            "Categoria",
+            "Subcategoria",
+            "Item de configuração",
+            "Descrição resumida",
+            "Aberto"
+          ],
+          "leakage_analysis": "Support uses only prior openings; simultaneous/current rows are left-open excluded.",
+          "compute_memory_cost": "low; ten dense float32 features",
+          "ablation_result": {
+            "feature_or_mechanism": "historical_backoff_plus_novelty",
+            "full": "elastic_structured_full",
+            "ablated_or_reference": "elastic_no_history_novelty",
+            "segments": {
+              "global": {
+                "pooled_pr_auc_delta": 0.00248552097862627,
+                "robust_pr_auc_delta": 0.003968237508743946,
+                "recall_at_top_5pct_delta": 0.009345794392523366
+              },
+              "P2": {
+                "pooled_pr_auc_delta": 0.0013331543686880016,
+                "robust_pr_auc_delta": -0.0012408991527460243,
+                "recall_at_top_5pct_delta": 0.0
+              },
+              "P3": {
+                "pooled_pr_auc_delta": 0.0028520768101662035,
+                "robust_pr_auc_delta": 0.0038391648907040443,
+                "recall_at_top_5pct_delta": 0.0
+              }
+            }
+          }
+        },
+        "fold_safe_encoded_categories": {
+          "availability": "Computed at incident opening from the current opening record or strictly prior events/outcomes.",
+          "missing_behavior": "Categorical absence is an explicit level; numeric absence is fold-fitted median imputation.",
+          "affected_track": "incident-level OLA risk",
+          "mechanism": "Code, frequency, and smoothed target encodings make categories usable by tree models.",
+          "source_columns": [
+            "Produto",
+            "Categoria",
+            "Subcategoria",
+            "Aberto por"
+          ],
+          "leakage_analysis": "Maps are fitted inside each outer fold; training target encodings are leave-one-out.",
+          "compute_memory_cost": "low; twelve dense float32 features",
+          "ablation_result": "Evaluated as part of a model-family cycle; no clean one-factor isolation"
+        },
+        "word_tfidf": {
+          "availability": "Computed at incident opening from the current opening record or strictly prior events/outcomes.",
+          "missing_behavior": "Categorical absence is an explicit level; numeric absence is fold-fitted median imputation.",
+          "affected_track": "incident-level OLA risk",
+          "mechanism": "Word unigrams/bigrams capture recurring alert and incident-summary templates.",
+          "source_columns": [
+            "Descrição resumida"
+          ],
+          "leakage_analysis": "Vocabulary/IDF are fitted only on training rows; no vocabulary or raw text is persisted.",
+          "compute_memory_cost": "moderate; up to 30k sparse features",
+          "ablation_result": "Evaluated as part of a model-family cycle; no clean one-factor isolation"
+        },
+        "char_tfidf": {
+          "availability": "Computed at incident opening from the current opening record or strictly prior events/outcomes.",
+          "missing_behavior": "Categorical absence is an explicit level; numeric absence is fold-fitted median imputation.",
+          "affected_track": "incident-level OLA risk",
+          "mechanism": "Character 3-5 grams capture morphological variants and fragmented machine identifiers.",
+          "source_columns": [
+            "Descrição resumida"
+          ],
+          "leakage_analysis": "Fold-local vocabulary; no raw token output.",
+          "compute_memory_cost": "moderate; up to 32k sparse features",
+          "ablation_result": {
+            "feature_or_mechanism": "character_tfidf_and_margin",
+            "full": "word_char_tfidf_svm",
+            "ablated_or_reference": "word_tfidf_logistic",
+            "segments": {
+              "global": {
+                "pooled_pr_auc_delta": -0.0028896057998731225,
+                "robust_pr_auc_delta": -0.018110449406626317,
+                "recall_at_top_5pct_delta": 0.028037383177570097
+              },
+              "P2": {
+                "pooled_pr_auc_delta": 0.002312966215605214,
+                "robust_pr_auc_delta": 0.0026652839280707427,
+                "recall_at_top_5pct_delta": 0.0
+              },
+              "P3": {
+                "pooled_pr_auc_delta": -0.004136607415236908,
+                "robust_pr_auc_delta": -0.024807961863422087,
+                "recall_at_top_5pct_delta": 0.011494252873563204
+              }
+            }
+          }
+        },
+        "naive_bayes_log_count_ratio": {
+          "availability": "Computed at incident opening from the current opening record or strictly prior events/outcomes.",
+          "missing_behavior": "Categorical absence is an explicit level; numeric absence is fold-fitted median imputation.",
+          "affected_track": "incident-level OLA risk",
+          "mechanism": "Training-only class-conditional ratios reweight binary word/character counts before logistic fitting.",
+          "source_columns": [
+            "Descrição resumida",
+            "KPI Violado?"
+          ],
+          "leakage_analysis": "Ratios use training labels only and are recomputed for every outer fold.",
+          "compute_memory_cost": "moderate; sparse elementwise scaling",
+          "ablation_result": {
+            "feature_or_mechanism": "naive_bayes_log_count_ratio",
+            "full": "nbsvm_word_char",
+            "ablated_or_reference": "word_char_tfidf_svm",
+            "segments": {
+              "global": {
+                "pooled_pr_auc_delta": 0.011321035355822129,
+                "robust_pr_auc_delta": 0.04398675280869603,
+                "recall_at_top_5pct_delta": -0.01869158878504673
+              },
+              "P2": {
+                "pooled_pr_auc_delta": -0.0035144090162455774,
+                "robust_pr_auc_delta": -0.00010215657997698913,
+                "recall_at_top_5pct_delta": -0.1
+              },
+              "P3": {
+                "pooled_pr_auc_delta": 0.015424323888132661,
+                "robust_pr_auc_delta": 0.04961643600089487,
+                "recall_at_top_5pct_delta": 0.011494252873563232
+              }
+            }
+          }
+        },
+        "fixed_rank_hybrid": {
+          "availability": "Computed at incident opening from the current opening record or strictly prior events/outcomes.",
+          "missing_behavior": "Categorical absence is an explicit level; numeric absence is fold-fitted median imputation.",
+          "affected_track": "incident-level OLA risk",
+          "mechanism": "Predeclared equal-weight fold-local ranks combine independent text and safe structured error patterns.",
+          "source_columns": [
+            "safe structured features",
+            "Descrição resumida"
+          ],
+          "leakage_analysis": "Weights are fixed before evaluation; no outer-fold labels tune blending.",
+          "compute_memory_cost": "low after component inference",
+          "ablation_result": {
+            "feature_or_mechanism": "fixed_rank_hybrid",
+            "full": "hybrid_nbsvm_xgboost",
+            "ablated_or_reference": "nbsvm_word_char",
+            "segments": {
+              "global": {
+                "pooled_pr_auc_delta": -0.03138377896397804,
+                "robust_pr_auc_delta": -0.06394178585143312,
+                "recall_at_top_5pct_delta": -0.046728971962616814
+              },
+              "P2": {
+                "pooled_pr_auc_delta": 0.057774319013981675,
+                "robust_pr_auc_delta": 0.004724519757351366,
+                "recall_at_top_5pct_delta": 0.15
+              },
+              "P3": {
+                "pooled_pr_auc_delta": -0.0425028298561983,
+                "robust_pr_auc_delta": -0.07702211241089943,
+                "recall_at_top_5pct_delta": -0.08045977011494254
+              }
+            }
+          }
+        }
+      },
+      "forbidden_predictor_fields": [
+        "Duração",
+        "Resolvido",
+        "Encerrado",
+        "Código de fechamento",
+        "Solução",
+        "KPI Violado?",
+        "Status",
+        "Incidente Pai",
+        "Entrou para KPI?"
+      ],
+      "temporally_uncertain_group_policy": "Grupo designado is used only by the reconstructed champion, never by challengers."
+    },
+    "forecasting": {
+      "weekly_aligned_lags": {
+        "mechanism": "same target weekday at t-7/t-14/t-21 plus origin and long lags",
+        "source": [
+          "data",
+          "y"
+        ],
+        "availability": "target calendar plus y values at or before origin",
+        "leakage": "all referenced timestamps are asserted <= origin",
+        "missing_behavior": "rolling 28-day median fallback before sufficient history",
+        "track": "daily total volume",
+        "ablation_cycle": "F14",
+        "ablation_mae": 39.2794902187822,
+        "compute": "low"
+      },
+      "rolling_distribution": {
+        "mechanism": "past-only mean/median/std/quantiles/range/EWMA over 7-56 days",
+        "source": [
+          "data",
+          "y"
+        ],
+        "availability": "through origin close",
+        "leakage": "slices terminate at origin",
+        "missing_behavior": "short prefix accepted",
+        "track": "daily total volume",
+        "ablation_cycle": "F12",
+        "ablation_mae": 25.064886637081575,
+        "compute": "low"
+      },
+      "trend_residual": {
+        "mechanism": "past slopes, changes, and seasonal-baseline residual summaries",
+        "source": [
+          "data",
+          "y"
+        ],
+        "availability": "through origin close",
+        "leakage": "residual baselines use only dates before each residual target",
+        "missing_behavior": "zero until support exists",
+        "track": "daily total volume",
+        "ablation_cycle": "F13",
+        "ablation_mae": 38.545038252282225,
+        "compute": "low"
+      },
+      "calendar_fourier": {
+        "mechanism": "weekday/month/week cycles, month-end, weekend and known holiday flags",
+        "source": [
+          "data"
+        ],
+        "availability": "known before target date",
+        "leakage": "no observed target outcome",
+        "missing_behavior": "not applicable",
+        "track": "daily total volume",
+        "ablation_cycle": "F11",
+        "ablation_mae": 14.628138401380767,
+        "compute": "negligible"
+      },
+      "fold_safe_synthetic_augmentation": {
+        "mechanism": "aligned seven-day block bootstrap of training-prefix real totals with 8% multiplicative noise",
+        "source": [
+          "data",
+          "y"
+        ],
+        "availability": "regenerated after train cutoff",
+        "leakage": "source restricted to real prefix; supplied synthetic rows excluded",
+        "missing_behavior": "unseen target months fall back to aligned blocks from available months",
+        "track": "daily total volume",
+        "ablation_cycles": [
+          "F06",
+          "F07",
+          "F08",
+          "F09"
+        ],
+        "compute": "moderate"
+      },
+      "year_end_operational_window": {
+        "mechanism": "Dec 24-31 weekdays share the causally learned earlier-weekday-holiday volume factor",
+        "source": [
+          "data",
+          "y",
+          "calendar"
+        ],
+        "availability": "window known; factor uses holidays observed by origin",
+        "leakage": "no future actual enters factor; operational assumption is explicit",
+        "missing_behavior": "factor 1.0 until a past weekday holiday exists; factor guarded to [0.35, 0.75]",
+        "track": "daily total volume",
+        "ablation_cycle": "F01",
+        "compute": "negligible"
+      }
+    },
+    "operational": {
+      "families": {
+        "calendar": {
+          "mechanism": "Known target-day weekly/annual position.",
+          "source_columns": [
+            "Aberto"
+          ],
+          "availability": "Known before target day.",
+          "leakage": "Deterministic calendar only.",
+          "missing": "None.",
+          "track": "next-day high workload",
+          "features": [
+            "dow_sin",
+            "dow_cos",
+            "month_sin",
+            "month_cos",
+            "doy_sin",
+            "doy_cos",
+            "is_weekend",
+            "is_month_end"
+          ],
+          "compute": "O(n), negligible memory.",
+          "ablation": {
+            "candidate": "logistic_calendar",
+            "pr_auc": 0.4324969337319647
+          }
+        },
+        "lag_levels": {
+          "mechanism": "Recent and seasonal observed workload persistence.",
+          "source_columns": [
+            "Aberto"
+          ],
+          "availability": "Counts through d-1 only.",
+          "leakage": "Positive shifts only; target-day count excluded.",
+          "missing": "Median imputation fitted in each training fold.",
+          "track": "next-day high workload",
+          "features": [
+            "lag_1",
+            "lag_2",
+            "lag_3",
+            "lag_7",
+            "lag_14",
+            "lag_21",
+            "lag_28",
+            "lag_56"
+          ],
+          "compute": "O(n), negligible memory.",
+          "ablation": {
+            "from": "logistic_calendar",
+            "to": "logistic_calendar_lags",
+            "pr_auc_delta": 0.2630834098706389
+          }
+        },
+        "rolling_distribution": {
+          "mechanism": "Robust recent workload level, dispersion, and weekday capacity proxy.",
+          "source_columns": [
+            "Aberto"
+          ],
+          "availability": "Strictly prior daily counts.",
+          "leakage": "Every rolling input shifted by one; same-weekday windows shift one group observation.",
+          "missing": "Minimum histories enforced; fold-fitted median imputation.",
+          "track": "next-day high workload",
+          "features": [
+            "roll_mean_7",
+            "roll_median_7",
+            "roll_std_7",
+            "roll_q25_7",
+            "roll_q80_7",
+            "roll_mean_14",
+            "roll_median_14",
+            "roll_std_14",
+            "roll_q25_14",
+            "roll_q80_14",
+            "roll_mean_28",
+            "roll_median_28",
+            "roll_std_28",
+            "roll_q25_28",
+            "roll_q80_28",
+            "roll_mean_56",
+            "roll_median_56",
+            "roll_std_56",
+            "roll_q25_56",
+            "roll_q80_56",
+            "same_dow_median_4",
+            "same_dow_q80_4",
+            "same_dow_median_8",
+            "same_dow_q80_8",
+            "same_dow_median_12",
+            "same_dow_q80_12"
+          ],
+          "compute": "O(n*w), under 1 MB for this series.",
+          "ablation": {
+            "from": "extra_trees_no_rolling",
+            "to": "extra_trees_full",
+            "pr_auc_delta": -0.10273941764358652
+          }
+        },
+        "seasonal_residual": {
+          "mechanism": "Recent deviations from the point-in-time same-weekday capacity proxy.",
+          "source_columns": [
+            "Aberto"
+          ],
+          "availability": "Observed residuals through d-1 only.",
+          "leakage": "Current-day residual is shifted before use.",
+          "missing": "Fold-fitted median imputation or zero in fixed rule.",
+          "track": "next-day high workload",
+          "features": [
+            "lag7_margin",
+            "lag7_ratio",
+            "past_resid_1",
+            "past_resid_7",
+            "past_resid_mean_7",
+            "past_resid_mean_28",
+            "past_high_rate_7",
+            "past_high_rate_28"
+          ],
+          "compute": "O(n), negligible memory.",
+          "ablation": {
+            "from": "seasonal_naive_lag7_margin",
+            "to": "robust_residual_rule",
+            "relative_gain": 0.0473742395221175
+          }
+        },
+        "trend_regime": {
+          "mechanism": "Detect persistent level shift/change relative to longer context.",
+          "source_columns": [
+            "Aberto"
+          ],
+          "availability": "Windows end at d-1.",
+          "leakage": "No centered windows or future change points.",
+          "missing": "Fold-fitted median imputation.",
+          "track": "next-day high workload",
+          "features": [
+            "mean7_minus_mean28",
+            "mean14_minus_mean56",
+            "mean7_over_mean28",
+            "std7_over_std28",
+            "roll_mad_28",
+            "slope_7",
+            "slope_28",
+            "threshold_change_7"
+          ],
+          "compute": "O(n*28), negligible memory.",
+          "ablation": {
+            "from": "robust_residual_rule",
+            "to": "isolation_regime_hybrid",
+            "pr_auc_delta": 0.002895854968192557
+          }
+        }
+      },
+      "full_feature_count": 58
+    }
+  }
+}

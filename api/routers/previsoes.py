@@ -1,12 +1,8 @@
 """
 previsoes.py — Endpoints de previsão de volume de incidentes.
 
-Hierarquia de modelos (melhor → fallback):
-  1. LSTM v2 early stopping  (MAE holdout 92d = 14.67)
-  2. Prophet MC ensemble     (MAE holdout 92d = 23.80)
-  3. Prophet original v5+v6  (MAE CV D+1      = 12.43)
-
-Todos os endpoints tentam na ordem acima e usam o primeiro disponível.
+O modelo ativo (incluindo o baseline sazonal) é o vencedor para a série Total no holdout temporal comum.
+Disponibilidade é usada apenas como fallback quando a comparação não existe.
 """
 from typing import Union
 from fastapi import APIRouter
@@ -16,6 +12,7 @@ from api.schemas import (
     PrevisaoSerieResponse, NaoDisponivel,
 )
 from api.services.data_loader import load_json
+from api.services.model_registry import reconcile_forecast_point
 
 router = APIRouter(tags=["Previsões"])
 
@@ -26,20 +23,37 @@ def _round_pos(v: float) -> int:
     return round(max(v, 0))
 
 
+def _public_forecast(total, p2, p3) -> dict:
+    return reconcile_forecast_point(total, p2, p3)
+
+
 def _carregar_melhor_modelo() -> tuple[str | None, dict | None]:
     """
     Carrega o melhor modelo disponível em ordem de hierarquia.
     Retorna (nome_modelo, dados) ou (None, None) se nenhum disponível.
     """
+    comparison = load_json("comparacao_modelos.json")
+    winner = comparison.get("series", {}).get("total", {}).get("vencedor_geral") if comparison else None
+    baseline = load_json("previsoes_baseline.json")
     lstm = load_json("previsoes_lstm.json")
+    orig = load_json("previsoes_volume.json")
+    if winner == "lstm" and lstm:
+        return "lstm_v2", lstm
+    if winner == "baseline_sazonal" and baseline:
+        return "baseline_sazonal_7d", baseline
+    if winner == "prophet" and orig:
+        return "prophet_original", orig
+    mc = load_json("previsoes_volume_mc.json")
+    if winner == "prophet_mc" and mc:
+        return "prophet_mc_ensemble", mc
+    if baseline:
+        return "baseline_sazonal_7d", baseline
     if lstm:
         return "lstm_v2", lstm
-    mc = load_json("previsoes_volume_mc.json")
-    if mc:
-        return "prophet_mc_ensemble", mc
-    orig = load_json("previsoes_volume.json")
     if orig:
         return "prophet_original", orig
+    if mc:
+        return "prophet_mc_ensemble", mc
     return None, None
 
 
@@ -53,11 +67,18 @@ def get_modelos():
     Retorna quais modelos de previsão estão disponíveis e qual está sendo usado
     ativamente pelos endpoints `/previsoes/d1`, `/previsoes/d7` e `/previsoes/serie`.
 
-    **Hierarquia:** LSTM v2 > Prophet MC > Prophet Original
+    **Seleção:** vencedor no holdout temporal comum; fallback por disponibilidade.
     """
     modelo_ativo, data = _carregar_melhor_modelo()
-    mae_raw = data.get("mae_holdout_92_dias") if modelo_ativo == "lstm_v2" and data else None
-    mae = mae_raw["total"] if isinstance(mae_raw, dict) else mae_raw
+    comparison = load_json("comparacao_modelos.json")
+    total_comparison = comparison.get("series", {}).get("total", {}) if comparison else {}
+    active_key = {
+        "lstm_v2": "lstm",
+        "baseline_sazonal_7d": "baseline_sazonal",
+        "prophet_original": "prophet",
+        "prophet_mc_ensemble": "prophet_mc",
+    }.get(modelo_ativo)
+    mae = total_comparison.get("mae_medio_d1_d7", {}).get(active_key)
 
     lstm_data = load_json("previsoes_lstm.json")
     prophet_data = load_json("previsoes_volume.json")
@@ -69,8 +90,9 @@ def get_modelos():
             mae_total=mae_h.get("total", 0),
             mae_p2=mae_h.get("p2", 0),
             mae_p3=mae_h.get("p3", 0),
-            mae_prophet_holdout_92d=lstm_data.get("mae_prophet_92_dias", 0),
+            mae_prophet_holdout_comum=lstm_data.get("mae_prophet_holdout_comum"),
             melhora_pct_vs_prophet=lstm_data.get("melhora_pct_vs_prophet", 0),
+            protocolo_validacao=lstm_data.get("protocolo_validacao", "indisponivel"),
             arquitetura=lstm_data.get("arquitetura", ""),
             treino=lstm_data.get("treino", ""),
             holdout=lstm_data.get("holdout", ""),
@@ -86,16 +108,19 @@ def get_modelos():
             mae_d7_total=total_m.get("mae_d7", 0),
             mae_d1_p2=p2_m.get("mae_d1", 0),
             mae_d1_p3=p3_m.get("mae_d1", 0),
+            protocolo_validacao=prophet_data.get("protocolo_validacao", "indisponivel"),
         )
 
     return {
         "lstm":             lstm_data is not None,
+        "baseline_sazonal": load_json("previsoes_baseline.json") is not None,
         "prophet_mc":       load_json("previsoes_volume_mc.json") is not None,
         "prophet_original": prophet_data is not None,
         "modelo_ativo":     modelo_ativo or "nenhum",
         "mae_modelo_ativo": mae,
         "metricas_lstm":    metricas_lstm,
         "metricas_prophet": metricas_prophet,
+        "comparacao":       comparison,
     }
 
 
@@ -107,7 +132,7 @@ def get_previsoes():
     """
     Retorna o JSON completo do melhor modelo disponível com campo `modelo_usado`.
 
-    **Hierarquia:** LSTM v2 > Prophet MC > Prophet Original.
+    **Seleção:** vencedor no holdout temporal comum; fallback por disponibilidade.
 
     A estrutura do JSON varia por modelo — use `/previsoes/d1`, `/previsoes/d7`
     e `/previsoes/serie` para respostas normalizadas e compatíveis com o dashboard.
@@ -129,43 +154,44 @@ def get_d1():
     """
     Retorna o volume previsto de incidentes para **D+1** (amanhã).
 
-    - **LSTM v2** (ativo se disponível): prevê apenas `total`. `p2` e `p3` retornam `null`.
+    - **Baseline sazonal / LSTM v2**: preveem `total`, `p2` e `p3`.
     - **Prophet MC**: prevê `total`, `p2` e `p3`.
     - **Prophet original**: prevê `total`, `p2` e `p3`.
 
     O campo `modelo_usado` indica qual modelo gerou a previsão.
-    O campo `mae` contém o MAE holdout (apenas LSTM tem este valor).
+    O campo `mae` contém o MAE D+1 no holdout comum quando disponível.
 
     Retorna `disponivel: false` se nenhum modelo estiver disponível.
     """
     modelo_ativo, data = _carregar_melhor_modelo()
     if data is None:
         return _NOT_TRAINED
-    if modelo_ativo == "lstm_v2":
+    if modelo_ativo in {"lstm_v2", "baseline_sazonal_7d"}:
         mae_raw = data["mae_holdout_92_dias"]
         mae_val = mae_raw["total"] if isinstance(mae_raw, dict) else float(mae_raw)
+        point = _public_forecast(
+            data["serie"][0]["total"], data["serie"][0]["P2"], data["serie"][0]["P3"]
+        )
         return {
             "disponivel":   True,
-            "total":        _round_pos(data["serie"][0]["total"]),
-            "p2":           _round_pos(data["serie"][0]["P2"]),
-            "p3":           _round_pos(data["serie"][0]["P3"]),
-            "modelo_usado": "lstm_v2",
+            **point,
+            "modelo_usado": modelo_ativo,
             "mae":          mae_val,
         }
     if modelo_ativo == "prophet_mc_ensemble":
+        point = _public_forecast(data["d1"]["total"], data["d1"]["p2"], data["d1"]["p3"])
         return {
             "disponivel":   True,
-            "total":        data["d1"]["total"],
-            "p2":           data["d1"]["p2"],
-            "p3":           data["d1"]["p3"],
+            **point,
             "modelo_usado": "prophet_mc_ensemble",
             "mae":          None,
         }
+    point = _public_forecast(
+        data["total"]["D1"]["yhat"], data["p2"]["D1"]["yhat"], data["p3"]["D1"]["yhat"]
+    )
     return {
         "disponivel":   True,
-        "total":        _round_pos(data["total"]["D1"]["yhat"]),
-        "p2":           _round_pos(data["p2"]["D1"]["yhat"]),
-        "p3":           _round_pos(data["p3"]["D1"]["yhat"]),
+        **point,
         "modelo_usado": "prophet_original",
         "mae":          None,
     }
@@ -180,38 +206,39 @@ def get_d7():
     """
     Retorna o volume previsto de incidentes para **D+7** (7 dias à frente).
 
-    Mesma lógica de fallback do `/previsoes/d1` — LSTM > MC > Original.
+    Mesma seleção validada do `/previsoes/d1`.
 
     Retorna `disponivel: false` se nenhum modelo estiver disponível.
     """
     modelo_ativo, data = _carregar_melhor_modelo()
     if data is None:
         return _NOT_TRAINED
-    if modelo_ativo == "lstm_v2":
+    if modelo_ativo in {"lstm_v2", "baseline_sazonal_7d"}:
         mae_raw = data["mae_holdout_92_dias"]
         mae_val = mae_raw["total"] if isinstance(mae_raw, dict) else float(mae_raw)
+        point = _public_forecast(
+            data["serie"][6]["total"], data["serie"][6]["P2"], data["serie"][6]["P3"]
+        )
         return {
             "disponivel":   True,
-            "total":        _round_pos(data["serie"][6]["total"]),
-            "p2":           _round_pos(data["serie"][6]["P2"]),
-            "p3":           _round_pos(data["serie"][6]["P3"]),
-            "modelo_usado": "lstm_v2",
+            **point,
+            "modelo_usado": modelo_ativo,
             "mae":          mae_val,
         }
     if modelo_ativo == "prophet_mc_ensemble":
+        point = _public_forecast(data["d7"]["total"], data["d7"]["p2"], data["d7"]["p3"])
         return {
             "disponivel":   True,
-            "total":        data["d7"]["total"],
-            "p2":           data["d7"]["p2"],
-            "p3":           data["d7"]["p3"],
+            **point,
             "modelo_usado": "prophet_mc_ensemble",
             "mae":          None,
         }
+    point = _public_forecast(
+        data["total"]["D7"]["yhat"], data["p2"]["D7"]["yhat"], data["p3"]["D7"]["yhat"]
+    )
     return {
         "disponivel":   True,
-        "total":        _round_pos(data["total"]["D7"]["yhat"]),
-        "p2":           _round_pos(data["p2"]["D7"]["yhat"]),
-        "p3":           _round_pos(data["p3"]["D7"]["yhat"]),
+        **point,
         "modelo_usado": "prophet_original",
         "mae":          None,
     }
@@ -227,7 +254,7 @@ def get_serie():
     Retorna a série completa **D+1 a D+7** formatada para o gráfico de área
     do MonitoramentoPage.
 
-    - **LSTM v2**: `P2` e `P3` retornam `null` (modelo prevê apenas total).
+    - **Baseline sazonal / LSTM v2**: `P2` e `P3` também são previstos.
     - **Prophet MC / Original**: `P2` e `P3` preenchidos.
 
     O campo `modelo_usado` indica a fonte dos dados.
@@ -237,29 +264,31 @@ def get_serie():
     modelo_ativo, data = _carregar_melhor_modelo()
     if data is None:
         return _NOT_TRAINED
-    if modelo_ativo == "lstm_v2":
-        serie = [
-            {
+    if modelo_ativo in {"lstm_v2", "baseline_sazonal_7d"}:
+        serie = []
+        for p in data["serie"]:
+            point = _public_forecast(p["total"], p.get("P2"), p.get("P3"))
+            serie.append({
                 "dia":   p["horizonte"],
                 "ds":    p["ds"],
-                "total": _round_pos(p["total"]),
-                "P2":    _round_pos(p["P2"]) if p.get("P2") is not None else None,
-                "P3":    _round_pos(p["P3"]) if p.get("P3") is not None else None,
-            }
-            for p in data["serie"]
-        ]
-        return {"disponivel": True, "modelo_usado": "lstm_v2", "serie": serie}
+                "total": point["total"],
+                "P2": point["p2"],
+                "P3": point["p3"],
+                "reconciliado": point["reconciliado"],
+            })
+        return {"disponivel": True, "modelo_usado": modelo_ativo, "serie": serie}
     if modelo_ativo == "prophet_mc_ensemble":
-        serie = [
-            {
+        serie = []
+        for p in data["serie"]:
+            point = _public_forecast(p["total"], p.get("P2"), p.get("P3"))
+            serie.append({
                 "dia":   p["horizonte"],
                 "ds":    p["ds"],
-                "total": _round_pos(p["total"]),
-                "P2":    _round_pos(p["P2"]),
-                "P3":    _round_pos(p["P3"]),
-            }
-            for p in data["serie"]
-        ]
+                "total": point["total"],
+                "P2": point["p2"],
+                "P3": point["p3"],
+                "reconciliado": point["reconciliado"],
+            })
         return {"disponivel": True, "modelo_usado": "prophet_mc_ensemble", "serie": serie}
     serie = []
     for t, p2, p3 in zip(
@@ -267,11 +296,13 @@ def get_serie():
         data["p2"]["serie_7d"],
         data["p3"]["serie_7d"],
     ):
+        point = _public_forecast(t["yhat"], p2["yhat"], p3["yhat"])
         serie.append({
             "dia":   t["horizonte"],
             "ds":    t["ds"],
-            "total": _round_pos(t["yhat"]),
-            "P2":    _round_pos(p2["yhat"]),
-            "P3":    _round_pos(p3["yhat"]),
+            "total": point["total"],
+            "P2": point["p2"],
+            "P3": point["p3"],
+            "reconciliado": point["reconciliado"],
         })
     return {"disponivel": True, "modelo_usado": "prophet_original", "serie": serie}

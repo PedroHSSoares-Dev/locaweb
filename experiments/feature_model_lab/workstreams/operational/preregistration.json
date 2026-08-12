@@ -1,0 +1,45 @@
+{
+  "registered_before_candidate_execution": true,
+  "track": "next_day_high_workload_staffing",
+  "data_scope": "Real daily counts reconstructed from raw ITSM opening timestamps; synthetic rows are excluded from evaluation and, for this track, from training.",
+  "prediction_time": "End of calendar day t, for workload on day t+1.",
+  "observable_target": {
+    "definition": "1 when the real all-incident opening count on target day t+1 is at or above a capacity threshold frozen as the empirical 80th percentile of real daily counts from 2023-01-01 through 2025-06-30; otherwise 0.",
+    "reason": "A high-volume day is observable from opening timestamps and directly supports next-day staffing/flex-capacity decisions.",
+    "threshold_ties": "Use >= against the frozen numeric threshold; never recompute the threshold on July-December evaluation data."
+  },
+  "baseline": {
+    "name": "seasonal_naive_lag7",
+    "score": "Real incident count on target day minus 7 days, available by prediction time.",
+    "reason": "It is the simplest defensible next-day workload ranking that captures day-of-week seasonality and matches the active seasonal-naive forecasting logic."
+  },
+  "evaluation": {
+    "real_only": true,
+    "outer_folds": ["2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"],
+    "training_rule": "For each month, fit using target days strictly before the first day of the month and features available by the preceding day.",
+    "primary_metric": "Pooled out-of-fold average precision (PR-AUC) across identical real July-December 2025 target days.",
+    "paired_improvement_gate": "Candidate pooled PR-AUC must be at least 15% higher than seasonal_naive_lag7 on the exact same rows.",
+    "temporal_stability_gate": "Candidate must win monthly PR-AUC in at least 4 of 6 folds and beat the baseline on pooled PR-AUC in both 2025-07..09 and 2025-10..12.",
+    "seed_stability_gate": "For stochastic candidates, evaluate seeds 11, 29, 47, 71, and 101; mean performance must pass, every seed must retain at least a 10% paired gain, and relative PR-AUC spread (max-min)/mean must be <= 10%.",
+    "secondary_metrics": ["precision", "recall", "F1", "PR-AUC", "alert days", "alerts per calendar day", "days reviewed per true high-workload day", "lift"],
+    "workload_protocol": "Report capacity-matched Top-20% ranking metrics per fold (ceil(20% of days)); this is a workload diagnostic, not a retrospectively tuned deployment threshold.",
+    "operational_guardrail": "At Top-20% workload, pooled recall must not be more than 5% relatively below the baseline and precision must not be lower than the baseline."
+  },
+  "operational_action": "At the end of each day, issue a next-day staffing advisory when the risk score crosses a threshold calibrated only on prior real days. The advisory supports flex staffing/on-call readiness; it does not automate incident handling. A Top-20% budget corresponds to at most roughly one advisory in five days and is used here to quantify workload.",
+  "minimum_methods": [
+    "robust seasonal residual/MAD rule",
+    "regularized logistic regression",
+    "Isolation Forest or Extra Trees",
+    "gradient boosting",
+    "regime/change-point or hybrid rule/model"
+  ],
+  "minimum_cycles": 5,
+  "feature_ablation_plan": [
+    "calendar only",
+    "lag levels",
+    "rolling distribution",
+    "seasonal residuals",
+    "trend/change/regime"
+  ],
+  "promotion_label_policy": "Only a candidate satisfying every predeclared gate can be called promotion-worthy for this track."
+}

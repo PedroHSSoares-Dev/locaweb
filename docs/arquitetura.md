@@ -136,7 +136,8 @@ O subset KPI (`Entrou para KPI? == SIM`) resulta em ~25.600 incidentes (P2 e P3)
 | K-Means | `kmeans_model.py` | Clustering | Segmentação de padrões | ✅ |
 | KPI | `kpi_projection.py` | Estatística | Projeção de atingimento anual | ✅ |
 | Prophet | `prophet_model.py` | Séries temporais | Previsão D+1/D+7 | ✅ |
-| LSTM | `lstm_model.py` | Deep Learning (PyTorch) | Previsão D+1/D+7 (MAE=13.15) | ✅ |
+| LSTM | `lstm_model.py` | Deep Learning (PyTorch) | Previsão D+1/D+7 (MAE médio comum=21,19) | ✅ |
+| Baseline sazonal | `seasonal_baseline.py` | Mediana semanal | Previsão D+1/D+7 (MAE médio comum=12,46) | ✅ ativo |
 
 **Orquestrador** (`src/pipeline.py`):
 ```bash
@@ -148,20 +149,25 @@ python src/pipeline.py --step kpi        # só projeção KPI
 python src/pipeline.py --step prophet    # Prophet ensemble v5+v6 (2025-only)
 python src/pipeline.py --step prophet-mc # Prophet Monte Carlo (série 2023-2025)
 python src/pipeline.py --step lstm       # LSTM v2 com early stopping
+python src/pipeline.py --step baseline   # baseline sazonal semanal
 python src/pipeline.py --step horizon    # Prophet D+1..D+365 exploratório
+python src/pipeline.py --step compare    # comparação LSTM/Prophet no holdout comum
+python src/pipeline.py --step segments   # agregados protegidos por supressão
+python -m src.validation.artifacts       # gate dos artefatos versionados
 ```
 
 ### 4. Camada de Outputs (`outputs/`)
 
 JSONs estáticos consumidos pela API e pelo frontend. Gerados pelo pipeline e
-commitados no repositório (exceto dados brutos/processados). Todos os 7 arquivos
+commitados no repositório (exceto dados brutos/processados). Os artefatos
 já estão gerados.
 
 ### 5. API (`api/`)
 
 FastAPI servindo os JSONs de outputs com:
 - Normalização de formatos (diferentes modelos → resposta uniforme)
-- Hierarquia de fallback para previsões: LSTM v2 > Prophet MC > Prophet Original
+- Registro canônico com modelo ativo, candidatos shadow e regras de promoção
+- Reconciliação pública das previsões para preservar Total e fechar P2 + P3
 - Snapshot operacional canônico para o chatbot (`/api/context`)
 - Chat híbrido com sessão assinada, rate limit e streaming NDJSON
 - Function calling read-only para consultar e combinar modelos, metas, clusters e regras
@@ -171,12 +177,14 @@ FastAPI servindo os JSONs de outputs com:
 - Arquivo persistente de conversas em SQLite local ou PostgreSQL, isolado por identidade
 - Títulos automáticos, busca, resumo extrativo e contexto de rota/filtros do dashboard
 - Telemetria agregada, feedback por resposta e rate limit distribuído com fallback local
+- Fila operacional persistente com ação, resultado, falso positivo e auditoria
+- Preflight administrativo para validar a demonstração e o release
 - `Dockerfile` disponível para containerização
 
 ### 6. Frontend (`frontend/`)
 
 React + Vite + Recharts. Consume a API via `http://localhost:8000/api`.
-Cinco rotas com perfis de usuário dedicados:
+Sete rotas com perfis de usuário dedicados:
 
 | Rota | Público-alvo | Conteúdo |
 |---|---|---|
@@ -185,6 +193,8 @@ Cinco rotas com perfis de usuário dedicados:
 | `/tecnico` | DevOps / SRE | Clusters K-Means · SHAP values · risco por grupo |
 | `/financeiro` | Gestores | Exposição financeira · projeção KPI anual |
 | `/modelos` | Todos | Métricas dos modelos com contexto e explicações |
+| `/operacoes` | Usuários autenticados | Fila de investigação e fechamento do ciclo humano |
+| `/admin` | Administradores | Diretório de acesso, auditoria, consumo e preflight |
 
 ### 7. Notebooks (`notebooks/`)
 
@@ -241,7 +251,10 @@ Prophet e LSTM já foram convertidos para `.py`:
 | Decisão | Motivo |
 |---|---|
 | JSONs estáticos em vez de DB | Pipeline batch, não tempo-real; simplifica deploy |
-| Hierarquia de modelos na API | LSTM tem menor MAE, mas pode estar indisponível |
+| Registro canônico de modelos | Impede que disponibilidade ou artefato recente seja confundido com promoção |
+| Shadow mode antes de promoção | Mede candidatos prospectivamente sem mudar decisões públicas |
+| Reconciliação hierárquica | O Total validado é preservado e P2/P3 sempre fecham a soma pública |
+| Closed loop operacional | A utilidade do ranking passa a ser medida por ação e resultado observados |
 | Chatbot híbrido | Fatos locais sem custo; provider analítico selecionado por ambiente e substituível |
 | Ollama sob demanda | Sessão carrega o modelo; logout libera a RAM e encerra somente processos gerenciados pela API |
 | Respostas factuais sem LLM | Menor latência e nenhum risco de alterar números do snapshot |

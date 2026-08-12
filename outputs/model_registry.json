@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-12",
+  "reference_date": "2025-12-31",
+  "source_of_truth": "outputs/model_registry.json",
+  "governance": {
+    "promotion_policy": "Um candidato só substitui o ativo após validação temporal comparável e evidência prospectiva em shadow mode.",
+    "public_forecast_policy": "O Total do modelo ativo é preservado; P2 e P3 são reconciliados proporcionalmente para fechar a soma.",
+    "shadow_policy": "Shadow não altera decisões, previsões públicas ou filas automaticamente.",
+    "ground_truth": "KPI Violado?"
+  },
+  "models": [
+    {
+      "id": "volume_baseline_sazonal_v1",
+      "display_name": "Baseline sazonal de 3 semanas",
+      "task": "volume_d1_d7",
+      "status": "active",
+      "operational_state": "serving",
+      "version": "v1",
+      "artifact": "previsoes_baseline.json",
+      "protocol": "rolling_origin_2025Q4_D1_D7",
+      "validation_window": "2025-10-01 a 2025-12-31",
+      "metrics": {
+        "mae_mean_d1_d7_total": 12.4605,
+        "mae_d1_total": 12.6957,
+        "horizon_wins": 7
+      },
+      "capabilities": ["D+1 a D+7", "Total", "P2", "P3"],
+      "limitations": ["Não demonstra tendência de longo prazo", "Horizonte máximo validado: D+7"]
+    },
+    {
+      "id": "volume_calendar_adjusted_seasonal_v1",
+      "display_name": "Calendar Adjusted Seasonal",
+      "task": "volume_d1_d7",
+      "status": "shadow",
+      "operational_state": "offline_shadow_ready",
+      "version": "candidate-2026-08",
+      "artifact": "experiments/feature_model_lab/workstreams/forecasting/metrics.json",
+      "protocol": "rolling_origin_2025Q4_D1_D7",
+      "validation_window": "2025-10-01 a 2025-12-31",
+      "metrics": {
+        "mae_mean_d1_d7_total": 10.1848,
+        "mae_improvement_pct": 18.264,
+        "horizon_wins": 7
+      },
+      "capabilities": ["Comparação offline D+1 a D+7", "Total"],
+      "limitations": ["Sem validação prospectiva em 2026", "Ganho concentrado em novembro e dezembro", "P2 não foi promovido"]
+    },
+    {
+      "id": "risk_xgboost_v4",
+      "display_name": "XGBoost OLA Risk",
+      "task": "ola_risk_triage",
+      "status": "active",
+      "operational_state": "serving_triage_only",
+      "version": "v4",
+      "artifact": "risco_ola.json",
+      "protocol": "treino_ate_jun_validacao_q3_teste_q4_sem_embaralhamento",
+      "validation_window": "2025-Q4",
+      "metrics": {
+        "pr_auc": 0.129,
+        "recall": 0.82,
+        "precision": 0.0286,
+        "f1": 0.0553
+      },
+      "capabilities": ["Triagem histórica", "SHAP agregado", "P2 e P3"],
+      "limitations": ["Score não calibrado como probabilidade", "Alta incidência de falsos positivos", "Requer validação humana"]
+    },
+    {
+      "id": "risk_linear_svm_structured_v1",
+      "display_name": "Linear SVM Structured",
+      "task": "ola_risk_triage",
+      "status": "shadow",
+      "operational_state": "offline_shadow_ready",
+      "version": "candidate-2026-08",
+      "artifact": "experiments/feature_model_lab/workstreams/risk/metrics.json",
+      "protocol": "monthly_point_in_time_2025H2_top5pct",
+      "validation_window": "2025-07 a 2025-12",
+      "metrics": {
+        "pr_auc": 0.02688,
+        "robust_pr_auc": 0.03984,
+        "recall_at_top_5pct": 0.271,
+        "precision_at_top_5pct": 0.04858,
+        "alerts_per_day": 3.2446,
+        "incidents_reviewed_per_hit": 20.5862,
+        "monthly_wins": 6
+      },
+      "capabilities": ["Ranking Top-5%", "Shadow global", "Evidência forte em P3"],
+      "limitations": ["Sem validação prospectiva em 2026", "P2 manteve Recall@5% em 15%", "Métricas não são diretamente comparáveis ao card Q4 do XGBoost ativo"]
+    },
+    {
+      "id": "clusters_kmeans_v1",
+      "display_name": "K-Means operacional",
+      "task": "operational_segmentation",
+      "status": "exploratory",
+      "operational_state": "available",
+      "version": "k5-2026-08",
+      "artifact": "clusters.json",
+      "protocol": "unsupervised_full_kpi_subset",
+      "validation_window": "2023-01 a 2025-12",
+      "metrics": {"silhouette": 0.2001, "clusters": 5},
+      "capabilities": ["Perfis agregados", "Investigação de segmentos"],
+      "limitations": ["Cluster não demonstra causalidade", "Não é classificador de violação"]
+    },
+    {
+      "id": "prophet_long_horizon_scenario_v1",
+      "display_name": "Prophet — cenário de longo prazo",
+      "task": "long_horizon_scenario",
+      "status": "scenario_only",
+      "operational_state": "available",
+      "version": "v5-v6",
+      "artifact": "previsoes_horizonte_prophet.json",
+      "protocol": "exploratory_after_d7",
+      "validation_window": "D+1 a D+7 validado; D+8 a D+365 exploratório",
+      "metrics": {},
+      "capabilities": ["Cenários D+8 a D+365"],
+      "limitations": ["Não é previsão validada após D+7", "Não pode ser declarado vencedor do horizonte operacional"]
+    }
+  ]
+}

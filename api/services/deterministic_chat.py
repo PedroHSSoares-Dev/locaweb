@@ -280,9 +280,8 @@ def answer_deterministically(message: str, context: dict[str, Any]) -> Determini
         )
         if horizon == "D7" and forecast.get("modelo_ativo") == "lstm_v2":
             reply += " O horizonte D+7 é recursivo e deve ser tratado como estimativa operacional."
-        if all(isinstance(values.get(key), int) for key in ("total", "p2", "p3")):
-            if values["total"] != values["p2"] + values["p3"]:
-                reply += " As séries total, P2 e P3 são modeladas independentemente e podem não fechar por soma."
+        if values.get("reconciliado"):
+            reply += " P2 e P3 foram reconciliados proporcionalmente ao Total do modelo ativo."
         return DeterministicAnswer(
             reply=reply,
             badge={"label": "SNAPSHOT HISTÓRICO", "tone": "purple"} if stale else badge,

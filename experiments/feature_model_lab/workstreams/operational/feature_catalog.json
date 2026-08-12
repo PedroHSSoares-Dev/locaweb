@@ -1,0 +1,152 @@
+{
+  "families": {
+    "calendar": {
+      "mechanism": "Known target-day weekly/annual position.",
+      "source_columns": [
+        "Aberto"
+      ],
+      "availability": "Known before target day.",
+      "leakage": "Deterministic calendar only.",
+      "missing": "None.",
+      "track": "next-day high workload",
+      "features": [
+        "dow_sin",
+        "dow_cos",
+        "month_sin",
+        "month_cos",
+        "doy_sin",
+        "doy_cos",
+        "is_weekend",
+        "is_month_end"
+      ],
+      "compute": "O(n), negligible memory.",
+      "ablation": {
+        "candidate": "logistic_calendar",
+        "pr_auc": 0.4324969337319647
+      }
+    },
+    "lag_levels": {
+      "mechanism": "Recent and seasonal observed workload persistence.",
+      "source_columns": [
+        "Aberto"
+      ],
+      "availability": "Counts through d-1 only.",
+      "leakage": "Positive shifts only; target-day count excluded.",
+      "missing": "Median imputation fitted in each training fold.",
+      "track": "next-day high workload",
+      "features": [
+        "lag_1",
+        "lag_2",
+        "lag_3",
+        "lag_7",
+        "lag_14",
+        "lag_21",
+        "lag_28",
+        "lag_56"
+      ],
+      "compute": "O(n), negligible memory.",
+      "ablation": {
+        "from": "logistic_calendar",
+        "to": "logistic_calendar_lags",
+        "pr_auc_delta": 0.2630834098706389
+      }
+    },
+    "rolling_distribution": {
+      "mechanism": "Robust recent workload level, dispersion, and weekday capacity proxy.",
+      "source_columns": [
+        "Aberto"
+      ],
+      "availability": "Strictly prior daily counts.",
+      "leakage": "Every rolling input shifted by one; same-weekday windows shift one group observation.",
+      "missing": "Minimum histories enforced; fold-fitted median imputation.",
+      "track": "next-day high workload",
+      "features": [
+        "roll_mean_7",
+        "roll_median_7",
+        "roll_std_7",
+        "roll_q25_7",
+        "roll_q80_7",
+        "roll_mean_14",
+        "roll_median_14",
+        "roll_std_14",
+        "roll_q25_14",
+        "roll_q80_14",
+        "roll_mean_28",
+        "roll_median_28",
+        "roll_std_28",
+        "roll_q25_28",
+        "roll_q80_28",
+        "roll_mean_56",
+        "roll_median_56",
+        "roll_std_56",
+        "roll_q25_56",
+        "roll_q80_56",
+        "same_dow_median_4",
+        "same_dow_q80_4",
+        "same_dow_median_8",
+        "same_dow_q80_8",
+        "same_dow_median_12",
+        "same_dow_q80_12"
+      ],
+      "compute": "O(n*w), under 1 MB for this series.",
+      "ablation": {
+        "from": "extra_trees_no_rolling",
+        "to": "extra_trees_full",
+        "pr_auc_delta": -0.10273941764358652
+      }
+    },
+    "seasonal_residual": {
+      "mechanism": "Recent deviations from the point-in-time same-weekday capacity proxy.",
+      "source_columns": [
+        "Aberto"
+      ],
+      "availability": "Observed residuals through d-1 only.",
+      "leakage": "Current-day residual is shifted before use.",
+      "missing": "Fold-fitted median imputation or zero in fixed rule.",
+      "track": "next-day high workload",
+      "features": [
+        "lag7_margin",
+        "lag7_ratio",
+        "past_resid_1",
+        "past_resid_7",
+        "past_resid_mean_7",
+        "past_resid_mean_28",
+        "past_high_rate_7",
+        "past_high_rate_28"
+      ],
+      "compute": "O(n), negligible memory.",
+      "ablation": {
+        "from": "seasonal_naive_lag7_margin",
+        "to": "robust_residual_rule",
+        "relative_gain": 0.0473742395221175
+      }
+    },
+    "trend_regime": {
+      "mechanism": "Detect persistent level shift/change relative to longer context.",
+      "source_columns": [
+        "Aberto"
+      ],
+      "availability": "Windows end at d-1.",
+      "leakage": "No centered windows or future change points.",
+      "missing": "Fold-fitted median imputation.",
+      "track": "next-day high workload",
+      "features": [
+        "mean7_minus_mean28",
+        "mean14_minus_mean56",
+        "mean7_over_mean28",
+        "std7_over_std28",
+        "roll_mad_28",
+        "slope_7",
+        "slope_28",
+        "threshold_change_7"
+      ],
+      "compute": "O(n*28), negligible memory.",
+      "ablation": {
+        "from": "robust_residual_rule",
+        "to": "isolation_regime_hybrid",
+        "pr_auc_delta": 0.002895854968192557
+      }
+    }
+  },
+  "full_feature_count": 58
+}

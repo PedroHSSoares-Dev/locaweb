@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   Activity,
+  ClipboardCheck,
   FlaskConical,
   LayoutDashboard,
   LogOut,
@@ -20,6 +21,7 @@ import './Sidebar.css';
 const NAV = [
   { to: '/gestao', label: 'GESTÃO', icon: <LayoutDashboard size={18} strokeWidth={1.7} /> },
   { to: '/monitoramento', label: 'MONITORAMENTO', icon: <Activity size={18} strokeWidth={1.7} /> },
+  { to: '/operacoes', label: 'FILA OPERACIONAL', icon: <ClipboardCheck size={18} strokeWidth={1.7} /> },
   { to: '/tecnico', label: 'TÉCNICO', icon: <Server size={18} strokeWidth={1.7} /> },
   { to: '/modelos', label: 'MODELOS', icon: <FlaskConical size={18} strokeWidth={1.7} /> },
 ];

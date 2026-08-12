@@ -1,0 +1,235 @@
+{
+  "modelo": "comparacao_previsao_volume",
+  "gerado_em": "2026-08-10",
+  "protocolo": "rolling_origin_2025Q4_D1_D7",
+  "holdout": {
+    "inicio": "2025-10-01",
+    "fim": "2025-12-31"
+  },
+  "comparaveis": true,
+  "nota": "Baseline sazonal, LSTM, Prophet real e Prophet Monte Carlo foram avaliados por rolling origin no mesmo período. Seleção de variante e base sintética terminam antes do holdout.",
+  "series": {
+    "total": {
+      "mae_medio_d1_d7": {
+        "lstm": 21.19,
+        "prophet": 47.66,
+        "prophet_mc": 25.61,
+        "baseline_sazonal": 12.46
+      },
+      "vencedor_geral": "baseline_sazonal",
+      "por_horizonte": {
+        "D1": {
+          "lstm_mae": 21.62,
+          "prophet_mae": 40.39,
+          "prophet_mc_mae": 22.39,
+          "baseline_sazonal_mae": 12.7,
+          "vencedor": "baseline_sazonal",
+          "reducao_erro_pct_vs_segundo": 41.3,
+          "n_previsoes": 92
+        },
+        "D2": {
+          "lstm_mae": 21.66,
+          "prophet_mae": 51.91,
+          "prophet_mc_mae": 28.56,
+          "baseline_sazonal_mae": 12.59,
+          "vencedor": "baseline_sazonal",
+          "reducao_erro_pct_vs_segundo": 41.9,
+          "n_previsoes": 91
+        },
+        "D3": {
+          "lstm_mae": 21.29,
+          "prophet_mae": 53.38,
+          "prophet_mc_mae": 29.13,
+          "baseline_sazonal_mae": 12.51,
+          "vencedor": "baseline_sazonal",
+          "reducao_erro_pct_vs_segundo": 41.2,
+          "n_previsoes": 90
+        },
+        "D4": {
+          "lstm_mae": 21.04,
+          "prophet_mae": 51.51,
+          "prophet_mc_mae": 27.82,
+          "baseline_sazonal_mae": 12.46,
+          "vencedor": "baseline_sazonal",
+          "reducao_erro_pct_vs_segundo": 40.8,
+          "n_previsoes": 89
+        },
+        "D5": {
+          "lstm_mae": 21.08,
+          "prophet_mae": 48.64,
+          "prophet_mc_mae": 25.85,
+          "baseline_sazonal_mae": 12.41,
+          "vencedor": "baseline_sazonal",
+          "reducao_erro_pct_vs_segundo": 41.1,
+          "n_previsoes": 88
+        },
+        "D6": {
+          "lstm_mae": 20.81,
+          "prophet_mae": 45.5,
+          "prophet_mc_mae": 23.56,
+          "baseline_sazonal_mae": 12.37,
+          "vencedor": "baseline_sazonal",
+          "reducao_erro_pct_vs_segundo": 40.6,
+          "n_previsoes": 87
+        },
+        "D7": {
+          "lstm_mae": 20.86,
+          "prophet_mae": 42.31,
+          "prophet_mc_mae": 21.98,
+          "baseline_sazonal_mae": 12.19,
+          "vencedor": "baseline_sazonal",
+          "reducao_erro_pct_vs_segundo": 41.6,
+          "n_previsoes": 86
+        }
+      }
+    },
+    "p2": {
+      "mae_medio_d1_d7": {
+        "lstm": 4.43,
+        "prophet": 5.12,
+        "prophet_mc": 4.46,
+        "baseline_sazonal": 4.28
+      },
+      "vencedor_geral": "baseline_sazonal",
+      "por_horizonte": {
+        "D1": {
+          "lstm_mae": 4.43,
+          "prophet_mae": 5.0,
+          "prophet_mc_mae": 4.3,
+          "baseline_sazonal_mae": 4.36,
+          "vencedor": "prophet_mc",
+          "reducao_erro_pct_vs_segundo": 1.4,
+          "n_previsoes": 92
+        },
+        "D2": {
+          "lstm_mae": 4.48,
+          "prophet_mae": 5.29,
+          "prophet_mc_mae": 4.55,
+          "baseline_sazonal_mae": 4.34,
+          "vencedor": "baseline_sazonal",
+          "reducao_erro_pct_vs_segundo": 3.1,
+          "n_previsoes": 91
+        },
+        "D3": {
+          "lstm_mae": 4.4,
+          "prophet_mae": 5.25,
+          "prophet_mc_mae": 4.55,
+          "baseline_sazonal_mae": 4.28,
+          "vencedor": "baseline_sazonal",
+          "reducao_erro_pct_vs_segundo": 2.7,
+          "n_previsoes": 90
+        },
+        "D4": {
+          "lstm_mae": 4.37,
+          "prophet_mae": 5.2,
+          "prophet_mc_mae": 4.49,
+          "baseline_sazonal_mae": 4.25,
+          "vencedor": "baseline_sazonal",
+          "reducao_erro_pct_vs_segundo": 2.7,
+          "n_previsoes": 89
+        },
+        "D5": {
+          "lstm_mae": 4.42,
+          "prophet_mae": 5.14,
+          "prophet_mc_mae": 4.49,
+          "baseline_sazonal_mae": 4.26,
+          "vencedor": "baseline_sazonal",
+          "reducao_erro_pct_vs_segundo": 3.6,
+          "n_previsoes": 88
+        },
+        "D6": {
+          "lstm_mae": 4.43,
+          "prophet_mae": 5.06,
+          "prophet_mc_mae": 4.45,
+          "baseline_sazonal_mae": 4.29,
+          "vencedor": "baseline_sazonal",
+          "reducao_erro_pct_vs_segundo": 3.2,
+          "n_previsoes": 87
+        },
+        "D7": {
+          "lstm_mae": 4.46,
+          "prophet_mae": 4.91,
+          "prophet_mc_mae": 4.39,
+          "baseline_sazonal_mae": 4.21,
+          "vencedor": "baseline_sazonal",
+          "reducao_erro_pct_vs_segundo": 4.1,
+          "n_previsoes": 86
+        }
+      }
+    },
+    "p3": {
+      "mae_medio_d1_d7": {
+        "lstm": 18.98,
+        "prophet": 39.52,
+        "prophet_mc": 23.06,
+        "baseline_sazonal": 11.37
+      },
+      "vencedor_geral": "baseline_sazonal",
+      "por_horizonte": {
+        "D1": {
+          "lstm_mae": 19.32,
+          "prophet_mae": 36.41,
+          "prophet_mc_mae": 21.31,
+          "baseline_sazonal_mae": 11.43,
+          "vencedor": "baseline_sazonal",
+          "reducao_erro_pct_vs_segundo": 40.8,
+          "n_previsoes": 92
+        },
+        "D2": {
+          "lstm_mae": 19.31,
+          "prophet_mae": 45.22,
+          "prophet_mc_mae": 26.68,
+          "baseline_sazonal_mae": 11.38,
+          "vencedor": "baseline_sazonal",
+          "reducao_erro_pct_vs_segundo": 41.1,
+          "n_previsoes": 91
+        },
+        "D3": {
+          "lstm_mae": 19.08,
+          "prophet_mae": 45.79,
+          "prophet_mc_mae": 26.63,
+          "baseline_sazonal_mae": 11.4,
+          "vencedor": "baseline_sazonal",
+          "reducao_erro_pct_vs_segundo": 40.3,
+          "n_previsoes": 90
+        },
+        "D4": {
+          "lstm_mae": 18.91,
+          "prophet_mae": 43.97,
+          "prophet_mc_mae": 24.93,
+          "baseline_sazonal_mae": 11.42,
+          "vencedor": "baseline_sazonal",
+          "reducao_erro_pct_vs_segundo": 39.6,
+          "n_previsoes": 89
+        },
+        "D5": {
+          "lstm_mae": 18.92,
+          "prophet_mae": 41.63,
+          "prophet_mc_mae": 22.69,
+          "baseline_sazonal_mae": 11.4,
+          "vencedor": "baseline_sazonal",
+          "reducao_erro_pct_vs_segundo": 39.7,
+          "n_previsoes": 88
+        },
+        "D6": {
+          "lstm_mae": 18.68,
+          "prophet_mae": 39.2,
+          "prophet_mc_mae": 20.47,
+          "baseline_sazonal_mae": 11.32,
+          "vencedor": "baseline_sazonal",
+          "reducao_erro_pct_vs_segundo": 39.4,
+          "n_previsoes": 87
+        },
+        "D7": {
+          "lstm_mae": 18.67,
+          "prophet_mae": 24.4,
+          "prophet_mc_mae": 18.71,
+          "baseline_sazonal_mae": 11.26,
+          "vencedor": "baseline_sazonal",
+          "reducao_erro_pct_vs_segundo": 39.7,
+          "n_previsoes": 86
+        }
+      }
+    }
+  }
+}

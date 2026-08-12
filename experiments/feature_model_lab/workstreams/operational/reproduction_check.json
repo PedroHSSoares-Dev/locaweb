@@ -1,0 +1,10 @@
+{
+  "success": true,
+  "clean_child_process": true,
+  "tolerance": 1e-12,
+  "max_absolute_numeric_difference": 0.0,
+  "mismatches": [],
+  "canonical_raw_sha256": "5aa75370425d669b16be8d88509200e0fdab3cfc7f5f473e9a3c70c297ef1f26",
+  "candidate": "extra_trees_no_rolling",
+  "generated_at": "2026-08-10T22:26:26.778286-03:00"
+}

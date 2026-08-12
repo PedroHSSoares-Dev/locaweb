@@ -8,6 +8,9 @@ optuna==4.8.0
 pandas==2.2.3
 numpy==1.26.4
 openpyxl==3.1.5
+pyarrow>=17.0
+holidays>=0.70
+torch>=2.4,<3.0
 
 # Visualização (notebooks)
 matplotlib==3.9.4

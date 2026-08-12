@@ -15,6 +15,7 @@ const GestaoPage = lazy(() => import('./pages/GestaoPage'));
 const MonitoramentoPage = lazy(() => import('./pages/MonitoramentoPage'));
 const TecnicoPage = lazy(() => import('./pages/TecnicoPage'));
 const ModelosPage = lazy(() => import('./pages/ModelosPage'));
+const OperationsPage = lazy(() => import('./pages/OperationsPage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
 const ChatBot = lazy(() => import('./components/ChatBot'));
 
@@ -31,26 +32,15 @@ function AppInner() {
   const { isMobile } = useBreakpoint();
   const { user } = useChatAuth();
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100%', overflow: 'hidden' }}>
+    <div className="app-shell">
       <Sidebar />
-      <div style={{
-        flex: 1,
-        minWidth: 0,
-        marginLeft: isMobile ? 0 : 'var(--sidebar-width)',
-        paddingTop: isMobile ? 48 : 0,
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100vh',
-        overflowY: 'auto',
-        overflowX: 'hidden',
-        transition: 'margin-left 0.25s cubic-bezier(0.4,0,0.2,1)',
-        background: 'var(--bg)',
-      }}>
+      <div className={`app-main${isMobile ? ' app-main--mobile' : ''}`}>
             <Suspense fallback={<RouteFallback />}>
               <Routes>
                 <Route path="/" element={<Navigate to="/gestao" replace />} />
                 <Route path="/gestao"        element={<GestaoPage />} />
                 <Route path="/monitoramento" element={<MonitoramentoPage />} />
+                <Route path="/operacoes" element={<OperationsPage />} />
                 <Route path="/tecnico"       element={<TecnicoPage />} />
                 <Route path="/modelos"       element={<ModelosPage />} />
                 <Route

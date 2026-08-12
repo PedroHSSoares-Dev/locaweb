@@ -1,0 +1,257 @@
+[
+  {
+    "mechanism": "Previously resolved patterns may carry persistent OLA risk.",
+    "raw_columns": [
+      "KPI Violado?",
+      "Resolvido",
+      "Encerrado",
+      "Produto",
+      "Categoria",
+      "Subcategoria"
+    ],
+    "availability": "Only outcomes known before each new opening.",
+    "leakage_risk": "Strict known-time event ordering and smoothing.",
+    "segment": "Recurring P2 failure modes.",
+    "falsification": "No operational lift after point-in-time restriction.",
+    "rank": 1,
+    "id": "historical_outcomes",
+    "priority_score": 129.6,
+    "status": "REJECT",
+    "result_summary": {
+      "pr_auc": 0.01691105676433185,
+      "recall_at_top_5pct": 0.2,
+      "paired_pr_auc_delta_vs_champion": 0.0009330869138252096
+    }
+  },
+  {
+    "mechanism": "Arrival bursts may overload triage before an incident is assigned.",
+    "raw_columns": [
+      "Aberto"
+    ],
+    "availability": "Prior opening timestamps only.",
+    "leakage_risk": "Exclude simultaneous/current arrivals with left-open search.",
+    "segment": "P2 during bursty periods.",
+    "falsification": "No positive paired PR-AUC delta and no Top-5% recall gain.",
+    "rank": 2,
+    "id": "arrival_burst",
+    "priority_score": 213.33333333333334,
+    "status": "REJECT",
+    "result_summary": {
+      "pr_auc": 0.016405016738001724,
+      "recall_at_top_5pct": 0.2,
+      "paired_pr_auc_delta_vs_champion": 0.00042704688749508474
+    }
+  },
+  {
+    "mechanism": "Rapid recurrence can identify correlated operational episodes.",
+    "raw_columns": [
+      "Aberto",
+      "Produto",
+      "Categoria",
+      "Subcategoria",
+      "Item de configuração",
+      "Descrição resumida"
+    ],
+    "availability": "Prior openings for the same safe key only.",
+    "leakage_risk": "No future/current row in cumulative support.",
+    "segment": "Repeated P2 patterns.",
+    "falsification": "No paired PR-AUC/Top-5% improvement.",
+    "rank": 3,
+    "id": "recurrence",
+    "priority_score": 115.2,
+    "status": "REJECT",
+    "result_summary": {
+      "pr_auc": 0.013385400946418194,
+      "recall_at_top_5pct": 0.2,
+      "paired_pr_auc_delta_vs_champion": -0.0025925689040884447
+    }
+  },
+  {
+    "mechanism": "Local bursts within product/priority may matter more than global volume.",
+    "raw_columns": [
+      "Aberto",
+      "Prioridade",
+      "Produto",
+      "Categoria"
+    ],
+    "availability": "Prior openings only.",
+    "leakage_risk": "Same-timestamp events excluded.",
+    "segment": "Correlated P2 alert storms.",
+    "falsification": "No gain over global burst features.",
+    "rank": 4,
+    "id": "segmented_bursts",
+    "priority_score": 115.2,
+    "status": "REJECT",
+    "result_summary": {
+      "pr_auc": 0.011963677283689774,
+      "recall_at_top_5pct": 0.15,
+      "paired_pr_auc_delta_vs_champion": -0.004014292566816865
+    }
+  },
+  {
+    "mechanism": "Exact alert summaries may recur with consistent operational risk.",
+    "raw_columns": [
+      "Descrição resumida"
+    ],
+    "availability": "Opening text identity; no text leaves memory.",
+    "leakage_risk": "Rare exact strings and sensitive content; only encoded aggregates retained.",
+    "segment": "Repeated machine-generated alerts.",
+    "falsification": "No paired gain or only one-fold win.",
+    "rank": 5,
+    "id": "description_history",
+    "priority_score": 89.6,
+    "status": "REJECT",
+    "result_summary": {
+      "pr_auc": 0.014960966986023545,
+      "recall_at_top_5pct": 0.15,
+      "paired_pr_auc_delta_vs_champion": -0.001017002864483094
+    }
+  },
+  {
+    "mechanism": "Configuration-item identity/frequency may expose fragile assets.",
+    "raw_columns": [
+      "Item de configuração"
+    ],
+    "availability": "Value known at opening; mappings fitted inside each fold.",
+    "leakage_risk": "High cardinality and rare-level overfit.",
+    "segment": "Repeated affected assets.",
+    "falsification": "Temporal PR-AUC fails to improve or fold variance increases materially.",
+    "rank": 6,
+    "id": "config_identity",
+    "priority_score": 98.0,
+    "status": "REJECT",
+    "result_summary": {
+      "pr_auc": 0.016210206567251303,
+      "recall_at_top_5pct": 0.2,
+      "paired_pr_auc_delta_vs_champion": 0.00023223671674466387
+    }
+  },
+  {
+    "mechanism": "Fold-fitted lexical patterns may generalize beyond exact description identity.",
+    "raw_columns": [
+      "Descrição resumida"
+    ],
+    "availability": "Opening text; vocabulary fitted on training rows only.",
+    "leakage_risk": "Sensitive tokens never persisted; vocabulary never reported.",
+    "segment": "Machine-generated and templated P2 descriptions.",
+    "falsification": "Blended ranking does not improve paired PR-AUC and Top-5% recall.",
+    "rank": 7,
+    "id": "text_tfidf",
+    "priority_score": 56.0,
+    "status": "RETAIN",
+    "result_summary": {
+      "pr_auc": 0.02720245101773821,
+      "recall_at_top_5pct": 0.2,
+      "paired_pr_auc_delta_vs_champion": 0.01122448116723157
+    }
+  },
+  {
+    "mechanism": "Rare or first-seen classifications may be harder to resolve inside OLA.",
+    "raw_columns": [
+      "Produto",
+      "Categoria",
+      "Subcategoria",
+      "Item de configuração",
+      "Descrição resumida",
+      "Aberto"
+    ],
+    "availability": "Cumulative support from prior openings.",
+    "leakage_risk": "Future category frequencies excluded.",
+    "segment": "Novel and low-support P2 records.",
+    "falsification": "Ablation is neutral/negative across paired folds.",
+    "rank": 8,
+    "id": "novelty_support",
+    "priority_score": 94.5,
+    "status": "RETAIN",
+    "result_summary": {
+      "pr_auc": 0.017825612128660167,
+      "recall_at_top_5pct": 0.15,
+      "paired_pr_auc_delta_vs_champion": 0.001847642278153528
+    }
+  },
+  {
+    "mechanism": "Open workload at arrival may proxy queue pressure.",
+    "raw_columns": [
+      "Aberto",
+      "Resolvido",
+      "Encerrado",
+      "Prioridade",
+      "Produto"
+    ],
+    "availability": "Uses prior incidents and whether each had ended by scoring time.",
+    "leakage_risk": "Outcome timestamps only determine prior incident state; never current outcome.",
+    "segment": "P2 arriving under elevated backlog.",
+    "falsification": "No temporal gain or instability caused by closure-coverage regime.",
+    "rank": 9,
+    "id": "active_workload",
+    "priority_score": 56.0,
+    "status": "REJECT",
+    "result_summary": {
+      "pr_auc": 0.014304121440407627,
+      "recall_at_top_5pct": 0.2,
+      "paired_pr_auc_delta_vs_champion": -0.0016738484100990124
+    }
+  },
+  {
+    "mechanism": "Acceleration in arrivals and net open-queue growth may precede violations.",
+    "raw_columns": [
+      "Aberto",
+      "Resolvido",
+      "Encerrado"
+    ],
+    "availability": "Prior arrival/end event counts only.",
+    "leakage_risk": "End events included only when they occurred before scoring.",
+    "segment": "Rapidly deteriorating workload.",
+    "falsification": "No paired operational improvement.",
+    "rank": 10,
+    "id": "queue_growth",
+    "priority_score": 58.8,
+    "status": "REJECT",
+    "result_summary": {
+      "pr_auc": 0.016620341665552724,
+      "recall_at_top_5pct": 0.15,
+      "paired_pr_auc_delta_vs_champion": 0.0006423718150460854
+    }
+  },
+  {
+    "mechanism": "Supported classification combinations may be more informative than marginal levels.",
+    "raw_columns": [
+      "Produto",
+      "Categoria",
+      "Subcategoria",
+      "Aberto por"
+    ],
+    "availability": "Opening values; encoders trained per fold.",
+    "leakage_risk": "Sparse combinations; smoothing and unknown buckets required.",
+    "segment": "Specific P2 operational paths.",
+    "falsification": "No incremental ablation value.",
+    "rank": 11,
+    "id": "interactions",
+    "priority_score": 57.6,
+    "status": "REJECT",
+    "result_summary": {
+      "pr_auc": 0.01395049674286818,
+      "recall_at_top_5pct": 0.05,
+      "paired_pr_auc_delta_vs_champion": -0.002027473107638459
+    }
+  },
+  {
+    "mechanism": "Minute, shift boundary and holiday proximity may proxy coverage constraints.",
+    "raw_columns": [
+      "Aberto"
+    ],
+    "availability": "Deterministic at opening.",
+    "leakage_risk": "None beyond fixed calendar definition.",
+    "segment": "Off-hours and holiday-adjacent P2.",
+    "falsification": "No temporal incremental value.",
+    "rank": 12,
+    "id": "calendar_context",
+    "priority_score": 125.0,
+    "status": "REJECT",
+    "result_summary": {
+      "pr_auc": 0.015819618995587207,
+      "recall_at_top_5pct": 0.15,
+      "paired_pr_auc_delta_vs_champion": -0.00015835085491943193
+    }
+  }
+]

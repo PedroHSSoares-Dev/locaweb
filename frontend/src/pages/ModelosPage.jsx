@@ -157,11 +157,29 @@ export default function ModelosPage() {
   const { data: riscoData,    loading: riscoLoading,    disponivel: riscoDisponivel    } = useApi('/risco');
   const { data: clustersData, loading: clustersLoading, disponivel: clustersDisponivel } = useApi('/clusters');
   const { data: modelosData, loading: modelosLoading, disponivel: modelosDisponivel } = useApi('/previsoes/modelos');
+  const { data: registryData, loading: registryLoading, disponivel: registryDisponivel } = useApi('/models/registry');
 
   const m  = riscoDisponivel    ? riscoData?.metricas    : null;
   const km = clustersDisponivel ? clustersData?.metricas : null;
   const ml = modelosDisponivel  ? modelosData?.metricas_lstm    : null;
   const mp = modelosDisponivel  ? modelosData?.metricas_prophet : null;
+  const comparison = modelosDisponivel ? modelosData?.comparacao : null;
+  const forecastWinner = comparison?.series?.total?.vencedor_geral;
+  const comparisonD1 = {
+    total: comparison?.series?.total?.por_horizonte?.D1,
+    p2: comparison?.series?.p2?.por_horizonte?.D1,
+    p3: comparison?.series?.p3?.por_horizonte?.D1,
+  };
+  const registryModels = registryDisponivel && Array.isArray(registryData?.models)
+    ? registryData.models
+    : [];
+  const shadowModels = registryModels.filter((item) => item.status === 'shadow');
+  const tabForTask = (task) => task === 'ola_risk_triage'
+    ? 'xgb'
+    : task === 'operational_segmentation' ? 'clusters' : 'forecast';
+  const colorForStatus = (status) => ({
+    active: 'var(--green)', shadow: 'var(--teal)', exploratory: 'var(--orange)', scenario_only: 'var(--purple)',
+  }[status] || 'var(--text-muted)');
 
   const fmtMae = (v) => (v != null ? v.toFixed(2) : '—');
   const fmtPct = (v) => (v != null ? `−${v.toFixed(1)}%` : '—');
@@ -178,30 +196,42 @@ export default function ModelosPage() {
 
       <main style={{ flex: 1, padding: isMobile ? '12px 12px 40px' : '20px 28px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>
 
-        <section className="model-registry" aria-label="Registro de modelos">
-          {[
-            { id: 'xgb', name: 'XGBoost OLA', version: riscoData?.versao ?? '—', status: riscoDisponivel ? 'TRIAGEM' : 'INDISPONÍVEL', meta: riscoData?.gerado_em ?? 'sem artefato', color: 'var(--purple)' },
-            { id: 'forecast', name: 'Previsão de volume', version: modelosData?.modelo_ativo ?? '—', status: modelosDisponivel ? 'ATIVO' : 'INDISPONÍVEL', meta: 'D+1 a D+7', color: 'var(--teal)' },
-            { id: 'clusters', name: 'K-Means', version: clustersData?.k ? `K=${clustersData.k}` : '—', status: clustersDisponivel ? 'EXPLORATÓRIO' : 'INDISPONÍVEL', meta: clustersData?.gerado_em ?? 'sem artefato', color: 'var(--orange)' },
-          ].map((model) => (
+        <section className="model-registry" aria-label="Registro canônico de modelos">
+          {registryLoading ? [0, 1, 2].map((item) => <Skeleton key={item} height={96} />) : registryModels.map((model) => (
             <button
               key={model.id}
               type="button"
-              aria-pressed={activeTab === model.id}
-              onClick={() => setActiveTab(model.id)}
-              style={{ '--registry-color': model.color }}
+              aria-pressed={activeTab === tabForTask(model.task)}
+              onClick={() => setActiveTab(tabForTask(model.task))}
+              style={{ '--registry-color': colorForStatus(model.status) }}
             >
-              <span>{model.status}</span>
-              <strong>{model.name}</strong>
-              <small>{model.version} · {model.meta}</small>
+              <span>{model.status.replace('_', ' ').toUpperCase()}</span>
+              <strong>{model.display_name}</strong>
+              <small>{model.version} · {model.protocol}</small>
             </button>
           ))}
         </section>
 
+        {registryDisponivel && shadowModels.length > 0 ? (
+          <section className="shadow-evidence" aria-label="Candidatos em shadow mode">
+            <header><span>SHADOW MODE</span><div><strong>Candidatos isolados da produção</strong><p>Resultados offline visíveis para governança; não alteram previsões públicas ou decisões automaticamente.</p></div></header>
+            <div>{shadowModels.map((model) => (
+              <article key={model.id}>
+                <span>{model.task === 'volume_d1_d7' ? 'VOLUME' : 'RISCO OLA'}</span>
+                <strong>{model.display_name}</strong>
+                <p>{model.metrics?.mae_improvement_pct != null
+                  ? `MAE −${model.metrics.mae_improvement_pct.toFixed(1)}% · ${model.metrics.horizon_wins} vitórias de horizonte`
+                  : `Recall@Top-5% ${((model.metrics?.recall_at_top_5pct || 0) * 100).toFixed(1)}% · ${model.metrics?.alerts_per_day?.toFixed(2)} alertas/dia`}</p>
+                <small>{model.limitations?.[0]}</small>
+              </article>
+            ))}</div>
+          </section>
+        ) : null}
+
         <nav className="model-tabs" aria-label="Selecionar modelo">
           {[
             ['xgb', 'XGBoost'],
-            ['forecast', 'Prophet & LSTM'],
+            ['forecast', 'Previsão de volume'],
             ['clusters', 'K-Means'],
           ].map(([id, label]) => (
             <button key={id} type="button" aria-pressed={activeTab === id} onClick={() => setActiveTab(id)}>{label}</button>
@@ -243,7 +273,7 @@ export default function ModelosPage() {
           {riscoLoading ? (
             <div style={grid3}>{[0,1,2,3,4,5].map(i => <Skeleton key={i} height={160} />)}</div>
           ) : !riscoDisponivel ? (
-            <SemDados mensagem="Modelo XGBoost não disponível — execute: python src/pipeline.py --step xgb" />
+            <SemDados mensagem="Evidência de risco temporariamente indisponível. Tente novamente ou consulte o preflight administrativo." />
           ) : (
             <>
               {/* Métricas primárias */}
@@ -418,9 +448,9 @@ export default function ModelosPage() {
                 <MetricCard
                   label="PR-AUC CV (MEAN)"
                   value={(m?.pr_auc_cv_mean ?? 0).toFixed(4)}
-                  sub="Média em 5 folds estratificados"
+                  sub={`${m?.cv_folds_temporais ?? 0} folds temporais expanding-window`}
                   color="var(--teal)"
-                  explain="PR-AUC medido na validação cruzada — mais representativo que o valor único no conjunto de teste. Estratificado para garantir proporção de violações em cada fold."
+                  explain="PR-AUC medido em validação temporal expanding-window: cada fold treina no passado e valida em um período posterior. SMOTE e estatísticas são derivados novamente dentro de cada treino."
                   context={`Desvio padrão: ±${(m?.pr_auc_cv_std ?? 0).toFixed(4)}`}
                 />
                 <MetricCard
@@ -468,7 +498,7 @@ export default function ModelosPage() {
                       },
                       {
                         tag: 'LIMITAÇÃO',
-                        text: 'Desbalanceamento 1:102 limita a precision (3%). Recomendado para triagem — um analista valida os incidentes sinalizados, não para alertas automáticos sem revisão humana.',
+                        text: <>Desbalanceamento 1:102 limita a precision ({((m?.precision_violacao ?? 0) * 100).toFixed(2)}%). Recomendado para triagem — um analista valida os incidentes sinalizados, não para alertas automáticos sem revisão humana.</>,
                       },
                     ]}
                   />
@@ -506,30 +536,30 @@ export default function ModelosPage() {
           {modelosLoading ? (
             <div style={grid3}>{[0,1,2,3,4,5].map(i => <Skeleton key={i} height={180} />)}</div>
           ) : !modelosDisponivel ? (
-            <SemDados mensagem="Modelos de previsão não disponíveis — execute: python src/pipeline.py --step lstm" />
+            <SemDados mensagem="Evidência de previsão temporariamente indisponível. Tente novamente ou consulte o preflight administrativo." />
           ) : (
             <>
-              <Divider label="LSTM V2 — MODELO ATIVO · HOLDOUT REAL" />
+              <Divider label={`LSTM V2 — HOLDOUT TEMPORAL COMUM${forecastWinner === 'lstm' ? ' · MODELO ATIVO' : ''}`} />
               <div style={grid3}>
                 <MetricCard
-                  label="MAE HOLDOUT — TOTAL"
+                  label="MAE D+1 — TOTAL"
                   value={fmtMae(ml?.mae_total)}
                   sub="Média em 92 dias de holdout real (out–dez 2025)"
                   color="var(--green)"
-                  badge={{ text: 'MODELO ATIVO', color: 'var(--teal)' }}
-                  explain="Erro médio absoluto medido em 92 dias completamente fora do treino (holdout). Dados 100% reais, sem Monte Carlo. A separação estrita evita vazamento de dados futuros."
+                  badge={forecastWinner === 'lstm' ? { text: 'MODELO ATIVO', color: 'var(--teal)' } : undefined}
+                  explain="Erro D+1 medido por rolling origin nos 92 dias reais de out–dez/2025. O scaler é ajustado apenas no treino anterior ao holdout."
                   context={ml?.arquitetura ?? '—'}
                 />
                 <MetricCard
-                  label="MAE HOLDOUT — P2"
+                  label="MAE D+1 — P2"
                   value={fmtMae(ml?.mae_p2)}
                   sub="Alta prioridade · OLA ≤ 4h"
                   color="var(--green)"
                   explain="P2 possui menor volume diário, portanto o MAE absoluto tende a ser menor. Para declarar maior precisão seria necessário comparar também erro normalizado e baseline por prioridade."
-                  context="P2 é a prioridade que excedeu a meta em 2025 (42 vs meta 37)"
+                  context="P2 é a prioridade que excedeu a referência central em 2025 (42 vs 37,5)"
                 />
                 <MetricCard
-                  label="MAE HOLDOUT — P3"
+                  label="MAE D+1 — P3"
                   value={fmtMae(ml?.mae_p3)}
                   sub="Média prioridade · OLA ≤ 12h"
                   color="var(--teal)"
@@ -538,15 +568,15 @@ export default function ModelosPage() {
                 />
               </div>
 
-              <Divider label="PROPHET ENSEMBLE — FALLBACK" />
+              <Divider label={`PROPHET ENSEMBLE — HOLDOUT TEMPORAL COMUM${forecastWinner === 'prophet' ? ' · MODELO ATIVO' : ''}`} />
               <div style={grid3}>
                 <MetricCard
                   label="MAE D+1 — TOTAL"
                   value={fmtMae(mp?.mae_d1_total)}
                   sub="Erro previsão 1 dia à frente"
                   color="var(--orange)"
-                  explain="MAE do Prophet Ensemble (v5+v6) para previsão do próximo dia. Calculado por cross-validation (initial=180d). Usado como fallback quando LSTM não está disponível."
-                  context="Prophet 2025-only · ensemble v5 (4 lags) + v6 (+ is_dia_util)"
+                  explain="MAE do Prophet para o próximo dia, medido no mesmo rolling origin de out–dez/2025 usado pelo LSTM. Os regressores futuros são gerados recursivamente sem consultar valores reais futuros."
+                  context="Variante v5/v6 escolhida em jul–set antes do holdout final"
                 />
                 <MetricCard
                   label="MAE D+7 — TOTAL"
@@ -554,7 +584,7 @@ export default function ModelosPage() {
                   sub="Erro previsão 7 dias à frente"
                   color="var(--orange)"
                   explain="Para horizontes maiores, o Prophet seleciona automaticamente o modelo (v5 ou v6) com menor MAE histórico para aquele horizonte específico — reduzindo o erro médio."
-                  context="Seleção por horizonte via cross-validation"
+                  context="Seleção por horizonte em jul–set · avaliação final em out–dez"
                 />
                 <MetricCard
                   label="LSTM vs PROPHET"
@@ -563,7 +593,7 @@ export default function ModelosPage() {
                   color="var(--green)"
                   badge={{ text: 'MELHORA', color: 'var(--green)' }}
                   explain="No mesmo holdout de 92 dias (out–dez 2025), o LSTM v2 apresentou MAE menor que o Prophet rolling. O teste sustenta a diferença observada, mas não identifica sozinho a causa do ganho."
-                  context={`Prophet holdout MAE = ${fmtMae(ml?.mae_prophet_holdout_92d)} · LSTM holdout MAE = ${fmtMae(ml?.mae_total)}`}
+                  context={`Prophet D+1 MAE = ${fmtMae(ml?.mae_prophet_holdout_comum)} · LSTM D+1 MAE = ${fmtMae(ml?.mae_total)}`}
                 />
               </div>
 
@@ -580,14 +610,15 @@ export default function ModelosPage() {
                   </thead>
                   <tbody>
                     {[
-                      { model: 'LSTM v2', period: 'Holdout real 92d', total: fmtMae(ml?.mae_total), p2: fmtMae(ml?.mae_p2), p3: fmtMae(ml?.mae_p3), status: 'ATIVO', statusColor: 'var(--teal)' },
-                      { model: 'Prophet MC', period: 'Holdout real 92d', total: fmtMae(ml?.mae_prophet_holdout_92d), p2: '—', p3: '—', status: 'FALLBACK', statusColor: 'var(--text-muted)' },
-                      { model: 'Prophet Orig.', period: 'Cross-validation', total: fmtMae(mp?.mae_d1_total), p2: fmtMae(mp?.mae_d1_p2), p3: fmtMae(mp?.mae_d1_p3), status: 'NÃO COMPARÁVEL', statusColor: 'var(--orange)' },
+                      { model: 'Baseline sazonal', period: 'Rolling origin Q4 · D+1', total: fmtMae(comparisonD1.total?.baseline_sazonal_mae), p2: fmtMae(comparisonD1.p2?.baseline_sazonal_mae), p3: fmtMae(comparisonD1.p3?.baseline_sazonal_mae), status: forecastWinner === 'baseline_sazonal' ? 'ATIVO' : 'COMPARÁVEL', statusColor: forecastWinner === 'baseline_sazonal' ? 'var(--teal)' : 'var(--text-muted)' },
+                      { model: 'LSTM v2', period: 'Rolling origin Q4 · D+1', total: fmtMae(ml?.mae_total), p2: fmtMae(ml?.mae_p2), p3: fmtMae(ml?.mae_p3), status: forecastWinner === 'lstm' ? 'ATIVO' : 'COMPARÁVEL', statusColor: forecastWinner === 'lstm' ? 'var(--teal)' : 'var(--text-muted)' },
+                      { model: 'Prophet Orig.', period: 'Rolling origin Q4 · D+1', total: fmtMae(mp?.mae_d1_total), p2: fmtMae(mp?.mae_d1_p2), p3: fmtMae(mp?.mae_d1_p3), status: forecastWinner === 'prophet' ? 'ATIVO' : 'COMPARÁVEL', statusColor: forecastWinner === 'prophet' ? 'var(--teal)' : 'var(--text-muted)' },
+                      { model: 'Prophet MC', period: 'Rolling origin Q4 · D+1', total: fmtMae(comparisonD1.total?.prophet_mc_mae), p2: fmtMae(comparisonD1.p2?.prophet_mc_mae), p3: fmtMae(comparisonD1.p3?.prophet_mc_mae), status: forecastWinner === 'prophet_mc' ? 'ATIVO' : 'COMPARÁVEL', statusColor: forecastWinner === 'prophet_mc' ? 'var(--teal)' : 'var(--text-muted)' },
                     ].map((row, i) => (
-                      <tr key={i} style={{ borderBottom: '0.5px solid var(--border)', background: i === 0 ? 'rgba(90,200,250,0.04)' : 'transparent' }}>
-                        <td style={{ padding: '8px 12px', color: i === 0 ? 'var(--teal)' : 'var(--text-sec)', fontWeight: i === 0 ? 700 : 400 }}>{row.model}</td>
+                      <tr key={i} style={{ borderBottom: '0.5px solid var(--border)', background: row.status === 'ATIVO' ? 'rgba(90,200,250,0.04)' : 'transparent' }}>
+                        <td style={{ padding: '8px 12px', color: row.status === 'ATIVO' ? 'var(--teal)' : 'var(--text-sec)', fontWeight: row.status === 'ATIVO' ? 700 : 400 }}>{row.model}</td>
                         <td style={{ padding: '8px 12px', color: 'var(--text-muted)', fontSize: 10 }}>{row.period}</td>
-                        <td style={{ padding: '8px 12px', color: i === 0 ? 'var(--green)' : 'var(--text-sec)', fontWeight: i === 0 ? 700 : 400 }}>{row.total}</td>
+                        <td style={{ padding: '8px 12px', color: row.status === 'ATIVO' ? 'var(--green)' : 'var(--text-sec)', fontWeight: row.status === 'ATIVO' ? 700 : 400 }}>{row.total}</td>
                         <td style={{ padding: '8px 12px', color: 'var(--text-sec)' }}>{row.p2}</td>
                         <td style={{ padding: '8px 12px', color: 'var(--text-sec)' }}>{row.p3}</td>
                         <td style={{ padding: '8px 12px' }}>
@@ -607,8 +638,10 @@ export default function ModelosPage() {
                 <ResponsiveContainer width="100%" height={200} minWidth={0}>
                   <BarChart
                     data={[
+                      { modelo: 'Baseline', total: comparisonD1.total?.baseline_sazonal_mae ?? null, p2: comparisonD1.p2?.baseline_sazonal_mae ?? null, p3: comparisonD1.p3?.baseline_sazonal_mae ?? null },
                       { modelo: 'LSTM v2',       total: ml.mae_total,                    p2: ml.mae_p2,    p3: ml.mae_p3 },
-                      { modelo: 'Prophet MC',     total: ml.mae_prophet_holdout_92d ?? null, p2: null,     p3: null },
+                      { modelo: 'Prophet', total: mp?.mae_d1_total ?? null, p2: mp?.mae_d1_p2 ?? null, p3: mp?.mae_d1_p3 ?? null },
+                      { modelo: 'Prophet MC', total: comparisonD1.total?.prophet_mc_mae ?? null, p2: comparisonD1.p2?.prophet_mc_mae ?? null, p3: comparisonD1.p3?.prophet_mc_mae ?? null },
                     ]}
                     margin={{ top: 8, right: 20, left: 0, bottom: 0 }}
                   >
@@ -685,7 +718,7 @@ export default function ModelosPage() {
           {clustersLoading ? (
             <div style={grid3}>{[0,1,2].map(i => <Skeleton key={i} height={180} />)}</div>
           ) : !clustersDisponivel ? (
-            <SemDados mensagem="Modelo K-Means não disponível — execute: python src/pipeline.py --step km" />
+            <SemDados mensagem="Evidência de segmentação temporariamente indisponível. Tente novamente ou consulte o preflight administrativo." />
           ) : (
             <>
               {/* Callout sobre métricas de clustering */}

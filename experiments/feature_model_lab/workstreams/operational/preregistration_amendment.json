@@ -1,0 +1,25 @@
+{
+  "amendment_before_candidate_execution": true,
+  "supersedes_target_only_in": "preregistration.json",
+  "reason": "A candidate-free target-validity audit found a major collection/operating-regime discontinuity: real all-incident daily means were 0.30 in 2023, 1.70 in 2024, and 333.73 in 2025. The originally frozen 2023-01-01..2025-06-30 q80 threshold was 33 incidents and labeled 181/184 (98.37%) July-December days positive. That target is degenerate and cannot support ranking. No candidate or baseline result had been computed when this amendment was written.",
+  "revised_observable_target": {
+    "definition": "For each target day d, high_workload=1 when its real all-incident opening count is at or above the empirical 80th percentile of the eight strictly prior observations having the same weekday as d; otherwise 0.",
+    "availability": "The comparison threshold uses only counts known before target day d and is therefore available at the end of d-1.",
+    "minimum_history": "Require eight prior same-weekday observations; all July-December 2025 evaluation days satisfy this.",
+    "ties": "Use >= against the point-in-time threshold.",
+    "mechanism": "This reproducible proxy means unusually high workload relative to the recent staffing pattern for that weekday and adapts to measured regime shifts without reading future data."
+  },
+  "revised_baseline": {
+    "name": "seasonal_naive_lag7_margin",
+    "score": "Count on d-7 minus the point-in-time same-weekday q80 threshold for d.",
+    "reason": "It ranks whether the most recent comparable weekday already exceeded the capacity proxy; every input is known by d-1."
+  },
+  "unchanged_gates": {
+    "primary": "At least 15% paired pooled PR-AUC gain on identical real July-December 2025 days.",
+    "monthly": "Win at least 4/6 monthly PR-AUC folds.",
+    "halves": "Beat baseline pooled PR-AUC in both Jul-Sep and Oct-Dec.",
+    "stochastic_seeds": "Seeds 11, 29, 47, 71, 101; mean passes; every seed >=10% gain; relative spread <=10%.",
+    "workload": "At capacity-matched Top-20%, recall no more than 5% relatively below baseline and precision not below baseline."
+  },
+  "operational_action": "Issue a next-day flex-staffing/on-call-readiness advisory for days ranked above a threshold calibrated exclusively on prior real observations. Do not automate incident handling."
+}

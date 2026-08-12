@@ -1,0 +1,1788 @@
+{
+  "status": "NO-GO: OPERATIONAL TRACK GATE NOT PASSED",
+  "generated_at": "2026-08-10T22:02:16.802714-03:00",
+  "protocol": {
+    "target": "y[d] >= q80(previous 8 same-weekday real counts)",
+    "prediction_horizon": "D+1",
+    "outer_months": [
+      "2025-07",
+      "2025-08",
+      "2025-09",
+      "2025-10",
+      "2025-11",
+      "2025-12"
+    ],
+    "evaluation": "real 2025 only",
+    "training": "expanding real 2025 days strictly before each evaluation month",
+    "top_share": 0.2,
+    "seeds": [
+      11,
+      29,
+      47,
+      71,
+      101
+    ]
+  },
+  "data_audit": {
+    "source": "data/raw/LW-DATASET.xlsx",
+    "sha256": "5aa75370425d669b16be8d88509200e0fdab3cfc7f5f473e9a3c70c297ef1f26",
+    "incident_rows": 122543,
+    "valid_opening_timestamps": 122543,
+    "daily_start": "2023-01-02",
+    "daily_end": "2025-12-31",
+    "calendar_days": 1095,
+    "zero_count_days": 451,
+    "duplicate_daily_dates": 0,
+    "year_stats": {
+      "2023": {
+        "days": 364,
+        "mean": 0.3021978021978022,
+        "std": 0.6271151355798976,
+        "min": 0.0,
+        "median": 0.0,
+        "max": 3.0
+      },
+      "2024": {
+        "days": 366,
+        "mean": 1.6994535519125684,
+        "std": 4.821453168856927,
+        "min": 0.0,
+        "median": 1.0,
+        "max": 69.0
+      },
+      "2025": {
+        "days": 365,
+        "mean": 333.7287671232877,
+        "std": 330.6995255978132,
+        "min": 25.0,
+        "median": 149.0,
+        "max": 1431.0
+      }
+    },
+    "sensitive_values_persisted": false
+  },
+  "target_audit": {
+    "definition": "y[d] >= q80(previous 8 same-weekday real counts)",
+    "evaluation_days": 184,
+    "evaluation_positives": 83,
+    "evaluation_prevalence": 0.45108695652173914,
+    "monthly_positives": {
+      "2025-07-01": 5,
+      "2025-08-01": 18,
+      "2025-09-01": 27,
+      "2025-10-01": 10,
+      "2025-11-01": 8,
+      "2025-12-01": 15
+    },
+    "original_preregistered_target_invalidated": {
+      "threshold": 33.0,
+      "evaluation_positives": 181,
+      "evaluation_days": 184
+    }
+  },
+  "baseline": {
+    "name": "seasonal_naive_lag7_margin",
+    "metrics": {
+      "aggregate": {
+        "days": 184,
+        "positives": 83,
+        "prevalence": 0.45108695652173914,
+        "pr_auc": 0.6732688148026253,
+        "monthly_pr_auc_mean": 0.554996800654581,
+        "monthly_pr_auc_std": 0.2272514636102749,
+        "top20_alerts": 40,
+        "top20_hits": 17,
+        "top20_precision": 0.425,
+        "top20_recall": 0.20481927710843373,
+        "top20_lift": 0.9421686746987952,
+        "alerts_per_calendar_day": 0.21739130434782608,
+        "days_reviewed_per_true_positive": 2.3529411764705883,
+        "jul_sep_pr_auc": 0.768900359581717,
+        "oct_dec_pr_auc": 0.5382594008820748,
+        "runtime_seconds": 0.0013517089537344873
+      },
+      "monthly": [
+        {
+          "month": "2025-07",
+          "days": 31,
+          "positives": 5,
+          "prevalence": 0.16129032258064516,
+          "pr_auc": 0.13797643097643097,
+          "top20_alerts": 7,
+          "top20_hits": 0,
+          "top20_precision": 0.0,
+          "top20_recall": 0.0,
+          "train_days": 181,
+          "train_positives": 72,
+          "runtime_seconds": 0.000108207983430475
+        },
+        {
+          "month": "2025-08",
+          "days": 31,
+          "positives": 18,
+          "prevalence": 0.5806451612903226,
+          "pr_auc": 0.5582339721838114,
+          "top20_alerts": 7,
+          "top20_hits": 3,
+          "top20_precision": 0.42857142857142855,
+          "top20_recall": 0.16666666666666666,
+          "train_days": 212,
+          "train_positives": 77,
+          "runtime_seconds": 0.0003190420102328062
+        },
+        {
+          "month": "2025-09",
+          "days": 30,
+          "positives": 27,
+          "prevalence": 0.9,
+          "pr_auc": 0.9198870471783949,
+          "top20_alerts": 6,
+          "top20_hits": 5,
+          "top20_precision": 0.8333333333333334,
+          "top20_recall": 0.18518518518518517,
+          "train_days": 243,
+          "train_positives": 95,
+          "runtime_seconds": 0.00041783397318795323
+        },
+        {
+          "month": "2025-10",
+          "days": 31,
+          "positives": 10,
+          "prevalence": 0.3225806451612903,
+          "pr_auc": 0.5730433893591788,
+          "top20_alerts": 7,
+          "top20_hits": 3,
+          "top20_precision": 0.42857142857142855,
+          "top20_recall": 0.3,
+          "train_days": 273,
+          "train_positives": 122,
+          "runtime_seconds": 0.00010075001046061516
+        },
+        {
+          "month": "2025-11",
+          "days": 30,
+          "positives": 8,
+          "prevalence": 0.26666666666666666,
+          "pr_auc": 0.6020156926406927,
+          "top20_alerts": 6,
+          "top20_hits": 3,
+          "top20_precision": 0.5,
+          "top20_recall": 0.375,
+          "train_days": 304,
+          "train_positives": 132,
+          "runtime_seconds": 0.0002663329942151904
+        },
+        {
+          "month": "2025-12",
+          "days": 31,
+          "positives": 15,
+          "prevalence": 0.4838709677419355,
+          "pr_auc": 0.5388242715889774,
+          "top20_alerts": 7,
+          "top20_hits": 3,
+          "top20_precision": 0.42857142857142855,
+          "top20_recall": 0.2,
+          "train_days": 334,
+          "train_positives": 140,
+          "runtime_seconds": 0.0001395419822074473
+        }
+      ]
+    }
+  },
+  "cycles": [
+    {
+      "cycle": 1,
+      "name": "robust_residual_rule",
+      "method": "robust_residual_rule",
+      "family": "robust seasonal residual/MAD-style rule",
+      "mechanism": "Carry last same-weekday pressure forward and adjust for recent robust level shift/persistence.",
+      "falsification": "Fails paired 15% PR-AUC gate or temporal/workload guardrails.",
+      "ablation": "Seasonal baseline + residual/regime rule.",
+      "feature_count": 16,
+      "seed": 47,
+      "data": "real-only",
+      "synthetic_rows_train": 0,
+      "synthetic_rows_evaluation": 0,
+      "metrics": {
+        "aggregate": {
+          "days": 184,
+          "positives": 83,
+          "prevalence": 0.45108695652173914,
+          "pr_auc": 0.7051644128978571,
+          "monthly_pr_auc_mean": 0.5801835835719126,
+          "monthly_pr_auc_std": 0.21701129441613284,
+          "top20_alerts": 40,
+          "top20_hits": 19,
+          "top20_precision": 0.475,
+          "top20_recall": 0.2289156626506024,
+          "top20_lift": 1.053012048192771,
+          "alerts_per_calendar_day": 0.21739130434782608,
+          "days_reviewed_per_true_positive": 2.1052631578947367,
+          "jul_sep_pr_auc": 0.8006245247632835,
+          "oct_dec_pr_auc": 0.5569175590932692,
+          "runtime_seconds": 0.006949293951038271
+        },
+        "monthly": [
+          {
+            "month": "2025-07",
+            "days": 31,
+            "positives": 5,
+            "prevalence": 0.16129032258064516,
+            "pr_auc": 0.20014492753623186,
+            "top20_alerts": 7,
+            "top20_hits": 1,
+            "top20_precision": 0.14285714285714285,
+            "top20_recall": 0.2,
+            "train_days": 181,
+            "train_positives": 72,
+            "runtime_seconds": 0.001712416997179389
+          },
+          {
+            "month": "2025-08",
+            "days": 31,
+            "positives": 18,
+            "prevalence": 0.5806451612903226,
+            "pr_auc": 0.541631675527167,
+            "top20_alerts": 7,
+            "top20_hits": 2,
+            "top20_precision": 0.2857142857142857,
+            "top20_recall": 0.1111111111111111,
+            "train_days": 212,
+            "train_positives": 77,
+            "runtime_seconds": 0.0010114589822478592
+          },
+          {
+            "month": "2025-09",
+            "days": 30,
+            "positives": 27,
+            "prevalence": 0.9,
+            "pr_auc": 0.938217281354887,
+            "top20_alerts": 6,
+            "top20_hits": 6,
+            "top20_precision": 1.0,
+            "top20_recall": 0.2222222222222222,
+            "train_days": 243,
+            "train_positives": 95,
+            "runtime_seconds": 0.000890791998244822
+          },
+          {
+            "month": "2025-10",
+            "days": 31,
+            "positives": 10,
+            "prevalence": 0.3225806451612903,
+            "pr_auc": 0.6683064076446429,
+            "top20_alerts": 7,
+            "top20_hits": 4,
+            "top20_precision": 0.5714285714285714,
+            "top20_recall": 0.4,
+            "train_days": 273,
+            "train_positives": 122,
+            "runtime_seconds": 0.0012268340215086937
+          },
+          {
+            "month": "2025-11",
+            "days": 30,
+            "positives": 8,
+            "prevalence": 0.26666666666666666,
+            "pr_auc": 0.5538690476190475,
+            "top20_alerts": 6,
+            "top20_hits": 4,
+            "top20_precision": 0.6666666666666666,
+            "top20_recall": 0.5,
+            "train_days": 304,
+            "train_positives": 132,
+            "runtime_seconds": 0.0013528749695979059
+          },
+          {
+            "month": "2025-12",
+            "days": 31,
+            "positives": 15,
+            "prevalence": 0.4838709677419355,
+            "pr_auc": 0.5789321617494992,
+            "top20_alerts": 7,
+            "top20_hits": 2,
+            "top20_precision": 0.2857142857142857,
+            "top20_recall": 0.13333333333333333,
+            "train_days": 334,
+            "train_positives": 140,
+            "runtime_seconds": 0.0007549169822596014
+          }
+        ]
+      },
+      "gate": {
+        "pr_auc_relative_improvement": 0.0473742395221175,
+        "monthly_wins": 4,
+        "checks": {
+          "paired_pr_auc_gain_at_least_15pct": false,
+          "monthly_wins_at_least_4_of_6": true,
+          "wins_both_halves": true,
+          "top20_precision_not_lower": true,
+          "top20_recall_not_more_than_5pct_relative_lower": true
+        },
+        "base_gate_passed_before_seed_check": false
+      },
+      "decision": "RETAIN",
+      "peak_rss_mb_process": 309.5
+    },
+    {
+      "cycle": 2,
+      "name": "logistic_calendar",
+      "method": "logistic_calendar",
+      "family": "regularized generalized linear",
+      "mechanism": "Estimate stable calendar-only high-workload propensity.",
+      "falsification": "Calendar-only ranking does not beat seasonal baseline.",
+      "ablation": "Calendar-only lower bound.",
+      "feature_count": 8,
+      "seed": 47,
+      "data": "real-only",
+      "synthetic_rows_train": 0,
+      "synthetic_rows_evaluation": 0,
+      "metrics": {
+        "aggregate": {
+          "days": 184,
+          "positives": 83,
+          "prevalence": 0.45108695652173914,
+          "pr_auc": 0.4324969337319647,
+          "monthly_pr_auc_mean": 0.5214955116961163,
+          "monthly_pr_auc_std": 0.2094662721319854,
+          "top20_alerts": 40,
+          "top20_hits": 17,
+          "top20_precision": 0.425,
+          "top20_recall": 0.20481927710843373,
+          "top20_lift": 0.9421686746987952,
+          "alerts_per_calendar_day": 0.21739130434782608,
+          "days_reviewed_per_true_positive": 2.3529411764705883,
+          "jul_sep_pr_auc": 0.6707770943540229,
+          "oct_dec_pr_auc": 0.3016356888875682,
+          "runtime_seconds": 0.07509704009862617
+        },
+        "monthly": [
+          {
+            "month": "2025-07",
+            "days": 31,
+            "positives": 5,
+            "prevalence": 0.16129032258064516,
+            "pr_auc": 0.5654901960784313,
+            "top20_alerts": 7,
+            "top20_hits": 3,
+            "top20_precision": 0.42857142857142855,
+            "top20_recall": 0.6,
+            "train_days": 181,
+            "train_positives": 72,
+            "runtime_seconds": 0.015338417026214302
+          },
+          {
+            "month": "2025-08",
+            "days": 31,
+            "positives": 18,
+            "prevalence": 0.5806451612903226,
+            "pr_auc": 0.6298394549986279,
+            "top20_alerts": 7,
+            "top20_hits": 4,
+            "top20_precision": 0.5714285714285714,
+            "top20_recall": 0.2222222222222222,
+            "train_days": 212,
+            "train_positives": 77,
+            "runtime_seconds": 0.01180400000885129
+          },
+          {
+            "month": "2025-09",
+            "days": 30,
+            "positives": 27,
+            "prevalence": 0.9,
+            "pr_auc": 0.7858049679234946,
+            "top20_alerts": 6,
+            "top20_hits": 4,
+            "top20_precision": 0.6666666666666666,
+            "top20_recall": 0.14814814814814814,
+            "train_days": 243,
+            "train_positives": 95,
+            "runtime_seconds": 0.012472208007238805
+          },
+          {
+            "month": "2025-10",
+            "days": 31,
+            "positives": 10,
+            "prevalence": 0.3225806451612903,
+            "pr_auc": 0.2520736297409014,
+            "top20_alerts": 7,
+            "top20_hits": 0,
+            "top20_precision": 0.0,
+            "top20_recall": 0.0,
+            "train_days": 273,
+            "train_positives": 122,
+            "runtime_seconds": 0.009780166030395776
+          },
+          {
+            "month": "2025-11",
+            "days": 30,
+            "positives": 8,
+            "prevalence": 0.26666666666666666,
+            "pr_auc": 0.22845434020002983,
+            "top20_alerts": 6,
+            "top20_hits": 1,
+            "top20_precision": 0.16666666666666666,
+            "top20_recall": 0.125,
+            "train_days": 304,
+            "train_positives": 132,
+            "runtime_seconds": 0.012671916047111154
+          },
+          {
+            "month": "2025-12",
+            "days": 31,
+            "positives": 15,
+            "prevalence": 0.4838709677419355,
+            "pr_auc": 0.6673104812352124,
+            "top20_alerts": 7,
+            "top20_hits": 5,
+            "top20_precision": 0.7142857142857143,
+            "top20_recall": 0.3333333333333333,
+            "train_days": 334,
+            "train_positives": 140,
+            "runtime_seconds": 0.01303033297881484
+          }
+        ]
+      },
+      "gate": {
+        "pr_auc_relative_improvement": -0.35761626823788806,
+        "monthly_wins": 3,
+        "checks": {
+          "paired_pr_auc_gain_at_least_15pct": false,
+          "monthly_wins_at_least_4_of_6": false,
+          "wins_both_halves": false,
+          "top20_precision_not_lower": true,
+          "top20_recall_not_more_than_5pct_relative_lower": true
+        },
+        "base_gate_passed_before_seed_check": false
+      },
+      "decision": "REJECT",
+      "peak_rss_mb_process": 309.5
+    },
+    {
+      "cycle": 3,
+      "name": "logistic_calendar_lags",
+      "method": "logistic_calendar_lags",
+      "family": "regularized generalized linear",
+      "mechanism": "Add autoregressive level signals to the transparent calendar model.",
+      "falsification": "Lag-family ablation has non-positive paired gain over calendar-only.",
+      "ablation": "+ lag levels versus cycle 2.",
+      "feature_count": 16,
+      "seed": 47,
+      "data": "real-only",
+      "synthetic_rows_train": 0,
+      "synthetic_rows_evaluation": 0,
+      "metrics": {
+        "aggregate": {
+          "days": 184,
+          "positives": 83,
+          "prevalence": 0.45108695652173914,
+          "pr_auc": 0.6955803436026036,
+          "monthly_pr_auc_mean": 0.6617427325998684,
+          "monthly_pr_auc_std": 0.2134896653519971,
+          "top20_alerts": 40,
+          "top20_hits": 27,
+          "top20_precision": 0.675,
+          "top20_recall": 0.3253012048192771,
+          "top20_lift": 1.4963855421686747,
+          "alerts_per_calendar_day": 0.21739130434782608,
+          "days_reviewed_per_true_positive": 1.4814814814814814,
+          "jul_sep_pr_auc": 0.747785001525773,
+          "oct_dec_pr_auc": 0.61245688773569,
+          "runtime_seconds": 0.07538975001079962
+        },
+        "monthly": [
+          {
+            "month": "2025-07",
+            "days": 31,
+            "positives": 5,
+            "prevalence": 0.16129032258064516,
+            "pr_auc": 0.26543859649122803,
+            "top20_alerts": 7,
+            "top20_hits": 2,
+            "top20_precision": 0.2857142857142857,
+            "top20_recall": 0.4,
+            "train_days": 181,
+            "train_positives": 72,
+            "runtime_seconds": 0.013847374997567385
+          },
+          {
+            "month": "2025-08",
+            "days": 31,
+            "positives": 18,
+            "prevalence": 0.5806451612903226,
+            "pr_auc": 0.7028022418566795,
+            "top20_alerts": 7,
+            "top20_hits": 4,
+            "top20_precision": 0.5714285714285714,
+            "top20_recall": 0.2222222222222222,
+            "train_days": 212,
+            "train_positives": 77,
+            "runtime_seconds": 0.013776791980490088
+          },
+          {
+            "month": "2025-09",
+            "days": 30,
+            "positives": 27,
+            "prevalence": 0.9,
+            "pr_auc": 0.9973055065647656,
+            "top20_alerts": 6,
+            "top20_hits": 6,
+            "top20_precision": 1.0,
+            "top20_recall": 0.2222222222222222,
+            "train_days": 243,
+            "train_positives": 95,
+            "runtime_seconds": 0.014244250021874905
+          },
+          {
+            "month": "2025-10",
+            "days": 31,
+            "positives": 10,
+            "prevalence": 0.3225806451612903,
+            "pr_auc": 0.7013924963924963,
+            "top20_alerts": 7,
+            "top20_hits": 5,
+            "top20_precision": 0.7142857142857143,
+            "top20_recall": 0.5,
+            "train_days": 273,
+            "train_positives": 122,
+            "runtime_seconds": 0.01169541699346155
+          },
+          {
+            "month": "2025-11",
+            "days": 30,
+            "positives": 8,
+            "prevalence": 0.26666666666666666,
+            "pr_auc": 0.6649938423645321,
+            "top20_alerts": 6,
+            "top20_hits": 5,
+            "top20_precision": 0.8333333333333334,
+            "top20_recall": 0.625,
+            "train_days": 304,
+            "train_positives": 132,
+            "runtime_seconds": 0.012202000012621284
+          },
+          {
+            "month": "2025-12",
+            "days": 31,
+            "positives": 15,
+            "prevalence": 0.4838709677419355,
+            "pr_auc": 0.638523711929509,
+            "top20_alerts": 7,
+            "top20_hits": 5,
+            "top20_precision": 0.7142857142857143,
+            "top20_recall": 0.3333333333333333,
+            "train_days": 334,
+            "train_positives": 140,
+            "runtime_seconds": 0.009623916004784405
+          }
+        ]
+      },
+      "gate": {
+        "pr_auc_relative_improvement": 0.03313910923754726,
+        "monthly_wins": 6,
+        "checks": {
+          "paired_pr_auc_gain_at_least_15pct": false,
+          "monthly_wins_at_least_4_of_6": true,
+          "wins_both_halves": false,
+          "top20_precision_not_lower": true,
+          "top20_recall_not_more_than_5pct_relative_lower": true
+        },
+        "base_gate_passed_before_seed_check": false
+      },
+      "decision": "RETAIN",
+      "peak_rss_mb_process": 309.5
+    },
+    {
+      "cycle": 4,
+      "name": "logistic_full",
+      "method": "logistic_full",
+      "family": "regularized generalized linear",
+      "mechanism": "Linear combination of calendar, lag, rolling, residual, and regime evidence.",
+      "falsification": "Full features do not improve over calendar+lags or are temporally unstable.",
+      "ablation": "+ rolling/residual/regime versus cycle 3.",
+      "feature_count": 58,
+      "seed": 47,
+      "data": "real-only",
+      "synthetic_rows_train": 0,
+      "synthetic_rows_evaluation": 0,
+      "metrics": {
+        "aggregate": {
+          "days": 184,
+          "positives": 83,
+          "prevalence": 0.45108695652173914,
+          "pr_auc": 0.5539451999534508,
+          "monthly_pr_auc_mean": 0.6029295803105806,
+          "monthly_pr_auc_std": 0.25312728195560924,
+          "top20_alerts": 40,
+          "top20_hits": 20,
+          "top20_precision": 0.5,
+          "top20_recall": 0.24096385542168675,
+          "top20_lift": 1.108433734939759,
+          "alerts_per_calendar_day": 0.21739130434782608,
+          "days_reviewed_per_true_positive": 2.0,
+          "jul_sep_pr_auc": 0.5019780586991079,
+          "oct_dec_pr_auc": 0.612474309015341,
+          "runtime_seconds": 0.1130197920720093
+        },
+        "monthly": [
+          {
+            "month": "2025-07",
+            "days": 31,
+            "positives": 5,
+            "prevalence": 0.16129032258064516,
+            "pr_auc": 0.1439719954967633,
+            "top20_alerts": 7,
+            "top20_hits": 0,
+            "top20_precision": 0.0,
+            "top20_recall": 0.0,
+            "train_days": 181,
+            "train_positives": 72,
+            "runtime_seconds": 0.017150375002529472
+          },
+          {
+            "month": "2025-08",
+            "days": 31,
+            "positives": 18,
+            "prevalence": 0.5806451612903226,
+            "pr_auc": 0.6195025636595641,
+            "top20_alerts": 7,
+            "top20_hits": 3,
+            "top20_precision": 0.42857142857142855,
+            "top20_recall": 0.16666666666666666,
+            "train_days": 212,
+            "train_positives": 77,
+            "runtime_seconds": 0.01869120803894475
+          },
+          {
+            "month": "2025-09",
+            "days": 30,
+            "positives": 27,
+            "prevalence": 0.9,
+            "pr_auc": 0.9973055065647656,
+            "top20_alerts": 6,
+            "top20_hits": 6,
+            "top20_precision": 1.0,
+            "top20_recall": 0.2222222222222222,
+            "train_days": 243,
+            "train_positives": 95,
+            "runtime_seconds": 0.020265209022909403
+          },
+          {
+            "month": "2025-10",
+            "days": 31,
+            "positives": 10,
+            "prevalence": 0.3225806451612903,
+            "pr_auc": 0.5614141414141415,
+            "top20_alerts": 7,
+            "top20_hits": 3,
+            "top20_precision": 0.42857142857142855,
+            "top20_recall": 0.3,
+            "train_days": 273,
+            "train_positives": 122,
+            "runtime_seconds": 0.018241791985929012
+          },
+          {
+            "month": "2025-11",
+            "days": 30,
+            "positives": 8,
+            "prevalence": 0.26666666666666666,
+            "pr_auc": 0.5693953717850777,
+            "top20_alerts": 6,
+            "top20_hits": 3,
+            "top20_precision": 0.5,
+            "top20_recall": 0.375,
+            "train_days": 304,
+            "train_positives": 132,
+            "runtime_seconds": 0.0214345830027014
+          },
+          {
+            "month": "2025-12",
+            "days": 31,
+            "positives": 15,
+            "prevalence": 0.4838709677419355,
+            "pr_auc": 0.7259879029431714,
+            "top20_alerts": 7,
+            "top20_hits": 5,
+            "top20_precision": 0.7142857142857143,
+            "top20_recall": 0.3333333333333333,
+            "train_days": 334,
+            "train_positives": 140,
+            "runtime_seconds": 0.017236625018995255
+          }
+        ]
+      },
+      "gate": {
+        "pr_auc_relative_improvement": -0.1772302715136974,
+        "monthly_wins": 4,
+        "checks": {
+          "paired_pr_auc_gain_at_least_15pct": false,
+          "monthly_wins_at_least_4_of_6": true,
+          "wins_both_halves": false,
+          "top20_precision_not_lower": true,
+          "top20_recall_not_more_than_5pct_relative_lower": true
+        },
+        "base_gate_passed_before_seed_check": false
+      },
+      "decision": "REJECT",
+      "peak_rss_mb_process": 309.5
+    },
+    {
+      "cycle": 5,
+      "name": "isolation_regime_hybrid",
+      "method": "isolation_regime_hybrid",
+      "family": "unsupervised density plus directional rule",
+      "mechanism": "Use Isolation Forest to amplify only high-side context anomalies on top of the robust rule.",
+      "falsification": "Unsupervised novelty adds no paired outcome association or destabilizes folds.",
+      "ablation": "Isolation component versus cycle 1.",
+      "feature_count": 24,
+      "seed": 47,
+      "data": "real-only",
+      "synthetic_rows_train": 0,
+      "synthetic_rows_evaluation": 0,
+      "metrics": {
+        "aggregate": {
+          "days": 184,
+          "positives": 83,
+          "prevalence": 0.45108695652173914,
+          "pr_auc": 0.7080602678660497,
+          "monthly_pr_auc_mean": 0.578530504061506,
+          "monthly_pr_auc_std": 0.2200154660290513,
+          "top20_alerts": 40,
+          "top20_hits": 18,
+          "top20_precision": 0.45,
+          "top20_recall": 0.21686746987951808,
+          "top20_lift": 0.9975903614457832,
+          "alerts_per_calendar_day": 0.21739130434782608,
+          "days_reviewed_per_true_positive": 2.2222222222222223,
+          "jul_sep_pr_auc": 0.8031096656190583,
+          "oct_dec_pr_auc": 0.5571593772611512,
+          "runtime_seconds": 4.136407373996917
+        },
+        "monthly": [
+          {
+            "month": "2025-07",
+            "days": 31,
+            "positives": 5,
+            "prevalence": 0.16129032258064516,
+            "pr_auc": 0.18903381642512077,
+            "top20_alerts": 7,
+            "top20_hits": 0,
+            "top20_precision": 0.0,
+            "top20_recall": 0.0,
+            "train_days": 181,
+            "train_positives": 72,
+            "runtime_seconds": 0.7456113750231452
+          },
+          {
+            "month": "2025-08",
+            "days": 31,
+            "positives": 18,
+            "prevalence": 0.5806451612903226,
+            "pr_auc": 0.5431008304405943,
+            "top20_alerts": 7,
+            "top20_hits": 2,
+            "top20_precision": 0.2857142857142857,
+            "top20_recall": 0.1111111111111111,
+            "train_days": 212,
+            "train_positives": 77,
+            "runtime_seconds": 0.9904269999824464
+          },
+          {
+            "month": "2025-09",
+            "days": 30,
+            "positives": 27,
+            "prevalence": 0.9,
+            "pr_auc": 0.938217281354887,
+            "top20_alerts": 6,
+            "top20_hits": 6,
+            "top20_precision": 1.0,
+            "top20_recall": 0.2222222222222222,
+            "train_days": 243,
+            "train_positives": 95,
+            "runtime_seconds": 0.5765870420145802
+          },
+          {
+            "month": "2025-10",
+            "days": 31,
+            "positives": 10,
+            "prevalence": 0.3225806451612903,
+            "pr_auc": 0.6650384337884337,
+            "top20_alerts": 7,
+            "top20_hits": 4,
+            "top20_precision": 0.5714285714285714,
+            "top20_recall": 0.4,
+            "train_days": 273,
+            "train_positives": 122,
+            "runtime_seconds": 0.5994400409981608
+          },
+          {
+            "month": "2025-11",
+            "days": 30,
+            "positives": 8,
+            "prevalence": 0.26666666666666666,
+            "pr_auc": 0.5538690476190475,
+            "top20_alerts": 6,
+            "top20_hits": 4,
+            "top20_precision": 0.6666666666666666,
+            "top20_recall": 0.5,
+            "train_days": 304,
+            "train_positives": 132,
+            "runtime_seconds": 0.7392682079807855
+          },
+          {
+            "month": "2025-12",
+            "days": 31,
+            "positives": 15,
+            "prevalence": 0.4838709677419355,
+            "pr_auc": 0.5819236147409522,
+            "top20_alerts": 7,
+            "top20_hits": 2,
+            "top20_precision": 0.2857142857142857,
+            "top20_recall": 0.13333333333333333,
+            "train_days": 334,
+            "train_positives": 140,
+            "runtime_seconds": 0.4850737079977989
+          }
+        ]
+      },
+      "gate": {
+        "pr_auc_relative_improvement": 0.05167542636535716,
+        "monthly_wins": 4,
+        "checks": {
+          "paired_pr_auc_gain_at_least_15pct": false,
+          "monthly_wins_at_least_4_of_6": true,
+          "wins_both_halves": true,
+          "top20_precision_not_lower": true,
+          "top20_recall_not_more_than_5pct_relative_lower": true
+        },
+        "base_gate_passed_before_seed_check": false
+      },
+      "decision": "RETAIN",
+      "peak_rss_mb_process": 309.5
+    },
+    {
+      "cycle": 6,
+      "name": "extra_trees_no_rolling",
+      "method": "extra_trees_no_rolling",
+      "family": "random-tree bagging",
+      "mechanism": "Capture nonlinear interactions without rolling-distribution features.",
+      "falsification": "Does not beat linear/full and baseline gates.",
+      "ablation": "Tree model with rolling-distribution family removed.",
+      "feature_count": 32,
+      "seed": 47,
+      "data": "real-only",
+      "synthetic_rows_train": 0,
+      "synthetic_rows_evaluation": 0,
+      "metrics": {
+        "aggregate": {
+          "days": 184,
+          "positives": 83,
+          "prevalence": 0.45108695652173914,
+          "pr_auc": 0.7206896480041596,
+          "monthly_pr_auc_mean": 0.6292975160164355,
+          "monthly_pr_auc_std": 0.21564471751986977,
+          "top20_alerts": 40,
+          "top20_hits": 27,
+          "top20_precision": 0.675,
+          "top20_recall": 0.3253012048192771,
+          "top20_lift": 1.4963855421686747,
+          "alerts_per_calendar_day": 0.21739130434782608,
+          "days_reviewed_per_true_positive": 1.4814814814814814,
+          "jul_sep_pr_auc": 0.8916091224599054,
+          "oct_dec_pr_auc": 0.5301337207996994,
+          "runtime_seconds": 14.498026414948981
+        },
+        "monthly": [
+          {
+            "month": "2025-07",
+            "days": 31,
+            "positives": 5,
+            "prevalence": 0.16129032258064516,
+            "pr_auc": 0.36969696969696964,
+            "top20_alerts": 7,
+            "top20_hits": 2,
+            "top20_precision": 0.2857142857142857,
+            "top20_recall": 0.4,
+            "train_days": 181,
+            "train_positives": 72,
+            "runtime_seconds": 2.229077583004255
+          },
+          {
+            "month": "2025-08",
+            "days": 31,
+            "positives": 18,
+            "prevalence": 0.5806451612903226,
+            "pr_auc": 0.7351479742107312,
+            "top20_alerts": 7,
+            "top20_hits": 6,
+            "top20_precision": 0.8571428571428571,
+            "top20_recall": 0.3333333333333333,
+            "train_days": 212,
+            "train_positives": 77,
+            "runtime_seconds": 3.5303493330138735
+          },
+          {
+            "month": "2025-09",
+            "days": 30,
+            "positives": 27,
+            "prevalence": 0.9,
+            "pr_auc": 0.9912460078241074,
+            "top20_alerts": 6,
+            "top20_hits": 6,
+            "top20_precision": 1.0,
+            "top20_recall": 0.2222222222222222,
+            "train_days": 243,
+            "train_positives": 95,
+            "runtime_seconds": 5.4260167079628445
+          },
+          {
+            "month": "2025-10",
+            "days": 31,
+            "positives": 10,
+            "prevalence": 0.3225806451612903,
+            "pr_auc": 0.6017982017982018,
+            "top20_alerts": 7,
+            "top20_hits": 5,
+            "top20_precision": 0.7142857142857143,
+            "top20_recall": 0.5,
+            "train_days": 273,
+            "train_positives": 122,
+            "runtime_seconds": 1.4513236659695394
+          },
+          {
+            "month": "2025-11",
+            "days": 30,
+            "positives": 8,
+            "prevalence": 0.26666666666666666,
+            "pr_auc": 0.37719182990922123,
+            "top20_alerts": 6,
+            "top20_hits": 2,
+            "top20_precision": 0.3333333333333333,
+            "top20_recall": 0.25,
+            "train_days": 304,
+            "train_positives": 132,
+            "runtime_seconds": 1.0183993329992518
+          },
+          {
+            "month": "2025-12",
+            "days": 31,
+            "positives": 15,
+            "prevalence": 0.4838709677419355,
+            "pr_auc": 0.7007041126593812,
+            "top20_alerts": 7,
+            "top20_hits": 6,
+            "top20_precision": 0.8571428571428571,
+            "top20_recall": 0.4,
+            "train_days": 334,
+            "train_positives": 140,
+            "runtime_seconds": 0.8428597919992171
+          }
+        ]
+      },
+      "gate": {
+        "pr_auc_relative_improvement": 0.07043372893401578,
+        "monthly_wins": 5,
+        "checks": {
+          "paired_pr_auc_gain_at_least_15pct": false,
+          "monthly_wins_at_least_4_of_6": true,
+          "wins_both_halves": false,
+          "top20_precision_not_lower": true,
+          "top20_recall_not_more_than_5pct_relative_lower": true
+        },
+        "base_gate_passed_before_seed_check": false
+      },
+      "decision": "RETAIN_EXPLORATORY",
+      "peak_rss_mb_process": 309.5
+    },
+    {
+      "cycle": 7,
+      "name": "extra_trees_full",
+      "method": "extra_trees_full",
+      "family": "random-tree bagging",
+      "mechanism": "Capture nonlinear interactions across all point-in-time feature families.",
+      "falsification": "Rolling family is non-incremental or candidate fails temporal gates.",
+      "ablation": "+ rolling-distribution features versus cycle 6.",
+      "feature_count": 58,
+      "seed": 47,
+      "data": "real-only",
+      "synthetic_rows_train": 0,
+      "synthetic_rows_evaluation": 0,
+      "metrics": {
+        "aggregate": {
+          "days": 184,
+          "positives": 83,
+          "prevalence": 0.45108695652173914,
+          "pr_auc": 0.6179502303605731,
+          "monthly_pr_auc_mean": 0.6459992428268698,
+          "monthly_pr_auc_std": 0.20948077412365373,
+          "top20_alerts": 40,
+          "top20_hits": 25,
+          "top20_precision": 0.625,
+          "top20_recall": 0.30120481927710846,
+          "top20_lift": 1.3855421686746987,
+          "alerts_per_calendar_day": 0.21739130434782608,
+          "days_reviewed_per_true_positive": 1.6,
+          "jul_sep_pr_auc": 0.7005767030552448,
+          "oct_dec_pr_auc": 0.5822283369119744,
+          "runtime_seconds": 4.60650208388688
+        },
+        "monthly": [
+          {
+            "month": "2025-07",
+            "days": 31,
+            "positives": 5,
+            "prevalence": 0.16129032258064516,
+            "pr_auc": 0.31545454545454543,
+            "top20_alerts": 7,
+            "top20_hits": 1,
+            "top20_precision": 0.14285714285714285,
+            "top20_recall": 0.2,
+            "train_days": 181,
+            "train_positives": 72,
+            "runtime_seconds": 0.7479735420201905
+          },
+          {
+            "month": "2025-08",
+            "days": 31,
+            "positives": 18,
+            "prevalence": 0.5806451612903226,
+            "pr_auc": 0.6221466303967818,
+            "top20_alerts": 7,
+            "top20_hits": 4,
+            "top20_precision": 0.5714285714285714,
+            "top20_recall": 0.2222222222222222,
+            "train_days": 212,
+            "train_positives": 77,
+            "runtime_seconds": 0.7133167089777999
+          },
+          {
+            "month": "2025-09",
+            "days": 30,
+            "positives": 27,
+            "prevalence": 0.9,
+            "pr_auc": 0.985329181721263,
+            "top20_alerts": 6,
+            "top20_hits": 6,
+            "top20_precision": 1.0,
+            "top20_recall": 0.2222222222222222,
+            "train_days": 243,
+            "train_positives": 95,
+            "runtime_seconds": 0.8459561669733375
+          },
+          {
+            "month": "2025-10",
+            "days": 31,
+            "positives": 10,
+            "prevalence": 0.3225806451612903,
+            "pr_auc": 0.6646477052359405,
+            "top20_alerts": 7,
+            "top20_hits": 5,
+            "top20_precision": 0.7142857142857143,
+            "top20_recall": 0.5,
+            "train_days": 273,
+            "train_positives": 122,
+            "runtime_seconds": 0.7317347499774769
+          },
+          {
+            "month": "2025-11",
+            "days": 30,
+            "positives": 8,
+            "prevalence": 0.26666666666666666,
+            "pr_auc": 0.5064309056956116,
+            "top20_alerts": 6,
+            "top20_hits": 3,
+            "top20_precision": 0.5,
+            "top20_recall": 0.375,
+            "train_days": 304,
+            "train_positives": 132,
+            "runtime_seconds": 0.7659349159803241
+          },
+          {
+            "month": "2025-12",
+            "days": 31,
+            "positives": 15,
+            "prevalence": 0.4838709677419355,
+            "pr_auc": 0.7819864884570766,
+            "top20_alerts": 7,
+            "top20_hits": 6,
+            "top20_precision": 0.8571428571428571,
+            "top20_recall": 0.4,
+            "train_days": 334,
+            "train_positives": 140,
+            "runtime_seconds": 0.8015859999577515
+          }
+        ]
+      },
+      "gate": {
+        "pr_auc_relative_improvement": -0.08216418646728707,
+        "monthly_wins": 5,
+        "checks": {
+          "paired_pr_auc_gain_at_least_15pct": false,
+          "monthly_wins_at_least_4_of_6": true,
+          "wins_both_halves": false,
+          "top20_precision_not_lower": true,
+          "top20_recall_not_more_than_5pct_relative_lower": true
+        },
+        "base_gate_passed_before_seed_check": false
+      },
+      "decision": "REJECT",
+      "peak_rss_mb_process": 309.5
+    },
+    {
+      "cycle": 8,
+      "name": "hist_gradient_boosting",
+      "method": "hist_gradient_boosting",
+      "family": "gradient boosting",
+      "mechanism": "Sequentially fit nonlinear residual structure with bounded shallow leaves.",
+      "falsification": "No paired improvement or excessive fold/seed sensitivity.",
+      "ablation": "Boosting inductive bias on the same full feature matrix as cycle 7.",
+      "feature_count": 58,
+      "seed": 47,
+      "data": "real-only",
+      "synthetic_rows_train": 0,
+      "synthetic_rows_evaluation": 0,
+      "metrics": {
+        "aggregate": {
+          "days": 184,
+          "positives": 83,
+          "prevalence": 0.45108695652173914,
+          "pr_auc": 0.6137734536268016,
+          "monthly_pr_auc_mean": 0.6233009802243048,
+          "monthly_pr_auc_std": 0.23704763522559066,
+          "top20_alerts": 40,
+          "top20_hits": 26,
+          "top20_precision": 0.65,
+          "top20_recall": 0.3132530120481928,
+          "top20_lift": 1.4409638554216868,
+          "alerts_per_calendar_day": 0.21739130434782608,
+          "days_reviewed_per_true_positive": 1.5384615384615385,
+          "jul_sep_pr_auc": 0.6330198928998574,
+          "oct_dec_pr_auc": 0.6183411317303857,
+          "runtime_seconds": 15.738382460083812
+        },
+        "monthly": [
+          {
+            "month": "2025-07",
+            "days": 31,
+            "positives": 5,
+            "prevalence": 0.16129032258064516,
+            "pr_auc": 0.14780086580086582,
+            "top20_alerts": 7,
+            "top20_hits": 0,
+            "top20_precision": 0.0,
+            "top20_recall": 0.0,
+            "train_days": 181,
+            "train_positives": 72,
+            "runtime_seconds": 3.0692190840491094
+          },
+          {
+            "month": "2025-08",
+            "days": 31,
+            "positives": 18,
+            "prevalence": 0.5806451612903226,
+            "pr_auc": 0.7143918531022875,
+            "top20_alerts": 7,
+            "top20_hits": 6,
+            "top20_precision": 0.8571428571428571,
+            "top20_recall": 0.3333333333333333,
+            "train_days": 212,
+            "train_positives": 77,
+            "runtime_seconds": 2.765823583002202
+          },
+          {
+            "month": "2025-09",
+            "days": 30,
+            "positives": 27,
+            "prevalence": 0.9,
+            "pr_auc": 0.9235230263114873,
+            "top20_alerts": 6,
+            "top20_hits": 6,
+            "top20_precision": 1.0,
+            "top20_recall": 0.2222222222222222,
+            "train_days": 243,
+            "train_positives": 95,
+            "runtime_seconds": 2.6066553330165334
+          },
+          {
+            "month": "2025-10",
+            "days": 31,
+            "positives": 10,
+            "prevalence": 0.3225806451612903,
+            "pr_auc": 0.5944805194805194,
+            "top20_alerts": 7,
+            "top20_hits": 5,
+            "top20_precision": 0.7142857142857143,
+            "top20_recall": 0.5,
+            "train_days": 273,
+            "train_positives": 122,
+            "runtime_seconds": 2.172231959004421
+          },
+          {
+            "month": "2025-11",
+            "days": 30,
+            "positives": 8,
+            "prevalence": 0.26666666666666666,
+            "pr_auc": 0.6278321175950486,
+            "top20_alerts": 6,
+            "top20_hits": 4,
+            "top20_precision": 0.6666666666666666,
+            "top20_recall": 0.5,
+            "train_days": 304,
+            "train_positives": 132,
+            "runtime_seconds": 2.4927666669827886
+          },
+          {
+            "month": "2025-12",
+            "days": 31,
+            "positives": 15,
+            "prevalence": 0.4838709677419355,
+            "pr_auc": 0.7317774990556207,
+            "top20_alerts": 7,
+            "top20_hits": 5,
+            "top20_precision": 0.7142857142857143,
+            "top20_recall": 0.3333333333333333,
+            "train_days": 334,
+            "train_positives": 140,
+            "runtime_seconds": 2.631685834028758
+          }
+        ]
+      },
+      "gate": {
+        "pr_auc_relative_improvement": -0.08836791466906924,
+        "monthly_wins": 6,
+        "checks": {
+          "paired_pr_auc_gain_at_least_15pct": false,
+          "monthly_wins_at_least_4_of_6": true,
+          "wins_both_halves": false,
+          "top20_precision_not_lower": true,
+          "top20_recall_not_more_than_5pct_relative_lower": true
+        },
+        "base_gate_passed_before_seed_check": false
+      },
+      "decision": "REJECT",
+      "peak_rss_mb_process": 309.5
+    },
+    {
+      "cycle": 9,
+      "name": "hybrid_rank_blend",
+      "method": "fixed_equal_rank_blend",
+      "family": "ensemble/hybrid",
+      "feature_count": 58,
+      "seed": 47,
+      "mechanism": "Equal within-fold rank average of Extra Trees, full logistic, and fixed robust rule; weights are fixed, not fit on evaluation data.",
+      "falsification": "Fails any paired, monthly, half-year, or workload gate.",
+      "ablation": "Ensemble versus strongest constituent on identical folds.",
+      "data": "real-only",
+      "synthetic_rows_train": 0,
+      "synthetic_rows_evaluation": 0,
+      "metrics": {
+        "aggregate": {
+          "days": 184,
+          "positives": 83,
+          "prevalence": 0.45108695652173914,
+          "pr_auc": 0.6088016192787798,
+          "monthly_pr_auc_mean": 0.6232514601730451,
+          "monthly_pr_auc_std": 0.23580855949817278,
+          "top20_alerts": 40,
+          "top20_hits": 24,
+          "top20_precision": 0.6,
+          "top20_recall": 0.2891566265060241,
+          "top20_lift": 1.3301204819277108,
+          "alerts_per_calendar_day": 0.21739130434782608,
+          "days_reviewed_per_true_positive": 1.6666666666666667,
+          "jul_sep_pr_auc": 0.6304669073308731,
+          "oct_dec_pr_auc": 0.630602375206488,
+          "runtime_seconds": 4.726471169909928
+        },
+        "monthly": [
+          {
+            "month": "2025-07",
+            "days": 31,
+            "positives": 5,
+            "prevalence": 0.16129032258064516,
+            "pr_auc": 0.20225918331181492,
+            "top20_alerts": 7,
+            "top20_hits": 1,
+            "top20_precision": 0.14285714285714285,
+            "top20_recall": 0.2,
+            "train_days": 181,
+            "train_positives": 72,
+            "runtime_seconds": 0.7668363340198994
+          },
+          {
+            "month": "2025-08",
+            "days": 31,
+            "positives": 18,
+            "prevalence": 0.5806451612903226,
+            "pr_auc": 0.5740785080522589,
+            "top20_alerts": 7,
+            "top20_hits": 3,
+            "top20_precision": 0.42857142857142855,
+            "top20_recall": 0.16666666666666666,
+            "train_days": 212,
+            "train_positives": 77,
+            "runtime_seconds": 0.7330193759989925
+          },
+          {
+            "month": "2025-09",
+            "days": 30,
+            "positives": 27,
+            "prevalence": 0.9,
+            "pr_auc": 0.9903510261556236,
+            "top20_alerts": 6,
+            "top20_hits": 6,
+            "top20_precision": 1.0,
+            "top20_recall": 0.2222222222222222,
+            "train_days": 243,
+            "train_positives": 95,
+            "runtime_seconds": 0.8671121679944918
+          },
+          {
+            "month": "2025-10",
+            "days": 31,
+            "positives": 10,
+            "prevalence": 0.3225806451612903,
+            "pr_auc": 0.6566040821923175,
+            "top20_alerts": 7,
+            "top20_hits": 5,
+            "top20_precision": 0.7142857142857143,
+            "top20_recall": 0.5,
+            "train_days": 273,
+            "train_positives": 122,
+            "runtime_seconds": 0.7512033759849146
+          },
+          {
+            "month": "2025-11",
+            "days": 30,
+            "positives": 8,
+            "prevalence": 0.26666666666666666,
+            "pr_auc": 0.5695722782119841,
+            "top20_alerts": 6,
+            "top20_hits": 4,
+            "top20_precision": 0.6666666666666666,
+            "top20_recall": 0.5,
+            "train_days": 304,
+            "train_positives": 132,
+            "runtime_seconds": 0.7887223739526235
+          },
+          {
+            "month": "2025-12",
+            "days": 31,
+            "positives": 15,
+            "prevalence": 0.4838709677419355,
+            "pr_auc": 0.7466436831142713,
+            "top20_alerts": 7,
+            "top20_hits": 5,
+            "top20_precision": 0.7142857142857143,
+            "top20_recall": 0.3333333333333333,
+            "train_days": 334,
+            "train_positives": 140,
+            "runtime_seconds": 0.8195775419590063
+          }
+        ]
+      },
+      "gate": {
+        "pr_auc_relative_improvement": -0.09575253465845524,
+        "monthly_wins": 5,
+        "checks": {
+          "paired_pr_auc_gain_at_least_15pct": false,
+          "monthly_wins_at_least_4_of_6": true,
+          "wins_both_halves": false,
+          "top20_precision_not_lower": true,
+          "top20_recall_not_more_than_5pct_relative_lower": true
+        },
+        "base_gate_passed_before_seed_check": false
+      },
+      "decision": "REJECT",
+      "peak_rss_mb_process": 309.5
+    }
+  ],
+  "strongest": {
+    "name": "extra_trees_no_rolling",
+    "metrics": {
+      "aggregate": {
+        "days": 184,
+        "positives": 83,
+        "prevalence": 0.45108695652173914,
+        "pr_auc": 0.7206896480041596,
+        "monthly_pr_auc_mean": 0.6292975160164355,
+        "monthly_pr_auc_std": 0.21564471751986977,
+        "top20_alerts": 40,
+        "top20_hits": 27,
+        "top20_precision": 0.675,
+        "top20_recall": 0.3253012048192771,
+        "top20_lift": 1.4963855421686747,
+        "alerts_per_calendar_day": 0.21739130434782608,
+        "days_reviewed_per_true_positive": 1.4814814814814814,
+        "jul_sep_pr_auc": 0.8916091224599054,
+        "oct_dec_pr_auc": 0.5301337207996994,
+        "runtime_seconds": 14.498026414948981
+      },
+      "monthly": [
+        {
+          "month": "2025-07",
+          "days": 31,
+          "positives": 5,
+          "prevalence": 0.16129032258064516,
+          "pr_auc": 0.36969696969696964,
+          "top20_alerts": 7,
+          "top20_hits": 2,
+          "top20_precision": 0.2857142857142857,
+          "top20_recall": 0.4,
+          "train_days": 181,
+          "train_positives": 72,
+          "runtime_seconds": 2.229077583004255
+        },
+        {
+          "month": "2025-08",
+          "days": 31,
+          "positives": 18,
+          "prevalence": 0.5806451612903226,
+          "pr_auc": 0.7351479742107312,
+          "top20_alerts": 7,
+          "top20_hits": 6,
+          "top20_precision": 0.8571428571428571,
+          "top20_recall": 0.3333333333333333,
+          "train_days": 212,
+          "train_positives": 77,
+          "runtime_seconds": 3.5303493330138735
+        },
+        {
+          "month": "2025-09",
+          "days": 30,
+          "positives": 27,
+          "prevalence": 0.9,
+          "pr_auc": 0.9912460078241074,
+          "top20_alerts": 6,
+          "top20_hits": 6,
+          "top20_precision": 1.0,
+          "top20_recall": 0.2222222222222222,
+          "train_days": 243,
+          "train_positives": 95,
+          "runtime_seconds": 5.4260167079628445
+        },
+        {
+          "month": "2025-10",
+          "days": 31,
+          "positives": 10,
+          "prevalence": 0.3225806451612903,
+          "pr_auc": 0.6017982017982018,
+          "top20_alerts": 7,
+          "top20_hits": 5,
+          "top20_precision": 0.7142857142857143,
+          "top20_recall": 0.5,
+          "train_days": 273,
+          "train_positives": 122,
+          "runtime_seconds": 1.4513236659695394
+        },
+        {
+          "month": "2025-11",
+          "days": 30,
+          "positives": 8,
+          "prevalence": 0.26666666666666666,
+          "pr_auc": 0.37719182990922123,
+          "top20_alerts": 6,
+          "top20_hits": 2,
+          "top20_precision": 0.3333333333333333,
+          "top20_recall": 0.25,
+          "train_days": 304,
+          "train_positives": 132,
+          "runtime_seconds": 1.0183993329992518
+        },
+        {
+          "month": "2025-12",
+          "days": 31,
+          "positives": 15,
+          "prevalence": 0.4838709677419355,
+          "pr_auc": 0.7007041126593812,
+          "top20_alerts": 7,
+          "top20_hits": 6,
+          "top20_precision": 0.8571428571428571,
+          "top20_recall": 0.4,
+          "train_days": 334,
+          "train_positives": 140,
+          "runtime_seconds": 0.8428597919992171
+        }
+      ]
+    },
+    "gate": {
+      "pr_auc_relative_improvement": 0.07043372893401578,
+      "monthly_wins": 5,
+      "checks": {
+        "paired_pr_auc_gain_at_least_15pct": false,
+        "monthly_wins_at_least_4_of_6": true,
+        "wins_both_halves": false,
+        "top20_precision_not_lower": true,
+        "top20_recall_not_more_than_5pct_relative_lower": true
+      },
+      "base_gate_passed_before_seed_check": false
+    },
+    "seed_stability": {
+      "seeds": [
+        11,
+        29,
+        47,
+        71,
+        101
+      ],
+      "per_seed": [
+        {
+          "seed": 11,
+          "pr_auc": 0.7139532629846541,
+          "relative_gain": 0.06042823800469033,
+          "monthly_wins": 5,
+          "base_gate_passed": false,
+          "top20_precision": 0.675,
+          "top20_recall": 0.3253012048192771
+        },
+        {
+          "seed": 29,
+          "pr_auc": 0.7132540535603196,
+          "relative_gain": 0.059389708655102735,
+          "monthly_wins": 5,
+          "base_gate_passed": false,
+          "top20_precision": 0.65,
+          "top20_recall": 0.3132530120481928
+        },
+        {
+          "seed": 47,
+          "pr_auc": 0.7206896480041596,
+          "relative_gain": 0.07043372893401578,
+          "monthly_wins": 5,
+          "base_gate_passed": false,
+          "top20_precision": 0.675,
+          "top20_recall": 0.3253012048192771
+        },
+        {
+          "seed": 71,
+          "pr_auc": 0.7115822579768347,
+          "relative_gain": 0.05690660599725139,
+          "monthly_wins": 5,
+          "base_gate_passed": false,
+          "top20_precision": 0.675,
+          "top20_recall": 0.3253012048192771
+        },
+        {
+          "seed": 101,
+          "pr_auc": 0.7283114728799869,
+          "relative_gain": 0.08175435556672528,
+          "monthly_wins": 5,
+          "base_gate_passed": false,
+          "top20_precision": 0.675,
+          "top20_recall": 0.3253012048192771
+        }
+      ],
+      "mean_pr_auc": 0.7175581390811909,
+      "std_pr_auc": 0.006207607828120558,
+      "relative_pr_auc_spread": 0.023314089816573406,
+      "mean_relative_gain": 0.0657825274315571,
+      "checks": {
+        "mean_gain_at_least_15pct": false,
+        "every_seed_gain_at_least_10pct": false,
+        "relative_pr_auc_spread_at_most_10pct": true,
+        "every_seed_base_gate_passed": false
+      },
+      "seed_stability_passed": false
+    },
+    "promotion_gate_passed": false
+  },
+  "synthetic": {
+    "used_in_track": false,
+    "training_rows": 0,
+    "evaluation_rows": 0,
+    "reason": "The available synthetic daily series was generated from 2025 observations, including the July-December evaluation period, and represents the P2/P3 KPI subset rather than all-incident workload. Using it would mismatch the target and risk future-information leakage.",
+    "evidence_separation": "All metrics in this track use real raw opening timestamps only."
+  },
+  "feature_catalog": {
+    "families": {
+      "calendar": {
+        "mechanism": "Known target-day weekly/annual position.",
+        "source_columns": [
+          "Aberto"
+        ],
+        "availability": "Known before target day.",
+        "leakage": "Deterministic calendar only.",
+        "missing": "None.",
+        "track": "next-day high workload",
+        "features": [
+          "dow_sin",
+          "dow_cos",
+          "month_sin",
+          "month_cos",
+          "doy_sin",
+          "doy_cos",
+          "is_weekend",
+          "is_month_end"
+        ],
+        "compute": "O(n), negligible memory.",
+        "ablation": {
+          "candidate": "logistic_calendar",
+          "pr_auc": 0.4324969337319647
+        }
+      },
+      "lag_levels": {
+        "mechanism": "Recent and seasonal observed workload persistence.",
+        "source_columns": [
+          "Aberto"
+        ],
+        "availability": "Counts through d-1 only.",
+        "leakage": "Positive shifts only; target-day count excluded.",
+        "missing": "Median imputation fitted in each training fold.",
+        "track": "next-day high workload",
+        "features": [
+          "lag_1",
+          "lag_2",
+          "lag_3",
+          "lag_7",
+          "lag_14",
+          "lag_21",
+          "lag_28",
+          "lag_56"
+        ],
+        "compute": "O(n), negligible memory.",
+        "ablation": {
+          "from": "logistic_calendar",
+          "to": "logistic_calendar_lags",
+          "pr_auc_delta": 0.2630834098706389
+        }
+      },
+      "rolling_distribution": {
+        "mechanism": "Robust recent workload level, dispersion, and weekday capacity proxy.",
+        "source_columns": [
+          "Aberto"
+        ],
+        "availability": "Strictly prior daily counts.",
+        "leakage": "Every rolling input shifted by one; same-weekday windows shift one group observation.",
+        "missing": "Minimum histories enforced; fold-fitted median imputation.",
+        "track": "next-day high workload",
+        "features": [
+          "roll_mean_7",
+          "roll_median_7",
+          "roll_std_7",
+          "roll_q25_7",
+          "roll_q80_7",
+          "roll_mean_14",
+          "roll_median_14",
+          "roll_std_14",
+          "roll_q25_14",
+          "roll_q80_14",
+          "roll_mean_28",
+          "roll_median_28",
+          "roll_std_28",
+          "roll_q25_28",
+          "roll_q80_28",
+          "roll_mean_56",
+          "roll_median_56",
+          "roll_std_56",
+          "roll_q25_56",
+          "roll_q80_56",
+          "same_dow_median_4",
+          "same_dow_q80_4",
+          "same_dow_median_8",
+          "same_dow_q80_8",
+          "same_dow_median_12",
+          "same_dow_q80_12"
+        ],
+        "compute": "O(n*w), under 1 MB for this series.",
+        "ablation": {
+          "from": "extra_trees_no_rolling",
+          "to": "extra_trees_full",
+          "pr_auc_delta": -0.10273941764358652
+        }
+      },
+      "seasonal_residual": {
+        "mechanism": "Recent deviations from the point-in-time same-weekday capacity proxy.",
+        "source_columns": [
+          "Aberto"
+        ],
+        "availability": "Observed residuals through d-1 only.",
+        "leakage": "Current-day residual is shifted before use.",
+        "missing": "Fold-fitted median imputation or zero in fixed rule.",
+        "track": "next-day high workload",
+        "features": [
+          "lag7_margin",
+          "lag7_ratio",
+          "past_resid_1",
+          "past_resid_7",
+          "past_resid_mean_7",
+          "past_resid_mean_28",
+          "past_high_rate_7",
+          "past_high_rate_28"
+        ],
+        "compute": "O(n), negligible memory.",
+        "ablation": {
+          "from": "seasonal_naive_lag7_margin",
+          "to": "robust_residual_rule",
+          "relative_gain": 0.0473742395221175
+        }
+      },
+      "trend_regime": {
+        "mechanism": "Detect persistent level shift/change relative to longer context.",
+        "source_columns": [
+          "Aberto"
+        ],
+        "availability": "Windows end at d-1.",
+        "leakage": "No centered windows or future change points.",
+        "missing": "Fold-fitted median imputation.",
+        "track": "next-day high workload",
+        "features": [
+          "mean7_minus_mean28",
+          "mean14_minus_mean56",
+          "mean7_over_mean28",
+          "std7_over_std28",
+          "roll_mad_28",
+          "slope_7",
+          "slope_28",
+          "threshold_change_7"
+        ],
+        "compute": "O(n*28), negligible memory.",
+        "ablation": {
+          "from": "robust_residual_rule",
+          "to": "isolation_regime_hybrid",
+          "pr_auc_delta": 0.002895854968192557
+        }
+      }
+    },
+    "full_feature_count": 58
+  },
+  "coverage": {
+    "cycles": 9,
+    "model_families": [
+      "ensemble/hybrid",
+      "gradient boosting",
+      "random-tree bagging",
+      "regularized generalized linear",
+      "robust seasonal residual/MAD-style rule",
+      "unsupervised density plus directional rule"
+    ],
+    "feature_families": [
+      "calendar",
+      "lag_levels",
+      "rolling_distribution",
+      "seasonal_residual",
+      "trend_regime"
+    ]
+  },
+  "hardware": {
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "python": "3.11.11",
+    "pandas": "3.0.1",
+    "numpy": "1.26.4",
+    "scikit_learn": "1.8.0",
+    "cpu_count": 10,
+    "peak_rss_mb_process": 309.5,
+    "wall_seconds": 79.81087454099907,
+    "cuda_used": false,
+    "mps_used": false
+  },
+  "leakage_checks": {
+    "target_threshold_uses_strict_prior_same_weekdays": true,
+    "features_shifted_before_rolling": true,
+    "train_dates_precede_fold": true,
+    "identical_baseline_candidate_rows": true,
+    "evaluation_real_only": true,
+    "synthetic_excluded": true,
+    "raw_sensitive_values_persisted": false
+  }
+}

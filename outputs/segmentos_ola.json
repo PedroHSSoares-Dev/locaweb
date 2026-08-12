@@ -1,0 +1,146 @@
+{
+  "modelo": "agregados_operacionais_ola",
+  "gerado_em": "2026-08-10",
+  "ano_referencia": 2025,
+  "ground_truth": "KPI Violado?",
+  "supressao": {
+    "min_incidentes": 100,
+    "min_violacoes": 10
+  },
+  "grupos": [
+    {
+      "grupo": "Team07",
+      "nIncidentes": 176,
+      "violacoes": 15,
+      "taxaViolacaoReal": 8.523,
+      "intervaloConfianca95": [
+        5.233,
+        13.585
+      ],
+      "pctP2": 15.3
+    },
+    {
+      "grupo": "Team03",
+      "nIncidentes": 415,
+      "violacoes": 12,
+      "taxaViolacaoReal": 2.892,
+      "intervaloConfianca95": [
+        1.662,
+        4.986
+      ],
+      "pctP2": 55.9
+    },
+    {
+      "grupo": "Team09",
+      "nIncidentes": 1993,
+      "violacoes": 53,
+      "taxaViolacaoReal": 2.659,
+      "intervaloConfianca95": [
+        2.039,
+        3.462
+      ],
+      "pctP2": 33.7
+    },
+    {
+      "grupo": "Team11",
+      "nIncidentes": 8642,
+      "violacoes": 112,
+      "taxaViolacaoReal": 1.296,
+      "intervaloConfianca95": [
+        1.078,
+        1.557
+      ],
+      "pctP2": 0.6
+    },
+    {
+      "grupo": "Team05",
+      "nIncidentes": 3393,
+      "violacoes": 12,
+      "taxaViolacaoReal": 0.354,
+      "intervaloConfianca95": [
+        0.202,
+        0.617
+      ],
+      "pctP2": 21.5
+    },
+    {
+      "grupo": "Team14",
+      "nIncidentes": 8932,
+      "violacoes": 10,
+      "taxaViolacaoReal": 0.112,
+      "intervaloConfianca95": [
+        0.061,
+        0.206
+      ],
+      "pctP2": 33.0
+    }
+  ],
+  "produtos": [
+    {
+      "produto": "lexc",
+      "nIncidentes": 168,
+      "violacoes": 14,
+      "taxaViolacaoReal": 8.333,
+      "intervaloConfianca95": [
+        5.029,
+        13.501
+      ],
+      "pctP2": 13.7
+    },
+    {
+      "produto": "lvps",
+      "nIncidentes": 418,
+      "violacoes": 10,
+      "taxaViolacaoReal": 2.392,
+      "intervaloConfianca95": [
+        1.305,
+        4.347
+      ],
+      "pctP2": 43.1
+    },
+    {
+      "produto": "lsin",
+      "nIncidentes": 3190,
+      "violacoes": 62,
+      "taxaViolacaoReal": 1.944,
+      "intervaloConfianca95": [
+        1.519,
+        2.484
+      ],
+      "pctP2": 28.0
+    },
+    {
+      "produto": "lhvp",
+      "nIncidentes": 1888,
+      "violacoes": 14,
+      "taxaViolacaoReal": 0.742,
+      "intervaloConfianca95": [
+        0.442,
+        1.241
+      ],
+      "pctP2": 37.5
+    },
+    {
+      "produto": "lhco",
+      "nIncidentes": 8131,
+      "violacoes": 54,
+      "taxaViolacaoReal": 0.664,
+      "intervaloConfianca95": [
+        0.509,
+        0.865
+      ],
+      "pctP2": 13.3
+    },
+    {
+      "produto": "lcem",
+      "nIncidentes": 3496,
+      "violacoes": 18,
+      "taxaViolacaoReal": 0.515,
+      "intervaloConfianca95": [
+        0.326,
+        0.812
+      ],
+      "pctP2": 17.6
+    }
+  ]
+}

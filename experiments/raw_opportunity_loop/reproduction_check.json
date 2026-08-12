@@ -1,0 +1,155 @@
+{
+  "passed": true,
+  "tolerance": 1e-12,
+  "absolute_differences": {
+    "pr_auc": 0.0,
+    "precision_at_top_5pct": 0.0,
+    "recall_at_top_5pct": 0.0
+  },
+  "data_hashes_verified": true,
+  "clean_process_pid": 28650,
+  "reproduced_metrics": {
+    "aggregate": {
+      "incidents": 2490,
+      "violations": 20,
+      "prevalence": 0.008032128514056224,
+      "pr_auc": 0.02720245101773821,
+      "monthly_pr_auc_mean": 0.05360462809957146,
+      "monthly_pr_auc_std": 0.08104087349483521,
+      "precision_at_top_5pct": 0.03225806451612903,
+      "recall_at_top_5pct": 0.2,
+      "lift_at_top_5pct": 4.016129032258065,
+      "alerts": 124,
+      "hits": 4,
+      "alerts_per_day": 0.6739130434782609,
+      "incidents_reviewed_per_true_violation": 31.0
+    },
+    "monthly": [
+      {
+        "month": "2025-07",
+        "train_incidents": 13244,
+        "train_violations": 129,
+        "test_incidents": 386,
+        "test_violations": 6,
+        "pr_auc": 0.04406229049425658,
+        "roc_auc_secondary": 0.6570175438596491,
+        "top_5pct": {
+          "k": 19,
+          "hits": 1,
+          "precision": 0.05263157894736842,
+          "recall": 0.16666666666666666,
+          "lift": 3.3859649122807016
+        },
+        "feature_count": 5298
+      },
+      {
+        "month": "2025-08",
+        "train_incidents": 15263,
+        "train_violations": 161,
+        "test_incidents": 414,
+        "test_violations": 3,
+        "pr_auc": 0.012761698767466613,
+        "roc_auc_secondary": 0.6301703163017031,
+        "top_5pct": {
+          "k": 21,
+          "hits": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "lift": 0.0
+        },
+        "feature_count": 5789
+      },
+      {
+        "month": "2025-09",
+        "train_incidents": 17338,
+        "train_violations": 182,
+        "test_incidents": 442,
+        "test_violations": 2,
+        "pr_auc": 0.009801594835769888,
+        "roc_auc_secondary": 0.6409090909090909,
+        "top_5pct": {
+          "k": 22,
+          "hits": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "lift": 0.0
+        },
+        "feature_count": 6443
+      },
+      {
+        "month": "2025-10",
+        "train_incidents": 19593,
+        "train_violations": 194,
+        "test_incidents": 436,
+        "test_violations": 2,
+        "pr_auc": 0.012681159420289856,
+        "roc_auc_secondary": 0.7390552995391705,
+        "top_5pct": {
+          "k": 22,
+          "hits": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "lift": 0.0
+        },
+        "feature_count": 7105
+      },
+      {
+        "month": "2025-11",
+        "train_incidents": 22060,
+        "train_violations": 207,
+        "test_incidents": 448,
+        "test_violations": 6,
+        "pr_auc": 0.23279721555583624,
+        "roc_auc_secondary": 0.9177978883861238,
+        "top_5pct": {
+          "k": 22,
+          "hits": 3,
+          "precision": 0.13636363636363635,
+          "recall": 0.5,
+          "lift": 10.181818181818182
+        },
+        "feature_count": 7832
+      },
+      {
+        "month": "2025-12",
+        "train_incidents": 23934,
+        "train_violations": 223,
+        "test_incidents": 364,
+        "test_violations": 1,
+        "pr_auc": 0.009523809523809525,
+        "roc_auc_secondary": 0.7272727272727273,
+        "top_5pct": {
+          "k": 18,
+          "hits": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "lift": 0.0
+        },
+        "feature_count": 8424
+      }
+    ],
+    "config": {
+      "kind": "tfidf_logistic_rank_blend",
+      "seed": 42,
+      "p2_only": false,
+      "blend_weight": 0.5,
+      "evaluation_priority": "2 - Alta",
+      "vectorizer": {
+        "ngram_range": [
+          1,
+          2
+        ],
+        "min_df": 2,
+        "max_df": 0.995,
+        "max_features": 30000,
+        "sublinear_tf": true
+      },
+      "logistic": {
+        "C": 1.0,
+        "class_weight": "balanced",
+        "solver": "liblinear",
+        "max_iter": 2000
+      }
+    }
+  }
+}

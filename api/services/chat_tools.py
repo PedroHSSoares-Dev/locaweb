@@ -169,7 +169,7 @@ CHAT_TOOLS: list[dict[str, Any]] = [
         "parameters": _enum_schema(
             "modelo",
             "Modelo ou família de modelos a consultar.",
-            ["lstm", "prophet", "prophet_monte_carlo", "xgboost", "todos"],
+            ["baseline_sazonal", "lstm", "prophet", "prophet_monte_carlo", "xgboost", "todos"],
         ),
         "strict": True,
     },
@@ -191,7 +191,7 @@ CHAT_TOOLS: list[dict[str, Any]] = [
 
 
 TOOL_SOURCE_LABELS = {
-    "consultar_previsao_volume": "previsão de volume (LSTM)",
+    "consultar_previsao_volume": "previsão de volume (modelo ativo no registro canônico)",
     "projetar_volume_longo_prazo": "projeção de longo prazo (Prophet v5/v6)",
     "simular_consumo_cota_ola": "simulação de cota (Prophet + XGBoost + metas de OLA)",
     "analisar_planejamento_periodico": "planejamento periódico e score executivo auditável",
@@ -296,7 +296,7 @@ def execute_chat_tool(
             "pontos": selected,
             "limitacoes": [
                 "D+1 e D+7 são previsões pontuais, não o total acumulado da semana.",
-                "Total, P2 e P3 são séries independentes e podem não fechar por soma.",
+                "As séries são treinadas independentemente; a API preserva o Total e reconcilia P2/P3 proporcionalmente.",
                 "Comparar apenas D+1 e D+7 não comprova tendência.",
             ],
         }
@@ -390,7 +390,7 @@ def execute_chat_tool(
             "fonte": "simulação derivada de Prophet + taxa observada do XGBoost + metas de OLA",
             "horizonte_dias": horizon,
             "data_alvo": series["total"][-1].get("data_alvo"),
-            "assuncao_cota": "metas anuais reiniciadas em 01/01/2026; P2=37 e P3=247",
+            "assuncao_cota": "metas anuais reiniciadas em 01/01/2026; P2=37,5 e P3=247",
             "prioridades": results,
             "status_validacao": (
                 "validado_apenas_para_volume_D1_D7; consumo_de_cota_e_longo_prazo_sao_cenarios"
@@ -579,12 +579,14 @@ def execute_chat_tool(
         model = _require_enum(
             arguments,
             "modelo",
-            {"lstm", "prophet", "prophet_monte_carlo", "xgboost", "todos"},
+            {"baseline_sazonal", "lstm", "prophet", "prophet_monte_carlo", "xgboost", "todos"},
         )
         catalog = compact.get("modelos", {}).get("volume_incidentes", {})
+        canonical = compact.get("modelos", {}).get("registro_canonico", {})
         lstm = catalog.get("lstm", {})
         prophet = catalog.get("prophet_original", {})
         prophet_mc = catalog.get("prophet_monte_carlo", {})
+        baseline = catalog.get("baseline_sazonal", {})
 
         def safe_mae(source: dict[str, Any]) -> dict[str, Any]:
             return {
@@ -593,6 +595,12 @@ def execute_chat_tool(
             }
 
         model_map = {
+            "baseline_sazonal": {
+                "disponivel": bool(baseline.get("disponivel")),
+                "protocolo_validacao": baseline.get("protocolo_validacao"),
+                "metricas_holdout_comum": baseline.get("metricas"),
+                "metodologia": "mediana das três semanas anteriores no mesmo dia da semana",
+            },
             "lstm": {
                 "disponivel": bool(lstm.get("disponivel")),
                 "protocolo_validacao": "holdout temporal real de 92 dias (01/10/2025 a 31/12/2025)",
@@ -604,12 +612,12 @@ def execute_chat_tool(
             },
             "prophet": {
                 "disponivel": bool(prophet.get("disponivel")),
-                "protocolo_validacao": "cross-validation temporal com janela inicial de 180 dias",
+                "protocolo_validacao": "rolling origin no holdout comum de 01/10/2025 a 31/12/2025",
                 "metricas": safe_mae(prophet.get("metricas", {})),
             },
             "prophet_monte_carlo": {
                 "disponivel": bool(prophet_mc.get("disponivel")),
-                "protocolo_validacao": "cross-validation temporal com janela inicial de 180 dias",
+                "protocolo_validacao": "rolling origin no holdout comum; base sintética limitada ao período anterior à seleção",
                 "metricas": safe_mae(prophet_mc.get("metricas", {})),
             },
             "xgboost": {
@@ -625,11 +633,13 @@ def execute_chat_tool(
         return {
             "fonte": "catálogo de avaliação dos modelos",
             "modelo_ativo_volume": _safe_identifier(catalog.get("modelo_ativo"), "indisponivel"),
+            "registro_canonico": canonical,
             "modelos": selected,
             "regras_comparacao": [
                 "comparar somente a mesma série, horizonte, métrica e período de validação",
-                "o holdout do LSTM não é diretamente comparável à validação cruzada do Prophet",
-                "modelo ativo não prova superioridade geral",
+                "o baseline, LSTM e Prophet publicados usam o mesmo rolling origin de Out–Dez/2025",
+                "candidatos shadow não substituem o ativo até validação prospectiva",
+                "métricas de protocolos diferentes não devem ser comparadas diretamente",
             ],
         }
 

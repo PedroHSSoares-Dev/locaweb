@@ -1,0 +1,324 @@
+{
+  "models": [
+    {
+      "name": "elastic_structured_full",
+      "family": "regularized_linear",
+      "mechanism": "Elastic-net shrinkage can share weak additive evidence across safe calendar, categorical, historical-support, and novelty signals.",
+      "falsification": "Reject if it fails to beat the reconstructed champion robust PR-AUC or loses more than 5% Recall@Top-5%.",
+      "feature_families": [
+        "calendar_volume",
+        "sparse_categories",
+        "historical_backoff",
+        "novelty_missingness"
+      ],
+      "config": {
+        "kind": "elastic_structured",
+        "seed": 42,
+        "alpha": 2e-05,
+        "l1_ratio": 0.1,
+        "solver": "sgd_log_loss",
+        "max_iter": 1200
+      },
+      "runtime": {
+        "seconds": 4.293698667024728,
+        "rss_start_mb": 361.375,
+        "rss_end_mb": 403.34375,
+        "process_peak_rss_mb": 405.015625
+      }
+    },
+    {
+      "name": "elastic_no_categories",
+      "family": "regularized_linear",
+      "mechanism": "Explicit ablation of opening-time sparse categorical identity from the elastic model.",
+      "falsification": "Falsify categorical value if removal does not reduce robust PR-AUC or operational recall.",
+      "feature_families": [
+        "calendar_volume",
+        "historical_backoff",
+        "novelty_missingness"
+      ],
+      "config": {
+        "kind": "elastic_structured",
+        "seed": 42,
+        "alpha": 2e-05,
+        "l1_ratio": 0.1,
+        "solver": "sgd_log_loss",
+        "max_iter": 1200,
+        "no_categories": true
+      },
+      "runtime": {
+        "seconds": 3.0800225000130013,
+        "rss_start_mb": 403.34375,
+        "rss_end_mb": 398.15625,
+        "process_peak_rss_mb": 405.015625
+      }
+    },
+    {
+      "name": "elastic_no_history_novelty",
+      "family": "regularized_linear",
+      "mechanism": "Explicit ablation of point-in-time outcome backoff and novelty/support features.",
+      "falsification": "Falsify historical/novelty value if removal does not reduce robust PR-AUC or operational recall.",
+      "feature_families": [
+        "calendar_volume",
+        "sparse_categories"
+      ],
+      "config": {
+        "kind": "elastic_structured",
+        "seed": 42,
+        "alpha": 2e-05,
+        "l1_ratio": 0.1,
+        "solver": "sgd_log_loss",
+        "max_iter": 1200,
+        "no_history_novelty": true
+      },
+      "runtime": {
+        "seconds": 3.2024112500366755,
+        "rss_start_mb": 398.15625,
+        "rss_end_mb": 395.953125,
+        "process_peak_rss_mb": 405.015625
+      }
+    },
+    {
+      "name": "elastic_no_volume_context",
+      "family": "regularized_linear",
+      "mechanism": "Explicit ablation of prior-day and rolling-volume context while preserving deterministic calendar features.",
+      "falsification": "Falsify volume-context value if removal does not reduce robust PR-AUC or operational recall.",
+      "feature_families": [
+        "calendar",
+        "sparse_categories",
+        "historical_backoff",
+        "novelty_missingness"
+      ],
+      "config": {
+        "kind": "elastic_structured",
+        "seed": 42,
+        "alpha": 2e-05,
+        "l1_ratio": 0.1,
+        "solver": "sgd_log_loss",
+        "max_iter": 1200,
+        "no_volume": true
+      },
+      "runtime": {
+        "seconds": 2.9634684580378234,
+        "rss_start_mb": 395.953125,
+        "rss_end_mb": 404.515625,
+        "process_peak_rss_mb": 405.015625
+      }
+    },
+    {
+      "name": "linear_svm_structured",
+      "family": "linear_margin",
+      "mechanism": "A maximum-margin sparse ranker may outperform likelihood optimization under extreme imbalance.",
+      "falsification": "Reject if monthly paired wins or operational recall do not improve.",
+      "feature_families": [
+        "calendar_volume",
+        "sparse_categories",
+        "historical_backoff",
+        "novelty_missingness"
+      ],
+      "config": {
+        "kind": "linear_svm_structured",
+        "seed": 42,
+        "C": 0.08,
+        "class_weight": "balanced",
+        "max_iter": 5000
+      },
+      "runtime": {
+        "seconds": 6.532655416987836,
+        "rss_start_mb": 404.53125,
+        "rss_end_mb": 347.328125,
+        "process_peak_rss_mb": 405.015625
+      }
+    },
+    {
+      "name": "extra_trees_structured",
+      "family": "bagging_random_trees",
+      "mechanism": "Randomized bagged trees may capture discontinuous interactions without boosting's sequential focus on rare positives.",
+      "falsification": "Reject if gains are unstable or Recall@Top-5% degrades by more than 5%.",
+      "feature_families": [
+        "calendar_volume",
+        "fold_safe_encoded_categories"
+      ],
+      "config": {
+        "kind": "extra_trees",
+        "seed": 42,
+        "n_estimators": 320,
+        "max_depth": 14,
+        "min_samples_leaf": 3,
+        "max_features": 0.75
+      },
+      "runtime": {
+        "seconds": 21.60083549999399,
+        "rss_start_mb": 347.953125,
+        "rss_end_mb": 253.25,
+        "process_peak_rss_mb": 405.015625
+      }
+    },
+    {
+      "name": "hist_gradient_boosting_structured",
+      "family": "gradient_boosting",
+      "mechanism": "Regularized histogram boosting may generalize differently from the deep locked XGBoost champion.",
+      "falsification": "Reject if it cannot improve paired robust PR-AUC with stable workload.",
+      "feature_families": [
+        "calendar_volume",
+        "fold_safe_encoded_categories"
+      ],
+      "config": {
+        "kind": "hist_gradient_boosting",
+        "seed": 42,
+        "learning_rate": 0.055,
+        "max_iter": 220,
+        "max_leaf_nodes": 15,
+        "min_samples_leaf": 30,
+        "l2_regularization": 1.0
+      },
+      "runtime": {
+        "seconds": 37.58039970800746,
+        "rss_start_mb": 253.8125,
+        "rss_end_mb": 221.515625,
+        "process_peak_rss_mb": 405.015625
+      }
+    },
+    {
+      "name": "xgboost_safe_reconstruction",
+      "family": "gradient_boosting",
+      "mechanism": "Reconstruct the locked XGBoost without the temporally uncertain assignment group to isolate model-family versus feature effects.",
+      "falsification": "Use as a safe boosting reference; reject as a promotion if it fails the complete gate.",
+      "feature_families": [
+        "calendar_volume",
+        "fold_safe_encoded_categories"
+      ],
+      "config": {
+        "kind": "xgboost_safe",
+        "seed": 42,
+        "n_estimators": 500,
+        "max_depth": 7,
+        "learning_rate": 0.03607939886307854,
+        "subsample": 0.7454404070203796,
+        "colsample_bytree": 0.9630659181130072,
+        "min_child_weight": 2,
+        "gamma": 2.9282357199398956,
+        "max_delta_step": 4,
+        "reg_alpha": 0.4520071476614973,
+        "reg_lambda": 0.11537349692556405
+      },
+      "runtime": {
+        "seconds": 5.1994571249815635,
+        "rss_start_mb": 223.328125,
+        "rss_end_mb": 271.359375,
+        "process_peak_rss_mb": 405.015625
+      }
+    },
+    {
+      "name": "word_tfidf_logistic",
+      "family": "sparse_text_linear",
+      "mechanism": "Reconstruct the retained lexical mechanism without champion blending to isolate its contribution.",
+      "falsification": "Reject standalone text if it loses operational recall or paired temporal stability.",
+      "feature_families": [
+        "word_tfidf"
+      ],
+      "config": {
+        "kind": "word_tfidf_logistic",
+        "seed": 42,
+        "ngram_range": [
+          1,
+          2
+        ],
+        "min_df": 2,
+        "max_features": 30000,
+        "C": 1.0
+      },
+      "runtime": {
+        "seconds": 2.9422402920317836,
+        "rss_start_mb": 271.359375,
+        "rss_end_mb": 281.96875,
+        "process_peak_rss_mb": 405.015625
+      }
+    },
+    {
+      "name": "word_char_tfidf_svm",
+      "family": "sparse_text_margin",
+      "mechanism": "Character shapes should generalize templated alert variants and identifiers that word tokenization fragments.",
+      "falsification": "Reject if character augmentation fails to improve robust PR-AUC over word-only text with non-degraded recall.",
+      "feature_families": [
+        "word_tfidf",
+        "char_tfidf"
+      ],
+      "config": {
+        "kind": "word_char_tfidf_svm",
+        "seed": 42,
+        "word_features": 22000,
+        "char_features": 32000,
+        "char_ngram_range": [
+          3,
+          5
+        ],
+        "C": 0.08
+      },
+      "runtime": {
+        "seconds": 31.122840708994772,
+        "rss_start_mb": 281.96875,
+        "rss_end_mb": 403.21875,
+        "process_peak_rss_mb": 462.21875
+      }
+    },
+    {
+      "name": "nbsvm_word_char",
+      "family": "nbsvm_sparse_text",
+      "mechanism": "Class-conditional log-count ratios can amplify rare violation-associated lexical patterns before a regularized linear fit.",
+      "falsification": "Reject if the NB transform fails to improve over the plain word/character margin model or destabilizes Top-5% recall.",
+      "feature_families": [
+        "word_binary_counts",
+        "char_binary_counts",
+        "naive_bayes_log_count_ratio"
+      ],
+      "config": {
+        "kind": "nbsvm_word_char",
+        "seed": 42,
+        "word_features": 22000,
+        "char_features": 32000,
+        "char_ngram_range": [
+          3,
+          5
+        ],
+        "C": 0.5
+      },
+      "runtime": {
+        "seconds": 108.77999933302635,
+        "rss_start_mb": 404.671875,
+        "rss_end_mb": 366.328125,
+        "process_peak_rss_mb": 488.34375
+      }
+    },
+    {
+      "name": "hybrid_nbsvm_xgboost",
+      "family": "leakage_safe_fixed_rank_hybrid",
+      "mechanism": "Equal-weight rank blend of NB-SVM lexical and safe XGBoost structured signals.",
+      "falsification": "Reject if it fails the full promotion gate or adds no robust value over both components.",
+      "feature_families": [
+        "word_binary_counts",
+        "char_binary_counts",
+        "naive_bayes_log_count_ratio",
+        "calendar_volume",
+        "fold_safe_encoded_categories"
+      ],
+      "config": {
+        "kind": "fixed_rank_hybrid",
+        "components": [
+          "nbsvm_word_char",
+          "xgboost_safe_reconstruction"
+        ],
+        "weights": [
+          0.5,
+          0.5
+        ],
+        "seed": 42
+      },
+      "runtime": {
+        "seconds": 0.004624916997272521,
+        "rss_start_mb": 368.453125,
+        "rss_end_mb": 368.453125,
+        "process_peak_rss_mb": 488.34375
+      }
+    }
+  ]
+}

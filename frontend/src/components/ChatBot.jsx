@@ -20,7 +20,7 @@ import './ChatBot.css';
 
 const DEFAULT_WELCOME = 'SYSTEM READY. Contexto operacional 2023–2025 carregado. Como posso ajudar?';
 const DEFAULT_SUGGESTIONS = ['Previsão amanhã', 'Status das metas', 'Cluster mais crítico'];
-const ALLOWED_ACTION_ROUTES = new Set(['/gestao', '/monitoramento', '/tecnico', '/modelos']);
+const ALLOWED_ACTION_ROUTES = new Set(['/gestao', '/monitoramento', '/operacoes', '/tecnico', '/modelos']);
 const MAX_MESSAGE_LENGTH = 6000;
 const PANEL_DEFAULT_WIDTH = 430;
 const PANEL_MIN_WIDTH = 340;
@@ -30,6 +30,7 @@ const DOCK_BREAKPOINT = 1180;
 const ROUTE_LABELS = {
   '/gestao': 'GESTÃO',
   '/monitoramento': 'MONITORAMENTO',
+  '/operacoes': 'FILA OPERACIONAL',
   '/tecnico': 'TÉCNICO',
   '/modelos': 'MODELOS',
   '/admin': 'ADMINISTRAÇÃO',
@@ -243,6 +244,7 @@ function MarkdownContent({ text, compact = false }) {
 
 function ProviderStatus({ token }) {
   const [status, setStatus] = useState({ state: 'checking', model: 'Assistente', provider: null });
+  const [retryTick, setRetryTick] = useState(0);
 
   useEffect(() => {
     let controller;
@@ -269,15 +271,21 @@ function ProviderStatus({ token }) {
       window.clearInterval(interval);
       controller?.abort();
     };
-  }, [token]);
+  }, [retryTick, token]);
 
   return (
-    <div className={`chat-provider chat-provider--${status.state}`} title={status.model}>
+    <button
+      type="button"
+      className={`chat-provider chat-provider--${status.state}`}
+      title={status.state === 'offline' ? 'Análise remota indisponível. Clique para verificar novamente.' : status.model}
+      onClick={() => setRetryTick((current) => current + 1)}
+      aria-label={status.state === 'offline' ? 'Verificar assistente novamente' : `Assistente ${status.state}`}
+    >
       <span aria-hidden="true" />
       {status.state === 'online'
         ? status.provider === 'openai' ? 'LUNA ONLINE' : 'LOCAL ONLINE'
-        : status.state === 'offline' ? 'LLM OFFLINE' : 'CHECKING'}
-    </div>
+        : status.state === 'offline' ? 'ANÁLISE DEGRADADA' : 'VERIFICANDO'}
+    </button>
   );
 }
 
@@ -594,6 +602,7 @@ function ChatConversation({
         elapsedMs: requestError.elapsedMs ?? Math.round(performance.now() - startedAt),
         text: message.text || `Não consegui concluir a consulta. ${requestError.message}`,
         badge: { label: 'FALHA NA CONSULTA', tone: 'red' },
+        retryText: text,
       }));
     } finally {
       if (abortRef.current === controller) {
@@ -720,6 +729,11 @@ function ChatConversation({
                   [ {message.action.label} ] →
                 </button>
               )}
+              {message.role === 'bot' && message.retryText && !message.streaming ? (
+                <button className="chat-retry" type="button" onClick={() => sendMessage(message.retryText)} disabled={thinking}>
+                  TENTAR NOVAMENTE
+                </button>
+              ) : null}
               {message.suggestions?.length > 0 && (
                 <div className="chat-suggestions" aria-label="Consultas sugeridas">
                   {message.suggestions.map((suggestion) => (

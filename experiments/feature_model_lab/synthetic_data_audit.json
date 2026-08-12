@@ -1,0 +1,202 @@
+{
+  "schema_version": 1,
+  "source": "data/processed/serie_sintetica_2023_2024.csv",
+  "csv_sha256": "010a6d84593941a1e1da1386b86466a3ea85542448192a02e9adcfca3f6cc0bb",
+  "generator": "notebooks/03b_monte_carlo_seed.ipynb",
+  "generator_sha256": "f98b9cf2c0c459aa3480fc796d0610e330ee88c02b941e74ec19135c549037a7",
+  "rows_observed": 1097,
+  "calendar_days_expected_2023_2025": 1096,
+  "unique_dates": 1096,
+  "duplicate_date_count": 1,
+  "duplicate_dates": [
+    "2023-02-05"
+  ],
+  "by_year": {
+    "2023": {
+      "rows": 366,
+      "unique_dates": 365,
+      "expected_calendar_days": 365,
+      "start": "2023-01-01",
+      "end": "2023-12-31",
+      "synthetic_flag_values": [
+        true
+      ],
+      "y_mean": 69.27595628415301,
+      "y_std": 31.69767842565392
+    },
+    "2024": {
+      "rows": 366,
+      "unique_dates": 366,
+      "expected_calendar_days": 366,
+      "start": "2024-01-01",
+      "end": "2024-12-31",
+      "synthetic_flag_values": [
+        true
+      ],
+      "y_mean": 67.88524590163935,
+      "y_std": 28.76295088067329
+    },
+    "2025": {
+      "rows": 365,
+      "unique_dates": 365,
+      "expected_calendar_days": 365,
+      "start": "2025-01-01",
+      "end": "2025-12-31",
+      "synthetic_flag_values": [
+        false
+      ],
+      "y_mean": 68.92054794520548,
+      "y_std": 29.97291340795001
+    }
+  },
+  "boundaries": {
+    "synthetic_start": "2023-01-01",
+    "synthetic_end": "2024-12-31",
+    "real_start": "2025-01-01",
+    "real_end": "2025-12-31",
+    "flags_consistent_with_boundary": true
+  },
+  "row_count_explanation": "The correct 2023-2025 calendar has 1,096 days. The file has 1,097 rows because 2023 contains one duplicated target date. The notebook groups source dates by ISO week number without ISO year; 2025 week 1 contains Jan 1-5 and Dec 29-31 (8 rows). The generator appends every sampled row but advances its target pointer by exactly 7, so selecting that block can duplicate a target date.",
+  "generation_logic": {
+    "source_population": "all real KPI daily totals in calendar year 2025",
+    "method": "month-conditioned ISO-week block bootstrap with multiplicative Normal(1, 0.08) noise",
+    "seeds": {
+      "2023": 42,
+      "2024": 123
+    },
+    "target_floor": 1,
+    "alignment_issue": "Source blocks are sorted Monday-Sunday, then assigned to consecutive target dates. When the target block does not start Monday, weekday values are cyclically misaligned; the 2023 Sunday mean is consequently generator-distorted."
+  },
+  "leakage": {
+    "generator_read_full_2025": true,
+    "includes_q4_test_values_in_generator_source": true,
+    "provided_synthetic_rows_eligible_for_q4_training": false,
+    "reason": "The notebook constructs vol_2025 from the entire year before generating 2023-2024. Therefore those rows encode the distribution and sampled blocks of Oct-Dec 2025.",
+    "promotion_mitigation": "Exclude supplied synthetic rows from promotion evidence. Augmentation experiments regenerate each synthetic history from only the real prefix available before the fold."
+  },
+  "distribution_shift": {
+    "synthetic_mean": 68.58060109289617,
+    "real_mean": 68.92054794520548,
+    "standardized_mean_difference": -0.011341802102532453,
+    "std_ratio_synthetic_to_real": 1.009351350673135,
+    "ks_statistic": 0.05318511864660529,
+    "ks_pvalue_descriptive_only": 0.47354756321965874,
+    "wasserstein_distance": 1.41126207051426,
+    "weekday_mean_rmse": 12.285893892316798,
+    "month_mean_rmse": 3.741452672285553,
+    "autocorrelation": {
+      "synthetic_lag1": 0.42717148236552444,
+      "synthetic_lag7": 0.6939620581886898,
+      "real_lag1": 0.4487671531593437,
+      "real_lag7": 0.7059638555856431
+    },
+    "artifact_warning": "Near-equal marginal mean/std are expected because synthetic values directly resample 2025. They are not independent evidence of external realism."
+  },
+  "real_rows_against_raw": {
+    "checked": true,
+    "exact_daily_match": true,
+    "max_absolute_difference": 0.0,
+    "real_incident_total_csv": 25156,
+    "real_incident_total_raw_kpi": 25156
+  },
+  "total_p2_p3_reconciliation": {
+    "period": "2025-01-01/2025-12-31",
+    "raw_priority_labels": {
+      "p2": "2 - Alta",
+      "p3": "3 - Média"
+    },
+    "daily_rows": 365,
+    "total_incidents": 25156,
+    "p2_incidents": 5159,
+    "p3_incidents": 19997,
+    "p2_plus_p3": 25156,
+    "identity_holds_annual": true,
+    "identity_holds_every_day": true,
+    "mismatched_days": 0,
+    "maximum_absolute_daily_gap": 0.0
+  },
+  "measured_augmentation_contribution": {
+    "attribution_metric": "mean D1-D7 MAE averaged across all deterministic seeds",
+    "real_only_reference": {
+      "cycle_id": "F03",
+      "seed_values": {
+        "11": 39.30953328570448
+      },
+      "seed_mean_mae": 39.30953328570448,
+      "seed_std_mae": 0.0,
+      "n_seeds": 1,
+      "promotion_eligible": true
+    },
+    "strategies": {
+      "equal_weight": {
+        "cycle_id": "F06",
+        "seed_values": {
+          "11": 25.624539236980546,
+          "29": 17.624288082316074,
+          "47": 18.673384022377366
+        },
+        "seed_mean_mae": 20.64073711389133,
+        "seed_std_mae": 3.550010636082162,
+        "n_seeds": 3,
+        "promotion_eligible": true,
+        "incremental_mae_vs_real_only_seed_mean": -18.668796171813153
+      },
+      "reduced_weight_0.25": {
+        "cycle_id": "F07",
+        "seed_values": {
+          "11": 25.580120700211275,
+          "29": 19.13151886259174,
+          "47": 19.957906427684744
+        },
+        "seed_mean_mae": 21.556515330162586,
+        "seed_std_mae": 2.865051393645911,
+        "n_seeds": 3,
+        "promotion_eligible": true,
+        "incremental_mae_vs_real_only_seed_mean": -17.753017955541896
+      },
+      "pretrain_real_finetune": {
+        "cycle_id": "F08",
+        "seed_values": {
+          "11": 52.49086461064693,
+          "29": 52.48823404182804,
+          "47": 52.87565721921969
+        },
+        "seed_mean_mae": 52.61825195723156,
+        "seed_std_mae": 0.18201617445978643,
+        "n_seeds": 3,
+        "promotion_eligible": true,
+        "incremental_mae_vs_real_only_seed_mean": 13.308718671527075
+      },
+      "lag_initialization_only": {
+        "cycle_id": "F09",
+        "seed_values": {
+          "11": 39.54287783004243,
+          "29": 38.41208975390635,
+          "47": 38.198084043254106
+        },
+        "seed_mean_mae": 38.7176838757343,
+        "seed_std_mae": 0.5900047501040216,
+        "n_seeds": 3,
+        "promotion_eligible": true,
+        "incremental_mae_vs_real_only_seed_mean": -0.5918494099701803
+      },
+      "provided_file_equal_diagnostic": {
+        "cycle_id": "F10",
+        "seed_values": {
+          "11": 11.049809835467913
+        },
+        "seed_mean_mae": 11.049809835467913,
+        "seed_std_mae": 0.0,
+        "n_seeds": 1,
+        "promotion_eligible": false,
+        "incremental_mae_vs_real_only_seed_mean": -28.25972345023657
+      }
+    },
+    "note": "Synthetic contribution is the strategy seed-mean minus the real-only seed-mean. Individual seed values are retained, but no first-seed value is used for attribution."
+  },
+  "promotion_evidence_policy": {
+    "evaluation_real_2025_only": true,
+    "provided_synthetic_file_promotion_eligible": false,
+    "fold_safe_regenerated_synthetic_training_only": true
+  }
+}

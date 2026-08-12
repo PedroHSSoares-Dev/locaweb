@@ -341,7 +341,7 @@ export default function MonitoramentoPage() {
               {[0, 1, 2, 3].map(i => <Skeleton key={i} height={130} />)}
             </div>
           ) : !d1Disponivel ? (
-            <SemDados mensagem="Previsão Prophet indisponível — execute o notebook 03" />
+            <SemDados mensagem="Previsão temporariamente indisponível. Tente novamente ou consulte o preflight administrativo." />
           ) : (
             <>
               <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 12 }}>

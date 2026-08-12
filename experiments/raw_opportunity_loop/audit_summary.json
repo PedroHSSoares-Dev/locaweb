@@ -1,0 +1,104 @@
+{
+  "dataset": {
+    "raw_rows": 122543,
+    "raw_columns": 19,
+    "sheet_count": 1,
+    "duplicate_full_rows": 0,
+    "duplicate_incident_ids": 0,
+    "raw_sha256": "5aa75370425d669b16be8d88509200e0fdab3cfc7f5f473e9a3c70c297ef1f26",
+    "processed_sha256": "6fd9377b87174be733b90d4dfa5ef07cec0c4ff1672a68984002d946da448237"
+  },
+  "timestamps": {
+    "open_min": "2023-01-02T20:19:58",
+    "open_max": "2025-12-31T23:45:18",
+    "resolved_before_open": 0,
+    "closed_before_open": 0,
+    "resolved_opening_coverage_by_year": {
+      "2023": 0.9454545454545454,
+      "2024": 0.8971061093247589,
+      "2025": 0.32492139461953357
+    },
+    "closed_opening_coverage_by_year": {
+      "2023": 1.0,
+      "2024": 1.0,
+      "2025": 1.0
+    }
+  },
+  "cohort": {
+    "model_rows": 25588,
+    "violations": 248,
+    "p2_first_open": "2025-01-01T00:04:47",
+    "p2_monthly": [
+      {
+        "month": "2025-01",
+        "incidents": 552,
+        "violations": 4
+      },
+      {
+        "month": "2025-02",
+        "incidents": 470,
+        "violations": 4
+      },
+      {
+        "month": "2025-03",
+        "incidents": 470,
+        "violations": 3
+      },
+      {
+        "month": "2025-04",
+        "incidents": 393,
+        "violations": 2
+      },
+      {
+        "month": "2025-05",
+        "incidents": 375,
+        "violations": 6
+      },
+      {
+        "month": "2025-06",
+        "incidents": 409,
+        "violations": 3
+      },
+      {
+        "month": "2025-07",
+        "incidents": 386,
+        "violations": 6
+      },
+      {
+        "month": "2025-08",
+        "incidents": 414,
+        "violations": 3
+      },
+      {
+        "month": "2025-09",
+        "incidents": 442,
+        "violations": 2
+      },
+      {
+        "month": "2025-10",
+        "incidents": 436,
+        "violations": 2
+      },
+      {
+        "month": "2025-11",
+        "incidents": 448,
+        "violations": 6
+      },
+      {
+        "month": "2025-12",
+        "incidents": 364,
+        "violations": 1
+      }
+    ],
+    "p2_pre_2025_rows": 0,
+    "unexpected_priority_values": 0,
+    "unexpected_kpi_entry_values": 0,
+    "unexpected_non_null_target_values": 0,
+    "kpi_rows_with_missing_target": 0
+  },
+  "collection_regime_inference": {
+    "observed_fact": "P2 KPI rows begin in 2025; resolution/closure timestamp coverage changes sharply by opening year.",
+    "supported_inference": "A collection or scope-definition change is more plausible than a stable 2023-2025 P2 process.",
+    "unsupported_conclusion": "The raw snapshot alone cannot establish the business cause of the regime change."
+  }
+}

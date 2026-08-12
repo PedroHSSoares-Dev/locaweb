@@ -31,10 +31,14 @@ O arquivo completo usa SQLite por padrão e aceita PostgreSQL por `CHAT_DATABASE
 
 ## Módulo: Previsões de Volume
 
-Hierarquia de modelos (melhor → fallback):
-1. **LSTM v2** — MAE holdout = 13.15 incidentes/dia
-2. **Prophet MC ensemble** — MAE holdout = 23.80
-3. **Prophet original** — MAE CV = 17.06
+Seleção validada no mesmo rolling origin de Out–Dez/2025:
+1. **Baseline sazonal** — MAE médio D1–D7 Total = 12,46
+2. **LSTM v2** — MAE médio D1–D7 Total = 21,19
+3. **Prophet MC** — MAE médio D1–D7 Total = 25,61
+4. **Prophet original** — MAE médio D1–D7 Total = 47,66
+
+O modelo ativo vem de `comparacao_modelos.json`; a disponibilidade isolada não
+é tratada como prova de superioridade.
 
 ### `GET /api/previsoes/modelos`
 
@@ -44,10 +48,12 @@ Status de disponibilidade de cada modelo e qual está sendo usado.
 ```json
 {
   "lstm":             true,
+  "baseline_sazonal": true,
   "prophet_mc":       true,
   "prophet_original": true,
-  "modelo_ativo":     "lstm_v2",
-  "mae_modelo_ativo": 13.15
+  "modelo_ativo":     "baseline_sazonal_7d",
+  "mae_modelo_ativo": 12.46,
+  "comparacao": { "comparaveis": true, "protocolo": "rolling_origin_2025Q4_D1_D7" }
 }
 ```
 
@@ -68,15 +74,18 @@ Previsão de volume para **D+1** (amanhã).
 ```json
 {
   "disponivel":   true,
-  "total":        87,
-  "p2":           14,
-  "p3":           73,
-  "modelo_usado": "lstm_v2",
-  "mae":          13.15
+  "total":        44,
+  "p2":           8,
+  "p3":           36,
+  "modelo_usado": "baseline_sazonal_7d",
+  "mae":          12.70,
+  "reconciliado": false,
+  "valores_brutos": null
 }
 ```
 
-> `p2` e `p3` retornam `null` se o modelo ativo for LSTM v2 (prevê apenas `total`).
+> As séries são treinadas independentemente. A API preserva o Total validado e
+> reconcilia P2/P3 proporcionalmente para que a saída pública feche por soma.
 
 ---
 
@@ -96,8 +105,8 @@ Série completa **D+1 a D+7** formatada para gráfico de área.
   "disponivel":   true,
   "modelo_usado": "lstm_v2",
   "serie": [
-    { "dia": "D+1", "ds": "2026-01-02", "total": 87, "P2": null, "P3": null },
-    { "dia": "D+2", "ds": "2026-01-03", "total": 91, "P2": null, "P3": null }
+    { "dia": "D+1", "ds": "2026-01-01", "total": 44, "P2": 10, "P3": 34, "reconciliado": true },
+    { "dia": "D+2", "ds": "2026-01-02", "total": 44, "P2": 10, "P3": 34, "reconciliado": true }
   ]
 }
 ```
@@ -140,7 +149,8 @@ JSON completo do modelo XGBoost de risco de violação de OLA.
 
 ### `GET /api/risco/produtos`
 
-Prioridades ordenadas por probabilidade de violação (decrescente).
+Produtos ordenados pela taxa histórica observada de violação. Segmentos com
+menos de 100 incidentes ou 10 violações são suprimidos.
 
 **Response:**
 ```json
@@ -148,20 +158,18 @@ Prioridades ordenadas por probabilidade de violação (decrescente).
   "disponivel": true,
   "produtos": [
     {
-      "produto":          "P2",
-      "probViolacao":     21.0,
-      "pctAltoRisco":     12.1,
-      "nIncidentes":      58,
-      "taxaViolacaoReal": 0.103
+      "produto": "produto-agregado",
+      "nIncidentes": 1200,
+      "violacoes": 18,
+      "taxaViolacaoReal": 1.5,
+      "intervaloConfianca95": [0.95, 2.36],
+      "pctP2": 22.1
     }
   ]
 }
 ```
 
-Semáforo do dashboard:
-- `probViolacao > 30%` → 🔴 ALTO RISCO
-- `probViolacao > 15%` → 🟡 ATENÇÃO
-- `probViolacao ≤ 15%` → 🟢 NORMAL
+Nenhum score individual, identificador de incidente ou conteúdo livre é exposto.
 
 ---
 
@@ -174,7 +182,8 @@ Grupos de atendimento ordenados por taxa histórica de violação (decrescente).
 {
   "disponivel": true,
   "grupos": [
-    { "grupo": "Team07", "taxaViolacao": 8.94 }
+    { "grupo": "grupo-agregado", "taxaViolacao": 2.1, "nIncidentes": 800,
+      "violacoes": 17, "intervaloConfianca95": [1.31, 3.39], "pctP2": 20.0 }
   ]
 }
 ```
@@ -237,21 +246,21 @@ KPI de atingimento das metas de OLA.
   "periodo_filtro": "ano",
   "P2": {
     "violacoesAno":   42,
-    "metaAnual":      39,
-    "metaMensal":     3.25,
-    "pctUtilizado":   107.7,
-    "margemRestante": -3,
-    "pctAtingimento": 92,
-    "status":         "atencao"
+    "metaAnual":      37.5,
+    "metaMensal":     3.12,
+    "pctUtilizado":   112.0,
+    "margemRestante": -4.5,
+    "pctAtingimento": 89,
+    "tendencia":      "atencao"
   },
   "P3": {
     "violacoesAno":   196,
-    "metaAnual":      263,
-    "metaMensal":     21.9,
-    "pctUtilizado":   74.5,
-    "margemRestante": 67,
+    "metaAnual":      247.0,
+    "metaMensal":     20.58,
+    "pctUtilizado":   79.4,
+    "margemRestante": 51.0,
     "pctAtingimento": 100,
-    "status":         "dentro_meta"
+    "tendencia":      "dentro_da_meta"
   },
   "por_mes": {
     "P2": { "1": 4, "2": 4, "3": 3, ... },
@@ -335,9 +344,9 @@ Snapshot operacional canônico para o chatbot local e outras integrações.
   "timestamp": "2026-08-06T12:00:00Z",
   "previsoes": {
     "disponivel": true,
-    "modelo_ativo": "lstm_v2",
-    "D1": { "total": 66, "p2": 13, "p3": 54 },
-    "D7": { "total": 62, "p2": 14, "p3": 44 }
+    "modelo_ativo": "baseline_sazonal_7d",
+    "D1": { "total": 44, "p2": 8, "p3": 36, "reconciliado": false },
+    "D7": { "total": 40, "p2": 9, "p3": 31, "reconciliado": true }
   },
   "risco": {
     "disponivel": true,
@@ -394,6 +403,35 @@ Supabase diretamente.
 | `PATCH` | `/api/admin/users/{id}` | Altera papel ou status com controle otimista por `version` |
 | `DELETE` | `/api/admin/users/{id}` | Remove o acesso de forma lógica, revoga sessões e preserva a auditoria |
 | `GET` | `/api/admin/audit` | Lista eventos append-only de administração e vinculação |
+| `GET` | `/api/admin/preflight` | Verifica artefatos, registro de modelos, reconciliação, bancos e provider antes de uma demonstração/deploy |
+
+## Módulo: Governança de modelos
+
+### `GET /api/models/registry`
+
+Retorna o registro canônico versionado. Há exatamente um modelo `active` por
+tarefa servida; modelos `shadow` ficam visíveis para comparação, mas não alteram
+previsões, decisões ou filas automaticamente.
+
+O registro também documenta protocolo, janela de validação, métricas,
+capacidades e limitações. A política de promoção exige validação temporal
+comparável e evidência prospectiva.
+
+## Módulo: Fila operacional
+
+Todos os endpoints exigem uma sessão Predictfy ativa. A fila fecha o ciclo entre
+um sinal do modelo, a investigação humana e o resultado observado.
+
+| Método | Endpoint | Função |
+|---|---|---|
+| `GET` | `/api/operations/alerts` | Lista alertas com filtros de status/prioridade e resumo agregado |
+| `POST` | `/api/operations/alerts` | Abre investigação manual ou vinculada a um modelo autorizado pelo registro |
+| `PATCH` | `/api/operations/alerts/{id}` | Atualiza responsável, ação, resultado e status com controle otimista por `version` |
+| `GET` | `/api/operations/alerts/{id}/audit` | Lista o histórico append-only do alerta |
+
+Um alerta só pode ir para `resolved` após registrar ação tomada e resultado
+observado. `false_positive` exige justificativa. O score de origem continua sendo
+um sinal de ranking, nunca uma probabilidade calibrada.
 
 Os endpoints de consulta exigem `Authorization: Bearer <token>`. Somente quick actions factuais explicitamente reconhecidas são respondidas a partir de `outputs/`, sem custo de LLM. Toda pergunta natural, estratégica, futura, comparativa ou ambígua prefere o agente `gpt-5.6-luna` quando `CHAT_LLM_PROVIDER=openai`, ou `OLLAMA_MODEL` quando o fallback local está ativo.
 
@@ -411,4 +449,7 @@ O evento `reasoning` contém somente um resumo auditável das evidências e limi
 | `/monitoramento` | Geral | `/historico/diario`, `/previsoes/serie`, `/historico/sazonalidade`, `/risco/produtos` |
 | `/tecnico` | DevOps/SRE | `/risco`, `/risco/grupos`, `/clusters` |
 | `/financeiro` | Gestores | `/kpi`, `/historico/mensal` |
+| `/modelos` | Geral | `/models/registry`, `/previsoes/modelos`, `/risco`, `/clusters` |
+| `/operacoes` | Geral autenticado | `/operations/alerts`, `/models/registry` |
+| `/admin` | Administradores | `/admin/users`, `/admin/audit`, `/admin/preflight` |
 | Chatbot | — | `/context`, `/chat/session` (`POST`/`DELETE`), `/chat/status`, `/chat`, `/chat/stream` |

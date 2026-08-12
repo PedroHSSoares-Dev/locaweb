@@ -18,7 +18,7 @@ def get_kpi(
     Retorna o KPI de atingimento das metas anuais de negócio de OLA.
 
     **Metas de negócio (2025):**
-    - P2: faixa anual 36–39; referência central 37
+    - P2: faixa anual 36–39; referência central 37,5
     - P3: faixa anual 231–263; referência central 247
 
     **Filtro `periodo`:**
@@ -50,19 +50,19 @@ def get_kpi(
     def recalcular_periodo(prioridade):
         meses_viol = por_mes_filtrado.get(prioridade, {})
         viol = sum(meses_viol.values())
-        meta_mensal = data[prioridade]["metaMensal"]
         n_meses = len(meses_idx)
-        meta_periodo = round(meta_mensal * n_meses)
         meta_min_anual, meta_max_anual = metas_negocio[prioridade]
-        meta_min = round(meta_min_anual * n_meses / 12)
-        meta_max = round(meta_max_anual * n_meses / 12)
+        meta_min = round(meta_min_anual * n_meses / 12, 3)
+        meta_max = round(meta_max_anual * n_meses / 12, 3)
+        meta_periodo = round((meta_min_anual + meta_max_anual) / 2 * n_meses / 12, 3)
         pct_utilizado = round(viol / meta_periodo * 100, 1) if meta_periodo > 0 else 0.0
-        margem = meta_periodo - viol
+        margem = round(meta_periodo - viol, 3)
         pct_atingimento = min(100, int(meta_periodo / viol * 100)) if viol > 0 else 100
         return {
             **data[prioridade],
             "violacoesAno":   viol,
             "metaAnual":      meta_periodo,
+            "metaMensal":     round(meta_periodo / n_meses, 3),
             "metaMin":        meta_min,
             "metaMax":        meta_max,
             "pctUtilizado":   pct_utilizado,

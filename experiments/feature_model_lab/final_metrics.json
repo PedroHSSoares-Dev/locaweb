@@ -1,0 +1,2157 @@
+{
+  "status": "SUCCESS: TARGET X ACHIEVED",
+  "generated_at": "2026-08-10T22:26:35.710495-03:00",
+  "exact_stopping_criterion": {
+    "minimum_research_coverage_passed": true,
+    "promotion_gate_passed": {
+      "ola_risk": true,
+      "daily_volume_forecasting": true,
+      "operational_workload": false
+    },
+    "clean_reproductions_passed": true
+  },
+  "coverage": {
+    "tracks": 3,
+    "track_names": [
+      "ola_risk",
+      "daily_volume_forecasting",
+      "operational_workload"
+    ],
+    "cycles": 36,
+    "model_family_count": 11,
+    "model_families": [
+      "regularized/generalized linear",
+      "maximum-margin linear",
+      "bagging/random trees",
+      "gradient boosting",
+      "sparse TF-IDF text",
+      "NB-SVM sparse text",
+      "statistical seasonal baseline/smoothing",
+      "direct autoregression",
+      "online pretrain/fine-tuning",
+      "anomaly/density",
+      "fixed ensembles/hybrid operational rules"
+    ],
+    "feature_family_count": 17,
+    "feature_families": [
+      "calendar/cyclical/Fourier",
+      "weekly/seasonal lags",
+      "general autoregressive lags",
+      "rolling distributions",
+      "recency weighting/EWM",
+      "trend/change/residual",
+      "regime/seasonal residual",
+      "holidays/year-end event windows",
+      "causal event-factor estimation",
+      "fold-safe categorical/sparse identity",
+      "historical target backoff",
+      "novelty/missingness/support",
+      "word sparse text",
+      "character sparse text",
+      "NB log-count ratios",
+      "fixed-rank component scores",
+      "long-lag synthetic initialization"
+    ],
+    "explicit_ablations": 10,
+    "synthetic_strategies": [
+      "provided_synthetic_equal_diagnostic",
+      "real_only",
+      "synthetic_lag_initialization_only",
+      "synthetic_plus_real_equal",
+      "synthetic_pretrain_real_finetune",
+      "synthetic_weight_0.25"
+    ]
+  },
+  "champions": {
+    "ola_risk": {
+      "champion_name": "reconstructed_champion",
+      "candidate_name": "linear_svm_structured",
+      "segments": {
+        "global": {
+          "champion": {
+            "incidents": 11963,
+            "violations": 107,
+            "prevalence": 0.008944244754660203,
+            "pr_auc": 0.014449230931008732,
+            "robust_pr_auc": 0.01636598854388405,
+            "monthly_pr_auc_mean": 0.01607218573394953,
+            "monthly_pr_auc_std": 0.006050828993515296,
+            "precision_at_top_5pct": 0.02512562814070352,
+            "recall_at_top_5pct": 0.14018691588785046,
+            "lift_at_top_5pct": 2.8091391537124877,
+            "alerts": 597,
+            "hits": 15,
+            "alerts_per_day": 3.244565217391304,
+            "incidents_reviewed_per_true_violation": 39.8
+          },
+          "candidate": {
+            "incidents": 11963,
+            "violations": 107,
+            "prevalence": 0.008944244754660203,
+            "pr_auc": 0.02687683495412771,
+            "robust_pr_auc": 0.039835281764133715,
+            "monthly_pr_auc_mean": 0.04849234191162808,
+            "monthly_pr_auc_std": 0.022841063804063692,
+            "precision_at_top_5pct": 0.048576214405360134,
+            "recall_at_top_5pct": 0.27102803738317754,
+            "lift_at_top_5pct": 5.431002363844143,
+            "alerts": 597,
+            "hits": 29,
+            "alerts_per_day": 3.244565217391304,
+            "incidents_reviewed_per_true_violation": 20.586206896551722
+          },
+          "comparison": {
+            "pooled_pr_auc_delta": 0.012427604023118977,
+            "pooled_pr_auc_relative": 0.860087577149089,
+            "robust_pr_auc_delta": 0.023469293220249664,
+            "robust_pr_auc_relative": 1.434028452196376,
+            "monthly_pr_auc_wins": 6,
+            "precision_at_top_5pct_delta": 0.023450586264656615,
+            "recall_at_top_5pct_delta": 0.1308411214953271,
+            "monthly": [
+              {
+                "month": "2025-07",
+                "candidate_pr_auc": 0.04045883820390604,
+                "champion_pr_auc": 0.01782603130707173,
+                "delta": 0.022632806896834314,
+                "candidate_hits": 5,
+                "champion_hits": 3
+              },
+              {
+                "month": "2025-08",
+                "candidate_pr_auc": 0.03104072341620085,
+                "champion_pr_auc": 0.010831835603271025,
+                "delta": 0.020208887812929826,
+                "candidate_hits": 5,
+                "champion_hits": 2
+              },
+              {
+                "month": "2025-09",
+                "candidate_pr_auc": 0.03921172532436139,
+                "champion_pr_auc": 0.007917830743858998,
+                "delta": 0.03129389458050239,
+                "candidate_hits": 2,
+                "champion_hits": 2
+              },
+              {
+                "month": "2025-10",
+                "candidate_pr_auc": 0.02265782594742517,
+                "champion_pr_auc": 0.01598038681442157,
+                "delta": 0.006677439133003598,
+                "candidate_hits": 3,
+                "champion_hits": 3
+              },
+              {
+                "month": "2025-11",
+                "candidate_pr_auc": 0.08805101957418929,
+                "champion_pr_auc": 0.027125439661727327,
+                "delta": 0.06092557991246196,
+                "candidate_hits": 7,
+                "champion_hits": 4
+              },
+              {
+                "month": "2025-12",
+                "candidate_pr_auc": 0.06953391900368573,
+                "champion_pr_auc": 0.01675159027334653,
+                "delta": 0.0527823287303392,
+                "candidate_hits": 7,
+                "champion_hits": 1
+              }
+            ],
+            "gate_checks": {
+              "robust_pr_auc_improvement_at_least_15pct": true,
+              "monthly_pr_auc_wins_at_least_4": true,
+              "recall_at_top_5pct_no_more_than_5pct_relative_degradation": true,
+              "point_in_time_safe": true
+            },
+            "passes": true
+          }
+        },
+        "P2": {
+          "champion": {
+            "incidents": 2490,
+            "violations": 20,
+            "prevalence": 0.008032128514056224,
+            "pr_auc": 0.01597796985050664,
+            "robust_pr_auc": 0.01596810627465143,
+            "monthly_pr_auc_mean": 0.02261743218288192,
+            "monthly_pr_auc_std": 0.019310805568297337,
+            "precision_at_top_5pct": 0.024193548387096774,
+            "recall_at_top_5pct": 0.15,
+            "lift_at_top_5pct": 3.0120967741935485,
+            "alerts": 124,
+            "hits": 3,
+            "alerts_per_day": 0.6739130434782609,
+            "incidents_reviewed_per_true_violation": 41.333333333333336
+          },
+          "candidate": {
+            "incidents": 2490,
+            "violations": 20,
+            "prevalence": 0.008032128514056224,
+            "pr_auc": 0.025453620396785795,
+            "robust_pr_auc": 0.03508619604285354,
+            "monthly_pr_auc_mean": 0.07106789931229954,
+            "monthly_pr_auc_std": 0.08510154355481453,
+            "precision_at_top_5pct": 0.024193548387096774,
+            "recall_at_top_5pct": 0.15,
+            "lift_at_top_5pct": 3.0120967741935485,
+            "alerts": 124,
+            "hits": 3,
+            "alerts_per_day": 0.6739130434782609,
+            "incidents_reviewed_per_true_violation": 41.333333333333336
+          },
+          "comparison": {
+            "pooled_pr_auc_delta": 0.009475650546279156,
+            "pooled_pr_auc_relative": 0.5930447131228438,
+            "robust_pr_auc_delta": 0.01911808976820211,
+            "robust_pr_auc_relative": 1.1972671924504361,
+            "monthly_pr_auc_wins": 4,
+            "precision_at_top_5pct_delta": 0.0,
+            "recall_at_top_5pct_delta": 0.0,
+            "monthly": [
+              {
+                "month": "2025-07",
+                "candidate_pr_auc": 0.04259312606499307,
+                "champion_pr_auc": 0.030020242602502294,
+                "delta": 0.012572883462490775,
+                "candidate_hits": 1,
+                "champion_hits": 1
+              },
+              {
+                "month": "2025-08",
+                "candidate_pr_auc": 0.022029644582730917,
+                "champion_pr_auc": 0.02112676056338028,
+                "delta": 0.0009028840193506353,
+                "candidate_hits": 0,
+                "champion_hits": 0
+              },
+              {
+                "month": "2025-09",
+                "candidate_pr_auc": 0.2545045045045045,
+                "champion_pr_auc": 0.007164404223227753,
+                "delta": 0.24734010028127676,
+                "candidate_hits": 1,
+                "champion_hits": 0
+              },
+              {
+                "month": "2025-10",
+                "candidate_pr_auc": 0.07692307692307691,
+                "champion_pr_auc": 0.010809451985922574,
+                "delta": 0.06611362493715434,
+                "candidate_hits": 1,
+                "champion_hits": 0
+              },
+              {
+                "month": "2025-11",
+                "candidate_pr_auc": 0.027579266020714012,
+                "champion_pr_auc": 0.06134813162801778,
+                "delta": -0.033768865607303765,
+                "candidate_hits": 0,
+                "champion_hits": 2
+              },
+              {
+                "month": "2025-12",
+                "candidate_pr_auc": 0.002777777777777778,
+                "champion_pr_auc": 0.005235602094240838,
+                "delta": -0.00245782431646306,
+                "candidate_hits": 0,
+                "champion_hits": 0
+              }
+            ],
+            "gate_checks": {
+              "robust_pr_auc_improvement_at_least_15pct": true,
+              "monthly_pr_auc_wins_at_least_4": true,
+              "recall_at_top_5pct_no_more_than_5pct_relative_degradation": true,
+              "point_in_time_safe": true
+            },
+            "passes": true
+          }
+        },
+        "P3": {
+          "champion": {
+            "incidents": 9473,
+            "violations": 87,
+            "prevalence": 0.009183996621978253,
+            "pr_auc": 0.014675912000970943,
+            "robust_pr_auc": 0.018250272199533492,
+            "monthly_pr_auc_mean": 0.01695888624341428,
+            "monthly_pr_auc_std": 0.00469301177200932,
+            "precision_at_top_5pct": 0.02748414376321353,
+            "recall_at_top_5pct": 0.14942528735632185,
+            "lift_at_top_5pct": 2.9926125732059976,
+            "alerts": 473,
+            "hits": 13,
+            "alerts_per_day": 2.5706521739130435,
+            "incidents_reviewed_per_true_violation": 36.38461538461539
+          },
+          "candidate": {
+            "incidents": 9473,
+            "violations": 87,
+            "prevalence": 0.009183996621978253,
+            "pr_auc": 0.029698584145996,
+            "robust_pr_auc": 0.04148593182219398,
+            "monthly_pr_auc_mean": 0.059527600965486295,
+            "monthly_pr_auc_std": 0.05138722933385359,
+            "precision_at_top_5pct": 0.05496828752642706,
+            "recall_at_top_5pct": 0.2988505747126437,
+            "lift_at_top_5pct": 5.985225146411995,
+            "alerts": 473,
+            "hits": 26,
+            "alerts_per_day": 2.5706521739130435,
+            "incidents_reviewed_per_true_violation": 18.192307692307693
+          },
+          "comparison": {
+            "pooled_pr_auc_delta": 0.015022672145025057,
+            "pooled_pr_auc_relative": 1.023627842960027,
+            "robust_pr_auc_delta": 0.02323565962266049,
+            "robust_pr_auc_relative": 1.2731678392859496,
+            "monthly_pr_auc_wins": 4,
+            "precision_at_top_5pct_delta": 0.02748414376321353,
+            "recall_at_top_5pct_delta": 0.14942528735632185,
+            "monthly": [
+              {
+                "month": "2025-07",
+                "candidate_pr_auc": 0.04632475900387999,
+                "champion_pr_auc": 0.01697215811487696,
+                "delta": 0.029352600889003027,
+                "candidate_hits": 4,
+                "champion_hits": 2
+              },
+              {
+                "month": "2025-08",
+                "candidate_pr_auc": 0.03664710464050799,
+                "champion_pr_auc": 0.011804279121339661,
+                "delta": 0.024842825519168325,
+                "candidate_hits": 5,
+                "champion_hits": 2
+              },
+              {
+                "month": "2025-09",
+                "candidate_pr_auc": 0.008813181162045495,
+                "champion_pr_auc": 0.009789250746848638,
+                "delta": -0.000976069584803143,
+                "candidate_hits": 1,
+                "champion_hits": 2
+              },
+              {
+                "month": "2025-10",
+                "candidate_pr_auc": 0.014959833650854217,
+                "champion_pr_auc": 0.021582764499501687,
+                "delta": -0.006622930848647471,
+                "candidate_hits": 2,
+                "champion_hits": 3
+              },
+              {
+                "month": "2025-11",
+                "candidate_pr_auc": 0.15651022781998192,
+                "champion_pr_auc": 0.022076478693728713,
+                "delta": 0.1344337491262532,
+                "candidate_hits": 7,
+                "champion_hits": 3
+              },
+              {
+                "month": "2025-12",
+                "candidate_pr_auc": 0.0939104995156482,
+                "champion_pr_auc": 0.019528386284190024,
+                "delta": 0.07438211323145817,
+                "candidate_hits": 7,
+                "champion_hits": 1
+              }
+            ],
+            "gate_checks": {
+              "robust_pr_auc_improvement_at_least_15pct": true,
+              "monthly_pr_auc_wins_at_least_4": true,
+              "recall_at_top_5pct_no_more_than_5pct_relative_degradation": true,
+              "point_in_time_safe": true
+            },
+            "passes": true
+          }
+        }
+      },
+      "promotion_gate_passed": true,
+      "passing_segments": [
+        "global",
+        "P2",
+        "P3"
+      ]
+    },
+    "daily_volume_forecasting": {
+      "champion_name": "active_seasonal_median3",
+      "candidate_name": "calendar_adjusted_seasonal",
+      "baseline": {
+        "aggregate_mae_mean_horizons": 12.46054250691528,
+        "aggregate_wape": 0.22424697490397666,
+        "aggregate_bias": 7.093097913322633,
+        "n_predictions": 623,
+        "horizons": {
+          "D1": {
+            "mae": 12.695652173913043,
+            "wape": 0.22535211267605634,
+            "bias": 6.978260869565218,
+            "n": 92
+          },
+          "D2": {
+            "mae": 12.593406593406593,
+            "wape": 0.22461779694237555,
+            "bias": 6.813186813186813,
+            "n": 91
+          },
+          "D3": {
+            "mae": 12.511111111111111,
+            "wape": 0.22556089743589744,
+            "bias": 7.111111111111111,
+            "n": 90
+          },
+          "D4": {
+            "mae": 12.460674157303371,
+            "wape": 0.22660400490396404,
+            "bias": 7.382022471910112,
+            "n": 89
+          },
+          "D5": {
+            "mae": 12.409090909090908,
+            "wape": 0.225015454358129,
+            "bias": 7.2727272727272725,
+            "n": 88
+          },
+          "D6": {
+            "mae": 12.367816091954023,
+            "wape": 0.22231404958677686,
+            "bias": 7.172413793103448,
+            "n": 87
+          },
+          "D7": {
+            "mae": 12.186046511627907,
+            "wape": 0.2200293932395549,
+            "bias": 6.930232558139535,
+            "n": 86
+          }
+        },
+        "months": {
+          "2025-10": {
+            "mae": 9.974489795918368,
+            "wape": 0.1477925612337466,
+            "bias": 7.188775510204081,
+            "n": 196
+          },
+          "2025-11": {
+            "mae": 11.566666666666666,
+            "wape": 0.21236230110159118,
+            "bias": 4.166666666666667,
+            "n": 210
+          },
+          "2025-12": {
+            "mae": 15.580645161290322,
+            "wape": 0.3394237526352776,
+            "bias": 9.838709677419354,
+            "n": 217
+          }
+        }
+      },
+      "candidate": {
+        "aggregate_mae_mean_horizons": 10.18475079814182,
+        "aggregate_wape": 0.18331224585951794,
+        "aggregate_bias": 4.31234422530668,
+        "n_predictions": 623,
+        "horizons": {
+          "D1": {
+            "mae": 10.489232853867,
+            "wape": 0.1861874247647625,
+            "bias": 4.244546410347047,
+            "n": 92
+          },
+          "D2": {
+            "mae": 10.340199346203098,
+            "wape": 0.18442927097304623,
+            "bias": 4.071973096738575,
+            "n": 91
+          },
+          "D3": {
+            "mae": 10.232868227827577,
+            "wape": 0.18448680699208372,
+            "bias": 4.339439464480115,
+            "n": 90
+          },
+          "D4": {
+            "mae": 10.1568330393762,
+            "wape": 0.18470742552196198,
+            "bias": 4.579208447227082,
+            "n": 89
+          },
+          "D5": {
+            "mae": 10.111237610627853,
+            "wape": 0.18334821960338987,
+            "bias": 4.4702309208406765,
+            "n": 88
+          },
+          "D6": {
+            "mae": 10.072315791239255,
+            "wape": 0.18105195740450727,
+            "bias": 4.3664699440982035,
+            "n": 87
+          },
+          "D7": {
+            "mae": 9.890568717851757,
+            "wape": 0.1785825970470819,
+            "bias": 4.118375825976506,
+            "n": 86
+          }
+        },
+        "months": {
+          "2025-10": {
+            "mae": 9.974489795918368,
+            "wape": 0.1477925612337466,
+            "bias": 7.188775510204081,
+            "n": 196
+          },
+          "2025-11": {
+            "mae": 10.182023486901537,
+            "wape": 0.18694045569586665,
+            "bias": 2.684643179765131,
+            "n": 210
+          },
+          "2025-12": {
+            "mae": 10.388609240222143,
+            "wape": 0.2263154507708267,
+            "bias": 3.2894718185040763,
+            "n": 217
+          }
+        }
+      },
+      "comparison": {
+        "mae_improvement_fraction": 0.18263985757525836,
+        "mae_improvement_pct": 18.263985757525838,
+        "horizon_wins": 7,
+        "wape_relative_change_fraction": -0.18254306022182512,
+        "checks": {
+          "mae_improvement_at_least_10pct": true,
+          "wins_at_least_5_horizons": true,
+          "wape_regression_not_over_5pct": true,
+          "real_test_rows_only": true,
+          "leakage_eligible": true
+        },
+        "passed": true
+      },
+      "segment_diagnostics": {
+        "total": {
+          "baseline": {
+            "aggregate_mae_mean_horizons": 12.46054250691528,
+            "aggregate_wape": 0.22424697490397666,
+            "aggregate_bias": 7.093097913322633,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 12.695652173913043,
+                "wape": 0.22535211267605634,
+                "bias": 6.978260869565218,
+                "n": 92
+              },
+              "D2": {
+                "mae": 12.593406593406593,
+                "wape": 0.22461779694237555,
+                "bias": 6.813186813186813,
+                "n": 91
+              },
+              "D3": {
+                "mae": 12.511111111111111,
+                "wape": 0.22556089743589744,
+                "bias": 7.111111111111111,
+                "n": 90
+              },
+              "D4": {
+                "mae": 12.460674157303371,
+                "wape": 0.22660400490396404,
+                "bias": 7.382022471910112,
+                "n": 89
+              },
+              "D5": {
+                "mae": 12.409090909090908,
+                "wape": 0.225015454358129,
+                "bias": 7.2727272727272725,
+                "n": 88
+              },
+              "D6": {
+                "mae": 12.367816091954023,
+                "wape": 0.22231404958677686,
+                "bias": 7.172413793103448,
+                "n": 87
+              },
+              "D7": {
+                "mae": 12.186046511627907,
+                "wape": 0.2200293932395549,
+                "bias": 6.930232558139535,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 9.974489795918368,
+                "wape": 0.1477925612337466,
+                "bias": 7.188775510204081,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 11.566666666666666,
+                "wape": 0.21236230110159118,
+                "bias": 4.166666666666667,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 15.580645161290322,
+                "wape": 0.3394237526352776,
+                "bias": 9.838709677419354,
+                "n": 217
+              }
+            }
+          },
+          "calendar_candidate": {
+            "aggregate_mae_mean_horizons": 10.18475079814182,
+            "aggregate_wape": 0.18331224585951794,
+            "aggregate_bias": 4.31234422530668,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 10.489232853867,
+                "wape": 0.1861874247647625,
+                "bias": 4.244546410347047,
+                "n": 92
+              },
+              "D2": {
+                "mae": 10.340199346203098,
+                "wape": 0.18442927097304623,
+                "bias": 4.071973096738575,
+                "n": 91
+              },
+              "D3": {
+                "mae": 10.232868227827577,
+                "wape": 0.18448680699208372,
+                "bias": 4.339439464480115,
+                "n": 90
+              },
+              "D4": {
+                "mae": 10.1568330393762,
+                "wape": 0.18470742552196198,
+                "bias": 4.579208447227082,
+                "n": 89
+              },
+              "D5": {
+                "mae": 10.111237610627853,
+                "wape": 0.18334821960338987,
+                "bias": 4.4702309208406765,
+                "n": 88
+              },
+              "D6": {
+                "mae": 10.072315791239255,
+                "wape": 0.18105195740450727,
+                "bias": 4.3664699440982035,
+                "n": 87
+              },
+              "D7": {
+                "mae": 9.890568717851757,
+                "wape": 0.1785825970470819,
+                "bias": 4.118375825976506,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 9.974489795918368,
+                "wape": 0.1477925612337466,
+                "bias": 7.188775510204081,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 10.182023486901537,
+                "wape": 0.18694045569586665,
+                "bias": 2.684643179765131,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 10.388609240222143,
+                "wape": 0.2263154507708267,
+                "bias": 3.2894718185040763,
+                "n": 217
+              }
+            }
+          },
+          "paired_comparison": {
+            "mae_improvement_fraction": 0.18263985757525836,
+            "mae_improvement_pct": 18.263985757525838,
+            "horizon_wins": 7,
+            "wape_relative_change_fraction": -0.18254306022182512,
+            "checks": {
+              "mae_improvement_at_least_10pct": true,
+              "wins_at_least_5_horizons": true,
+              "wape_regression_not_over_5pct": true,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": true
+          },
+          "promotion_scope": true,
+          "note": "Promotion gate is claimed on Total only. P2/P3 are diagnostic and were not used to select, weight, or sum the Total forecast."
+        },
+        "p2": {
+          "baseline": {
+            "aggregate_mae_mean_horizons": 4.283192295090157,
+            "aggregate_wape": 0.3167200664530675,
+            "aggregate_bias": 0.5248796147672552,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 4.358695652173913,
+                "wape": 0.3213141025641026,
+                "bias": 0.4673913043478261,
+                "n": 92
+              },
+              "D2": {
+                "mae": 4.34065934065934,
+                "wape": 0.3193209377526273,
+                "bias": 0.4065934065934066,
+                "n": 91
+              },
+              "D3": {
+                "mae": 4.277777777777778,
+                "wape": 0.3171334431630972,
+                "bias": 0.5222222222222223,
+                "n": 90
+              },
+              "D4": {
+                "mae": 4.247191011235955,
+                "wape": 0.31605351170568563,
+                "bias": 0.6067415730337079,
+                "n": 89
+              },
+              "D5": {
+                "mae": 4.261363636363637,
+                "wape": 0.31645569620253167,
+                "bias": 0.5795454545454546,
+                "n": 88
+              },
+              "D6": {
+                "mae": 4.287356321839081,
+                "wape": 0.3166383701188455,
+                "bias": 0.6091954022988506,
+                "n": 87
+              },
+              "D7": {
+                "mae": 4.209302325581396,
+                "wape": 0.30966638152266895,
+                "bias": 0.4883720930232558,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 3.86734693877551,
+                "wape": 0.27633977397010573,
+                "bias": 0.5612244897959183,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 5.033333333333333,
+                "wape": 0.33705357142857145,
+                "bias": -0.43333333333333335,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 3.935483870967742,
+                "wape": 0.33516483516483514,
+                "bias": 1.4193548387096775,
+                "n": 217
+              }
+            }
+          },
+          "calendar_candidate": {
+            "aggregate_mae_mean_horizons": 4.355352521259531,
+            "aggregate_wape": 0.322053511389129,
+            "aggregate_bias": -0.03256372773828637,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 4.430528597308489,
+                "wape": 0.32660947992979245,
+                "bias": -0.07620018115942032,
+                "n": 92
+              },
+              "D2": {
+                "mae": 4.411580978545264,
+                "wape": 0.32453829349039537,
+                "bias": -0.1412709314495029,
+                "n": 91
+              },
+              "D3": {
+                "mae": 4.349487433862434,
+                "wape": 0.32244964501451323,
+                "bias": -0.03172949735449737,
+                "n": 90
+              },
+              "D4": {
+                "mae": 4.3197063937934725,
+                "wape": 0.32144972328396243,
+                "bias": 0.046565676832530725,
+                "n": 89
+              },
+              "D5": {
+                "mae": 4.331185741341991,
+                "wape": 0.32164079766927867,
+                "bias": 0.016521239177489176,
+                "n": 88
+              },
+              "D6": {
+                "mae": 4.362205801860974,
+                "wape": 0.32216630285390896,
+                "bias": 0.04392446633825945,
+                "n": 87
+              },
+              "D7": {
+                "mae": 4.282772702104098,
+                "wape": 0.3150713878365718,
+                "bias": -0.08122231450719825,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 3.86734693877551,
+                "wape": 0.27633977397010573,
+                "bias": 0.5612244897959183,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 5.2868055555555555,
+                "wape": 0.3540271577380953,
+                "bias": -0.6868055555555557,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 3.897307713407944,
+                "wape": 0.3319135689990282,
+                "bias": 0.06424868334430556,
+                "n": 217
+              }
+            }
+          },
+          "paired_comparison": {
+            "mae_improvement_fraction": -0.016847300143888407,
+            "mae_improvement_pct": -1.6847300143888406,
+            "horizon_wins": 0,
+            "wape_relative_change_fraction": 0.016839618012810226,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": false,
+              "wape_regression_not_over_5pct": true,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          },
+          "promotion_scope": false,
+          "note": "Promotion gate is claimed on Total only. P2/P3 are diagnostic and were not used to select, weight, or sum the Total forecast."
+        },
+        "p3": {
+          "baseline": {
+            "aggregate_mae_mean_horizons": 11.372929805295014,
+            "aggregate_wape": 0.27045801526717556,
+            "aggregate_bias": 6.426966292134831,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 11.434782608695652,
+                "wape": 0.2673443456162643,
+                "bias": 6.369565217391305,
+                "n": 92
+              },
+              "D2": {
+                "mae": 11.384615384615385,
+                "wape": 0.26804657179818886,
+                "bias": 6.263736263736264,
+                "n": 91
+              },
+              "D3": {
+                "mae": 11.4,
+                "wape": 0.27157226045526733,
+                "bias": 6.444444444444445,
+                "n": 90
+              },
+              "D4": {
+                "mae": 11.415730337078651,
+                "wape": 0.27474310438074634,
+                "bias": 6.629213483146067,
+                "n": 89
+              },
+              "D5": {
+                "mae": 11.397727272727273,
+                "wape": 0.2734460196292257,
+                "bias": 6.556818181818182,
+                "n": 88
+              },
+              "D6": {
+                "mae": 11.32183908045977,
+                "wape": 0.2689787001638449,
+                "bias": 6.425287356321839,
+                "n": 87
+              },
+              "D7": {
+                "mae": 11.255813953488373,
+                "wape": 0.26933778519755147,
+                "bias": 6.3023255813953485,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 8.653061224489797,
+                "wape": 0.16175488793514545,
+                "bias": 7.357142857142857,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 10.966666666666667,
+                "wape": 0.2774030354131535,
+                "bias": 3.7666666666666666,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 14.225806451612904,
+                "wape": 0.4164305949008499,
+                "bias": 8.161290322580646,
+                "n": 217
+              }
+            }
+          },
+          "calendar_candidate": {
+            "aggregate_mae_mean_horizons": 9.42297062009435,
+            "aggregate_wape": 0.22411408894789248,
+            "aggregate_bias": 3.9746213971665854,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 9.54936200378072,
+                "wape": 0.22326335561571187,
+                "bias": 3.99718809073724,
+                "n": 92
+              },
+              "D2": {
+                "mae": 9.478475871954133,
+                "wape": 0.22316721975364198,
+                "bias": 3.86528905876732,
+                "n": 91
+              },
+              "D3": {
+                "mae": 9.472681159420292,
+                "wape": 0.22565942412594658,
+                "bias": 4.019347826086957,
+                "n": 90
+              },
+              "D4": {
+                "mae": 9.46675622862726,
+                "wape": 0.2278370211865403,
+                "bias": 4.176868588177822,
+                "n": 89
+              },
+              "D5": {
+                "mae": 9.426605731225296,
+                "wape": 0.2261562988952634,
+                "bias": 4.076605731225296,
+                "n": 88
+              },
+              "D6": {
+                "mae": 9.328060969515244,
+                "wape": 0.22161149763730917,
+                "bias": 3.9165667166416793,
+                "n": 87
+              },
+              "D7": {
+                "mae": 9.238852376137514,
+                "wape": 0.22107437516634007,
+                "bias": 3.76443377148635,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 8.653061224489797,
+                "wape": 0.16175488793514545,
+                "bias": 7.357142857142857,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 9.779710144927536,
+                "wape": 0.24737884009091574,
+                "bias": 2.579710144927536,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 9.779032258064515,
+                "wape": 0.2862606232294617,
+                "bias": 2.2693548387096776,
+                "n": 217
+              }
+            }
+          },
+          "paired_comparison": {
+            "mae_improvement_fraction": 0.17145618750700461,
+            "mae_improvement_pct": 17.14561875070046,
+            "horizon_wins": 7,
+            "wape_relative_change_fraction": -0.17135349556381835,
+            "checks": {
+              "mae_improvement_at_least_10pct": true,
+              "wins_at_least_5_horizons": true,
+              "wape_regression_not_over_5pct": true,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": true
+          },
+          "promotion_scope": false,
+          "note": "Promotion gate is claimed on Total only. P2/P3 are diagnostic and were not used to select, weight, or sum the Total forecast."
+        }
+      },
+      "promotion_scope": "total"
+    },
+    "operational_workload": {
+      "champion_name": "seasonal_naive_lag7_margin",
+      "candidate_name": "extra_trees_no_rolling",
+      "baseline": {
+        "aggregate": {
+          "days": 184,
+          "positives": 83,
+          "prevalence": 0.45108695652173914,
+          "pr_auc": 0.6732688148026253,
+          "monthly_pr_auc_mean": 0.554996800654581,
+          "monthly_pr_auc_std": 0.2272514636102749,
+          "top20_alerts": 40,
+          "top20_hits": 17,
+          "top20_precision": 0.425,
+          "top20_recall": 0.20481927710843373,
+          "top20_lift": 0.9421686746987952,
+          "alerts_per_calendar_day": 0.21739130434782608,
+          "days_reviewed_per_true_positive": 2.3529411764705883,
+          "jul_sep_pr_auc": 0.768900359581717,
+          "oct_dec_pr_auc": 0.5382594008820748,
+          "runtime_seconds": 0.0013517089537344873
+        },
+        "monthly": [
+          {
+            "month": "2025-07",
+            "days": 31,
+            "positives": 5,
+            "prevalence": 0.16129032258064516,
+            "pr_auc": 0.13797643097643097,
+            "top20_alerts": 7,
+            "top20_hits": 0,
+            "top20_precision": 0.0,
+            "top20_recall": 0.0,
+            "train_days": 181,
+            "train_positives": 72,
+            "runtime_seconds": 0.000108207983430475
+          },
+          {
+            "month": "2025-08",
+            "days": 31,
+            "positives": 18,
+            "prevalence": 0.5806451612903226,
+            "pr_auc": 0.5582339721838114,
+            "top20_alerts": 7,
+            "top20_hits": 3,
+            "top20_precision": 0.42857142857142855,
+            "top20_recall": 0.16666666666666666,
+            "train_days": 212,
+            "train_positives": 77,
+            "runtime_seconds": 0.0003190420102328062
+          },
+          {
+            "month": "2025-09",
+            "days": 30,
+            "positives": 27,
+            "prevalence": 0.9,
+            "pr_auc": 0.9198870471783949,
+            "top20_alerts": 6,
+            "top20_hits": 5,
+            "top20_precision": 0.8333333333333334,
+            "top20_recall": 0.18518518518518517,
+            "train_days": 243,
+            "train_positives": 95,
+            "runtime_seconds": 0.00041783397318795323
+          },
+          {
+            "month": "2025-10",
+            "days": 31,
+            "positives": 10,
+            "prevalence": 0.3225806451612903,
+            "pr_auc": 0.5730433893591788,
+            "top20_alerts": 7,
+            "top20_hits": 3,
+            "top20_precision": 0.42857142857142855,
+            "top20_recall": 0.3,
+            "train_days": 273,
+            "train_positives": 122,
+            "runtime_seconds": 0.00010075001046061516
+          },
+          {
+            "month": "2025-11",
+            "days": 30,
+            "positives": 8,
+            "prevalence": 0.26666666666666666,
+            "pr_auc": 0.6020156926406927,
+            "top20_alerts": 6,
+            "top20_hits": 3,
+            "top20_precision": 0.5,
+            "top20_recall": 0.375,
+            "train_days": 304,
+            "train_positives": 132,
+            "runtime_seconds": 0.0002663329942151904
+          },
+          {
+            "month": "2025-12",
+            "days": 31,
+            "positives": 15,
+            "prevalence": 0.4838709677419355,
+            "pr_auc": 0.5388242715889774,
+            "top20_alerts": 7,
+            "top20_hits": 3,
+            "top20_precision": 0.42857142857142855,
+            "top20_recall": 0.2,
+            "train_days": 334,
+            "train_positives": 140,
+            "runtime_seconds": 0.0001395419822074473
+          }
+        ]
+      },
+      "candidate": {
+        "aggregate": {
+          "days": 184,
+          "positives": 83,
+          "prevalence": 0.45108695652173914,
+          "pr_auc": 0.7206896480041596,
+          "monthly_pr_auc_mean": 0.6292975160164355,
+          "monthly_pr_auc_std": 0.21564471751986977,
+          "top20_alerts": 40,
+          "top20_hits": 27,
+          "top20_precision": 0.675,
+          "top20_recall": 0.3253012048192771,
+          "top20_lift": 1.4963855421686747,
+          "alerts_per_calendar_day": 0.21739130434782608,
+          "days_reviewed_per_true_positive": 1.4814814814814814,
+          "jul_sep_pr_auc": 0.8916091224599054,
+          "oct_dec_pr_auc": 0.5301337207996994,
+          "runtime_seconds": 14.498026414948981
+        },
+        "monthly": [
+          {
+            "month": "2025-07",
+            "days": 31,
+            "positives": 5,
+            "prevalence": 0.16129032258064516,
+            "pr_auc": 0.36969696969696964,
+            "top20_alerts": 7,
+            "top20_hits": 2,
+            "top20_precision": 0.2857142857142857,
+            "top20_recall": 0.4,
+            "train_days": 181,
+            "train_positives": 72,
+            "runtime_seconds": 2.229077583004255
+          },
+          {
+            "month": "2025-08",
+            "days": 31,
+            "positives": 18,
+            "prevalence": 0.5806451612903226,
+            "pr_auc": 0.7351479742107312,
+            "top20_alerts": 7,
+            "top20_hits": 6,
+            "top20_precision": 0.8571428571428571,
+            "top20_recall": 0.3333333333333333,
+            "train_days": 212,
+            "train_positives": 77,
+            "runtime_seconds": 3.5303493330138735
+          },
+          {
+            "month": "2025-09",
+            "days": 30,
+            "positives": 27,
+            "prevalence": 0.9,
+            "pr_auc": 0.9912460078241074,
+            "top20_alerts": 6,
+            "top20_hits": 6,
+            "top20_precision": 1.0,
+            "top20_recall": 0.2222222222222222,
+            "train_days": 243,
+            "train_positives": 95,
+            "runtime_seconds": 5.4260167079628445
+          },
+          {
+            "month": "2025-10",
+            "days": 31,
+            "positives": 10,
+            "prevalence": 0.3225806451612903,
+            "pr_auc": 0.6017982017982018,
+            "top20_alerts": 7,
+            "top20_hits": 5,
+            "top20_precision": 0.7142857142857143,
+            "top20_recall": 0.5,
+            "train_days": 273,
+            "train_positives": 122,
+            "runtime_seconds": 1.4513236659695394
+          },
+          {
+            "month": "2025-11",
+            "days": 30,
+            "positives": 8,
+            "prevalence": 0.26666666666666666,
+            "pr_auc": 0.37719182990922123,
+            "top20_alerts": 6,
+            "top20_hits": 2,
+            "top20_precision": 0.3333333333333333,
+            "top20_recall": 0.25,
+            "train_days": 304,
+            "train_positives": 132,
+            "runtime_seconds": 1.0183993329992518
+          },
+          {
+            "month": "2025-12",
+            "days": 31,
+            "positives": 15,
+            "prevalence": 0.4838709677419355,
+            "pr_auc": 0.7007041126593812,
+            "top20_alerts": 7,
+            "top20_hits": 6,
+            "top20_precision": 0.8571428571428571,
+            "top20_recall": 0.4,
+            "train_days": 334,
+            "train_positives": 140,
+            "runtime_seconds": 0.8428597919992171
+          }
+        ]
+      },
+      "comparison": {
+        "pr_auc_relative_improvement": 0.07043372893401578,
+        "monthly_wins": 5,
+        "checks": {
+          "paired_pr_auc_gain_at_least_15pct": false,
+          "monthly_wins_at_least_4_of_6": true,
+          "wins_both_halves": false,
+          "top20_precision_not_lower": true,
+          "top20_recall_not_more_than_5pct_relative_lower": true
+        },
+        "base_gate_passed_before_seed_check": false
+      },
+      "promotion_gate_passed": false
+    }
+  },
+  "synthetic_data": {
+    "schema_version": 1,
+    "source": "data/processed/serie_sintetica_2023_2024.csv",
+    "csv_sha256": "010a6d84593941a1e1da1386b86466a3ea85542448192a02e9adcfca3f6cc0bb",
+    "generator": "notebooks/03b_monte_carlo_seed.ipynb",
+    "generator_sha256": "f98b9cf2c0c459aa3480fc796d0610e330ee88c02b941e74ec19135c549037a7",
+    "rows_observed": 1097,
+    "calendar_days_expected_2023_2025": 1096,
+    "unique_dates": 1096,
+    "duplicate_date_count": 1,
+    "duplicate_dates": [
+      "2023-02-05"
+    ],
+    "by_year": {
+      "2023": {
+        "rows": 366,
+        "unique_dates": 365,
+        "expected_calendar_days": 365,
+        "start": "2023-01-01",
+        "end": "2023-12-31",
+        "synthetic_flag_values": [
+          true
+        ],
+        "y_mean": 69.27595628415301,
+        "y_std": 31.69767842565392
+      },
+      "2024": {
+        "rows": 366,
+        "unique_dates": 366,
+        "expected_calendar_days": 366,
+        "start": "2024-01-01",
+        "end": "2024-12-31",
+        "synthetic_flag_values": [
+          true
+        ],
+        "y_mean": 67.88524590163935,
+        "y_std": 28.76295088067329
+      },
+      "2025": {
+        "rows": 365,
+        "unique_dates": 365,
+        "expected_calendar_days": 365,
+        "start": "2025-01-01",
+        "end": "2025-12-31",
+        "synthetic_flag_values": [
+          false
+        ],
+        "y_mean": 68.92054794520548,
+        "y_std": 29.97291340795001
+      }
+    },
+    "boundaries": {
+      "synthetic_start": "2023-01-01",
+      "synthetic_end": "2024-12-31",
+      "real_start": "2025-01-01",
+      "real_end": "2025-12-31",
+      "flags_consistent_with_boundary": true
+    },
+    "row_count_explanation": "The correct 2023-2025 calendar has 1,096 days. The file has 1,097 rows because 2023 contains one duplicated target date. The notebook groups source dates by ISO week number without ISO year; 2025 week 1 contains Jan 1-5 and Dec 29-31 (8 rows). The generator appends every sampled row but advances its target pointer by exactly 7, so selecting that block can duplicate a target date.",
+    "generation_logic": {
+      "source_population": "all real KPI daily totals in calendar year 2025",
+      "method": "month-conditioned ISO-week block bootstrap with multiplicative Normal(1, 0.08) noise",
+      "seeds": {
+        "2023": 42,
+        "2024": 123
+      },
+      "target_floor": 1,
+      "alignment_issue": "Source blocks are sorted Monday-Sunday, then assigned to consecutive target dates. When the target block does not start Monday, weekday values are cyclically misaligned; the 2023 Sunday mean is consequently generator-distorted."
+    },
+    "leakage": {
+      "generator_read_full_2025": true,
+      "includes_q4_test_values_in_generator_source": true,
+      "provided_synthetic_rows_eligible_for_q4_training": false,
+      "reason": "The notebook constructs vol_2025 from the entire year before generating 2023-2024. Therefore those rows encode the distribution and sampled blocks of Oct-Dec 2025.",
+      "promotion_mitigation": "Exclude supplied synthetic rows from promotion evidence. Augmentation experiments regenerate each synthetic history from only the real prefix available before the fold."
+    },
+    "distribution_shift": {
+      "synthetic_mean": 68.58060109289617,
+      "real_mean": 68.92054794520548,
+      "standardized_mean_difference": -0.011341802102532453,
+      "std_ratio_synthetic_to_real": 1.009351350673135,
+      "ks_statistic": 0.05318511864660529,
+      "ks_pvalue_descriptive_only": 0.47354756321965874,
+      "wasserstein_distance": 1.41126207051426,
+      "weekday_mean_rmse": 12.285893892316798,
+      "month_mean_rmse": 3.741452672285553,
+      "autocorrelation": {
+        "synthetic_lag1": 0.42717148236552444,
+        "synthetic_lag7": 0.6939620581886898,
+        "real_lag1": 0.4487671531593437,
+        "real_lag7": 0.7059638555856431
+      },
+      "artifact_warning": "Near-equal marginal mean/std are expected because synthetic values directly resample 2025. They are not independent evidence of external realism."
+    },
+    "real_rows_against_raw": {
+      "checked": true,
+      "exact_daily_match": true,
+      "max_absolute_difference": 0.0,
+      "real_incident_total_csv": 25156,
+      "real_incident_total_raw_kpi": 25156
+    },
+    "total_p2_p3_reconciliation": {
+      "period": "2025-01-01/2025-12-31",
+      "raw_priority_labels": {
+        "p2": "2 - Alta",
+        "p3": "3 - Média"
+      },
+      "daily_rows": 365,
+      "total_incidents": 25156,
+      "p2_incidents": 5159,
+      "p3_incidents": 19997,
+      "p2_plus_p3": 25156,
+      "identity_holds_annual": true,
+      "identity_holds_every_day": true,
+      "mismatched_days": 0,
+      "maximum_absolute_daily_gap": 0.0
+    },
+    "measured_augmentation_contribution": {
+      "attribution_metric": "mean D1-D7 MAE averaged across all deterministic seeds",
+      "real_only_reference": {
+        "cycle_id": "F03",
+        "seed_values": {
+          "11": 39.30953328570448
+        },
+        "seed_mean_mae": 39.30953328570448,
+        "seed_std_mae": 0.0,
+        "n_seeds": 1,
+        "promotion_eligible": true
+      },
+      "strategies": {
+        "equal_weight": {
+          "cycle_id": "F06",
+          "seed_values": {
+            "11": 25.624539236980546,
+            "29": 17.624288082316074,
+            "47": 18.673384022377366
+          },
+          "seed_mean_mae": 20.64073711389133,
+          "seed_std_mae": 3.550010636082162,
+          "n_seeds": 3,
+          "promotion_eligible": true,
+          "incremental_mae_vs_real_only_seed_mean": -18.668796171813153
+        },
+        "reduced_weight_0.25": {
+          "cycle_id": "F07",
+          "seed_values": {
+            "11": 25.580120700211275,
+            "29": 19.13151886259174,
+            "47": 19.957906427684744
+          },
+          "seed_mean_mae": 21.556515330162586,
+          "seed_std_mae": 2.865051393645911,
+          "n_seeds": 3,
+          "promotion_eligible": true,
+          "incremental_mae_vs_real_only_seed_mean": -17.753017955541896
+        },
+        "pretrain_real_finetune": {
+          "cycle_id": "F08",
+          "seed_values": {
+            "11": 52.49086461064693,
+            "29": 52.48823404182804,
+            "47": 52.87565721921969
+          },
+          "seed_mean_mae": 52.61825195723156,
+          "seed_std_mae": 0.18201617445978643,
+          "n_seeds": 3,
+          "promotion_eligible": true,
+          "incremental_mae_vs_real_only_seed_mean": 13.308718671527075
+        },
+        "lag_initialization_only": {
+          "cycle_id": "F09",
+          "seed_values": {
+            "11": 39.54287783004243,
+            "29": 38.41208975390635,
+            "47": 38.198084043254106
+          },
+          "seed_mean_mae": 38.7176838757343,
+          "seed_std_mae": 0.5900047501040216,
+          "n_seeds": 3,
+          "promotion_eligible": true,
+          "incremental_mae_vs_real_only_seed_mean": -0.5918494099701803
+        },
+        "provided_file_equal_diagnostic": {
+          "cycle_id": "F10",
+          "seed_values": {
+            "11": 11.049809835467913
+          },
+          "seed_mean_mae": 11.049809835467913,
+          "seed_std_mae": 0.0,
+          "n_seeds": 1,
+          "promotion_eligible": false,
+          "incremental_mae_vs_real_only_seed_mean": -28.25972345023657
+        }
+      },
+      "note": "Synthetic contribution is the strategy seed-mean minus the real-only seed-mean. Individual seed values are retained, but no first-seed value is used for attribution."
+    },
+    "promotion_evidence_policy": {
+      "evaluation_real_2025_only": true,
+      "provided_synthetic_file_promotion_eligible": false,
+      "fold_safe_regenerated_synthetic_training_only": true
+    }
+  },
+  "reproduction": {
+    "all_passed": true,
+    "checks": {
+      "risk": {
+        "passed": true,
+        "tolerance": 1e-10,
+        "absolute_differences": {
+          "global.pr_auc": 0.0,
+          "global.robust_pr_auc": 0.0,
+          "global.precision_at_top_5pct": 0.0,
+          "global.recall_at_top_5pct": 0.0,
+          "P2.pr_auc": 0.0,
+          "P2.robust_pr_auc": 0.0,
+          "P2.precision_at_top_5pct": 0.0,
+          "P2.recall_at_top_5pct": 0.0,
+          "P3.pr_auc": 0.0,
+          "P3.robust_pr_auc": 0.0,
+          "P3.precision_at_top_5pct": 0.0,
+          "P3.recall_at_top_5pct": 0.0
+        },
+        "data_hashes_verified": true,
+        "clean_process_pid": 44871,
+        "candidate_name": "linear_svm_structured",
+        "reproduced_candidate": {
+          "name": "linear_svm_structured",
+          "family": "linear_margin",
+          "config": {
+            "kind": "linear_svm_structured",
+            "seed": 42,
+            "C": 0.08,
+            "class_weight": "balanced",
+            "max_iter": 5000
+          },
+          "segments": {
+            "global": {
+              "aggregate": {
+                "incidents": 11963,
+                "violations": 107,
+                "prevalence": 0.008944244754660203,
+                "pr_auc": 0.02687683495412771,
+                "robust_pr_auc": 0.039835281764133715,
+                "monthly_pr_auc_mean": 0.04849234191162808,
+                "monthly_pr_auc_std": 0.022841063804063692,
+                "precision_at_top_5pct": 0.048576214405360134,
+                "recall_at_top_5pct": 0.27102803738317754,
+                "lift_at_top_5pct": 5.431002363844143,
+                "alerts": 597,
+                "hits": 29,
+                "alerts_per_day": 3.244565217391304,
+                "incidents_reviewed_per_true_violation": 20.586206896551722
+              },
+              "monthly": [
+                {
+                  "month": "2025-07",
+                  "train_incidents": 13244,
+                  "train_violations": 129,
+                  "test_incidents": 2126,
+                  "test_violations": 29,
+                  "pr_auc": 0.04045883820390604,
+                  "roc_auc_secondary": 0.7208820482462631,
+                  "top_5pct": {
+                    "k": 106,
+                    "hits": 5,
+                    "precision": 0.04716981132075472,
+                    "recall": 0.1724137931034483,
+                    "lift": 3.458035133376708
+                  },
+                  "feature_count": 373
+                },
+                {
+                  "month": "2025-08",
+                  "train_incidents": 15263,
+                  "train_violations": 161,
+                  "test_incidents": 2330,
+                  "test_violations": 17,
+                  "pr_auc": 0.03104072341620085,
+                  "roc_auc_secondary": 0.802344803031459,
+                  "top_5pct": {
+                    "k": 116,
+                    "hits": 5,
+                    "precision": 0.04310344827586207,
+                    "recall": 0.29411764705882354,
+                    "lift": 5.907707910750507
+                  },
+                  "feature_count": 387
+                },
+                {
+                  "month": "2025-09",
+                  "train_incidents": 17338,
+                  "train_violations": 182,
+                  "test_incidents": 2324,
+                  "test_violations": 11,
+                  "pr_auc": 0.03921172532436139,
+                  "roc_auc_secondary": 0.6644656683567189,
+                  "top_5pct": {
+                    "k": 116,
+                    "hits": 2,
+                    "precision": 0.017241379310344827,
+                    "recall": 0.18181818181818182,
+                    "lift": 3.6426332288401255
+                  },
+                  "feature_count": 402
+                },
+                {
+                  "month": "2025-10",
+                  "train_incidents": 19593,
+                  "train_violations": 194,
+                  "test_incidents": 2126,
+                  "test_violations": 11,
+                  "pr_auc": 0.02265782594742517,
+                  "roc_auc_secondary": 0.7530195572748763,
+                  "top_5pct": {
+                    "k": 106,
+                    "hits": 3,
+                    "precision": 0.02830188679245283,
+                    "recall": 0.2727272727272727,
+                    "lift": 5.469982847341337
+                  },
+                  "feature_count": 408
+                },
+                {
+                  "month": "2025-11",
+                  "train_incidents": 22060,
+                  "train_violations": 207,
+                  "test_incidents": 1634,
+                  "test_violations": 21,
+                  "pr_auc": 0.08805101957418929,
+                  "roc_auc_secondary": 0.7563841407610781,
+                  "top_5pct": {
+                    "k": 82,
+                    "hits": 7,
+                    "precision": 0.08536585365853659,
+                    "recall": 0.3333333333333333,
+                    "lift": 6.642276422764228
+                  },
+                  "feature_count": 424
+                },
+                {
+                  "month": "2025-12",
+                  "train_incidents": 23934,
+                  "train_violations": 223,
+                  "test_incidents": 1423,
+                  "test_violations": 18,
+                  "pr_auc": 0.06953391900368573,
+                  "roc_auc_secondary": 0.696045867931989,
+                  "top_5pct": {
+                    "k": 71,
+                    "hits": 7,
+                    "precision": 0.09859154929577464,
+                    "recall": 0.3888888888888889,
+                    "lift": 7.794209702660406
+                  },
+                  "feature_count": 432
+                }
+              ]
+            },
+            "P2": {
+              "aggregate": {
+                "incidents": 2490,
+                "violations": 20,
+                "prevalence": 0.008032128514056224,
+                "pr_auc": 0.025453620396785795,
+                "robust_pr_auc": 0.03508619604285354,
+                "monthly_pr_auc_mean": 0.07106789931229954,
+                "monthly_pr_auc_std": 0.08510154355481453,
+                "precision_at_top_5pct": 0.024193548387096774,
+                "recall_at_top_5pct": 0.15,
+                "lift_at_top_5pct": 3.0120967741935485,
+                "alerts": 124,
+                "hits": 3,
+                "alerts_per_day": 0.6739130434782609,
+                "incidents_reviewed_per_true_violation": 41.333333333333336
+              },
+              "monthly": [
+                {
+                  "month": "2025-07",
+                  "train_incidents": 13244,
+                  "train_violations": 129,
+                  "test_incidents": 386,
+                  "test_violations": 6,
+                  "pr_auc": 0.04259312606499307,
+                  "roc_auc_secondary": 0.5877192982456141,
+                  "top_5pct": {
+                    "k": 19,
+                    "hits": 1,
+                    "precision": 0.05263157894736842,
+                    "recall": 0.16666666666666666,
+                    "lift": 3.3859649122807016
+                  },
+                  "feature_count": 373
+                },
+                {
+                  "month": "2025-08",
+                  "train_incidents": 15263,
+                  "train_violations": 161,
+                  "test_incidents": 414,
+                  "test_violations": 3,
+                  "pr_auc": 0.022029644582730917,
+                  "roc_auc_secondary": 0.5863746958637469,
+                  "top_5pct": {
+                    "k": 21,
+                    "hits": 0,
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "lift": 0.0
+                  },
+                  "feature_count": 387
+                },
+                {
+                  "month": "2025-09",
+                  "train_incidents": 17338,
+                  "train_violations": 182,
+                  "test_incidents": 442,
+                  "test_violations": 2,
+                  "pr_auc": 0.2545045045045045,
+                  "roc_auc_secondary": 0.7488636363636364,
+                  "top_5pct": {
+                    "k": 22,
+                    "hits": 1,
+                    "precision": 0.045454545454545456,
+                    "recall": 0.5,
+                    "lift": 10.045454545454545
+                  },
+                  "feature_count": 402
+                },
+                {
+                  "month": "2025-10",
+                  "train_incidents": 19593,
+                  "train_violations": 194,
+                  "test_incidents": 436,
+                  "test_violations": 2,
+                  "pr_auc": 0.07692307692307691,
+                  "roc_auc_secondary": 0.7857142857142857,
+                  "top_5pct": {
+                    "k": 22,
+                    "hits": 1,
+                    "precision": 0.045454545454545456,
+                    "recall": 0.5,
+                    "lift": 9.909090909090908
+                  },
+                  "feature_count": 408
+                },
+                {
+                  "month": "2025-11",
+                  "train_incidents": 22060,
+                  "train_violations": 207,
+                  "test_incidents": 448,
+                  "test_violations": 6,
+                  "pr_auc": 0.027579266020714012,
+                  "roc_auc_secondary": 0.5667420814479638,
+                  "top_5pct": {
+                    "k": 22,
+                    "hits": 0,
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "lift": 0.0
+                  },
+                  "feature_count": 424
+                },
+                {
+                  "month": "2025-12",
+                  "train_incidents": 23934,
+                  "train_violations": 223,
+                  "test_incidents": 364,
+                  "test_violations": 1,
+                  "pr_auc": 0.002777777777777778,
+                  "roc_auc_secondary": 0.011019283746556474,
+                  "top_5pct": {
+                    "k": 18,
+                    "hits": 0,
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "lift": 0.0
+                  },
+                  "feature_count": 432
+                }
+              ]
+            },
+            "P3": {
+              "aggregate": {
+                "incidents": 9473,
+                "violations": 87,
+                "prevalence": 0.009183996621978253,
+                "pr_auc": 0.029698584145996,
+                "robust_pr_auc": 0.04148593182219398,
+                "monthly_pr_auc_mean": 0.059527600965486295,
+                "monthly_pr_auc_std": 0.05138722933385359,
+                "precision_at_top_5pct": 0.05496828752642706,
+                "recall_at_top_5pct": 0.2988505747126437,
+                "lift_at_top_5pct": 5.985225146411995,
+                "alerts": 473,
+                "hits": 26,
+                "alerts_per_day": 2.5706521739130435,
+                "incidents_reviewed_per_true_violation": 18.192307692307693
+              },
+              "monthly": [
+                {
+                  "month": "2025-07",
+                  "train_incidents": 13244,
+                  "train_violations": 129,
+                  "test_incidents": 1740,
+                  "test_violations": 23,
+                  "pr_auc": 0.04632475900387999,
+                  "roc_auc_secondary": 0.7582740371223823,
+                  "top_5pct": {
+                    "k": 87,
+                    "hits": 4,
+                    "precision": 0.04597701149425287,
+                    "recall": 0.17391304347826086,
+                    "lift": 3.4782608695652173
+                  },
+                  "feature_count": 373
+                },
+                {
+                  "month": "2025-08",
+                  "train_incidents": 15263,
+                  "train_violations": 161,
+                  "test_incidents": 1916,
+                  "test_violations": 14,
+                  "pr_auc": 0.03664710464050799,
+                  "roc_auc_secondary": 0.8410695508487307,
+                  "top_5pct": {
+                    "k": 96,
+                    "hits": 5,
+                    "precision": 0.052083333333333336,
+                    "recall": 0.35714285714285715,
+                    "lift": 7.127976190476191
+                  },
+                  "feature_count": 387
+                },
+                {
+                  "month": "2025-09",
+                  "train_incidents": 17338,
+                  "train_violations": 182,
+                  "test_incidents": 1882,
+                  "test_violations": 9,
+                  "pr_auc": 0.008813181162045495,
+                  "roc_auc_secondary": 0.6492258408969568,
+                  "top_5pct": {
+                    "k": 94,
+                    "hits": 1,
+                    "precision": 0.010638297872340425,
+                    "recall": 0.1111111111111111,
+                    "lift": 2.2245862884160754
+                  },
+                  "feature_count": 402
+                },
+                {
+                  "month": "2025-10",
+                  "train_incidents": 19593,
+                  "train_violations": 194,
+                  "test_incidents": 1690,
+                  "test_violations": 9,
+                  "pr_auc": 0.014959833650854217,
+                  "roc_auc_secondary": 0.7543129089827484,
+                  "top_5pct": {
+                    "k": 84,
+                    "hits": 2,
+                    "precision": 0.023809523809523808,
+                    "recall": 0.2222222222222222,
+                    "lift": 4.470899470899471
+                  },
+                  "feature_count": 408
+                },
+                {
+                  "month": "2025-11",
+                  "train_incidents": 22060,
+                  "train_violations": 207,
+                  "test_incidents": 1186,
+                  "test_violations": 15,
+                  "pr_auc": 0.15651022781998192,
+                  "roc_auc_secondary": 0.8257899231426131,
+                  "top_5pct": {
+                    "k": 59,
+                    "hits": 7,
+                    "precision": 0.11864406779661017,
+                    "recall": 0.4666666666666667,
+                    "lift": 9.380790960451977
+                  },
+                  "feature_count": 424
+                },
+                {
+                  "month": "2025-12",
+                  "train_incidents": 23934,
+                  "train_violations": 223,
+                  "test_incidents": 1059,
+                  "test_violations": 17,
+                  "pr_auc": 0.0939104995156482,
+                  "roc_auc_secondary": 0.7271085017500282,
+                  "top_5pct": {
+                    "k": 53,
+                    "hits": 7,
+                    "precision": 0.1320754716981132,
+                    "recall": 0.4117647058823529,
+                    "lift": 8.227524972253052
+                  },
+                  "feature_count": 432
+                }
+              ]
+            }
+          },
+          "runtime": {
+            "seconds": 2.2803549999953248,
+            "rss_start_mb": 389.15625,
+            "rss_end_mb": 437.578125,
+            "process_peak_rss_mb": 437.578125
+          }
+        },
+        "reproduced_comparison": {
+          "global": {
+            "pooled_pr_auc_delta": 0.012427604023118977,
+            "pooled_pr_auc_relative": 0.860087577149089,
+            "robust_pr_auc_delta": 0.023469293220249664,
+            "robust_pr_auc_relative": 1.434028452196376,
+            "monthly_pr_auc_wins": 6,
+            "precision_at_top_5pct_delta": 0.023450586264656615,
+            "recall_at_top_5pct_delta": 0.1308411214953271,
+            "monthly": [
+              {
+                "month": "2025-07",
+                "candidate_pr_auc": 0.04045883820390604,
+                "champion_pr_auc": 0.01782603130707173,
+                "delta": 0.022632806896834314,
+                "candidate_hits": 5,
+                "champion_hits": 3
+              },
+              {
+                "month": "2025-08",
+                "candidate_pr_auc": 0.03104072341620085,
+                "champion_pr_auc": 0.010831835603271025,
+                "delta": 0.020208887812929826,
+                "candidate_hits": 5,
+                "champion_hits": 2
+              },
+              {
+                "month": "2025-09",
+                "candidate_pr_auc": 0.03921172532436139,
+                "champion_pr_auc": 0.007917830743858998,
+                "delta": 0.03129389458050239,
+                "candidate_hits": 2,
+                "champion_hits": 2
+              },
+              {
+                "month": "2025-10",
+                "candidate_pr_auc": 0.02265782594742517,
+                "champion_pr_auc": 0.01598038681442157,
+                "delta": 0.006677439133003598,
+                "candidate_hits": 3,
+                "champion_hits": 3
+              },
+              {
+                "month": "2025-11",
+                "candidate_pr_auc": 0.08805101957418929,
+                "champion_pr_auc": 0.027125439661727327,
+                "delta": 0.06092557991246196,
+                "candidate_hits": 7,
+                "champion_hits": 4
+              },
+              {
+                "month": "2025-12",
+                "candidate_pr_auc": 0.06953391900368573,
+                "champion_pr_auc": 0.01675159027334653,
+                "delta": 0.0527823287303392,
+                "candidate_hits": 7,
+                "champion_hits": 1
+              }
+            ],
+            "gate_checks": {
+              "robust_pr_auc_improvement_at_least_15pct": true,
+              "monthly_pr_auc_wins_at_least_4": true,
+              "recall_at_top_5pct_no_more_than_5pct_relative_degradation": true,
+              "point_in_time_safe": true
+            },
+            "passes": true
+          },
+          "P2": {
+            "pooled_pr_auc_delta": 0.009475650546279156,
+            "pooled_pr_auc_relative": 0.5930447131228438,
+            "robust_pr_auc_delta": 0.01911808976820211,
+            "robust_pr_auc_relative": 1.1972671924504361,
+            "monthly_pr_auc_wins": 4,
+            "precision_at_top_5pct_delta": 0.0,
+            "recall_at_top_5pct_delta": 0.0,
+            "monthly": [
+              {
+                "month": "2025-07",
+                "candidate_pr_auc": 0.04259312606499307,
+                "champion_pr_auc": 0.030020242602502294,
+                "delta": 0.012572883462490775,
+                "candidate_hits": 1,
+                "champion_hits": 1
+              },
+              {
+                "month": "2025-08",
+                "candidate_pr_auc": 0.022029644582730917,
+                "champion_pr_auc": 0.02112676056338028,
+                "delta": 0.0009028840193506353,
+                "candidate_hits": 0,
+                "champion_hits": 0
+              },
+              {
+                "month": "2025-09",
+                "candidate_pr_auc": 0.2545045045045045,
+                "champion_pr_auc": 0.007164404223227753,
+                "delta": 0.24734010028127676,
+                "candidate_hits": 1,
+                "champion_hits": 0
+              },
+              {
+                "month": "2025-10",
+                "candidate_pr_auc": 0.07692307692307691,
+                "champion_pr_auc": 0.010809451985922574,
+                "delta": 0.06611362493715434,
+                "candidate_hits": 1,
+                "champion_hits": 0
+              },
+              {
+                "month": "2025-11",
+                "candidate_pr_auc": 0.027579266020714012,
+                "champion_pr_auc": 0.06134813162801778,
+                "delta": -0.033768865607303765,
+                "candidate_hits": 0,
+                "champion_hits": 2
+              },
+              {
+                "month": "2025-12",
+                "candidate_pr_auc": 0.002777777777777778,
+                "champion_pr_auc": 0.005235602094240838,
+                "delta": -0.00245782431646306,
+                "candidate_hits": 0,
+                "champion_hits": 0
+              }
+            ],
+            "gate_checks": {
+              "robust_pr_auc_improvement_at_least_15pct": true,
+              "monthly_pr_auc_wins_at_least_4": true,
+              "recall_at_top_5pct_no_more_than_5pct_relative_degradation": true,
+              "point_in_time_safe": true
+            },
+            "passes": true
+          },
+          "P3": {
+            "pooled_pr_auc_delta": 0.015022672145025057,
+            "pooled_pr_auc_relative": 1.023627842960027,
+            "robust_pr_auc_delta": 0.02323565962266049,
+            "robust_pr_auc_relative": 1.2731678392859496,
+            "monthly_pr_auc_wins": 4,
+            "precision_at_top_5pct_delta": 0.02748414376321353,
+            "recall_at_top_5pct_delta": 0.14942528735632185,
+            "monthly": [
+              {
+                "month": "2025-07",
+                "candidate_pr_auc": 0.04632475900387999,
+                "champion_pr_auc": 0.01697215811487696,
+                "delta": 0.029352600889003027,
+                "candidate_hits": 4,
+                "champion_hits": 2
+              },
+              {
+                "month": "2025-08",
+                "candidate_pr_auc": 0.03664710464050799,
+                "champion_pr_auc": 0.011804279121339661,
+                "delta": 0.024842825519168325,
+                "candidate_hits": 5,
+                "champion_hits": 2
+              },
+              {
+                "month": "2025-09",
+                "candidate_pr_auc": 0.008813181162045495,
+                "champion_pr_auc": 0.009789250746848638,
+                "delta": -0.000976069584803143,
+                "candidate_hits": 1,
+                "champion_hits": 2
+              },
+              {
+                "month": "2025-10",
+                "candidate_pr_auc": 0.014959833650854217,
+                "champion_pr_auc": 0.021582764499501687,
+                "delta": -0.006622930848647471,
+                "candidate_hits": 2,
+                "champion_hits": 3
+              },
+              {
+                "month": "2025-11",
+                "candidate_pr_auc": 0.15651022781998192,
+                "champion_pr_auc": 0.022076478693728713,
+                "delta": 0.1344337491262532,
+                "candidate_hits": 7,
+                "champion_hits": 3
+              },
+              {
+                "month": "2025-12",
+                "candidate_pr_auc": 0.0939104995156482,
+                "champion_pr_auc": 0.019528386284190024,
+                "delta": 0.07438211323145817,
+                "candidate_hits": 7,
+                "champion_hits": 1
+              }
+            ],
+            "gate_checks": {
+              "robust_pr_auc_improvement_at_least_15pct": true,
+              "monthly_pr_auc_wins_at_least_4": true,
+              "recall_at_top_5pct_no_more_than_5pct_relative_degradation": true,
+              "point_in_time_safe": true
+            },
+            "passes": true
+          }
+        }
+      },
+      "forecasting": {
+        "status": "PASS",
+        "process": "fresh Python interpreter",
+        "tolerance": 1e-12,
+        "source_hashes": {
+          "csv": "010a6d84593941a1e1da1386b86466a3ea85542448192a02e9adcfca3f6cc0bb",
+          "generator": "f98b9cf2c0c459aa3480fc796d0610e330ee88c02b941e74ec19135c549037a7"
+        },
+        "candidate": "calendar_adjusted_seasonal",
+        "baseline_mae": 12.46054250691528,
+        "candidate_mae": 10.18475079814182,
+        "promotion_gate_passed": true,
+        "seed_labels": [
+          11,
+          29,
+          47
+        ],
+        "seed_maes": [
+          10.18475079814182,
+          10.18475079814182,
+          10.18475079814182
+        ],
+        "max_seed_difference": 0.0,
+        "reconciliation": {
+          "period": "2025-01-01/2025-12-31",
+          "raw_priority_labels": {
+            "p2": "2 - Alta",
+            "p3": "3 - Média"
+          },
+          "daily_rows": 365,
+          "total_incidents": 25156,
+          "p2_incidents": 5159,
+          "p3_incidents": 19997,
+          "p2_plus_p3": 25156,
+          "identity_holds_annual": true,
+          "identity_holds_every_day": true,
+          "mismatched_days": 0,
+          "maximum_absolute_daily_gap": 0.0
+        },
+        "segment_mae": {
+          "total": {
+            "baseline": 12.46054250691528,
+            "candidate": 10.18475079814182
+          },
+          "p2": {
+            "baseline": 4.283192295090157,
+            "candidate": 4.355352521259531
+          },
+          "p3": {
+            "baseline": 11.372929805295014,
+            "candidate": 9.42297062009435
+          }
+        },
+        "numeric_values_checked": 363,
+        "maximum_absolute_numeric_difference": 0.0
+      },
+      "operational": {
+        "success": true,
+        "clean_child_process": true,
+        "tolerance": 1e-12,
+        "max_absolute_numeric_difference": 0.0,
+        "mismatches": [],
+        "canonical_raw_sha256": "5aa75370425d669b16be8d88509200e0fdab3cfc7f5f473e9a3c70c297ef1f26",
+        "candidate": "extra_trees_no_rolling",
+        "generated_at": "2026-08-10T22:26:26.778286-03:00"
+      }
+    }
+  },
+  "hardware_runtime": {
+    "risk": {
+      "total_seconds": 308.24135229201056,
+      "process_peak_rss_mb": 488.34375,
+      "declared_memory_ceiling_mb": 18432,
+      "within_declared_ceiling": true
+    },
+    "forecasting": {
+      "total_cycle_seconds": 335.76910508598667,
+      "max_process_peak_rss_mb": 322.765625,
+      "max_tracemalloc_peak_mb": 32.60956859588623
+    },
+    "operational": {
+      "platform": "macOS-26.5.2-arm64-arm-64bit",
+      "machine": "arm64",
+      "python": "3.11.11",
+      "pandas": "3.0.1",
+      "numpy": "1.26.4",
+      "scikit_learn": "1.8.0",
+      "cpu_count": 10,
+      "peak_rss_mb_process": 309.5,
+      "wall_seconds": 79.81087454099907,
+      "cuda_used": false,
+      "mps_used": false
+    },
+    "packages_installed": [],
+    "cuda_used": false,
+    "memory_ceiling_mb": 18432
+  },
+  "scope_controls": {
+    "production_outputs_modified": false,
+    "api_or_frontend_modified": false,
+    "deployed_committed_or_pushed": false,
+    "sensitive_raw_values_persisted": false
+  }
+}

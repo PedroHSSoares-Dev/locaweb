@@ -1,0 +1,5521 @@
+{
+  "schema_version": 1,
+  "status": "PROMOTION GATE PASSED: CALENDAR-ADJUSTED SEASONAL",
+  "protocol": "rolling_origin_2025Q4_D1_D7",
+  "selection_period": {
+    "start": "2025-07-01T00:00:00",
+    "end": "2025-09-30T00:00:00"
+  },
+  "test_period": {
+    "start": "2025-10-01T00:00:00",
+    "end": "2025-12-31T00:00:00",
+    "real_only": true
+  },
+  "gate_definition": {
+    "minimum_mae_improvement_fraction": 0.1,
+    "minimum_horizon_wins": 5,
+    "maximum_wape_regression_fraction": 0.05
+  },
+  "active_artifact_reconstruction_difference": {
+    "D1": 0.004347826086956275,
+    "D2": 0.003406593406593217,
+    "D3": 0.0011111111111112848,
+    "D4": 0.0006741573033703929,
+    "D5": 0.0009090909090918586,
+    "D6": 0.002183908045976679,
+    "D7": 0.003953488372092195
+  },
+  "baseline": {
+    "aggregate_mae_mean_horizons": 12.46054250691528,
+    "aggregate_wape": 0.22424697490397666,
+    "aggregate_bias": 7.093097913322633,
+    "n_predictions": 623,
+    "horizons": {
+      "D1": {
+        "mae": 12.695652173913043,
+        "wape": 0.22535211267605634,
+        "bias": 6.978260869565218,
+        "n": 92
+      },
+      "D2": {
+        "mae": 12.593406593406593,
+        "wape": 0.22461779694237555,
+        "bias": 6.813186813186813,
+        "n": 91
+      },
+      "D3": {
+        "mae": 12.511111111111111,
+        "wape": 0.22556089743589744,
+        "bias": 7.111111111111111,
+        "n": 90
+      },
+      "D4": {
+        "mae": 12.460674157303371,
+        "wape": 0.22660400490396404,
+        "bias": 7.382022471910112,
+        "n": 89
+      },
+      "D5": {
+        "mae": 12.409090909090908,
+        "wape": 0.225015454358129,
+        "bias": 7.2727272727272725,
+        "n": 88
+      },
+      "D6": {
+        "mae": 12.367816091954023,
+        "wape": 0.22231404958677686,
+        "bias": 7.172413793103448,
+        "n": 87
+      },
+      "D7": {
+        "mae": 12.186046511627907,
+        "wape": 0.2200293932395549,
+        "bias": 6.930232558139535,
+        "n": 86
+      }
+    },
+    "months": {
+      "2025-10": {
+        "mae": 9.974489795918368,
+        "wape": 0.1477925612337466,
+        "bias": 7.188775510204081,
+        "n": 196
+      },
+      "2025-11": {
+        "mae": 11.566666666666666,
+        "wape": 0.21236230110159118,
+        "bias": 4.166666666666667,
+        "n": 210
+      },
+      "2025-12": {
+        "mae": 15.580645161290322,
+        "wape": 0.3394237526352776,
+        "bias": 9.838709677419354,
+        "n": 217
+      }
+    }
+  },
+  "final_candidate_name": "calendar_adjusted_seasonal",
+  "final_candidate": {
+    "aggregate_mae_mean_horizons": 10.18475079814182,
+    "aggregate_wape": 0.18331224585951794,
+    "aggregate_bias": 4.31234422530668,
+    "n_predictions": 623,
+    "horizons": {
+      "D1": {
+        "mae": 10.489232853867,
+        "wape": 0.1861874247647625,
+        "bias": 4.244546410347047,
+        "n": 92
+      },
+      "D2": {
+        "mae": 10.340199346203098,
+        "wape": 0.18442927097304623,
+        "bias": 4.071973096738575,
+        "n": 91
+      },
+      "D3": {
+        "mae": 10.232868227827577,
+        "wape": 0.18448680699208372,
+        "bias": 4.339439464480115,
+        "n": 90
+      },
+      "D4": {
+        "mae": 10.1568330393762,
+        "wape": 0.18470742552196198,
+        "bias": 4.579208447227082,
+        "n": 89
+      },
+      "D5": {
+        "mae": 10.111237610627853,
+        "wape": 0.18334821960338987,
+        "bias": 4.4702309208406765,
+        "n": 88
+      },
+      "D6": {
+        "mae": 10.072315791239255,
+        "wape": 0.18105195740450727,
+        "bias": 4.3664699440982035,
+        "n": 87
+      },
+      "D7": {
+        "mae": 9.890568717851757,
+        "wape": 0.1785825970470819,
+        "bias": 4.118375825976506,
+        "n": 86
+      }
+    },
+    "months": {
+      "2025-10": {
+        "mae": 9.974489795918368,
+        "wape": 0.1477925612337466,
+        "bias": 7.188775510204081,
+        "n": 196
+      },
+      "2025-11": {
+        "mae": 10.182023486901537,
+        "wape": 0.18694045569586665,
+        "bias": 2.684643179765131,
+        "n": 210
+      },
+      "2025-12": {
+        "mae": 10.388609240222143,
+        "wape": 0.2263154507708267,
+        "bias": 3.2894718185040763,
+        "n": 217
+      }
+    }
+  },
+  "promotion_gate": {
+    "mae_improvement_fraction": 0.18263985757525836,
+    "mae_improvement_pct": 18.263985757525838,
+    "horizon_wins": 7,
+    "wape_relative_change_fraction": -0.18254306022182512,
+    "checks": {
+      "mae_improvement_at_least_10pct": true,
+      "wins_at_least_5_horizons": true,
+      "wape_regression_not_over_5pct": true,
+      "real_test_rows_only": true,
+      "leakage_eligible": true
+    },
+    "passed": true
+  },
+  "deterministic_seed_reproduction": {
+    "seeds": [
+      11,
+      29,
+      47
+    ],
+    "maes": [
+      10.18475079814182,
+      10.18475079814182,
+      10.18475079814182
+    ],
+    "max_absolute_difference": 0.0
+  },
+  "synthetic_contribution": {
+    "attribution_metric": "mean D1-D7 MAE averaged across all deterministic seeds",
+    "real_only_reference": {
+      "cycle_id": "F03",
+      "seed_values": {
+        "11": 39.30953328570448
+      },
+      "seed_mean_mae": 39.30953328570448,
+      "seed_std_mae": 0.0,
+      "n_seeds": 1,
+      "promotion_eligible": true
+    },
+    "strategies": {
+      "equal_weight": {
+        "cycle_id": "F06",
+        "seed_values": {
+          "11": 25.624539236980546,
+          "29": 17.624288082316074,
+          "47": 18.673384022377366
+        },
+        "seed_mean_mae": 20.64073711389133,
+        "seed_std_mae": 3.550010636082162,
+        "n_seeds": 3,
+        "promotion_eligible": true,
+        "incremental_mae_vs_real_only_seed_mean": -18.668796171813153
+      },
+      "reduced_weight_0.25": {
+        "cycle_id": "F07",
+        "seed_values": {
+          "11": 25.580120700211275,
+          "29": 19.13151886259174,
+          "47": 19.957906427684744
+        },
+        "seed_mean_mae": 21.556515330162586,
+        "seed_std_mae": 2.865051393645911,
+        "n_seeds": 3,
+        "promotion_eligible": true,
+        "incremental_mae_vs_real_only_seed_mean": -17.753017955541896
+      },
+      "pretrain_real_finetune": {
+        "cycle_id": "F08",
+        "seed_values": {
+          "11": 52.49086461064693,
+          "29": 52.48823404182804,
+          "47": 52.87565721921969
+        },
+        "seed_mean_mae": 52.61825195723156,
+        "seed_std_mae": 0.18201617445978643,
+        "n_seeds": 3,
+        "promotion_eligible": true,
+        "incremental_mae_vs_real_only_seed_mean": 13.308718671527075
+      },
+      "lag_initialization_only": {
+        "cycle_id": "F09",
+        "seed_values": {
+          "11": 39.54287783004243,
+          "29": 38.41208975390635,
+          "47": 38.198084043254106
+        },
+        "seed_mean_mae": 38.7176838757343,
+        "seed_std_mae": 0.5900047501040216,
+        "n_seeds": 3,
+        "promotion_eligible": true,
+        "incremental_mae_vs_real_only_seed_mean": -0.5918494099701803
+      },
+      "provided_file_equal_diagnostic": {
+        "cycle_id": "F10",
+        "seed_values": {
+          "11": 11.049809835467913
+        },
+        "seed_mean_mae": 11.049809835467913,
+        "seed_std_mae": 0.0,
+        "n_seeds": 1,
+        "promotion_eligible": false,
+        "incremental_mae_vs_real_only_seed_mean": -28.25972345023657
+      }
+    },
+    "note": "Synthetic contribution is the strategy seed-mean minus the real-only seed-mean. Individual seed values are retained, but no first-seed value is used for attribution."
+  },
+  "coverage": {
+    "cycles": 15,
+    "model_families": [
+      "gradient boosting",
+      "hybrid statistical/operational rule",
+      "linear autoregression",
+      "linear autoregression ablation",
+      "linear online fine-tuning",
+      "random/bagging trees",
+      "seasonal baseline",
+      "statistical seasonal smoothing"
+    ],
+    "feature_families": [
+      "calendar/Fourier",
+      "causal factor estimation",
+      "holiday",
+      "lags",
+      "long-lag initialization",
+      "recency weighting",
+      "rolling distribution",
+      "trend/residual",
+      "weekly seasonal lags",
+      "year-end operational window"
+    ],
+    "synthetic_strategies": [
+      "provided_synthetic_equal_diagnostic",
+      "real_only",
+      "synthetic_lag_initialization_only",
+      "synthetic_plus_real_equal",
+      "synthetic_pretrain_real_finetune",
+      "synthetic_weight_0.25"
+    ],
+    "feature_ablation_cycles": [
+      "F11",
+      "F12",
+      "F13",
+      "F14"
+    ]
+  },
+  "cycles": [
+    {
+      "cycle_id": "F01",
+      "name": "active_seasonal_median3",
+      "hypothesis": "Reconstruct the locked production comparator exactly.",
+      "family": "seasonal baseline",
+      "feature_families": [
+        "weekly seasonal lags"
+      ],
+      "synthetic_strategy": "real_only",
+      "falsification_criterion": "Fail if any horizon differs from outputs/previsoes_baseline.json by more than 0.011 MAE.",
+      "promotion_eligible": true,
+      "stochastic": false,
+      "seeds": [
+        11
+      ],
+      "seed_mae_mean": 12.46054250691528,
+      "seed_mae_std": 0.0,
+      "seed_mae_min": 12.46054250691528,
+      "seed_mae_max": 12.46054250691528,
+      "per_seed": [
+        {
+          "seed": 11,
+          "selection": {
+            "aggregate_mae_mean_horizons": 13.004593477644944,
+            "aggregate_wape": 0.17635405781957506,
+            "aggregate_bias": -2.7624398073836276,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 12.967391304347826,
+                "wape": 0.17595870206489675,
+                "bias": -2.467391304347826,
+                "n": 92
+              },
+              "D2": {
+                "mae": 12.835164835164836,
+                "wape": 0.17432835820895523,
+                "bias": -2.769230769230769,
+                "n": 91
+              },
+              "D3": {
+                "mae": 12.944444444444445,
+                "wape": 0.17622144909998488,
+                "bias": -2.7666666666666666,
+                "n": 90
+              },
+              "D4": {
+                "mae": 13.03370786516854,
+                "wape": 0.177342913927534,
+                "bias": -2.853932584269663,
+                "n": 89
+              },
+              "D5": {
+                "mae": 13.159090909090908,
+                "wape": 0.17878647522000926,
+                "bias": -2.909090909090909,
+                "n": 88
+              },
+              "D6": {
+                "mae": 13.057471264367816,
+                "wape": 0.17691948294658152,
+                "bias": -2.689655172413793,
+                "n": 87
+              },
+              "D7": {
+                "mae": 13.034883720930232,
+                "wape": 0.17499219481735873,
+                "bias": -2.895348837209302,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 10.045918367346939,
+                "wape": 0.14740230573439136,
+                "bias": -1.3520408163265305,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 10.35483870967742,
+                "wape": 0.13776824034334764,
+                "bias": -4.161290322580645,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 18.5,
+                "wape": 0.23881239242685026,
+                "bias": -2.6333333333333333,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 12.46054250691528,
+            "aggregate_wape": 0.22424697490397666,
+            "aggregate_bias": 7.093097913322633,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 12.695652173913043,
+                "wape": 0.22535211267605634,
+                "bias": 6.978260869565218,
+                "n": 92
+              },
+              "D2": {
+                "mae": 12.593406593406593,
+                "wape": 0.22461779694237555,
+                "bias": 6.813186813186813,
+                "n": 91
+              },
+              "D3": {
+                "mae": 12.511111111111111,
+                "wape": 0.22556089743589744,
+                "bias": 7.111111111111111,
+                "n": 90
+              },
+              "D4": {
+                "mae": 12.460674157303371,
+                "wape": 0.22660400490396404,
+                "bias": 7.382022471910112,
+                "n": 89
+              },
+              "D5": {
+                "mae": 12.409090909090908,
+                "wape": 0.225015454358129,
+                "bias": 7.2727272727272725,
+                "n": 88
+              },
+              "D6": {
+                "mae": 12.367816091954023,
+                "wape": 0.22231404958677686,
+                "bias": 7.172413793103448,
+                "n": 87
+              },
+              "D7": {
+                "mae": 12.186046511627907,
+                "wape": 0.2200293932395549,
+                "bias": 6.930232558139535,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 9.974489795918368,
+                "wape": 0.1477925612337466,
+                "bias": 7.188775510204081,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 11.566666666666666,
+                "wape": 0.21236230110159118,
+                "bias": 4.166666666666667,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 15.580645161290322,
+                "wape": 0.3394237526352776,
+                "bias": 9.838709677419354,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": 0.0,
+            "mae_improvement_pct": 0.0,
+            "horizon_wins": 0,
+            "wape_relative_change_fraction": 0.0,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": false,
+              "wape_regression_not_over_5pct": true,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          }
+        }
+      ],
+      "decision": "RETAIN",
+      "runtime_seconds": 0.558615916990675,
+      "tracemalloc_peak_mb": 0.35770606994628906,
+      "process_peak_rss_mb_after": 322.765625,
+      "estimated_incremental_rss_mb": 0.0,
+      "compute_note": "single process; tree n_jobs=1; peak below the 18 GB budget"
+    },
+    {
+      "cycle_id": "F02",
+      "name": "seasonal_ewma13",
+      "hypothesis": "Exponentially weighting same-weekday history may reduce median noise.",
+      "family": "statistical seasonal smoothing",
+      "feature_families": [
+        "weekly seasonal lags",
+        "recency weighting"
+      ],
+      "synthetic_strategy": "real_only",
+      "falsification_criterion": "Reject unless aggregate Q4 MAE improves over the active baseline.",
+      "promotion_eligible": true,
+      "stochastic": false,
+      "seeds": [
+        11
+      ],
+      "seed_mae_mean": 12.185999455147018,
+      "seed_mae_std": 0.0,
+      "seed_mae_min": 12.185999455147018,
+      "seed_mae_max": 12.185999455147018,
+      "per_seed": [
+        {
+          "seed": 11,
+          "selection": {
+            "aggregate_mae_mean_horizons": 12.842971211307562,
+            "aggregate_wape": 0.17417937423318616,
+            "aggregate_bias": -1.6032384038371752,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 12.811142686720373,
+                "wape": 0.17383851433307881,
+                "bias": -1.2912921498793721,
+                "n": 92
+              },
+              "D2": {
+                "mae": 12.77068333919176,
+                "wape": 0.1734525647561866,
+                "bias": -1.4867233087991911,
+                "n": 91
+              },
+              "D3": {
+                "mae": 12.912014516215466,
+                "wape": 0.1757799586234143,
+                "bias": -1.5038077611976057,
+                "n": 90
+              },
+              "D4": {
+                "mae": 12.880466611585582,
+                "wape": 0.17525783953999644,
+                "bias": -1.6973311970343767,
+                "n": 89
+              },
+              "D5": {
+                "mae": 12.904258877008125,
+                "wape": 0.1753241903931936,
+                "bias": -1.8391957248916064,
+                "n": 88
+              },
+              "D6": {
+                "mae": 12.816817098571336,
+                "wape": 0.17365878953055697,
+                "bias": -1.624569312522443,
+                "n": 87
+              },
+              "D7": {
+                "mae": 12.805415349860292,
+                "wape": 0.17191160163721278,
+                "bias": -1.803894159036902,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 10.060546004513862,
+                "wape": 0.14761693493672082,
+                "bias": -0.6922495970287388,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 10.05428416225469,
+                "wape": 0.1337694459355774,
+                "bias": -2.3799122426707866,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 18.321224069912642,
+                "wape": 0.2365046136391477,
+                "bias": -1.650931656730318,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 12.185999455147018,
+            "aggregate_wape": 0.21929887188689967,
+            "aggregate_bias": 6.228866243936639,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 12.418477468248183,
+                "wape": 0.2204321680646021,
+                "bias": 6.1567295516442435,
+                "n": 92
+              },
+              "D2": {
+                "mae": 12.273843255097768,
+                "wape": 0.2189180196420809,
+                "bias": 5.9432849218278525,
+                "n": 91
+              },
+              "D3": {
+                "mae": 12.25173427361697,
+                "wape": 0.22088463233684438,
+                "bias": 6.167806438607823,
+                "n": 90
+              },
+              "D4": {
+                "mae": 12.14100828855355,
+                "wape": 0.22079071060099426,
+                "bias": 6.485493555269275,
+                "n": 89
+              },
+              "D5": {
+                "mae": 12.146022272659758,
+                "wape": 0.22024520090543143,
+                "bias": 6.426240326497256,
+                "n": 88
+              },
+              "D6": {
+                "mae": 12.088277238744373,
+                "wape": 0.217289280944372,
+                "bias": 6.302750672511035,
+                "n": 87
+              },
+              "D7": {
+                "mae": 11.98263338910853,
+                "wape": 0.21635659698999235,
+                "bias": 6.129833258151548,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 8.353880990743596,
+                "wape": 0.12377991186768557,
+                "bias": 6.501801008172971,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 12.347527381519816,
+                "wape": 0.22669878913439073,
+                "bias": 2.067227990615416,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 15.499173329598015,
+                "wape": 0.3376488919308071,
+                "bias": 10.009736379453395,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": 0.02203299347647968,
+            "mae_improvement_pct": 2.203299347647968,
+            "horizon_wins": 7,
+            "wape_relative_change_fraction": -0.0220654170215486,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": true,
+              "wape_regression_not_over_5pct": true,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          }
+        }
+      ],
+      "decision": "RETAIN",
+      "runtime_seconds": 1.3622203749837354,
+      "tracemalloc_peak_mb": 0.3569478988647461,
+      "process_peak_rss_mb_after": 322.765625,
+      "estimated_incremental_rss_mb": 0.0,
+      "compute_note": "single process; tree n_jobs=1; peak below the 18 GB budget"
+    },
+    {
+      "cycle_id": "F03",
+      "name": "ridge_ar_full_real",
+      "hypothesis": "A regularized direct multi-horizon AR can combine calendar and state safely.",
+      "family": "linear autoregression",
+      "feature_families": [
+        "lags",
+        "rolling distribution",
+        "trend/residual",
+        "calendar/Fourier"
+      ],
+      "synthetic_strategy": "real_only",
+      "falsification_criterion": "Reject unless paired aggregate MAE improves without WAPE regression over 5%.",
+      "promotion_eligible": true,
+      "stochastic": false,
+      "seeds": [
+        11
+      ],
+      "seed_mae_mean": 39.30953328570448,
+      "seed_mae_std": 0.0,
+      "seed_mae_min": 39.30953328570448,
+      "seed_mae_max": 39.30953328570448,
+      "per_seed": [
+        {
+          "seed": 11,
+          "selection": {
+            "aggregate_mae_mean_horizons": 17.49931621693488,
+            "aggregate_wape": 0.2372606861454278,
+            "aggregate_bias": 13.443261495408422,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 17.17505870668668,
+                "wape": 0.23305389395504048,
+                "bias": 12.814746308942404,
+                "n": 92
+              },
+              "D2": {
+                "mae": 17.306049249484023,
+                "wape": 0.23505231070194718,
+                "bias": 13.05247938030473,
+                "n": 91
+              },
+              "D3": {
+                "mae": 17.39815236347999,
+                "wape": 0.23685277759993933,
+                "bias": 13.360029922035583,
+                "n": 90
+              },
+              "D4": {
+                "mae": 17.417531779044587,
+                "wape": 0.23699133593257427,
+                "bias": 13.359727366286926,
+                "n": 89
+              },
+              "D5": {
+                "mae": 17.551976448808848,
+                "wape": 0.23847057704109598,
+                "bias": 13.475689156051043,
+                "n": 88
+              },
+              "D6": {
+                "mae": 17.688760005363033,
+                "wape": 0.23967016359859583,
+                "bias": 13.980633535871219,
+                "n": 87
+              },
+              "D7": {
+                "mae": 17.957684965676993,
+                "wape": 0.24108037887109293,
+                "bias": 14.125877158988231,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 12.162736605982246,
+                "wape": 0.1784620732723851,
+                "bias": 8.473119252621714,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 17.188295318013754,
+                "wape": 0.22868547418816582,
+                "bias": 14.899107525942503,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 22.785954380927937,
+                "wape": 0.294138825915593,
+                "bias": 16.577686690457462,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 39.30953328570448,
+            "aggregate_wape": 0.7071591353537082,
+            "aggregate_bias": 37.42369103132248,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 38.88604253388229,
+                "wape": 0.6902403845489428,
+                "bias": 36.715934840298466,
+                "n": 92
+              },
+              "D2": {
+                "mae": 39.1862781163214,
+                "wape": 0.698932047939092,
+                "bias": 36.75184063416446,
+                "n": 91
+              },
+              "D3": {
+                "mae": 39.27031419981979,
+                "wape": 0.707998453121751,
+                "bias": 37.17312314698695,
+                "n": 90
+              },
+              "D4": {
+                "mae": 39.24769013049728,
+                "wape": 0.7137401760552223,
+                "bias": 37.55456513222272,
+                "n": 89
+              },
+              "D5": {
+                "mae": 39.42835491465082,
+                "wape": 0.7149588362846223,
+                "bias": 37.791131632019216,
+                "n": 88
+              },
+              "D6": {
+                "mae": 39.53165909378313,
+                "wape": 0.7105897399089116,
+                "bias": 37.96425181029189,
+                "n": 87
+              },
+              "D7": {
+                "mae": 39.61639401097662,
+                "wape": 0.7153075551005647,
+                "bias": 38.095687655671405,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 16.50953762423722,
+                "wape": 0.24462272258470627,
+                "bias": 12.633929585812757,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 37.03938811224952,
+                "wape": 0.6800377254390977,
+                "bias": 35.076432436784,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 62.08598388004589,
+                "wape": 1.3525407591577108,
+                "bias": 62.08598388004589,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": -2.1547208529555357,
+            "mae_improvement_pct": -215.47208529555357,
+            "horizon_wins": 0,
+            "wape_relative_change_fraction": 2.153483500308159,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": false,
+              "wape_regression_not_over_5pct": false,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          }
+        }
+      ],
+      "decision": "REJECT",
+      "runtime_seconds": 29.247688750037923,
+      "tracemalloc_peak_mb": 6.895651817321777,
+      "process_peak_rss_mb_after": 322.765625,
+      "estimated_incremental_rss_mb": 0.0,
+      "compute_note": "single process; tree n_jobs=1; peak below the 18 GB budget"
+    },
+    {
+      "cycle_id": "F04",
+      "name": "extra_trees_full_real",
+      "hypothesis": "Bagged randomized trees may capture nonlinear lag interactions.",
+      "family": "random/bagging trees",
+      "feature_families": [
+        "lags",
+        "rolling distribution",
+        "trend/residual",
+        "calendar/Fourier"
+      ],
+      "synthetic_strategy": "real_only",
+      "falsification_criterion": "Reject unless mean seeded MAE improves and seed variation is operationally small.",
+      "promotion_eligible": true,
+      "stochastic": true,
+      "seeds": [
+        11,
+        29,
+        47
+      ],
+      "seed_mae_mean": 21.17251104257978,
+      "seed_mae_std": 0.25289714011341097,
+      "seed_mae_min": 20.840236193145984,
+      "seed_mae_max": 21.453236920212422,
+      "per_seed": [
+        {
+          "seed": 11,
+          "selection": {
+            "aggregate_mae_mean_horizons": 11.61388449627067,
+            "aggregate_wape": 0.15758092882279004,
+            "aggregate_bias": 0.9451691785492903,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 11.885475625772486,
+                "wape": 0.16127784034971515,
+                "bias": 1.4105598639635244,
+                "n": 92
+              },
+              "D2": {
+                "mae": 11.841958370379533,
+                "wape": 0.16083853906037873,
+                "bias": 1.2616148608619637,
+                "n": 91
+              },
+              "D3": {
+                "mae": 11.893419020143643,
+                "wape": 0.16191313141929026,
+                "bias": 1.142215090002363,
+                "n": 90
+              },
+              "D4": {
+                "mae": 11.583797642850634,
+                "wape": 0.15761473631152825,
+                "bias": 0.8111266608825553,
+                "n": 89
+              },
+              "D5": {
+                "mae": 11.444899162994119,
+                "wape": 0.1554965456760047,
+                "bias": 0.565108828936855,
+                "n": 88
+              },
+              "D6": {
+                "mae": 11.341566707091728,
+                "wape": 0.15367019210667815,
+                "bias": 0.767449402383072,
+                "n": 87
+              },
+              "D7": {
+                "mae": 11.306074944662543,
+                "wape": 0.15178308542631574,
+                "bias": 0.6136585179138889,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 10.156386727695521,
+                "wape": 0.14902319199193909,
+                "bias": 7.49832646139671,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 9.664106953432032,
+                "wape": 0.12857824701991116,
+                "bias": -1.5257401958695727,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 15.00416447086004,
+                "wape": 0.1936854277649747,
+                "bias": -2.617837931875475,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 21.453236920212422,
+            "aggregate_wape": 0.38593291829232335,
+            "aggregate_bias": 20.069473716356633,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 21.378891967920172,
+                "wape": 0.37948255084866983,
+                "bias": 19.499189544678547,
+                "n": 92
+              },
+              "D2": {
+                "mae": 21.355208647785986,
+                "wape": 0.3808945485982997,
+                "bias": 19.515590307856623,
+                "n": 91
+              },
+              "D3": {
+                "mae": 21.312357116805405,
+                "wape": 0.3842372076347128,
+                "bias": 19.856672546826868,
+                "n": 90
+              },
+              "D4": {
+                "mae": 21.30027781003496,
+                "wape": 0.3873569115433411,
+                "bias": 20.18237508801048,
+                "n": 89
+              },
+              "D5": {
+                "mae": 21.50813987101719,
+                "wape": 0.3900095422727205,
+                "bias": 20.395392435377723,
+                "n": 88
+              },
+              "D6": {
+                "mae": 21.63459905459138,
+                "wape": 0.38888638796476244,
+                "bias": 20.513455560996043,
+                "n": 87
+              },
+              "D7": {
+                "mae": 21.68318397333186,
+                "wape": 0.3915082556595717,
+                "bias": 20.588847546483212,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 11.131726554517595,
+                "wape": 0.16493940162424015,
+                "bias": 9.781841376617894,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 18.569719997728324,
+                "wape": 0.34093733165963874,
+                "bias": 17.528472607987947,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 33.55870763824831,
+                "wape": 0.7310751488304269,
+                "bias": 31.82056206357422,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": -0.7216936508427646,
+            "mae_improvement_pct": -72.16936508427646,
+            "horizon_wins": 0,
+            "wape_relative_change_fraction": 0.7210172777473639,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": false,
+              "wape_regression_not_over_5pct": false,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          }
+        },
+        {
+          "seed": 29,
+          "selection": {
+            "aggregate_mae_mean_horizons": 11.639120850570079,
+            "aggregate_wape": 0.1579143155033964,
+            "aggregate_bias": 0.6314774963431111,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 11.8652065876752,
+                "wape": 0.16100280325458974,
+                "bias": 1.099635383065704,
+                "n": 92
+              },
+              "D2": {
+                "mae": 11.830313658857197,
+                "wape": 0.16068037954567238,
+                "bias": 0.9326244818242333,
+                "n": 91
+              },
+              "D3": {
+                "mae": 11.896988425817254,
+                "wape": 0.1619617241451449,
+                "bias": 0.8142535197284977,
+                "n": 90
+              },
+              "D4": {
+                "mae": 11.623904186730115,
+                "wape": 0.1581604452864975,
+                "bias": 0.48746265677570283,
+                "n": 89
+              },
+              "D5": {
+                "mae": 11.49621471602791,
+                "wape": 0.15619374633479327,
+                "bias": 0.29829500104146917,
+                "n": 88
+              },
+              "D6": {
+                "mae": 11.406341404977569,
+                "wape": 0.15454784336287938,
+                "bias": 0.45377087602611926,
+                "n": 87
+              },
+              "D7": {
+                "mae": 11.354876973905311,
+                "wape": 0.15243824847890364,
+                "bias": 0.2904671813858629,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 10.18294512099707,
+                "wape": 0.14941287945167134,
+                "bias": 7.485562169469461,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 9.769712799746872,
+                "wape": 0.1299833033442717,
+                "bias": -2.183231050199731,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 14.943176550969145,
+                "wape": 0.19289814824831084,
+                "bias": -2.8571360338138785,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 20.840236193145984,
+            "aggregate_wape": 0.37489927265171286,
+            "aggregate_bias": 19.380272796491603,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 20.7778978151482,
+                "wape": 0.36881470171592406,
+                "bias": 18.852229111085876,
+                "n": 92
+              },
+              "D2": {
+                "mae": 20.73865076569214,
+                "wape": 0.36989753423715893,
+                "bias": 18.86471791120775,
+                "n": 91
+              },
+              "D3": {
+                "mae": 20.696360574692385,
+                "wape": 0.373131500745656,
+                "bias": 19.165955292768032,
+                "n": 90
+              },
+              "D4": {
+                "mae": 20.635231683732854,
+                "wape": 0.37526269306338866,
+                "bias": 19.447570523846874,
+                "n": 89
+              },
+              "D5": {
+                "mae": 20.870550741818203,
+                "wape": 0.37844806620234944,
+                "bias": 19.666837828085168,
+                "n": 88
+              },
+              "D6": {
+                "mae": 21.022046284025098,
+                "wape": 0.3778756253533437,
+                "bias": 19.820520241076828,
+                "n": 87
+              },
+              "D7": {
+                "mae": 21.140915486913023,
+                "wape": 0.3817171387517363,
+                "bias": 19.90673024718361,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 10.089319286143168,
+                "wape": 0.14949399607529942,
+                "bias": 8.584479487309562,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 18.251075643240203,
+                "wape": 0.3350870681133452,
+                "bias": 17.082227682844625,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 33.04794769099705,
+                "wape": 0.7199482631208072,
+                "bias": 31.355226540572467,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": -0.672498302668619,
+            "mae_improvement_pct": -67.24983026686189,
+            "horizon_wins": 0,
+            "wape_relative_change_fraction": 0.67181418082561,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": false,
+              "wape_regression_not_over_5pct": false,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          }
+        },
+        {
+          "seed": 47,
+          "selection": {
+            "aggregate_mae_mean_horizons": 11.394620038814844,
+            "aggregate_wape": 0.15460843927149454,
+            "aggregate_bias": 0.7843170565210206,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 11.654868205083686,
+                "wape": 0.1581486541102801,
+                "bias": 1.2399229433575323,
+                "n": 92
+              },
+              "D2": {
+                "mae": 11.642356166107625,
+                "wape": 0.1581275240471334,
+                "bias": 1.0964517560330402,
+                "n": 91
+              },
+              "D3": {
+                "mae": 11.668944893611926,
+                "wape": 0.1588572137989825,
+                "bias": 0.9847687229613906,
+                "n": 90
+              },
+              "D4": {
+                "mae": 11.398498792954518,
+                "wape": 0.155093470810725,
+                "bias": 0.6612173773886745,
+                "n": 89
+              },
+              "D5": {
+                "mae": 11.208941074230246,
+                "wape": 0.15229069237799317,
+                "bias": 0.4133694726640703,
+                "n": 88
+              },
+              "D6": {
+                "mae": 11.101854846025283,
+                "wape": 0.15042226625201677,
+                "bias": 0.6029853308846259,
+                "n": 87
+              },
+              "D7": {
+                "mae": 11.086876293690617,
+                "wape": 0.1488403623567582,
+                "bias": 0.4472760068509123,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 10.066138263748241,
+                "wape": 0.14769898934680756,
+                "bias": 7.572927487918234,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 9.563572743648544,
+                "wape": 0.12724066740476606,
+                "bias": -1.6248582858585903,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 14.54207086337611,
+                "wape": 0.18772036398506167,
+                "bias": -3.0622381589907794,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 21.224060014380946,
+            "aggregate_wape": 0.3818004988712607,
+            "aggregate_bias": 19.85477985756919,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 21.167280859948754,
+                "wape": 0.3757263822333176,
+                "bias": 19.29627384754896,
+                "n": 92
+              },
+              "D2": {
+                "mae": 21.09050451198696,
+                "wape": 0.37617324786178236,
+                "bias": 19.287897720851433,
+                "n": 91
+              },
+              "D3": {
+                "mae": 21.063558310902543,
+                "wape": 0.3797516522398295,
+                "bias": 19.628227401220176,
+                "n": 90
+              },
+              "D4": {
+                "mae": 21.02804995881531,
+                "wape": 0.3824063028881411,
+                "bias": 19.944832650644194,
+                "n": 89
+              },
+              "D5": {
+                "mae": 21.25215857439716,
+                "wape": 0.3853678043575005,
+                "bias": 20.149972507235294,
+                "n": 88
+              },
+              "D6": {
+                "mae": 21.422837769337274,
+                "wape": 0.38507993510998817,
+                "bias": 20.324731950017934,
+                "n": 87
+              },
+              "D7": {
+                "mae": 21.544030115278623,
+                "wape": 0.38899571486751244,
+                "bias": 20.41851316730471,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 10.555896946952362,
+                "wape": 0.15640730281241783,
+                "bias": 9.287611937439424,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 18.76948955916003,
+                "wape": 0.3446050714656064,
+                "bias": 17.776093879503527,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 33.22607034741417,
+                "wape": 0.723828658306282,
+                "bias": 31.410950215814463,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": -0.7033014415385317,
+            "mae_improvement_pct": -70.33014415385317,
+            "horizon_wins": 0,
+            "wape_relative_change_fraction": 0.7025892948377521,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": false,
+              "wape_regression_not_over_5pct": false,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          }
+        }
+      ],
+      "decision": "REJECT",
+      "runtime_seconds": 10.20221804198809,
+      "tracemalloc_peak_mb": 2.911407470703125,
+      "process_peak_rss_mb_after": 322.765625,
+      "estimated_incremental_rss_mb": 0.0,
+      "compute_note": "single process; tree n_jobs=1; peak below the 18 GB budget"
+    },
+    {
+      "cycle_id": "F05",
+      "name": "hist_gradient_full_real",
+      "hypothesis": "Shrinkage boosting may model regime and calendar interactions.",
+      "family": "gradient boosting",
+      "feature_families": [
+        "lags",
+        "rolling distribution",
+        "trend/residual",
+        "calendar/Fourier"
+      ],
+      "synthetic_strategy": "real_only",
+      "falsification_criterion": "Reject unless mean seeded MAE improves and no seed fails secondary WAPE.",
+      "promotion_eligible": true,
+      "stochastic": true,
+      "seeds": [
+        11,
+        29,
+        47
+      ],
+      "seed_mae_mean": 19.0657983479473,
+      "seed_mae_std": 0.0,
+      "seed_mae_min": 19.0657983479473,
+      "seed_mae_max": 19.0657983479473,
+      "per_seed": [
+        {
+          "seed": 11,
+          "selection": {
+            "aggregate_mae_mean_horizons": 12.643301284637678,
+            "aggregate_wape": 0.17149523618116783,
+            "aggregate_bias": 0.7254925823354732,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 12.785058570551689,
+                "wape": 0.17348457057385774,
+                "bias": 0.9989413339887261,
+                "n": 92
+              },
+              "D2": {
+                "mae": 12.650649411574692,
+                "wape": 0.17182225320198463,
+                "bias": 0.8376274028218033,
+                "n": 91
+              },
+              "D3": {
+                "mae": 12.750918678727533,
+                "wape": 0.17358685238019633,
+                "bias": 0.8549681280788961,
+                "n": 90
+              },
+              "D4": {
+                "mae": 12.588272353746019,
+                "wape": 0.17128210357489615,
+                "bias": 0.5508501384046189,
+                "n": 89
+              },
+              "D5": {
+                "mae": 12.633149661505813,
+                "wape": 0.17164075501196718,
+                "bias": 0.3981099598313986,
+                "n": 88
+              },
+              "D6": {
+                "mae": 12.539406285900029,
+                "wape": 0.16990006959559295,
+                "bias": 0.712946389188604,
+                "n": 87
+              },
+              "D7": {
+                "mae": 12.555654030457966,
+                "wape": 0.16855857736799643,
+                "bias": 0.7072369330415058,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 12.017506466358606,
+                "wape": 0.17633113246041973,
+                "bias": 7.605663568082825,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 11.045005236784164,
+                "wape": 0.14695071345077643,
+                "bias": -1.258898324737333,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 14.883846502046074,
+                "wape": 0.19213226981987186,
+                "bias": -3.6454630670534893,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 19.0657983479473,
+            "aggregate_wape": 0.34299334429556766,
+            "aggregate_bias": 17.078512742628718,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 19.026159207379834,
+                "wape": 0.33772074996699686,
+                "bias": 16.400913186515023,
+                "n": 92
+              },
+              "D2": {
+                "mae": 19.095443292807325,
+                "wape": 0.3405890512829217,
+                "bias": 16.45774317206978,
+                "n": 91
+              },
+              "D3": {
+                "mae": 18.941565349881753,
+                "wape": 0.3414945676060412,
+                "bias": 16.832641989636247,
+                "n": 90
+              },
+              "D4": {
+                "mae": 18.858359790639582,
+                "wape": 0.34294933007088735,
+                "bias": 17.266877520757326,
+                "n": 89
+              },
+              "D5": {
+                "mae": 19.059150154186394,
+                "wape": 0.34560173368398983,
+                "bias": 17.56535843061416,
+                "n": 88
+              },
+              "D6": {
+                "mae": 19.12611467021123,
+                "wape": 0.3437958628736316,
+                "bias": 17.519725250152845,
+                "n": 87
+              },
+              "D7": {
+                "mae": 19.353795970525,
+                "wape": 0.34944918191584085,
+                "bias": 17.57810790427851,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 9.838686376828663,
+                "wape": 0.14578035454024932,
+                "bias": 7.492967593362645,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 16.631353240039616,
+                "wape": 0.3053492026935058,
+                "bias": 13.973781314884354,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 29.75052452836812,
+                "wape": 0.6481140269707742,
+                "bias": 28.741003291395845,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": -0.5300937609551328,
+            "mae_improvement_pct": -53.00937609551328,
+            "horizon_wins": 0,
+            "wape_relative_change_fraction": 0.5295338741690434,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": false,
+              "wape_regression_not_over_5pct": false,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          }
+        },
+        {
+          "seed": 29,
+          "selection": {
+            "aggregate_mae_mean_horizons": 12.643301284637678,
+            "aggregate_wape": 0.17149523618116783,
+            "aggregate_bias": 0.7254925823354732,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 12.785058570551689,
+                "wape": 0.17348457057385774,
+                "bias": 0.9989413339887261,
+                "n": 92
+              },
+              "D2": {
+                "mae": 12.650649411574692,
+                "wape": 0.17182225320198463,
+                "bias": 0.8376274028218033,
+                "n": 91
+              },
+              "D3": {
+                "mae": 12.750918678727533,
+                "wape": 0.17358685238019633,
+                "bias": 0.8549681280788961,
+                "n": 90
+              },
+              "D4": {
+                "mae": 12.588272353746019,
+                "wape": 0.17128210357489615,
+                "bias": 0.5508501384046189,
+                "n": 89
+              },
+              "D5": {
+                "mae": 12.633149661505813,
+                "wape": 0.17164075501196718,
+                "bias": 0.3981099598313986,
+                "n": 88
+              },
+              "D6": {
+                "mae": 12.539406285900029,
+                "wape": 0.16990006959559295,
+                "bias": 0.712946389188604,
+                "n": 87
+              },
+              "D7": {
+                "mae": 12.555654030457966,
+                "wape": 0.16855857736799643,
+                "bias": 0.7072369330415058,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 12.017506466358606,
+                "wape": 0.17633113246041973,
+                "bias": 7.605663568082825,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 11.045005236784164,
+                "wape": 0.14695071345077643,
+                "bias": -1.258898324737333,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 14.883846502046074,
+                "wape": 0.19213226981987186,
+                "bias": -3.6454630670534893,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 19.0657983479473,
+            "aggregate_wape": 0.34299334429556766,
+            "aggregate_bias": 17.078512742628718,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 19.026159207379834,
+                "wape": 0.33772074996699686,
+                "bias": 16.400913186515023,
+                "n": 92
+              },
+              "D2": {
+                "mae": 19.095443292807325,
+                "wape": 0.3405890512829217,
+                "bias": 16.45774317206978,
+                "n": 91
+              },
+              "D3": {
+                "mae": 18.941565349881753,
+                "wape": 0.3414945676060412,
+                "bias": 16.832641989636247,
+                "n": 90
+              },
+              "D4": {
+                "mae": 18.858359790639582,
+                "wape": 0.34294933007088735,
+                "bias": 17.266877520757326,
+                "n": 89
+              },
+              "D5": {
+                "mae": 19.059150154186394,
+                "wape": 0.34560173368398983,
+                "bias": 17.56535843061416,
+                "n": 88
+              },
+              "D6": {
+                "mae": 19.12611467021123,
+                "wape": 0.3437958628736316,
+                "bias": 17.519725250152845,
+                "n": 87
+              },
+              "D7": {
+                "mae": 19.353795970525,
+                "wape": 0.34944918191584085,
+                "bias": 17.57810790427851,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 9.838686376828663,
+                "wape": 0.14578035454024932,
+                "bias": 7.492967593362645,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 16.631353240039616,
+                "wape": 0.3053492026935058,
+                "bias": 13.973781314884354,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 29.75052452836812,
+                "wape": 0.6481140269707742,
+                "bias": 28.741003291395845,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": -0.5300937609551328,
+            "mae_improvement_pct": -53.00937609551328,
+            "horizon_wins": 0,
+            "wape_relative_change_fraction": 0.5295338741690434,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": false,
+              "wape_regression_not_over_5pct": false,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          }
+        },
+        {
+          "seed": 47,
+          "selection": {
+            "aggregate_mae_mean_horizons": 12.643301284637678,
+            "aggregate_wape": 0.17149523618116783,
+            "aggregate_bias": 0.7254925823354732,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 12.785058570551689,
+                "wape": 0.17348457057385774,
+                "bias": 0.9989413339887261,
+                "n": 92
+              },
+              "D2": {
+                "mae": 12.650649411574692,
+                "wape": 0.17182225320198463,
+                "bias": 0.8376274028218033,
+                "n": 91
+              },
+              "D3": {
+                "mae": 12.750918678727533,
+                "wape": 0.17358685238019633,
+                "bias": 0.8549681280788961,
+                "n": 90
+              },
+              "D4": {
+                "mae": 12.588272353746019,
+                "wape": 0.17128210357489615,
+                "bias": 0.5508501384046189,
+                "n": 89
+              },
+              "D5": {
+                "mae": 12.633149661505813,
+                "wape": 0.17164075501196718,
+                "bias": 0.3981099598313986,
+                "n": 88
+              },
+              "D6": {
+                "mae": 12.539406285900029,
+                "wape": 0.16990006959559295,
+                "bias": 0.712946389188604,
+                "n": 87
+              },
+              "D7": {
+                "mae": 12.555654030457966,
+                "wape": 0.16855857736799643,
+                "bias": 0.7072369330415058,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 12.017506466358606,
+                "wape": 0.17633113246041973,
+                "bias": 7.605663568082825,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 11.045005236784164,
+                "wape": 0.14695071345077643,
+                "bias": -1.258898324737333,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 14.883846502046074,
+                "wape": 0.19213226981987186,
+                "bias": -3.6454630670534893,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 19.0657983479473,
+            "aggregate_wape": 0.34299334429556766,
+            "aggregate_bias": 17.078512742628718,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 19.026159207379834,
+                "wape": 0.33772074996699686,
+                "bias": 16.400913186515023,
+                "n": 92
+              },
+              "D2": {
+                "mae": 19.095443292807325,
+                "wape": 0.3405890512829217,
+                "bias": 16.45774317206978,
+                "n": 91
+              },
+              "D3": {
+                "mae": 18.941565349881753,
+                "wape": 0.3414945676060412,
+                "bias": 16.832641989636247,
+                "n": 90
+              },
+              "D4": {
+                "mae": 18.858359790639582,
+                "wape": 0.34294933007088735,
+                "bias": 17.266877520757326,
+                "n": 89
+              },
+              "D5": {
+                "mae": 19.059150154186394,
+                "wape": 0.34560173368398983,
+                "bias": 17.56535843061416,
+                "n": 88
+              },
+              "D6": {
+                "mae": 19.12611467021123,
+                "wape": 0.3437958628736316,
+                "bias": 17.519725250152845,
+                "n": 87
+              },
+              "D7": {
+                "mae": 19.353795970525,
+                "wape": 0.34944918191584085,
+                "bias": 17.57810790427851,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 9.838686376828663,
+                "wape": 0.14578035454024932,
+                "bias": 7.492967593362645,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 16.631353240039616,
+                "wape": 0.3053492026935058,
+                "bias": 13.973781314884354,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 29.75052452836812,
+                "wape": 0.6481140269707742,
+                "bias": 28.741003291395845,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": -0.5300937609551328,
+            "mae_improvement_pct": -53.00937609551328,
+            "horizon_wins": 0,
+            "wape_relative_change_fraction": 0.5295338741690434,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": false,
+              "wape_regression_not_over_5pct": false,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          }
+        }
+      ],
+      "decision": "REJECT",
+      "runtime_seconds": 19.450695167004596,
+      "tracemalloc_peak_mb": 4.949212074279785,
+      "process_peak_rss_mb_after": 322.765625,
+      "estimated_incremental_rss_mb": 0.0,
+      "compute_note": "single process; tree n_jobs=1; peak below the 18 GB budget"
+    },
+    {
+      "cycle_id": "F06",
+      "name": "ridge_safe_synthetic_equal",
+      "hypothesis": "Fold-safe block bootstrap may stabilize linear coefficients.",
+      "family": "linear autoregression",
+      "feature_families": [
+        "lags",
+        "rolling distribution",
+        "trend/residual",
+        "calendar/Fourier"
+      ],
+      "synthetic_strategy": "synthetic_plus_real_equal",
+      "falsification_criterion": "Reject unless it beats the paired real-only Ridge and the active baseline.",
+      "promotion_eligible": true,
+      "stochastic": true,
+      "seeds": [
+        11,
+        29,
+        47
+      ],
+      "seed_mae_mean": 20.64073711389133,
+      "seed_mae_std": 3.550010636082162,
+      "seed_mae_min": 17.624288082316074,
+      "seed_mae_max": 25.624539236980546,
+      "per_seed": [
+        {
+          "seed": 11,
+          "selection": {
+            "aggregate_mae_mean_horizons": 12.09163019626307,
+            "aggregate_wape": 0.1639455460783699,
+            "aggregate_bias": 2.0882721418123436,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 12.01457870814501,
+                "wape": 0.1630296815854485,
+                "bias": 2.5291571816267275,
+                "n": 92
+              },
+              "D2": {
+                "mae": 11.9714727000957,
+                "wape": 0.16259761428488193,
+                "bias": 2.387651662937697,
+                "n": 91
+              },
+              "D3": {
+                "mae": 11.855323429120919,
+                "wape": 0.1613945104554353,
+                "bias": 2.3167102552887813,
+                "n": 90
+              },
+              "D4": {
+                "mae": 11.93491531772793,
+                "wape": 0.16239221270108328,
+                "bias": 1.9900632020252655,
+                "n": 89
+              },
+              "D5": {
+                "mae": 12.174242769450062,
+                "wape": 0.16540579955405366,
+                "bias": 1.7852532650711603,
+                "n": 88
+              },
+              "D6": {
+                "mae": 12.321865547713276,
+                "wape": 0.1669525467452196,
+                "bias": 1.893559173782233,
+                "n": 87
+              },
+              "D7": {
+                "mae": 12.369012901588608,
+                "wape": 0.16605293623737438,
+                "bias": 1.6694569640761059,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 10.981800539045016,
+                "wape": 0.16113436934068148,
+                "bias": 8.098896113712424,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 11.074443519180608,
+                "wape": 0.14734238158566476,
+                "bias": -0.30930166440882206,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 14.168645025433259,
+                "wape": 0.18289989275516255,
+                "bias": -1.0441506321991953,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 25.624539236980546,
+            "aggregate_wape": 0.46096431049643743,
+            "aggregate_bias": 23.515712723846526,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 25.427473705905665,
+                "wape": 0.45134624367033016,
+                "bias": 22.934713776120397,
+                "n": 92
+              },
+              "D2": {
+                "mae": 25.555609579701237,
+                "wape": 0.45581349897154305,
+                "bias": 22.978781848671552,
+                "n": 91
+              },
+              "D3": {
+                "mae": 25.49618001791763,
+                "wape": 0.4596667070538034,
+                "bias": 23.36336316291005,
+                "n": 90
+              },
+              "D4": {
+                "mae": 25.47601674751152,
+                "wape": 0.46329495106835417,
+                "bias": 23.709836315186116,
+                "n": 89
+              },
+              "D5": {
+                "mae": 25.647283818754172,
+                "wape": 0.4650651094272341,
+                "bias": 23.837864559609805,
+                "n": 88
+              },
+              "D6": {
+                "mae": 25.788330812199348,
+                "wape": 0.4635505745168065,
+                "bias": 23.878960627703922,
+                "n": 87
+              },
+              "D7": {
+                "mae": 25.98087997687423,
+                "wape": 0.4691067978188503,
+                "bias": 23.966819055288667,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 13.962210226961552,
+                "wape": 0.20687883311796676,
+                "bias": 10.921104275498775,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 22.969625118882878,
+                "wape": 0.4217189434311422,
+                "bias": 19.562647089754062,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 38.71703548437914,
+                "wape": 0.8434491215852096,
+                "bias": 38.71703548437914,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": -1.0564545422287663,
+            "mae_improvement_pct": -105.64545422287664,
+            "horizon_wins": 0,
+            "wape_relative_change_fraction": 1.055609939415343,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": false,
+              "wape_regression_not_over_5pct": false,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          }
+        },
+        {
+          "seed": 29,
+          "selection": {
+            "aggregate_mae_mean_horizons": 12.891252124032395,
+            "aggregate_wape": 0.17479538406186393,
+            "aggregate_bias": 0.33344098012861706,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 12.703838844281828,
+                "wape": 0.17238247399320475,
+                "bias": 0.5052302820004669,
+                "n": 92
+              },
+              "D2": {
+                "mae": 12.654588356746778,
+                "wape": 0.17187575230805327,
+                "bias": 0.4451973909371214,
+                "n": 91
+              },
+              "D3": {
+                "mae": 12.87316327433578,
+                "wape": 0.17525105047499928,
+                "bias": 0.4639246492098451,
+                "n": 90
+              },
+              "D4": {
+                "mae": 12.995641422605688,
+                "wape": 0.1768249635547938,
+                "bias": 0.2536412914675813,
+                "n": 89
+              },
+              "D5": {
+                "mae": 12.892493150856728,
+                "wape": 0.17516433491977645,
+                "bias": 0.1486315859506872,
+                "n": 88
+              },
+              "D6": {
+                "mae": 13.106445081980016,
+                "wape": 0.1775830434717741,
+                "bias": 0.34506475683200777,
+                "n": 87
+              },
+              "D7": {
+                "mae": 13.012594737419965,
+                "wape": 0.17469296712739885,
+                "bias": 0.15479157352629416,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 10.393214485661943,
+                "wape": 0.15249813139614768,
+                "bias": 6.618633355245597,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 12.412825419399352,
+                "wape": 0.16514917939973386,
+                "bias": -0.47905437462041195,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 15.708321938411341,
+                "wape": 0.2027752401688211,
+                "bias": -4.693160036739901,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 17.624288082316074,
+            "aggregate_wape": 0.31707505621000553,
+            "aggregate_bias": 14.491057805577107,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 17.509864777758377,
+                "wape": 0.3108060118760893,
+                "bias": 13.878239845551555,
+                "n": 92
+              },
+              "D2": {
+                "mae": 17.69683177271407,
+                "wape": 0.31564321664386136,
+                "bias": 13.968969520108029,
+                "n": 91
+              },
+              "D3": {
+                "mae": 17.632314190316443,
+                "wape": 0.31789027987349355,
+                "bias": 14.355371311170908,
+                "n": 90
+              },
+              "D4": {
+                "mae": 17.57966971265429,
+                "wape": 0.3196956690695202,
+                "bias": 14.72767173129034,
+                "n": 89
+              },
+              "D5": {
+                "mae": 17.525127465390906,
+                "wape": 0.31778512609816606,
+                "bias": 14.867544318378288,
+                "n": 88
+              },
+              "D6": {
+                "mae": 17.674677469454483,
+                "wape": 0.3177059793063099,
+                "bias": 14.856268186414548,
+                "n": 87
+              },
+              "D7": {
+                "mae": 17.75153118792396,
+                "wape": 0.3205189338991099,
+                "bias": 14.841503330562654,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 8.865770998026683,
+                "wape": 0.13136461412256045,
+                "bias": 4.7768278112913505,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 14.17358549455313,
+                "wape": 0.26022494788041245,
+                "bias": 9.146902367979672,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 28.871953465043667,
+                "wape": 0.628974390313671,
+                "bias": 28.436964352929504,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": -0.41440776535492324,
+            "mae_improvement_pct": -41.440776535492326,
+            "horizon_wins": 0,
+            "wape_relative_change_fraction": 0.41395466469850123,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": false,
+              "wape_regression_not_over_5pct": false,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          }
+        },
+        {
+          "seed": 47,
+          "selection": {
+            "aggregate_mae_mean_horizons": 12.58673494992591,
+            "aggregate_wape": 0.17070424349100718,
+            "aggregate_bias": -4.7337861974772375,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 12.582932097373051,
+                "wape": 0.17074185146877888,
+                "bias": -4.482943353494967,
+                "n": 92
+              },
+              "D2": {
+                "mae": 12.580949135371347,
+                "wape": 0.170875577808775,
+                "bias": -4.551119861604207,
+                "n": 91
+              },
+              "D3": {
+                "mae": 12.525824238073897,
+                "wape": 0.1705224900055439,
+                "bias": -4.527423736532842,
+                "n": 90
+              },
+              "D4": {
+                "mae": 12.584075997757282,
+                "wape": 0.17122500593187556,
+                "bias": -4.822022475472695,
+                "n": 89
+              },
+              "D5": {
+                "mae": 12.653073506677238,
+                "wape": 0.17191145107111272,
+                "bias": -4.951091507388478,
+                "n": 88
+              },
+              "D6": {
+                "mae": 12.6916789274912,
+                "wape": 0.17196325598687656,
+                "bias": -4.790062790672776,
+                "n": 87
+              },
+              "D7": {
+                "mae": 12.488610746737356,
+                "wape": 0.16765852704018305,
+                "bias": -5.040772709965768,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 8.948997089447342,
+                "wape": 0.13130733863839492,
+                "bias": 0.7416875135619743,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 13.811756215982069,
+                "wape": 0.18376156338860264,
+                "bias": -7.037236497776027,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 14.715788574300564,
+                "wape": 0.18996284734467167,
+                "bias": -7.463996350805086,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 18.673384022377366,
+            "aggregate_wape": 0.3359526736607779,
+            "aggregate_bias": 15.311859399924177,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 18.43751411082729,
+                "wape": 0.32727210075170954,
+                "bias": 14.623940699426978,
+                "n": 92
+              },
+              "D2": {
+                "mae": 18.789768710448243,
+                "wape": 0.33513699581552137,
+                "bias": 14.728081184039443,
+                "n": 91
+              },
+              "D3": {
+                "mae": 18.805513546075865,
+                "wape": 0.3390417105662716,
+                "bias": 15.160623325931548,
+                "n": 90
+              },
+              "D4": {
+                "mae": 18.684377353986516,
+                "wape": 0.33978536667445847,
+                "bias": 15.558449064667736,
+                "n": 89
+              },
+              "D5": {
+                "mae": 18.54293342288975,
+                "wape": 0.3362411170851634,
+                "bias": 15.702147543061985,
+                "n": 88
+              },
+              "D6": {
+                "mae": 18.721068071336685,
+                "wape": 0.33651506657154784,
+                "bias": 15.707220534401808,
+                "n": 87
+              },
+              "D7": {
+                "mae": 18.73251294107721,
+                "wape": 0.33823139049604034,
+                "bias": 15.76924694983964,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 9.154831442796125,
+                "wape": 0.1356476385536771,
+                "bias": 3.6813852484701504,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 16.826625935702282,
+                "wape": 0.3089343807044483,
+                "bias": 12.221560332498992,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 29.055736504913543,
+                "wape": 0.632978096733886,
+                "bias": 28.807415795519923,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": -0.4986012055264945,
+            "mae_improvement_pct": -49.86012055264945,
+            "horizon_wins": 0,
+            "wape_relative_change_fraction": 0.49813692605946647,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": false,
+              "wape_regression_not_over_5pct": false,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          }
+        }
+      ],
+      "decision": "REJECT",
+      "runtime_seconds": 130.62217204202898,
+      "tracemalloc_peak_mb": 32.60956859588623,
+      "process_peak_rss_mb_after": 322.765625,
+      "estimated_incremental_rss_mb": 0.0,
+      "compute_note": "single process; tree n_jobs=1; peak below the 18 GB budget"
+    },
+    {
+      "cycle_id": "F07",
+      "name": "ridge_safe_synthetic_reduced",
+      "hypothesis": "Downweighting synthetic rows may retain seasonal support without dominance.",
+      "family": "linear autoregression",
+      "feature_families": [
+        "lags",
+        "rolling distribution",
+        "trend/residual",
+        "calendar/Fourier"
+      ],
+      "synthetic_strategy": "synthetic_weight_0.25",
+      "falsification_criterion": "Reject unless it beats real-only Ridge and equal-weight augmentation.",
+      "promotion_eligible": true,
+      "stochastic": true,
+      "seeds": [
+        11,
+        29,
+        47
+      ],
+      "seed_mae_mean": 21.556515330162586,
+      "seed_mae_std": 2.865051393645911,
+      "seed_mae_min": 19.13151886259174,
+      "seed_mae_max": 25.580120700211275,
+      "per_seed": [
+        {
+          "seed": 11,
+          "selection": {
+            "aggregate_mae_mean_horizons": 12.013241710401514,
+            "aggregate_wape": 0.16288538264301342,
+            "aggregate_bias": 2.6998495441320935,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 11.970874088260176,
+                "wape": 0.1624366395457133,
+                "bias": 3.067777159626212,
+                "n": 92
+              },
+              "D2": {
+                "mae": 11.89431637205622,
+                "wape": 0.16154967012792776,
+                "bias": 2.9494081717855725,
+                "n": 91
+              },
+              "D3": {
+                "mae": 11.748038313146079,
+                "wape": 0.1599339658422549,
+                "bias": 2.904928519011744,
+                "n": 90
+              },
+              "D4": {
+                "mae": 11.88587023223214,
+                "wape": 0.16172488161881368,
+                "bias": 2.6006484754951256,
+                "n": 89
+              },
+              "D5": {
+                "mae": 12.08653515584956,
+                "wape": 0.16421415681870638,
+                "bias": 2.4198907121897775,
+                "n": 88
+              },
+              "D6": {
+                "mae": 12.211766776930554,
+                "wape": 0.16546078641846412,
+                "bias": 2.5677129141175885,
+                "n": 87
+              },
+              "D7": {
+                "mae": 12.295291034335866,
+                "wape": 0.16506322649904537,
+                "bias": 2.3503713540132796,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 10.627684096047702,
+                "wape": 0.15593847004232292,
+                "bias": 8.148321659586996,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 10.991372504768416,
+                "wape": 0.14623714491322784,
+                "bias": 1.190478828747753,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 14.35309057490175,
+                "wape": 0.185280859400625,
+                "bias": -0.8257080243953293,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 25.580120700211275,
+            "aggregate_wape": 0.4601301917503263,
+            "aggregate_bias": 23.41782606376886,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 25.207017491856565,
+                "wape": 0.44743307143561717,
+                "bias": 22.690045896330076,
+                "n": 92
+              },
+              "D2": {
+                "mae": 25.419672754559777,
+                "wape": 0.45338891036161105,
+                "bias": 22.776177776488012,
+                "n": 91
+              },
+              "D3": {
+                "mae": 25.459093475254477,
+                "wape": 0.45899807948175136,
+                "bias": 23.214169855916456,
+                "n": 90
+              },
+              "D4": {
+                "mae": 25.455729327471612,
+                "wape": 0.46292601351552376,
+                "bias": 23.59563703191731,
+                "n": 89
+              },
+              "D5": {
+                "mae": 25.652525768272685,
+                "wape": 0.4651601622930138,
+                "bias": 23.793296887003592,
+                "n": 88
+              },
+              "D6": {
+                "mae": 25.846406067445926,
+                "wape": 0.4645944892288834,
+                "bias": 23.907020915044477,
+                "n": 87
+              },
+              "D7": {
+                "mae": 26.020400016617895,
+                "wape": 0.46982036561602747,
+                "bias": 24.025364058917617,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 13.447881561226867,
+                "wape": 0.19925799712734094,
+                "bias": 10.145239547623625,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 23.51790546180362,
+                "wape": 0.43178528999639443,
+                "bias": 20.20216890302117,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 38.51789500810749,
+                "wape": 0.839110854006558,
+                "bias": 38.51789500810749,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": -1.052889806845486,
+            "mae_improvement_pct": -105.28898068454859,
+            "horizon_wins": 0,
+            "wape_relative_change_fraction": 1.0518902961672312,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": false,
+              "wape_regression_not_over_5pct": false,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          }
+        },
+        {
+          "seed": 29,
+          "selection": {
+            "aggregate_mae_mean_horizons": 12.345769439955873,
+            "aggregate_wape": 0.16739653495381374,
+            "aggregate_bias": -0.2798442834548275,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 12.247273946887157,
+                "wape": 0.16618719809935376,
+                "bias": 0.014217020385296987,
+                "n": 92
+              },
+              "D2": {
+                "mae": 12.094653836330606,
+                "wape": 0.1642706715083709,
+                "bias": -0.08326332294834154,
+                "n": 91
+              },
+              "D3": {
+                "mae": 12.205169642518497,
+                "wape": 0.16615720281752605,
+                "bias": -0.09901402424749048,
+                "n": 90
+              },
+              "D4": {
+                "mae": 12.422657730510721,
+                "wape": 0.16902867115356277,
+                "bias": -0.36270110076966383,
+                "n": 89
+              },
+              "D5": {
+                "mae": 12.357997365301474,
+                "wape": 0.16790238816528172,
+                "bias": -0.5200019171009352,
+                "n": 88
+              },
+              "D6": {
+                "mae": 12.612467429766705,
+                "wape": 0.17088999632295643,
+                "bias": -0.35138404376407756,
+                "n": 87
+              },
+              "D7": {
+                "mae": 12.480166128375961,
+                "wape": 0.16754515876371098,
+                "bias": -0.5878110629811061,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 9.536278267093335,
+                "wape": 0.13992443033016125,
+                "bias": 5.5704932673393195,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 12.103034395666937,
+                "wape": 0.16102749625136267,
+                "bias": -0.9060372326062457,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 15.209801073468425,
+                "wape": 0.1963399450103497,
+                "bias": -5.093093283406235,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 19.13151886259174,
+            "aggregate_wape": 0.3441559673290014,
+            "aggregate_bias": 16.208759182702376,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 18.854129892742797,
+                "wape": 0.33466717154781733,
+                "bias": 15.469591528326957,
+                "n": 92
+              },
+              "D2": {
+                "mae": 19.09640083083935,
+                "wape": 0.3406061300678912,
+                "bias": 15.587012741916778,
+                "n": 91
+              },
+              "D3": {
+                "mae": 19.143047513203296,
+                "wape": 0.3451270585313094,
+                "bias": 16.0221501122197,
+                "n": 90
+              },
+              "D4": {
+                "mae": 19.11195030341579,
+                "wape": 0.3475610087870873,
+                "bias": 16.420652706451907,
+                "n": 89
+              },
+              "D5": {
+                "mae": 19.08302670103892,
+                "wape": 0.3460346898189625,
+                "bias": 16.618601058207986,
+                "n": 88
+              },
+              "D6": {
+                "mae": 19.233447545312675,
+                "wape": 0.34572519347979397,
+                "bias": 16.68697256856318,
+                "n": 87
+              },
+              "D7": {
+                "mae": 19.398629251589334,
+                "wape": 0.35025868478620253,
+                "bias": 16.73024747839281,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 9.740633244303114,
+                "wape": 0.14432749590893637,
+                "bias": 5.397445063499078,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 16.691983159874663,
+                "wape": 0.3064623591164259,
+                "bias": 12.269395116139279,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 29.96593595043429,
+                "wape": 0.6528067564746753,
+                "bias": 29.78610490317287,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": -0.5353680509475603,
+            "mae_improvement_pct": -53.53680509475603,
+            "horizon_wins": 0,
+            "wape_relative_change_fraction": 0.5347184392403518,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": false,
+              "wape_regression_not_over_5pct": false,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          }
+        },
+        {
+          "seed": 47,
+          "selection": {
+            "aggregate_mae_mean_horizons": 12.038658280823556,
+            "aggregate_wape": 0.1632560253098831,
+            "aggregate_bias": -3.5216586955020963,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 11.969604546544872,
+                "wape": 0.16241941272597762,
+                "bias": -3.2703560818050876,
+                "n": 92
+              },
+              "D2": {
+                "mae": 11.93293553175542,
+                "wape": 0.1620741990133945,
+                "bias": -3.3366983245154773,
+                "n": 91
+              },
+              "D3": {
+                "mae": 11.989621225907232,
+                "wape": 0.16322279690389516,
+                "bias": -3.3183341304441836,
+                "n": 90
+              },
+              "D4": {
+                "mae": 12.076747913535398,
+                "wape": 0.1643220553897952,
+                "bias": -3.608178618649288,
+                "n": 89
+              },
+              "D5": {
+                "mae": 12.082872632004904,
+                "wape": 0.16416439580306183,
+                "bias": -3.7518131244871737,
+                "n": 88
+              },
+              "D6": {
+                "mae": 12.219714732717517,
+                "wape": 0.16556847558735774,
+                "bias": -3.5774682909400766,
+                "n": 87
+              },
+              "D7": {
+                "mae": 11.99911138329955,
+                "wape": 0.16108704011298178,
+                "bias": -3.817485990400091,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 8.362147625886443,
+                "wape": 0.12269658142489466,
+                "bias": 1.7008313900823266,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 12.882204153247141,
+                "wape": 0.17139413251101346,
+                "bias": -5.150470943556317,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 14.594807346221037,
+                "wape": 0.18840112753297378,
+                "bias": -6.712876785724863,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 19.957906427684744,
+            "aggregate_wape": 0.359015721441018,
+            "aggregate_bias": 16.96588846826551,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 19.6079024580425,
+                "wape": 0.34804688908738374,
+                "bias": 16.184372406551756,
+                "n": 92
+              },
+              "D2": {
+                "mae": 19.909242231422553,
+                "wape": 0.35510408527233484,
+                "bias": 16.301936688993,
+                "n": 91
+              },
+              "D3": {
+                "mae": 20.00046925034171,
+                "wape": 0.3605853831191414,
+                "bias": 16.763151441242684,
+                "n": 90
+              },
+              "D4": {
+                "mae": 19.95506599621663,
+                "wape": 0.36289351729940333,
+                "bias": 17.175314799790414,
+                "n": 89
+              },
+              "D5": {
+                "mae": 19.924062838676075,
+                "wape": 0.36128529359231293,
+                "bias": 17.384013491802662,
+                "n": 88
+              },
+              "D6": {
+                "mae": 20.068890299177845,
+                "wape": 0.3607424495926596,
+                "bias": 17.469988008313415,
+                "n": 87
+              },
+              "D7": {
+                "mae": 20.239711919915884,
+                "wape": 0.36544514489035607,
+                "bias": 17.562107264339513,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 9.945688353570159,
+                "wape": 0.14736580868610155,
+                "bias": 5.0997788800070705,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 18.495421524686478,
+                "wape": 0.33957322260746287,
+                "bias": 14.272214303378451,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 30.40665414218534,
+                "wape": 0.6624077852478887,
+                "bias": 30.29044632045415,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": -0.6016884029414146,
+            "mae_improvement_pct": -60.168840294141454,
+            "horizon_wins": 0,
+            "wape_relative_change_fraction": 0.6009835655297013,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": false,
+              "wape_regression_not_over_5pct": false,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          }
+        }
+      ],
+      "decision": "REJECT",
+      "runtime_seconds": 0.24276691698469222,
+      "tracemalloc_peak_mb": 13.784721374511719,
+      "process_peak_rss_mb_after": 322.765625,
+      "estimated_incremental_rss_mb": 0.0,
+      "compute_note": "single process; tree n_jobs=1; peak below the 18 GB budget"
+    },
+    {
+      "cycle_id": "F08",
+      "name": "sgd_safe_synthetic_pretrain_finetune",
+      "hypothesis": "Synthetic pretraining followed by real-only fine-tuning may transfer seasonality.",
+      "family": "linear online fine-tuning",
+      "feature_families": [
+        "lags",
+        "rolling distribution",
+        "trend/residual",
+        "calendar/Fourier"
+      ],
+      "synthetic_strategy": "synthetic_pretrain_real_finetune",
+      "falsification_criterion": "Reject unless every seed beats the active baseline MAE.",
+      "promotion_eligible": true,
+      "stochastic": true,
+      "seeds": [
+        11,
+        29,
+        47
+      ],
+      "seed_mae_mean": 52.61825195723156,
+      "seed_mae_std": 0.18201617445978643,
+      "seed_mae_min": 52.48823404182804,
+      "seed_mae_max": 52.87565721921969,
+      "per_seed": [
+        {
+          "seed": 11,
+          "selection": {
+            "aggregate_mae_mean_horizons": 71.59171533786754,
+            "aggregate_wape": 0.9708914126274026,
+            "aggregate_bias": -71.58726794615147,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 71.55920702629261,
+                "wape": 0.9710098888523482,
+                "bias": -71.55920702629261,
+                "n": 92
+              },
+              "D2": {
+                "mae": 71.48802793754928,
+                "wape": 0.9709567973607439,
+                "bias": -71.48802793754928,
+                "n": 91
+              },
+              "D3": {
+                "mae": 71.31431697343938,
+                "wape": 0.9708498756027143,
+                "bias": -71.31431697343938,
+                "n": 90
+              },
+              "D4": {
+                "mae": 71.34928115489915,
+                "wape": 0.9708127232511885,
+                "bias": -71.34928115489915,
+                "n": 89
+              },
+              "D5": {
+                "mae": 71.45246504862678,
+                "wape": 0.9707915584806479,
+                "bias": -71.45246504862678,
+                "n": 88
+              },
+              "D6": {
+                "mae": 71.64987375489872,
+                "wape": 0.9708050173923359,
+                "bias": -71.64987375489872,
+                "n": 87
+              },
+              "D7": {
+                "mae": 72.32883546936694,
+                "wape": 0.9710084062387694,
+                "bias": -72.32883546936694,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 65.59120233140743,
+                "wape": 0.9624102153732488,
+                "bias": -65.59120233140743,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 73.13251099732295,
+                "wape": 0.9730076570459276,
+                "bias": -73.13251099732295,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 75.58684470036877,
+                "wape": 0.9757337956157759,
+                "bias": -75.58684470036877,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 52.49086461064693,
+            "aggregate_wape": 0.9445079760392366,
+            "aggregate_bias": -52.49675391061099,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 53.21299655181638,
+                "wape": 0.9445486557528665,
+                "bias": -53.21299655181638,
+                "n": 92
+              },
+              "D2": {
+                "mae": 52.9558101546137,
+                "wape": 0.9445273861367791,
+                "bias": -52.9558101546137,
+                "n": 91
+              },
+              "D3": {
+                "mae": 52.36938834579271,
+                "wape": 0.9441596456573205,
+                "bias": -52.36938834579271,
+                "n": 90
+              },
+              "D4": {
+                "mae": 51.90383564193997,
+                "wape": 0.9438989317802733,
+                "bias": -51.90383564193997,
+                "n": 89
+              },
+              "D5": {
+                "mae": 52.07715555529903,
+                "wape": 0.9443209744212475,
+                "bias": -52.07715555529903,
+                "n": 88
+              },
+              "D6": {
+                "mae": 52.57678919764083,
+                "wape": 0.9450786488005686,
+                "bias": -52.57678919764083,
+                "n": 87
+              },
+              "D7": {
+                "mae": 52.34007682742592,
+                "wape": 0.9450444272850365,
+                "bias": -52.34007682742592,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 65.36999115453862,
+                "wape": 0.9685907367923775,
+                "bias": -65.36999115453862,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 51.03048533688824,
+                "wape": 0.9369122154875441,
+                "bias": -51.03048533688824,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 42.28828340679515,
+                "wape": 0.9212486195436751,
+                "bias": -42.28828340679515,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": -3.212566554105959,
+            "mae_improvement_pct": -321.2566554105959,
+            "horizon_wins": 0,
+            "wape_relative_change_fraction": 3.211909553935692,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": false,
+              "wape_regression_not_over_5pct": false,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          }
+        },
+        {
+          "seed": 29,
+          "selection": {
+            "aggregate_mae_mean_horizons": 71.57882959126638,
+            "aggregate_wape": 0.9707179834651529,
+            "aggregate_bias": -71.5744803988046,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 71.55234065891736,
+                "wape": 0.9709167169056632,
+                "bias": -71.55234065891736,
+                "n": 92
+              },
+              "D2": {
+                "mae": 71.47960143829776,
+                "wape": 0.9708423478932979,
+                "bias": -71.47960143829776,
+                "n": 91
+              },
+              "D3": {
+                "mae": 71.30401454518362,
+                "wape": 0.9707096217011838,
+                "bias": -71.30401454518362,
+                "n": 90
+              },
+              "D4": {
+                "mae": 71.33684153071643,
+                "wape": 0.9706434637263053,
+                "bias": -71.33684153071643,
+                "n": 89
+              },
+              "D5": {
+                "mae": 71.43745248407127,
+                "wape": 0.970587589717195,
+                "bias": -71.43745248407127,
+                "n": 88
+              },
+              "D6": {
+                "mae": 71.63233562688575,
+                "wape": 0.9705673881854945,
+                "bias": -71.63233562688575,
+                "n": 87
+              },
+              "D7": {
+                "mae": 72.30922085479246,
+                "wape": 0.9707450817221591,
+                "bias": -72.30922085479246,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 65.48657121124307,
+                "wape": 0.9608749780957959,
+                "bias": -65.48657121124307,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 73.17263549757261,
+                "wape": 0.9735415023282193,
+                "bias": -73.17263549757261,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 75.6051020384684,
+                "wape": 0.9759694755396093,
+                "bias": -75.6051020384684,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 52.48823404182804,
+            "aggregate_wape": 0.9444592581918084,
+            "aggregate_bias": -52.49404612103973,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 53.20338981637968,
+                "wape": 0.9443781329552249,
+                "bias": -53.20338981637968,
+                "n": 92
+              },
+              "D2": {
+                "mae": 52.9494325437077,
+                "wape": 0.9444136341586438,
+                "bias": -52.9494325437077,
+                "n": 91
+              },
+              "D3": {
+                "mae": 52.36565347512897,
+                "wape": 0.9440923102487195,
+                "bias": -52.36565347512897,
+                "n": 90
+              },
+              "D4": {
+                "mae": 51.90316695550392,
+                "wape": 0.9438867713608191,
+                "bias": -51.90316695550392,
+                "n": 89
+              },
+              "D5": {
+                "mae": 52.07806065560896,
+                "wape": 0.9443373867079308,
+                "bias": -52.07806065560896,
+                "n": 88
+              },
+              "D6": {
+                "mae": 52.57810253221105,
+                "wape": 0.9451022562608183,
+                "bias": -52.57810253221105,
+                "n": 87
+              },
+              "D7": {
+                "mae": 52.33983231425601,
+                "wape": 0.9450400123926133,
+                "bias": -52.33983231425601,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 65.3016629522311,
+                "wape": 0.9675783140790214,
+                "bias": -65.3016629522311,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 51.055582019343674,
+                "wape": 0.9373729868912547,
+                "bias": -51.055582019343674,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 42.317938113863086,
+                "wape": 0.9218946461909737,
+                "bias": -42.317938113863086,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": -3.2123554422047373,
+            "mae_improvement_pct": -321.23554422047374,
+            "horizon_wins": 0,
+            "wape_relative_change_fraction": 3.2116923030789115,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": false,
+              "wape_regression_not_over_5pct": false,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          }
+        },
+        {
+          "seed": 47,
+          "selection": {
+            "aggregate_mae_mean_horizons": 71.64397610297245,
+            "aggregate_wape": 0.9715980810170652,
+            "aggregate_bias": -71.63937311332248,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 71.60168820417377,
+                "wape": 0.9715863296141574,
+                "bias": -71.60168820417377,
+                "n": 92
+              },
+              "D2": {
+                "mae": 71.53337451964781,
+                "wape": 0.9715726986996942,
+                "bias": -71.53337451964781,
+                "n": 91
+              },
+              "D3": {
+                "mae": 71.36268339863486,
+                "wape": 0.9715083203565478,
+                "bias": -71.36268339863486,
+                "n": 90
+              },
+              "D4": {
+                "mae": 71.40092863814492,
+                "wape": 0.9715154638120925,
+                "bias": -71.40092863814492,
+                "n": 89
+              },
+              "D5": {
+                "mae": 71.50796865213402,
+                "wape": 0.9715456602420557,
+                "bias": -71.50796865213402,
+                "n": 88
+              },
+              "D6": {
+                "mae": 71.70937697397702,
+                "wape": 0.97161124384613,
+                "bias": -71.70937697397702,
+                "n": 87
+              },
+              "D7": {
+                "mae": 72.39181233409468,
+                "wape": 0.971853865240734,
+                "bias": -72.39181233409468,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 65.78298075685323,
+                "wape": 0.9652241524437216,
+                "bias": -65.78298075685323,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 73.13686247646545,
+                "wape": 0.9730655522619867,
+                "bias": -73.13686247646545,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 75.55793363744607,
+                "wape": 0.9753605891236584,
+                "bias": -75.55793363744607,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 52.87565721921969,
+            "aggregate_wape": 0.9514354896165598,
+            "aggregate_bias": -52.88179245417755,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 53.61330641975115,
+                "wape": 0.9516542910702499,
+                "bias": -53.61330641975115,
+                "n": 92
+              },
+              "D2": {
+                "mae": 53.351229478268436,
+                "wape": 0.9515801416155288,
+                "bias": -53.351229478268436,
+                "n": 91
+              },
+              "D3": {
+                "mae": 52.76000622045694,
+                "wape": 0.9512020352245841,
+                "bias": -52.76000622045694,
+                "n": 90
+              },
+              "D4": {
+                "mae": 52.289965125611765,
+                "wape": 0.9509209023660496,
+                "bias": -52.289965125611765,
+                "n": 89
+              },
+              "D5": {
+                "mae": 52.45740696334938,
+                "wape": 0.9512161163764157,
+                "bias": -52.45740696334938,
+                "n": 88
+              },
+              "D6": {
+                "mae": 52.9503328871581,
+                "wape": 0.9517931737980897,
+                "bias": -52.9503328871581,
+                "n": 87
+              },
+              "D7": {
+                "mae": 52.70735343994202,
+                "wape": 0.9516759176642902,
+                "bias": -52.70735343994202,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 65.26486997486433,
+                "wape": 0.9670331505196105,
+                "bias": -65.26486997486433,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 51.4841888037943,
+                "wape": 0.9452421445005073,
+                "bias": -51.4841888037943,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 43.04959693586362,
+                "wape": 0.9378338053491021,
+                "bias": -43.04959693586362,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": -3.243447441383476,
+            "mae_improvement_pct": -324.3447441383476,
+            "horizon_wins": 0,
+            "wape_relative_change_fraction": 3.2428018929752245,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": false,
+              "wape_regression_not_over_5pct": false,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          }
+        }
+      ],
+      "decision": "REJECT",
+      "runtime_seconds": 0.9413305000052787,
+      "tracemalloc_peak_mb": 13.69385051727295,
+      "process_peak_rss_mb_after": 322.765625,
+      "estimated_incremental_rss_mb": 0.0,
+      "compute_note": "single process; tree n_jobs=1; peak below the 18 GB budget"
+    },
+    {
+      "cycle_id": "F09",
+      "name": "ridge_safe_synthetic_lag_init",
+      "hypothesis": "Synthetic history may be useful only to initialize long lags and rollings.",
+      "family": "linear autoregression",
+      "feature_families": [
+        "lags",
+        "rolling distribution",
+        "trend/residual",
+        "calendar/Fourier",
+        "long-lag initialization"
+      ],
+      "synthetic_strategy": "synthetic_lag_initialization_only",
+      "falsification_criterion": "Reject unless it improves on real-only Ridge without synthetic targets.",
+      "promotion_eligible": true,
+      "stochastic": true,
+      "seeds": [
+        11,
+        29,
+        47
+      ],
+      "seed_mae_mean": 38.7176838757343,
+      "seed_mae_std": 0.5900047501040216,
+      "seed_mae_min": 38.198084043254106,
+      "seed_mae_max": 39.54287783004243,
+      "per_seed": [
+        {
+          "seed": 11,
+          "selection": {
+            "aggregate_mae_mean_horizons": 18.20359308260545,
+            "aggregate_wape": 0.2468407525965701,
+            "aggregate_bias": 14.22687931070229,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 18.001270967895966,
+                "wape": 0.24426503378265912,
+                "bias": 13.742150249697614,
+                "n": 92
+              },
+              "D2": {
+                "mae": 18.13849738931912,
+                "wape": 0.24635869588478207,
+                "bias": 13.944020750047905,
+                "n": 91
+              },
+              "D3": {
+                "mae": 18.168475051554374,
+                "wape": 0.24733969968838204,
+                "bias": 14.199677899390695,
+                "n": 90
+              },
+              "D4": {
+                "mae": 18.11763489468661,
+                "wape": 0.24651727650620825,
+                "bias": 14.127651714949701,
+                "n": 89
+              },
+              "D5": {
+                "mae": 18.161544449670213,
+                "wape": 0.24675249522479215,
+                "bias": 14.206091101176613,
+                "n": 88
+              },
+              "D6": {
+                "mae": 18.263769003974726,
+                "wape": 0.2474611280712975,
+                "bias": 14.669069611427192,
+                "n": 87
+              },
+              "D7": {
+                "mae": 18.57395982113714,
+                "wape": 0.24935381589412958,
+                "bias": 14.749825728692958,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 10.899603685427959,
+                "wape": 0.15992830680819584,
+                "bias": 7.127651909293523,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 19.726208420851574,
+                "wape": 0.26245170001991364,
+                "bias": 17.129744519547742,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 23.437939340987494,
+                "wape": 0.3025551550041415,
+                "bias": 17.853197502876846,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 39.54287783004243,
+            "aggregate_wape": 0.7113039512298758,
+            "aggregate_bias": 37.443963515044985,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 38.90726752087347,
+                "wape": 0.6906171352344894,
+                "bias": 36.66565422315782,
+                "n": 92
+              },
+              "D2": {
+                "mae": 39.28186440376393,
+                "wape": 0.7006369386010423,
+                "bias": 36.740590582534864,
+                "n": 91
+              },
+              "D3": {
+                "mae": 39.41619615311826,
+                "wape": 0.7106285364143916,
+                "bias": 37.180230945182984,
+                "n": 90
+              },
+              "D4": {
+                "mae": 39.53012772005762,
+                "wape": 0.7188764542470634,
+                "bias": 37.574822702443065,
+                "n": 89
+              },
+              "D5": {
+                "mae": 39.7502387426323,
+                "wape": 0.7207955922834622,
+                "bias": 37.820589660036674,
+                "n": 88
+              },
+              "D6": {
+                "mae": 39.90089314939487,
+                "wape": 0.7172267983465607,
+                "bias": 38.03371056915386,
+                "n": 87
+              },
+              "D7": {
+                "mae": 40.01355712045655,
+                "wape": 0.722478671501,
+                "bias": 38.17942585056183,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 17.78457331079153,
+                "wape": 0.2635149961381267,
+                "bias": 13.693095984820443,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 37.35758428031382,
+                "wape": 0.685879760348479,
+                "bias": 34.972807644725485,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 61.28780115878279,
+                "wape": 1.3351523794253455,
+                "bias": 61.28780115878279,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": -2.1734475291181865,
+            "mae_improvement_pct": -217.34475291181866,
+            "horizon_wins": 0,
+            "wape_relative_change_fraction": 2.171966763584921,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": false,
+              "wape_regression_not_over_5pct": false,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          }
+        },
+        {
+          "seed": 29,
+          "selection": {
+            "aggregate_mae_mean_horizons": 14.972609298891495,
+            "aggregate_wape": 0.20301782637545582,
+            "aggregate_bias": 8.717987057060137,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 14.76290790086955,
+                "wape": 0.20032264408259567,
+                "bias": 8.153648634138861,
+                "n": 92
+              },
+              "D2": {
+                "mae": 14.885170972231048,
+                "wape": 0.20217172514522766,
+                "bias": 8.351714553121019,
+                "n": 91
+              },
+              "D3": {
+                "mae": 14.825522351023098,
+                "wape": 0.2018298308262107,
+                "bias": 8.64385432582262,
+                "n": 90
+              },
+              "D4": {
+                "mae": 14.950739570683439,
+                "wape": 0.20342697168488397,
+                "bias": 8.647863711090501,
+                "n": 89
+              },
+              "D5": {
+                "mae": 15.052736683915025,
+                "wape": 0.20451456356098846,
+                "bias": 8.733832920278372,
+                "n": 88
+              },
+              "D6": {
+                "mae": 15.052990699913614,
+                "wape": 0.20395735724847913,
+                "bias": 9.229176804693447,
+                "n": 87
+              },
+              "D7": {
+                "mae": 15.278196913604678,
+                "wape": 0.20510848182485206,
+                "bias": 9.326067433369303,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 11.497218023100453,
+                "wape": 0.16869701546097388,
+                "bias": 7.050392429059949,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 14.354305010043339,
+                "wape": 0.190980023738774,
+                "bias": 9.308889566093125,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 18.84518072702783,
+                "wape": 0.24326825379123707,
+                "bias": 9.663809450526225,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 38.41208975390635,
+            "aggregate_wape": 0.6910110473256613,
+            "aggregate_bias": 36.70401898128711,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 38.120375417128386,
+                "wape": 0.6766495347049607,
+                "bias": 36.16503446732553,
+                "n": 92
+              },
+              "D2": {
+                "mae": 38.201796696962845,
+                "wape": 0.6813726968686042,
+                "bias": 36.1117033803018,
+                "n": 91
+              },
+              "D3": {
+                "mae": 38.25948388670815,
+                "wape": 0.6897743489190172,
+                "bias": 36.45468960332464,
+                "n": 90
+              },
+              "D4": {
+                "mae": 38.35603080913704,
+                "wape": 0.6975248757689408,
+                "bias": 36.797718412897616,
+                "n": 89
+              },
+              "D5": {
+                "mae": 38.537303905321686,
+                "wape": 0.6988013071642918,
+                "bias": 37.02041923802705,
+                "n": 88
+              },
+              "D6": {
+                "mae": 38.64963212157775,
+                "wape": 0.6947351228465423,
+                "bias": 37.155315249577484,
+                "n": 87
+              },
+              "D7": {
+                "mae": 38.760005440508614,
+                "wape": 0.6998447339667733,
+                "bias": 37.291015395741084,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 15.940766069237826,
+                "wape": 0.2361952033240561,
+                "bias": 12.641496407513793,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 36.471464876127634,
+                "wape": 0.6696107382397974,
+                "bias": 34.4982322251472,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 60.57254268289518,
+                "wape": 1.3195705011734016,
+                "bias": 60.57254268289518,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": -2.0826980231870826,
+            "mae_improvement_pct": -208.26980231870826,
+            "horizon_wins": 0,
+            "wape_relative_change_fraction": 2.081473217739301,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": false,
+              "wape_regression_not_over_5pct": false,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          }
+        },
+        {
+          "seed": 47,
+          "selection": {
+            "aggregate_mae_mean_horizons": 14.959895889722931,
+            "aggregate_wape": 0.20285012956737142,
+            "aggregate_bias": 7.546964987517617,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 14.858783396684347,
+                "wape": 0.20162360951253094,
+                "bias": 7.15719136274604,
+                "n": 92
+              },
+              "D2": {
+                "mae": 14.834797267803228,
+                "wape": 0.20148754498061103,
+                "bias": 7.353800432628718,
+                "n": 91
+              },
+              "D3": {
+                "mae": 14.930551884137294,
+                "wape": 0.20325966866924164,
+                "bias": 7.568541634119922,
+                "n": 90
+              },
+              "D4": {
+                "mae": 14.779794151134405,
+                "wape": 0.20110100587845314,
+                "bias": 7.475273012863503,
+                "n": 89
+              },
+              "D5": {
+                "mae": 14.904801864742831,
+                "wape": 0.2025046416701203,
+                "bias": 7.469660515198643,
+                "n": 88
+              },
+              "D6": {
+                "mae": 15.068345755008222,
+                "wape": 0.20416540736422914,
+                "bias": 7.863031214464551,
+                "n": 87
+              },
+              "D7": {
+                "mae": 15.342196908550195,
+                "wape": 0.20596767626214746,
+                "bias": 7.979300654303315,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 11.273218753342872,
+                "wape": 0.16541030660691744,
+                "bias": 5.400695143773236,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 16.266012830935903,
+                "wape": 0.21641476298670087,
+                "bias": 10.192886015381175,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 17.042132818278475,
+                "wape": 0.2199931086696877,
+                "bias": 6.816031779553361,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 38.198084043254106,
+            "aggregate_wape": 0.6871017068013789,
+            "aggregate_bias": 36.301290732636915,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 37.57827371446262,
+                "wape": 0.6670270464461819,
+                "bias": 35.45857210987964,
+                "n": 92
+              },
+              "D2": {
+                "mae": 37.92378750380538,
+                "wape": 0.6764140852305546,
+                "bias": 35.560735447309845,
+                "n": 91
+              },
+              "D3": {
+                "mae": 38.06200071006469,
+                "wape": 0.6862139551093392,
+                "bias": 36.01911924528147,
+                "n": 90
+              },
+              "D4": {
+                "mae": 38.13634743328051,
+                "wape": 0.6935298164205079,
+                "bias": 36.397489086090566,
+                "n": 89
+              },
+              "D5": {
+                "mae": 38.37197297160914,
+                "wape": 0.6958033425719358,
+                "bias": 36.68653966899574,
+                "n": 88
+              },
+              "D6": {
+                "mae": 38.534636483251944,
+                "wape": 0.6926680524882064,
+                "bias": 36.909256743149506,
+                "n": 87
+              },
+              "D7": {
+                "mae": 38.779569486304496,
+                "wape": 0.7001979793874001,
+                "bias": 37.17291253901922,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 16.441815752105896,
+                "wape": 0.24361928389875684,
+                "bias": 12.72278187344958,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 36.5333480408651,
+                "wape": 0.6707469040550508,
+                "bias": 34.40174787533219,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 59.43627569316554,
+                "wape": 1.294816968719699,
+                "bias": 59.43627569316554,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": -2.0655233527797967,
+            "mae_improvement_pct": -206.55233527797967,
+            "horizon_wins": 0,
+            "wape_relative_change_fraction": 2.064040025938358,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": false,
+              "wape_regression_not_over_5pct": false,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          }
+        }
+      ],
+      "decision": "REJECT",
+      "runtime_seconds": 48.75496683298843,
+      "tracemalloc_peak_mb": 13.859488487243652,
+      "process_peak_rss_mb_after": 322.765625,
+      "estimated_incremental_rss_mb": 0.0,
+      "compute_note": "single process; tree n_jobs=1; peak below the 18 GB budget"
+    },
+    {
+      "cycle_id": "F10",
+      "name": "ridge_provided_synthetic_diagnostic",
+      "hypothesis": "The supplied generator may appear helpful because it copied test-period distribution.",
+      "family": "linear autoregression",
+      "feature_families": [
+        "lags",
+        "rolling distribution",
+        "trend/residual",
+        "calendar/Fourier"
+      ],
+      "synthetic_strategy": "provided_synthetic_equal_diagnostic",
+      "falsification_criterion": "Always ineligible; use only to quantify generator-artifact risk.",
+      "promotion_eligible": false,
+      "stochastic": false,
+      "seeds": [
+        11
+      ],
+      "seed_mae_mean": 11.049809835467913,
+      "seed_mae_std": 0.0,
+      "seed_mae_min": 11.049809835467913,
+      "seed_mae_max": 11.049809835467913,
+      "per_seed": [
+        {
+          "seed": 11,
+          "selection": {
+            "aggregate_mae_mean_horizons": 13.310309248541557,
+            "aggregate_wape": 0.1804714355039928,
+            "aggregate_bias": -3.3125022413049106,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 13.03239757279885,
+                "wape": 0.17684079302322922,
+                "bias": -2.926654766768722,
+                "n": 92
+              },
+              "D2": {
+                "mae": 13.091322396714297,
+                "wape": 0.17780751314940313,
+                "bias": -3.1370703372733373,
+                "n": 91
+              },
+              "D3": {
+                "mae": 13.172654935332233,
+                "wape": 0.17932823236725168,
+                "bias": -3.217621632818544,
+                "n": 90
+              },
+              "D4": {
+                "mae": 13.450757137493383,
+                "wape": 0.18301748742346904,
+                "bias": -3.38053212548712,
+                "n": 89
+              },
+              "D5": {
+                "mae": 13.528418377584506,
+                "wape": 0.18380435652731766,
+                "bias": -3.4845528897754083,
+                "n": 88
+              },
+              "D6": {
+                "mae": 13.578968360052237,
+                "wape": 0.18398539905381475,
+                "bias": -3.345323884834519,
+                "n": 87
+              },
+              "D7": {
+                "mae": 13.317645959815396,
+                "wape": 0.17878825359727193,
+                "bias": -3.7305362639011865,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 10.399740594301086,
+                "wape": 0.15259388804334578,
+                "bias": 1.115534813561785,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 10.867374825244477,
+                "wape": 0.14458739037878918,
+                "bias": -2.590785768039897,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 18.54079222738261,
+                "wape": 0.2393389702329941,
+                "bias": -8.191110514887676,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 11.049809835467913,
+            "aggregate_wape": 0.1988492135323318,
+            "aggregate_bias": 3.301999892332154,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 11.033024299511135,
+                "wape": 0.19583990653193603,
+                "bias": 2.956387462267118,
+                "n": 92
+              },
+              "D2": {
+                "mae": 11.373257423582455,
+                "wape": 0.20285504224735465,
+                "bias": 2.9209160976172166,
+                "n": 91
+              },
+              "D3": {
+                "mae": 11.150842360816622,
+                "wape": 0.20103682140895351,
+                "bias": 3.3100463953307275,
+                "n": 90
+              },
+              "D4": {
+                "mae": 11.006398224568413,
+                "wape": 0.2001572214929687,
+                "bias": 3.6705581118258355,
+                "n": 89
+              },
+              "D5": {
+                "mae": 10.985651633406944,
+                "wape": 0.19920406835767793,
+                "bias": 3.605772846298308,
+                "n": 88
+              },
+              "D6": {
+                "mae": 10.907895733605526,
+                "wape": 0.19607167950902493,
+                "bias": 3.451336006592766,
+                "n": 87
+              },
+              "D7": {
+                "mae": 10.8915991727843,
+                "wape": 0.1966570499389985,
+                "bias": 3.223218964315158,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 7.442874661723669,
+                "wape": 0.1102814812290474,
+                "bias": -0.20269239413043227,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 10.196026114543686,
+                "wape": 0.18719754188268703,
+                "bias": -2.6472259501699837,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 15.140934558673,
+                "wape": 0.32984467415239843,
+                "bias": 12.22484374059075,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": 0.11321599125113904,
+            "mae_improvement_pct": 11.321599125113904,
+            "horizon_wins": 7,
+            "wape_relative_change_fraction": -0.11325798879793265,
+            "checks": {
+              "mae_improvement_at_least_10pct": true,
+              "wins_at_least_5_horizons": true,
+              "wape_regression_not_over_5pct": true,
+              "real_test_rows_only": true,
+              "leakage_eligible": false
+            },
+            "passed": false
+          }
+        }
+      ],
+      "decision": "INELIGIBLE DIAGNOSTIC",
+      "runtime_seconds": 38.96010533400113,
+      "tracemalloc_peak_mb": 21.0145902633667,
+      "process_peak_rss_mb_after": 322.765625,
+      "estimated_incremental_rss_mb": 0.0,
+      "compute_note": "single process; tree n_jobs=1; peak below the 18 GB budget"
+    },
+    {
+      "cycle_id": "F11",
+      "name": "ridge_ablate_calendar",
+      "hypothesis": "Calendar/Fourier features provide incremental information beyond state lags.",
+      "family": "linear autoregression ablation",
+      "feature_families": [
+        "lags",
+        "rolling distribution",
+        "trend/residual"
+      ],
+      "synthetic_strategy": "real_only",
+      "falsification_criterion": "Calendar is retained only if full Ridge beats this drop-family ablation.",
+      "promotion_eligible": true,
+      "stochastic": false,
+      "seeds": [
+        11
+      ],
+      "seed_mae_mean": 14.628138401380767,
+      "seed_mae_std": 0.0,
+      "seed_mae_min": 14.628138401380767,
+      "seed_mae_max": 14.628138401380767,
+      "per_seed": [
+        {
+          "seed": 11,
+          "selection": {
+            "aggregate_mae_mean_horizons": 12.794675356733793,
+            "aggregate_wape": 0.1734448677973763,
+            "aggregate_bias": 0.8213323134282703,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 12.51755135406699,
+                "wape": 0.16985467914073202,
+                "bias": 0.154512044620074,
+                "n": 92
+              },
+              "D2": {
+                "mae": 12.541985713337915,
+                "wape": 0.17034637312145529,
+                "bias": 0.23694741019000928,
+                "n": 91
+              },
+              "D3": {
+                "mae": 12.529606283839035,
+                "wape": 0.17057397754432205,
+                "bias": 0.5450220404811046,
+                "n": 90
+              },
+              "D4": {
+                "mae": 12.693693171444611,
+                "wape": 0.17271651005329008,
+                "bias": 0.8250095294872022,
+                "n": 89
+              },
+              "D5": {
+                "mae": 12.908783360675603,
+                "wape": 0.17538566245784362,
+                "bias": 1.0527688990497146,
+                "n": 88
+              },
+              "D6": {
+                "mae": 13.136574324403536,
+                "wape": 0.177991273356659,
+                "bias": 1.4758461505455223,
+                "n": 87
+              },
+              "D7": {
+                "mae": 13.234533289368859,
+                "wape": 0.17767247313233248,
+                "bias": 1.5394488238602178,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 11.388323394325155,
+                "wape": 0.16709922033895275,
+                "bias": 2.9827896009820956,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 10.587249562728273,
+                "wape": 0.14086040190754356,
+                "bias": 1.470805030712208,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 16.370566222573874,
+                "wape": 0.2113240045943271,
+                "bias": -1.8671496294820362,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 14.628138401380767,
+            "aggregate_wape": 0.2633243687387999,
+            "aggregate_bias": 11.400602513319415,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 15.190147341933395,
+                "wape": 0.26963024415548376,
+                "bias": 10.919903447342644,
+                "n": 92
+              },
+              "D2": {
+                "mae": 14.955167835192144,
+                "wape": 0.26674250744854666,
+                "bias": 10.838545610320919,
+                "n": 91
+              },
+              "D3": {
+                "mae": 14.747043975147484,
+                "wape": 0.2658721870519378,
+                "bias": 11.234433639466083,
+                "n": 90
+              },
+              "D4": {
+                "mae": 14.657726202088648,
+                "wape": 0.26655856803961786,
+                "bias": 11.576007491929047,
+                "n": 89
+              },
+              "D5": {
+                "mae": 14.496901482119137,
+                "wape": 0.26287396052472367,
+                "bias": 11.66979838665684,
+                "n": 88
+              },
+              "D6": {
+                "mae": 14.121717988547767,
+                "wape": 0.25384079855447433,
+                "bias": 11.80765312203906,
+                "n": 87
+              },
+              "D7": {
+                "mae": 14.228263984636783,
+                "wape": 0.2569033597897886,
+                "bias": 11.814707257284123,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 11.77061998856888,
+                "wape": 0.17440592060473997,
+                "bias": 9.3186710716063,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 16.53252986762167,
+                "wape": 0.3035348200909731,
+                "bias": 14.11508635833753,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 15.388295513172228,
+                "wape": 0.3352334229854807,
+                "bias": 10.65413686872018,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": -0.1739567834436203,
+            "mae_improvement_pct": -17.395678344362032,
+            "horizon_wins": 0,
+            "wape_relative_change_fraction": 0.17426051723353816,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": false,
+              "wape_regression_not_over_5pct": false,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          }
+        }
+      ],
+      "decision": "REJECT",
+      "runtime_seconds": 12.823263583995868,
+      "tracemalloc_peak_mb": 6.671998023986816,
+      "process_peak_rss_mb_after": 322.765625,
+      "estimated_incremental_rss_mb": 0.0,
+      "compute_note": "single process; tree n_jobs=1; peak below the 18 GB budget"
+    },
+    {
+      "cycle_id": "F12",
+      "name": "ridge_ablate_rolling",
+      "hypothesis": "Rolling distribution summaries provide incremental regime information.",
+      "family": "linear autoregression ablation",
+      "feature_families": [
+        "lags",
+        "trend/residual",
+        "calendar/Fourier"
+      ],
+      "synthetic_strategy": "real_only",
+      "falsification_criterion": "Rolling summaries are retained only if full Ridge beats this ablation.",
+      "promotion_eligible": true,
+      "stochastic": false,
+      "seeds": [
+        11
+      ],
+      "seed_mae_mean": 25.064886637081575,
+      "seed_mae_std": 0.0,
+      "seed_mae_min": 25.064886637081575,
+      "seed_mae_max": 25.064886637081575,
+      "per_seed": [
+        {
+          "seed": 11,
+          "selection": {
+            "aggregate_mae_mean_horizons": 12.456443763663142,
+            "aggregate_wape": 0.1689420550822767,
+            "aggregate_bias": 3.32433254525682,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 12.647704888292305,
+                "wape": 0.1716207742954118,
+                "bias": 3.5489338698656594,
+                "n": 92
+              },
+              "D2": {
+                "mae": 12.41891310178399,
+                "wape": 0.16867478988990198,
+                "bias": 3.5096183368309712,
+                "n": 91
+              },
+              "D3": {
+                "mae": 12.256561652955774,
+                "wape": 0.16685683690304337,
+                "bias": 3.5411395251194904,
+                "n": 90
+              },
+              "D4": {
+                "mae": 12.310626336616785,
+                "wape": 0.16750431798790613,
+                "bias": 3.2319030284261476,
+                "n": 89
+              },
+              "D5": {
+                "mae": 12.54745708638784,
+                "wape": 0.17047648967147291,
+                "bias": 3.0382829398490943,
+                "n": 88
+              },
+              "D6": {
+                "mae": 12.709261901127968,
+                "wape": 0.17220149282014222,
+                "bias": 3.2720992148243533,
+                "n": 87
+              },
+              "D7": {
+                "mae": 12.304581378477316,
+                "wape": 0.16518794857150315,
+                "bias": 3.102308532890926,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 10.08574211546934,
+                "wape": 0.14798663382482338,
+                "bias": 7.364094503418756,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 11.800580574611915,
+                "wape": 0.1570034325377551,
+                "bias": 1.6844313885624638,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 15.347575252079453,
+                "wape": 0.19811844129190345,
+                "bias": 1.248452579556515,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 25.064886637081575,
+            "aggregate_wape": 0.4507864541920372,
+            "aggregate_bias": 22.910350444022058,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 24.37668944346275,
+                "wape": 0.4326944682227616,
+                "bias": 21.928801994419725,
+                "n": 92
+              },
+              "D2": {
+                "mae": 24.598048659589473,
+                "wape": 0.438734305766884,
+                "bias": 22.113525339383383,
+                "n": 91
+              },
+              "D3": {
+                "mae": 24.876498234814967,
+                "wape": 0.4484945595219044,
+                "bias": 22.643057416654965,
+                "n": 90
+              },
+              "D4": {
+                "mae": 25.151241696511892,
+                "wape": 0.4573887435614136,
+                "bias": 23.105875038655597,
+                "n": 89
+              },
+              "D5": {
+                "mae": 25.283948482448217,
+                "wape": 0.45847670852162437,
+                "bias": 23.38116259419128,
+                "n": 88
+              },
+              "D6": {
+                "mae": 25.54279883214938,
+                "wape": 0.45913708644566037,
+                "bias": 23.56191815080998,
+                "n": 87
+              },
+              "D7": {
+                "mae": 25.624981110594348,
+                "wape": 0.462680742286608,
+                "bias": 23.740005859379583,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 12.194343689851866,
+                "wape": 0.1806842578780591,
+                "bias": 9.109270829358662,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 23.02391498418137,
+                "wape": 0.4227156973839909,
+                "bias": 19.540296212632494,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 38.63718451344986,
+                "wape": 0.8417095712698142,
+                "bias": 38.63718451344986,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": -1.0115405587815465,
+            "mae_improvement_pct": -101.15405587815465,
+            "horizon_wins": 0,
+            "wape_relative_change_fraction": 1.0102231228986056,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": false,
+              "wape_regression_not_over_5pct": false,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          }
+        }
+      ],
+      "decision": "REJECT",
+      "runtime_seconds": 13.208301915961783,
+      "tracemalloc_peak_mb": 6.52247428894043,
+      "process_peak_rss_mb_after": 322.765625,
+      "estimated_incremental_rss_mb": 0.0,
+      "compute_note": "single process; tree n_jobs=1; peak below the 18 GB budget"
+    },
+    {
+      "cycle_id": "F13",
+      "name": "ridge_ablate_trend_residual",
+      "hypothesis": "Recent trend/residual correction adds signal beyond levels.",
+      "family": "linear autoregression ablation",
+      "feature_families": [
+        "lags",
+        "rolling distribution",
+        "calendar/Fourier"
+      ],
+      "synthetic_strategy": "real_only",
+      "falsification_criterion": "Trend/residual is retained only if full Ridge beats this ablation.",
+      "promotion_eligible": true,
+      "stochastic": false,
+      "seeds": [
+        11
+      ],
+      "seed_mae_mean": 38.545038252282225,
+      "seed_mae_std": 0.0,
+      "seed_mae_min": 38.545038252282225,
+      "seed_mae_max": 38.545038252282225,
+      "per_seed": [
+        {
+          "seed": 11,
+          "selection": {
+            "aggregate_mae_mean_horizons": 17.99575183760466,
+            "aggregate_wape": 0.24399122440861176,
+            "aggregate_bias": 14.125978191179737,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 17.60234209256251,
+                "wape": 0.23885183960409304,
+                "bias": 13.44137681633978,
+                "n": 92
+              },
+              "D2": {
+                "mae": 17.803948916782932,
+                "wape": 0.24181482857123085,
+                "bias": 13.698043480548739,
+                "n": 91
+              },
+              "D3": {
+                "mae": 17.932333554157257,
+                "wape": 0.24412494628258252,
+                "bias": 14.030921284362678,
+                "n": 90
+              },
+              "D4": {
+                "mae": 17.950618798560196,
+                "wape": 0.2442447749689432,
+                "bias": 14.052501571698357,
+                "n": 89
+              },
+              "D5": {
+                "mae": 18.061841137551156,
+                "wape": 0.24539787248795766,
+                "bias": 14.183535376618176,
+                "n": 88
+              },
+              "D6": {
+                "mae": 18.199608169280484,
+                "wape": 0.24659179422635136,
+                "bias": 14.696517547576834,
+                "n": 87
+              },
+              "D7": {
+                "mae": 18.419570194338085,
+                "wape": 0.24728114840978385,
+                "bias": 14.850605744376784,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 12.622684759859961,
+                "wape": 0.18521082594194882,
+                "bias": 9.02223358132153,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 17.43511413710685,
+                "wape": 0.23196932972116413,
+                "bias": 15.290708830555026,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 23.57388049404404,
+                "wape": 0.3043099891658009,
+                "bias": 17.685918166359606,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 38.545038252282225,
+            "aggregate_wape": 0.693382170403912,
+            "aggregate_bias": 36.7946243678626,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 38.071940148497546,
+                "wape": 0.6757897923329682,
+                "bias": 36.02677176885205,
+                "n": 92
+              },
+              "D2": {
+                "mae": 38.3666761497621,
+                "wape": 0.6843135103152393,
+                "bias": 36.08620783745003,
+                "n": 91
+              },
+              "D3": {
+                "mae": 38.44887206826315,
+                "wape": 0.6931887993076289,
+                "bias": 36.53220058790068,
+                "n": 90
+              },
+              "D4": {
+                "mae": 38.46396297586248,
+                "wape": 0.6994876797817247,
+                "bias": 36.92968270960878,
+                "n": 89
+              },
+              "D5": {
+                "mae": 38.6748938091847,
+                "wape": 0.7012962405127248,
+                "bias": 37.17810288791828,
+                "n": 88
+              },
+              "D6": {
+                "mae": 38.82920024355857,
+                "wape": 0.697962896939999,
+                "bias": 37.36877493478267,
+                "n": 87
+              },
+              "D7": {
+                "mae": 38.95972237084704,
+                "wape": 0.7034507923352604,
+                "bias": 37.52728811287111,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 17.122046881991906,
+                "wape": 0.25369830578095054,
+                "bias": 13.517447080700284,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 36.902448284976096,
+                "wape": 0.6775235303239184,
+                "bias": 35.092010797620354,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 59.46686214682429,
+                "wape": 1.2954832934304659,
+                "bias": 59.46686214682429,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": -2.0933675825824376,
+            "mae_improvement_pct": -209.33675825824375,
+            "horizon_wins": 0,
+            "wape_relative_change_fraction": 2.0920469304026095,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": false,
+              "wape_regression_not_over_5pct": false,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          }
+        }
+      ],
+      "decision": "REJECT",
+      "runtime_seconds": 13.195286292000674,
+      "tracemalloc_peak_mb": 6.5894060134887695,
+      "process_peak_rss_mb_after": 322.765625,
+      "estimated_incremental_rss_mb": 0.0,
+      "compute_note": "single process; tree n_jobs=1; peak below the 18 GB budget"
+    },
+    {
+      "cycle_id": "F14",
+      "name": "ridge_ablate_weekly_lags",
+      "hypothesis": "Weekly aligned lags are the core short-series mechanism.",
+      "family": "linear autoregression ablation",
+      "feature_families": [
+        "rolling distribution",
+        "trend/residual",
+        "calendar/Fourier"
+      ],
+      "synthetic_strategy": "real_only",
+      "falsification_criterion": "Weekly/state lags are retained only if full Ridge beats this ablation.",
+      "promotion_eligible": true,
+      "stochastic": false,
+      "seeds": [
+        11
+      ],
+      "seed_mae_mean": 39.2794902187822,
+      "seed_mae_std": 0.0,
+      "seed_mae_min": 39.2794902187822,
+      "seed_mae_max": 39.2794902187822,
+      "per_seed": [
+        {
+          "seed": 11,
+          "selection": {
+            "aggregate_mae_mean_horizons": 16.07843792605726,
+            "aggregate_wape": 0.21799062490581567,
+            "aggregate_bias": 12.178890609383302,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 15.767733582449821,
+                "wape": 0.213957446841502,
+                "bias": 11.8467103430891,
+                "n": 92
+              },
+              "D2": {
+                "mae": 15.853005616446456,
+                "wape": 0.2153169419547205,
+                "bias": 11.937688251488282,
+                "n": 91
+              },
+              "D3": {
+                "mae": 15.975016092899212,
+                "wape": 0.21747866409936908,
+                "bias": 12.11962281051717,
+                "n": 90
+              },
+              "D4": {
+                "mae": 16.035110578887373,
+                "wape": 0.21818144649456905,
+                "bias": 12.114889951951827,
+                "n": 89
+              },
+              "D5": {
+                "mae": 16.15501789619989,
+                "wape": 0.2194907480107442,
+                "bias": 12.147195992094794,
+                "n": 88
+              },
+              "D6": {
+                "mae": 16.210852709488744,
+                "wape": 0.21964556700288443,
+                "bias": 12.534665014617037,
+                "n": 87
+              },
+              "D7": {
+                "mae": 16.552329006029296,
+                "wape": 0.22221359577248195,
+                "bias": 12.590250057556794,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 10.837772576181425,
+                "wape": 0.15902106789426257,
+                "bias": 7.198714322593191,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 16.015032787420996,
+                "wape": 0.21307554352362698,
+                "bias": 14.005500869364365,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 21.019770504150628,
+                "wape": 0.2713395503978136,
+                "bias": 14.939557875073644,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 39.2794902187822,
+            "aggregate_wape": 0.7067097447276687,
+            "aggregate_bias": 37.34671439639382,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 39.24892938445978,
+                "wape": 0.6966817486726413,
+                "bias": 36.92465654703687,
+                "n": 92
+              },
+              "D2": {
+                "mae": 39.39774915773304,
+                "wape": 0.7027038756083313,
+                "bias": 36.884924814772454,
+                "n": 91
+              },
+              "D3": {
+                "mae": 39.297750347952544,
+                "wape": 0.7084930952154905,
+                "bias": 37.21156044680932,
+                "n": 90
+              },
+              "D4": {
+                "mae": 39.17428957287054,
+                "wape": 0.7124053477698158,
+                "bias": 37.50129121508797,
+                "n": 89
+              },
+              "D5": {
+                "mae": 39.25509646582088,
+                "wape": 0.7118171211605681,
+                "bias": 37.61353722800523,
+                "n": 88
+              },
+              "D6": {
+                "mae": 39.278833840615995,
+                "wape": 0.7060451537466098,
+                "bias": 37.6489319709545,
+                "n": 87
+              },
+              "D7": {
+                "mae": 39.30378276202261,
+                "wape": 0.7096630941704691,
+                "bias": 37.68956735568016,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 16.70195070729005,
+                "wape": 0.24747371776752716,
+                "bias": 12.767871661463003,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 37.07331224347048,
+                "wape": 0.680660567505578,
+                "bias": 35.010665725615546,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 61.80765170934255,
+                "wape": 1.3464773035766824,
+                "bias": 61.80765170934255,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": -2.1523097968634266,
+            "mae_improvement_pct": -215.23097968634266,
+            "horizon_wins": 0,
+            "wape_relative_change_fraction": 2.151479501698002,
+            "checks": {
+              "mae_improvement_at_least_10pct": false,
+              "wins_at_least_5_horizons": false,
+              "wape_regression_not_over_5pct": false,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": false
+          }
+        }
+      ],
+      "decision": "REJECT",
+      "runtime_seconds": 14.78338104201248,
+      "tracemalloc_peak_mb": 6.643726348876953,
+      "process_peak_rss_mb_after": 322.765625,
+      "estimated_incremental_rss_mb": 0.0,
+      "compute_note": "single process; tree n_jobs=1; peak below the 18 GB budget"
+    },
+    {
+      "cycle_id": "F15",
+      "name": "calendar_adjusted_seasonal",
+      "hypothesis": "Known weekday holidays and the Dec 24-31 reduced-activity window share an estimable demand factor.",
+      "family": "hybrid statistical/operational rule",
+      "feature_families": [
+        "weekly seasonal lags",
+        "holiday",
+        "year-end operational window",
+        "causal factor estimation"
+      ],
+      "synthetic_strategy": "real_only",
+      "falsification_criterion": "Promotion requires >=10% MAE gain, >=5/7 horizon wins, and <=5% WAPE regression.",
+      "promotion_eligible": true,
+      "stochastic": false,
+      "seeds": [
+        11
+      ],
+      "seed_mae_mean": 10.18475079814182,
+      "seed_mae_std": 0.0,
+      "seed_mae_min": 10.18475079814182,
+      "seed_mae_max": 10.18475079814182,
+      "per_seed": [
+        {
+          "seed": 11,
+          "selection": {
+            "aggregate_mae_mean_horizons": 13.004593477644944,
+            "aggregate_wape": 0.17635405781957506,
+            "aggregate_bias": -2.7624398073836276,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 12.967391304347826,
+                "wape": 0.17595870206489675,
+                "bias": -2.467391304347826,
+                "n": 92
+              },
+              "D2": {
+                "mae": 12.835164835164836,
+                "wape": 0.17432835820895523,
+                "bias": -2.769230769230769,
+                "n": 91
+              },
+              "D3": {
+                "mae": 12.944444444444445,
+                "wape": 0.17622144909998488,
+                "bias": -2.7666666666666666,
+                "n": 90
+              },
+              "D4": {
+                "mae": 13.03370786516854,
+                "wape": 0.177342913927534,
+                "bias": -2.853932584269663,
+                "n": 89
+              },
+              "D5": {
+                "mae": 13.159090909090908,
+                "wape": 0.17878647522000926,
+                "bias": -2.909090909090909,
+                "n": 88
+              },
+              "D6": {
+                "mae": 13.057471264367816,
+                "wape": 0.17691948294658152,
+                "bias": -2.689655172413793,
+                "n": 87
+              },
+              "D7": {
+                "mae": 13.034883720930232,
+                "wape": 0.17499219481735873,
+                "bias": -2.895348837209302,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-07": {
+                "mae": 10.045918367346939,
+                "wape": 0.14740230573439136,
+                "bias": -1.3520408163265305,
+                "n": 196
+              },
+              "2025-08": {
+                "mae": 10.35483870967742,
+                "wape": 0.13776824034334764,
+                "bias": -4.161290322580645,
+                "n": 217
+              },
+              "2025-09": {
+                "mae": 18.5,
+                "wape": 0.23881239242685026,
+                "bias": -2.6333333333333333,
+                "n": 210
+              }
+            }
+          },
+          "test": {
+            "aggregate_mae_mean_horizons": 10.18475079814182,
+            "aggregate_wape": 0.18331224585951794,
+            "aggregate_bias": 4.31234422530668,
+            "n_predictions": 623,
+            "horizons": {
+              "D1": {
+                "mae": 10.489232853867,
+                "wape": 0.1861874247647625,
+                "bias": 4.244546410347047,
+                "n": 92
+              },
+              "D2": {
+                "mae": 10.340199346203098,
+                "wape": 0.18442927097304623,
+                "bias": 4.071973096738575,
+                "n": 91
+              },
+              "D3": {
+                "mae": 10.232868227827577,
+                "wape": 0.18448680699208372,
+                "bias": 4.339439464480115,
+                "n": 90
+              },
+              "D4": {
+                "mae": 10.1568330393762,
+                "wape": 0.18470742552196198,
+                "bias": 4.579208447227082,
+                "n": 89
+              },
+              "D5": {
+                "mae": 10.111237610627853,
+                "wape": 0.18334821960338987,
+                "bias": 4.4702309208406765,
+                "n": 88
+              },
+              "D6": {
+                "mae": 10.072315791239255,
+                "wape": 0.18105195740450727,
+                "bias": 4.3664699440982035,
+                "n": 87
+              },
+              "D7": {
+                "mae": 9.890568717851757,
+                "wape": 0.1785825970470819,
+                "bias": 4.118375825976506,
+                "n": 86
+              }
+            },
+            "months": {
+              "2025-10": {
+                "mae": 9.974489795918368,
+                "wape": 0.1477925612337466,
+                "bias": 7.188775510204081,
+                "n": 196
+              },
+              "2025-11": {
+                "mae": 10.182023486901537,
+                "wape": 0.18694045569586665,
+                "bias": 2.684643179765131,
+                "n": 210
+              },
+              "2025-12": {
+                "mae": 10.388609240222143,
+                "wape": 0.2263154507708267,
+                "bias": 3.2894718185040763,
+                "n": 217
+              }
+            }
+          },
+          "gate": {
+            "mae_improvement_fraction": 0.18263985757525836,
+            "mae_improvement_pct": 18.263985757525838,
+            "horizon_wins": 7,
+            "wape_relative_change_fraction": -0.18254306022182512,
+            "checks": {
+              "mae_improvement_at_least_10pct": true,
+              "wins_at_least_5_horizons": true,
+              "wape_regression_not_over_5pct": true,
+              "real_test_rows_only": true,
+              "leakage_eligible": true
+            },
+            "passed": true
+          }
+        }
+      ],
+      "decision": "PROMOTION CANDIDATE",
+      "runtime_seconds": 1.4160923750023358,
+      "tracemalloc_peak_mb": 0.3467435836791992,
+      "process_peak_rss_mb_after": 322.765625,
+      "estimated_incremental_rss_mb": 0.0,
+      "compute_note": "single process; tree n_jobs=1; peak below the 18 GB budget"
+    }
+  ],
+  "runtime": {
+    "total_cycle_seconds": 335.76910508598667,
+    "max_process_peak_rss_mb": 322.765625,
+    "max_tracemalloc_peak_mb": 32.60956859588623
+  },
+  "hardware": {
+    "machine": "arm64",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "python": "3.11.11",
+    "numpy": "1.26.4",
+    "pandas": "3.0.1"
+  },
+  "source_hashes": {
+    "csv": "010a6d84593941a1e1da1386b86466a3ea85542448192a02e9adcfca3f6cc0bb",
+    "generator": "f98b9cf2c0c459aa3480fc796d0610e330ee88c02b941e74ec19135c549037a7"
+  },
+  "series_scope": {
+    "promoted_series": "total",
+    "segment_metrics_are_diagnostic": true,
+    "total_is_modeled_directly_not_summed": true
+  },
+  "segment_metrics": {
+    "total": {
+      "baseline": {
+        "aggregate_mae_mean_horizons": 12.46054250691528,
+        "aggregate_wape": 0.22424697490397666,
+        "aggregate_bias": 7.093097913322633,
+        "n_predictions": 623,
+        "horizons": {
+          "D1": {
+            "mae": 12.695652173913043,
+            "wape": 0.22535211267605634,
+            "bias": 6.978260869565218,
+            "n": 92
+          },
+          "D2": {
+            "mae": 12.593406593406593,
+            "wape": 0.22461779694237555,
+            "bias": 6.813186813186813,
+            "n": 91
+          },
+          "D3": {
+            "mae": 12.511111111111111,
+            "wape": 0.22556089743589744,
+            "bias": 7.111111111111111,
+            "n": 90
+          },
+          "D4": {
+            "mae": 12.460674157303371,
+            "wape": 0.22660400490396404,
+            "bias": 7.382022471910112,
+            "n": 89
+          },
+          "D5": {
+            "mae": 12.409090909090908,
+            "wape": 0.225015454358129,
+            "bias": 7.2727272727272725,
+            "n": 88
+          },
+          "D6": {
+            "mae": 12.367816091954023,
+            "wape": 0.22231404958677686,
+            "bias": 7.172413793103448,
+            "n": 87
+          },
+          "D7": {
+            "mae": 12.186046511627907,
+            "wape": 0.2200293932395549,
+            "bias": 6.930232558139535,
+            "n": 86
+          }
+        },
+        "months": {
+          "2025-10": {
+            "mae": 9.974489795918368,
+            "wape": 0.1477925612337466,
+            "bias": 7.188775510204081,
+            "n": 196
+          },
+          "2025-11": {
+            "mae": 11.566666666666666,
+            "wape": 0.21236230110159118,
+            "bias": 4.166666666666667,
+            "n": 210
+          },
+          "2025-12": {
+            "mae": 15.580645161290322,
+            "wape": 0.3394237526352776,
+            "bias": 9.838709677419354,
+            "n": 217
+          }
+        }
+      },
+      "calendar_candidate": {
+        "aggregate_mae_mean_horizons": 10.18475079814182,
+        "aggregate_wape": 0.18331224585951794,
+        "aggregate_bias": 4.31234422530668,
+        "n_predictions": 623,
+        "horizons": {
+          "D1": {
+            "mae": 10.489232853867,
+            "wape": 0.1861874247647625,
+            "bias": 4.244546410347047,
+            "n": 92
+          },
+          "D2": {
+            "mae": 10.340199346203098,
+            "wape": 0.18442927097304623,
+            "bias": 4.071973096738575,
+            "n": 91
+          },
+          "D3": {
+            "mae": 10.232868227827577,
+            "wape": 0.18448680699208372,
+            "bias": 4.339439464480115,
+            "n": 90
+          },
+          "D4": {
+            "mae": 10.1568330393762,
+            "wape": 0.18470742552196198,
+            "bias": 4.579208447227082,
+            "n": 89
+          },
+          "D5": {
+            "mae": 10.111237610627853,
+            "wape": 0.18334821960338987,
+            "bias": 4.4702309208406765,
+            "n": 88
+          },
+          "D6": {
+            "mae": 10.072315791239255,
+            "wape": 0.18105195740450727,
+            "bias": 4.3664699440982035,
+            "n": 87
+          },
+          "D7": {
+            "mae": 9.890568717851757,
+            "wape": 0.1785825970470819,
+            "bias": 4.118375825976506,
+            "n": 86
+          }
+        },
+        "months": {
+          "2025-10": {
+            "mae": 9.974489795918368,
+            "wape": 0.1477925612337466,
+            "bias": 7.188775510204081,
+            "n": 196
+          },
+          "2025-11": {
+            "mae": 10.182023486901537,
+            "wape": 0.18694045569586665,
+            "bias": 2.684643179765131,
+            "n": 210
+          },
+          "2025-12": {
+            "mae": 10.388609240222143,
+            "wape": 0.2263154507708267,
+            "bias": 3.2894718185040763,
+            "n": 217
+          }
+        }
+      },
+      "paired_comparison": {
+        "mae_improvement_fraction": 0.18263985757525836,
+        "mae_improvement_pct": 18.263985757525838,
+        "horizon_wins": 7,
+        "wape_relative_change_fraction": -0.18254306022182512,
+        "checks": {
+          "mae_improvement_at_least_10pct": true,
+          "wins_at_least_5_horizons": true,
+          "wape_regression_not_over_5pct": true,
+          "real_test_rows_only": true,
+          "leakage_eligible": true
+        },
+        "passed": true
+      },
+      "promotion_scope": true,
+      "note": "Promotion gate is claimed on Total only. P2/P3 are diagnostic and were not used to select, weight, or sum the Total forecast."
+    },
+    "p2": {
+      "baseline": {
+        "aggregate_mae_mean_horizons": 4.283192295090157,
+        "aggregate_wape": 0.3167200664530675,
+        "aggregate_bias": 0.5248796147672552,
+        "n_predictions": 623,
+        "horizons": {
+          "D1": {
+            "mae": 4.358695652173913,
+            "wape": 0.3213141025641026,
+            "bias": 0.4673913043478261,
+            "n": 92
+          },
+          "D2": {
+            "mae": 4.34065934065934,
+            "wape": 0.3193209377526273,
+            "bias": 0.4065934065934066,
+            "n": 91
+          },
+          "D3": {
+            "mae": 4.277777777777778,
+            "wape": 0.3171334431630972,
+            "bias": 0.5222222222222223,
+            "n": 90
+          },
+          "D4": {
+            "mae": 4.247191011235955,
+            "wape": 0.31605351170568563,
+            "bias": 0.6067415730337079,
+            "n": 89
+          },
+          "D5": {
+            "mae": 4.261363636363637,
+            "wape": 0.31645569620253167,
+            "bias": 0.5795454545454546,
+            "n": 88
+          },
+          "D6": {
+            "mae": 4.287356321839081,
+            "wape": 0.3166383701188455,
+            "bias": 0.6091954022988506,
+            "n": 87
+          },
+          "D7": {
+            "mae": 4.209302325581396,
+            "wape": 0.30966638152266895,
+            "bias": 0.4883720930232558,
+            "n": 86
+          }
+        },
+        "months": {
+          "2025-10": {
+            "mae": 3.86734693877551,
+            "wape": 0.27633977397010573,
+            "bias": 0.5612244897959183,
+            "n": 196
+          },
+          "2025-11": {
+            "mae": 5.033333333333333,
+            "wape": 0.33705357142857145,
+            "bias": -0.43333333333333335,
+            "n": 210
+          },
+          "2025-12": {
+            "mae": 3.935483870967742,
+            "wape": 0.33516483516483514,
+            "bias": 1.4193548387096775,
+            "n": 217
+          }
+        }
+      },
+      "calendar_candidate": {
+        "aggregate_mae_mean_horizons": 4.355352521259531,
+        "aggregate_wape": 0.322053511389129,
+        "aggregate_bias": -0.03256372773828637,
+        "n_predictions": 623,
+        "horizons": {
+          "D1": {
+            "mae": 4.430528597308489,
+            "wape": 0.32660947992979245,
+            "bias": -0.07620018115942032,
+            "n": 92
+          },
+          "D2": {
+            "mae": 4.411580978545264,
+            "wape": 0.32453829349039537,
+            "bias": -0.1412709314495029,
+            "n": 91
+          },
+          "D3": {
+            "mae": 4.349487433862434,
+            "wape": 0.32244964501451323,
+            "bias": -0.03172949735449737,
+            "n": 90
+          },
+          "D4": {
+            "mae": 4.3197063937934725,
+            "wape": 0.32144972328396243,
+            "bias": 0.046565676832530725,
+            "n": 89
+          },
+          "D5": {
+            "mae": 4.331185741341991,
+            "wape": 0.32164079766927867,
+            "bias": 0.016521239177489176,
+            "n": 88
+          },
+          "D6": {
+            "mae": 4.362205801860974,
+            "wape": 0.32216630285390896,
+            "bias": 0.04392446633825945,
+            "n": 87
+          },
+          "D7": {
+            "mae": 4.282772702104098,
+            "wape": 0.3150713878365718,
+            "bias": -0.08122231450719825,
+            "n": 86
+          }
+        },
+        "months": {
+          "2025-10": {
+            "mae": 3.86734693877551,
+            "wape": 0.27633977397010573,
+            "bias": 0.5612244897959183,
+            "n": 196
+          },
+          "2025-11": {
+            "mae": 5.2868055555555555,
+            "wape": 0.3540271577380953,
+            "bias": -0.6868055555555557,
+            "n": 210
+          },
+          "2025-12": {
+            "mae": 3.897307713407944,
+            "wape": 0.3319135689990282,
+            "bias": 0.06424868334430556,
+            "n": 217
+          }
+        }
+      },
+      "paired_comparison": {
+        "mae_improvement_fraction": -0.016847300143888407,
+        "mae_improvement_pct": -1.6847300143888406,
+        "horizon_wins": 0,
+        "wape_relative_change_fraction": 0.016839618012810226,
+        "checks": {
+          "mae_improvement_at_least_10pct": false,
+          "wins_at_least_5_horizons": false,
+          "wape_regression_not_over_5pct": true,
+          "real_test_rows_only": true,
+          "leakage_eligible": true
+        },
+        "passed": false
+      },
+      "promotion_scope": false,
+      "note": "Promotion gate is claimed on Total only. P2/P3 are diagnostic and were not used to select, weight, or sum the Total forecast."
+    },
+    "p3": {
+      "baseline": {
+        "aggregate_mae_mean_horizons": 11.372929805295014,
+        "aggregate_wape": 0.27045801526717556,
+        "aggregate_bias": 6.426966292134831,
+        "n_predictions": 623,
+        "horizons": {
+          "D1": {
+            "mae": 11.434782608695652,
+            "wape": 0.2673443456162643,
+            "bias": 6.369565217391305,
+            "n": 92
+          },
+          "D2": {
+            "mae": 11.384615384615385,
+            "wape": 0.26804657179818886,
+            "bias": 6.263736263736264,
+            "n": 91
+          },
+          "D3": {
+            "mae": 11.4,
+            "wape": 0.27157226045526733,
+            "bias": 6.444444444444445,
+            "n": 90
+          },
+          "D4": {
+            "mae": 11.415730337078651,
+            "wape": 0.27474310438074634,
+            "bias": 6.629213483146067,
+            "n": 89
+          },
+          "D5": {
+            "mae": 11.397727272727273,
+            "wape": 0.2734460196292257,
+            "bias": 6.556818181818182,
+            "n": 88
+          },
+          "D6": {
+            "mae": 11.32183908045977,
+            "wape": 0.2689787001638449,
+            "bias": 6.425287356321839,
+            "n": 87
+          },
+          "D7": {
+            "mae": 11.255813953488373,
+            "wape": 0.26933778519755147,
+            "bias": 6.3023255813953485,
+            "n": 86
+          }
+        },
+        "months": {
+          "2025-10": {
+            "mae": 8.653061224489797,
+            "wape": 0.16175488793514545,
+            "bias": 7.357142857142857,
+            "n": 196
+          },
+          "2025-11": {
+            "mae": 10.966666666666667,
+            "wape": 0.2774030354131535,
+            "bias": 3.7666666666666666,
+            "n": 210
+          },
+          "2025-12": {
+            "mae": 14.225806451612904,
+            "wape": 0.4164305949008499,
+            "bias": 8.161290322580646,
+            "n": 217
+          }
+        }
+      },
+      "calendar_candidate": {
+        "aggregate_mae_mean_horizons": 9.42297062009435,
+        "aggregate_wape": 0.22411408894789248,
+        "aggregate_bias": 3.9746213971665854,
+        "n_predictions": 623,
+        "horizons": {
+          "D1": {
+            "mae": 9.54936200378072,
+            "wape": 0.22326335561571187,
+            "bias": 3.99718809073724,
+            "n": 92
+          },
+          "D2": {
+            "mae": 9.478475871954133,
+            "wape": 0.22316721975364198,
+            "bias": 3.86528905876732,
+            "n": 91
+          },
+          "D3": {
+            "mae": 9.472681159420292,
+            "wape": 0.22565942412594658,
+            "bias": 4.019347826086957,
+            "n": 90
+          },
+          "D4": {
+            "mae": 9.46675622862726,
+            "wape": 0.2278370211865403,
+            "bias": 4.176868588177822,
+            "n": 89
+          },
+          "D5": {
+            "mae": 9.426605731225296,
+            "wape": 0.2261562988952634,
+            "bias": 4.076605731225296,
+            "n": 88
+          },
+          "D6": {
+            "mae": 9.328060969515244,
+            "wape": 0.22161149763730917,
+            "bias": 3.9165667166416793,
+            "n": 87
+          },
+          "D7": {
+            "mae": 9.238852376137514,
+            "wape": 0.22107437516634007,
+            "bias": 3.76443377148635,
+            "n": 86
+          }
+        },
+        "months": {
+          "2025-10": {
+            "mae": 8.653061224489797,
+            "wape": 0.16175488793514545,
+            "bias": 7.357142857142857,
+            "n": 196
+          },
+          "2025-11": {
+            "mae": 9.779710144927536,
+            "wape": 0.24737884009091574,
+            "bias": 2.579710144927536,
+            "n": 210
+          },
+          "2025-12": {
+            "mae": 9.779032258064515,
+            "wape": 0.2862606232294617,
+            "bias": 2.2693548387096776,
+            "n": 217
+          }
+        }
+      },
+      "paired_comparison": {
+        "mae_improvement_fraction": 0.17145618750700461,
+        "mae_improvement_pct": 17.14561875070046,
+        "horizon_wins": 7,
+        "wape_relative_change_fraction": -0.17135349556381835,
+        "checks": {
+          "mae_improvement_at_least_10pct": true,
+          "wins_at_least_5_horizons": true,
+          "wape_regression_not_over_5pct": true,
+          "real_test_rows_only": true,
+          "leakage_eligible": true
+        },
+        "passed": true
+      },
+      "promotion_scope": false,
+      "note": "Promotion gate is claimed on Total only. P2/P3 are diagnostic and were not used to select, weight, or sum the Total forecast."
+    }
+  }
+}

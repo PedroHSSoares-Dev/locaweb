@@ -1,0 +1,290 @@
+{
+  "families": {
+    "calendar_volume": {
+      "availability": "Computed at incident opening from the current opening record or strictly prior events/outcomes.",
+      "missing_behavior": "Categorical absence is an explicit level; numeric absence is fold-fitted median imputation.",
+      "affected_track": "incident-level OLA risk",
+      "mechanism": "Opening calendar plus D-1/D-7 and left-shifted rolling incident volumes proxy operating regime.",
+      "source_columns": [
+        "Aberto",
+        "Prioridade"
+      ],
+      "leakage_analysis": "All lags and rolling windows end before the opening date; current-day total is excluded.",
+      "compute_memory_cost": "low; dense float32",
+      "ablation_result": {
+        "feature_or_mechanism": "volume_context",
+        "full": "elastic_structured_full",
+        "ablated_or_reference": "elastic_no_volume_context",
+        "segments": {
+          "global": {
+            "pooled_pr_auc_delta": -0.000530805725864409,
+            "robust_pr_auc_delta": 0.0008948241612301913,
+            "recall_at_top_5pct_delta": -0.028037383177570097
+          },
+          "P2": {
+            "pooled_pr_auc_delta": 0.0006766263128753711,
+            "robust_pr_auc_delta": -0.0003122263921668082,
+            "recall_at_top_5pct_delta": -0.05
+          },
+          "P3": {
+            "pooled_pr_auc_delta": -0.0009841946578513679,
+            "robust_pr_auc_delta": 0.000905784394203836,
+            "recall_at_top_5pct_delta": -0.011494252873563204
+          }
+        }
+      }
+    },
+    "sparse_categories": {
+      "availability": "Computed at incident opening from the current opening record or strictly prior events/outcomes.",
+      "missing_behavior": "Categorical absence is an explicit level; numeric absence is fold-fitted median imputation.",
+      "affected_track": "incident-level OLA risk",
+      "mechanism": "Fold-fitted one-hot identity represents additive opening classification effects without ordinal assumptions.",
+      "source_columns": [
+        "Produto",
+        "Categoria",
+        "Subcategoria",
+        "Aberto por"
+      ],
+      "leakage_analysis": "Vocabulary is fitted only on pre-month training rows; unknown levels are ignored.",
+      "compute_memory_cost": "low; CSR sparse matrix",
+      "ablation_result": {
+        "feature_or_mechanism": "sparse_categories",
+        "full": "elastic_structured_full",
+        "ablated_or_reference": "elastic_no_categories",
+        "segments": {
+          "global": {
+            "pooled_pr_auc_delta": 0.001914662665076939,
+            "robust_pr_auc_delta": 0.003505412086549281,
+            "recall_at_top_5pct_delta": 0.018691588785046717
+          },
+          "P2": {
+            "pooled_pr_auc_delta": 0.0019223435319508705,
+            "robust_pr_auc_delta": 0.0011653292466149764,
+            "recall_at_top_5pct_delta": 0.0
+          },
+          "P3": {
+            "pooled_pr_auc_delta": 0.001834773440627279,
+            "robust_pr_auc_delta": 0.0037953212143431413,
+            "recall_at_top_5pct_delta": 0.03448275862068967
+          }
+        }
+      }
+    },
+    "historical_backoff": {
+      "availability": "Computed at incident opening from the current opening record or strictly prior events/outcomes.",
+      "missing_behavior": "Categorical absence is an explicit level; numeric absence is fold-fitted median imputation.",
+      "affected_track": "incident-level OLA risk",
+      "mechanism": "Smoothed violation history and support for product/category/subcategory using outcomes known before each opening.",
+      "source_columns": [
+        "Produto",
+        "Categoria",
+        "Subcategoria",
+        "KPI Violado?",
+        "Resolvido",
+        "Encerrado"
+      ],
+      "leakage_analysis": "Target appears only in strictly prior known outcomes; current/future outcomes are excluded by event-time search.",
+      "compute_memory_cost": "low; six dense float32 features",
+      "ablation_result": {
+        "feature_or_mechanism": "historical_backoff_plus_novelty",
+        "full": "elastic_structured_full",
+        "ablated_or_reference": "elastic_no_history_novelty",
+        "segments": {
+          "global": {
+            "pooled_pr_auc_delta": 0.00248552097862627,
+            "robust_pr_auc_delta": 0.003968237508743946,
+            "recall_at_top_5pct_delta": 0.009345794392523366
+          },
+          "P2": {
+            "pooled_pr_auc_delta": 0.0013331543686880016,
+            "robust_pr_auc_delta": -0.0012408991527460243,
+            "recall_at_top_5pct_delta": 0.0
+          },
+          "P3": {
+            "pooled_pr_auc_delta": 0.0028520768101662035,
+            "robust_pr_auc_delta": 0.0038391648907040443,
+            "recall_at_top_5pct_delta": 0.0
+          }
+        }
+      }
+    },
+    "novelty_missingness": {
+      "availability": "Computed at incident opening from the current opening record or strictly prior events/outcomes.",
+      "missing_behavior": "Categorical absence is an explicit level; numeric absence is fold-fitted median imputation.",
+      "affected_track": "incident-level OLA risk",
+      "mechanism": "Prior support and first-seen indicators expose unfamiliar classifications while preserving informative missingness.",
+      "source_columns": [
+        "Produto",
+        "Categoria",
+        "Subcategoria",
+        "Item de configuração",
+        "Descrição resumida",
+        "Aberto"
+      ],
+      "leakage_analysis": "Support uses only prior openings; simultaneous/current rows are left-open excluded.",
+      "compute_memory_cost": "low; ten dense float32 features",
+      "ablation_result": {
+        "feature_or_mechanism": "historical_backoff_plus_novelty",
+        "full": "elastic_structured_full",
+        "ablated_or_reference": "elastic_no_history_novelty",
+        "segments": {
+          "global": {
+            "pooled_pr_auc_delta": 0.00248552097862627,
+            "robust_pr_auc_delta": 0.003968237508743946,
+            "recall_at_top_5pct_delta": 0.009345794392523366
+          },
+          "P2": {
+            "pooled_pr_auc_delta": 0.0013331543686880016,
+            "robust_pr_auc_delta": -0.0012408991527460243,
+            "recall_at_top_5pct_delta": 0.0
+          },
+          "P3": {
+            "pooled_pr_auc_delta": 0.0028520768101662035,
+            "robust_pr_auc_delta": 0.0038391648907040443,
+            "recall_at_top_5pct_delta": 0.0
+          }
+        }
+      }
+    },
+    "fold_safe_encoded_categories": {
+      "availability": "Computed at incident opening from the current opening record or strictly prior events/outcomes.",
+      "missing_behavior": "Categorical absence is an explicit level; numeric absence is fold-fitted median imputation.",
+      "affected_track": "incident-level OLA risk",
+      "mechanism": "Code, frequency, and smoothed target encodings make categories usable by tree models.",
+      "source_columns": [
+        "Produto",
+        "Categoria",
+        "Subcategoria",
+        "Aberto por"
+      ],
+      "leakage_analysis": "Maps are fitted inside each outer fold; training target encodings are leave-one-out.",
+      "compute_memory_cost": "low; twelve dense float32 features",
+      "ablation_result": "Evaluated as part of a model-family cycle; no clean one-factor isolation"
+    },
+    "word_tfidf": {
+      "availability": "Computed at incident opening from the current opening record or strictly prior events/outcomes.",
+      "missing_behavior": "Categorical absence is an explicit level; numeric absence is fold-fitted median imputation.",
+      "affected_track": "incident-level OLA risk",
+      "mechanism": "Word unigrams/bigrams capture recurring alert and incident-summary templates.",
+      "source_columns": [
+        "Descrição resumida"
+      ],
+      "leakage_analysis": "Vocabulary/IDF are fitted only on training rows; no vocabulary or raw text is persisted.",
+      "compute_memory_cost": "moderate; up to 30k sparse features",
+      "ablation_result": "Evaluated as part of a model-family cycle; no clean one-factor isolation"
+    },
+    "char_tfidf": {
+      "availability": "Computed at incident opening from the current opening record or strictly prior events/outcomes.",
+      "missing_behavior": "Categorical absence is an explicit level; numeric absence is fold-fitted median imputation.",
+      "affected_track": "incident-level OLA risk",
+      "mechanism": "Character 3-5 grams capture morphological variants and fragmented machine identifiers.",
+      "source_columns": [
+        "Descrição resumida"
+      ],
+      "leakage_analysis": "Fold-local vocabulary; no raw token output.",
+      "compute_memory_cost": "moderate; up to 32k sparse features",
+      "ablation_result": {
+        "feature_or_mechanism": "character_tfidf_and_margin",
+        "full": "word_char_tfidf_svm",
+        "ablated_or_reference": "word_tfidf_logistic",
+        "segments": {
+          "global": {
+            "pooled_pr_auc_delta": -0.0028896057998731225,
+            "robust_pr_auc_delta": -0.018110449406626317,
+            "recall_at_top_5pct_delta": 0.028037383177570097
+          },
+          "P2": {
+            "pooled_pr_auc_delta": 0.002312966215605214,
+            "robust_pr_auc_delta": 0.0026652839280707427,
+            "recall_at_top_5pct_delta": 0.0
+          },
+          "P3": {
+            "pooled_pr_auc_delta": -0.004136607415236908,
+            "robust_pr_auc_delta": -0.024807961863422087,
+            "recall_at_top_5pct_delta": 0.011494252873563204
+          }
+        }
+      }
+    },
+    "naive_bayes_log_count_ratio": {
+      "availability": "Computed at incident opening from the current opening record or strictly prior events/outcomes.",
+      "missing_behavior": "Categorical absence is an explicit level; numeric absence is fold-fitted median imputation.",
+      "affected_track": "incident-level OLA risk",
+      "mechanism": "Training-only class-conditional ratios reweight binary word/character counts before logistic fitting.",
+      "source_columns": [
+        "Descrição resumida",
+        "KPI Violado?"
+      ],
+      "leakage_analysis": "Ratios use training labels only and are recomputed for every outer fold.",
+      "compute_memory_cost": "moderate; sparse elementwise scaling",
+      "ablation_result": {
+        "feature_or_mechanism": "naive_bayes_log_count_ratio",
+        "full": "nbsvm_word_char",
+        "ablated_or_reference": "word_char_tfidf_svm",
+        "segments": {
+          "global": {
+            "pooled_pr_auc_delta": 0.011321035355822129,
+            "robust_pr_auc_delta": 0.04398675280869603,
+            "recall_at_top_5pct_delta": -0.01869158878504673
+          },
+          "P2": {
+            "pooled_pr_auc_delta": -0.0035144090162455774,
+            "robust_pr_auc_delta": -0.00010215657997698913,
+            "recall_at_top_5pct_delta": -0.1
+          },
+          "P3": {
+            "pooled_pr_auc_delta": 0.015424323888132661,
+            "robust_pr_auc_delta": 0.04961643600089487,
+            "recall_at_top_5pct_delta": 0.011494252873563232
+          }
+        }
+      }
+    },
+    "fixed_rank_hybrid": {
+      "availability": "Computed at incident opening from the current opening record or strictly prior events/outcomes.",
+      "missing_behavior": "Categorical absence is an explicit level; numeric absence is fold-fitted median imputation.",
+      "affected_track": "incident-level OLA risk",
+      "mechanism": "Predeclared equal-weight fold-local ranks combine independent text and safe structured error patterns.",
+      "source_columns": [
+        "safe structured features",
+        "Descrição resumida"
+      ],
+      "leakage_analysis": "Weights are fixed before evaluation; no outer-fold labels tune blending.",
+      "compute_memory_cost": "low after component inference",
+      "ablation_result": {
+        "feature_or_mechanism": "fixed_rank_hybrid",
+        "full": "hybrid_nbsvm_xgboost",
+        "ablated_or_reference": "nbsvm_word_char",
+        "segments": {
+          "global": {
+            "pooled_pr_auc_delta": -0.03138377896397804,
+            "robust_pr_auc_delta": -0.06394178585143312,
+            "recall_at_top_5pct_delta": -0.046728971962616814
+          },
+          "P2": {
+            "pooled_pr_auc_delta": 0.057774319013981675,
+            "robust_pr_auc_delta": 0.004724519757351366,
+            "recall_at_top_5pct_delta": 0.15
+          },
+          "P3": {
+            "pooled_pr_auc_delta": -0.0425028298561983,
+            "robust_pr_auc_delta": -0.07702211241089943,
+            "recall_at_top_5pct_delta": -0.08045977011494254
+          }
+        }
+      }
+    }
+  },
+  "forbidden_predictor_fields": [
+    "Duração",
+    "Resolvido",
+    "Encerrado",
+    "Código de fechamento",
+    "Solução",
+    "KPI Violado?",
+    "Status",
+    "Incidente Pai",
+    "Entrou para KPI?"
+  ],
+  "temporally_uncertain_group_policy": "Grupo designado is used only by the reconstructed champion, never by challengers."
+}

@@ -1,0 +1,1068 @@
+{
+  "relatorio": "xgboost_champion_challenger_por_prioridade",
+  "gerado_em": "2026-08-10",
+  "versao": "experimental_v1",
+  "protocolo": "rolling_cv_mar_jun_threshold_q3_teste_q4",
+  "producao_alterada": false,
+  "artefato_producao_preservado": "outputs/risco_ola.json",
+  "configuracao": {
+    "n_trials_por_especialista": 30,
+    "n_splits": 4,
+    "random_state": 42
+  },
+  "generalista": {
+    "spec": {
+      "kind": "xgboost",
+      "balance": "none",
+      "params": {
+        "n_estimators": 500,
+        "max_depth": 7,
+        "learning_rate": 0.03607939886307854,
+        "subsample": 0.7454404070203796,
+        "colsample_bytree": 0.9630659181130072,
+        "min_child_weight": 2,
+        "gamma": 2.9282357199398956,
+        "max_delta_step": 4,
+        "reg_alpha": 0.4520071476614973,
+        "reg_lambda": 0.11537349692556405
+      }
+    },
+    "avaliacao_global": {
+      "threshold_selected_q3": 0.05824514850974083,
+      "train": {
+        "inicio": "2023-02-02T15:52:32",
+        "fim": "2025-06-30T23:08:03",
+        "incidentes": 13625,
+        "violacoes": 141,
+        "prevalencia": 0.01034862385321101
+      },
+      "validation_q3": {
+        "ranking": {
+          "incidentes": 6780,
+          "violacoes": 57,
+          "prevalencia": 0.008407079646017699,
+          "pr_auc": 0.08917639208233426,
+          "roc_auc": 0.7758819553718448,
+          "lift_pr_auc": 10.607297163477654,
+          "top_k": [
+            {
+              "share": 0.01,
+              "k": 68,
+              "violacoes_encontradas": 10,
+              "precision_at_k": 0.14705882352941177,
+              "recall_at_k": 0.17543859649122806,
+              "lift_at_k": 17.492260061919506
+            },
+            {
+              "share": 0.05,
+              "k": 339,
+              "violacoes_encontradas": 16,
+              "precision_at_k": 0.0471976401179941,
+              "recall_at_k": 0.2807017543859649,
+              "lift_at_k": 5.614035087719298
+            },
+            {
+              "share": 0.1,
+              "k": 678,
+              "violacoes_encontradas": 22,
+              "precision_at_k": 0.032448377581120944,
+              "recall_at_k": 0.38596491228070173,
+              "lift_at_k": 3.8596491228070176
+            }
+          ]
+        },
+        "threshold": {
+          "threshold": 0.05824514850974083,
+          "alertas": 37,
+          "tp": 8,
+          "fp": 29,
+          "fn": 49,
+          "tn": 6694,
+          "precision": 0.21621621621621623,
+          "recall": 0.14035087719298245,
+          "f1": 0.1702127659574468,
+          "incidentes_por_acerto": 4.625
+        }
+      },
+      "test_q4": {
+        "ranking": {
+          "incidentes": 5183,
+          "violacoes": 50,
+          "prevalencia": 0.009646922631680493,
+          "pr_auc": 0.2132110268129056,
+          "roc_auc": 0.8651996882914474,
+          "lift_pr_auc": 22.101455039425797,
+          "top_k": [
+            {
+              "share": 0.01,
+              "k": 52,
+              "violacoes_encontradas": 14,
+              "precision_at_k": 0.2692307692307692,
+              "recall_at_k": 0.28,
+              "lift_at_k": 27.90846153846154
+            },
+            {
+              "share": 0.05,
+              "k": 259,
+              "violacoes_encontradas": 26,
+              "precision_at_k": 0.10038610038610038,
+              "recall_at_k": 0.52,
+              "lift_at_k": 10.406023166023166
+            },
+            {
+              "share": 0.1,
+              "k": 518,
+              "violacoes_encontradas": 30,
+              "precision_at_k": 0.05791505791505792,
+              "recall_at_k": 0.6,
+              "lift_at_k": 6.003474903474904
+            }
+          ]
+        },
+        "threshold": {
+          "threshold": 0.05824514850974083,
+          "alertas": 92,
+          "tp": 17,
+          "fp": 75,
+          "fn": 33,
+          "tn": 5058,
+          "precision": 0.18478260869565216,
+          "recall": 0.34,
+          "f1": 0.23943661971830985,
+          "incidentes_por_acerto": 5.411764705882353
+        }
+      }
+    },
+    "artefato_avaliacao": "models_saved/xgboost_specialists/generalist_evaluation_through_june.json"
+  },
+  "especialistas": {
+    "P2": {
+      "amostra": {
+        "total_incidentes": 5159,
+        "total_violacoes": 42,
+        "violacoes_treino": 22
+      },
+      "tuning": {
+        "winner_name": "xgboost_optuna",
+        "winner_spec": {
+          "kind": "xgboost",
+          "balance": "weighted",
+          "params": {
+            "n_estimators": 400,
+            "max_depth": 2,
+            "learning_rate": 0.00988840273518348,
+            "subsample": 0.926095514887866,
+            "colsample_bytree": 0.6754859109378029,
+            "min_child_weight": 19,
+            "gamma": 0.5788577496722647,
+            "max_delta_step": 5,
+            "reg_alpha": 0.016148718257799875,
+            "reg_lambda": 24.0899557624612
+          }
+        },
+        "winner_cv": {
+          "folds": [
+            {
+              "fold": 1,
+              "mes_validacao": "2025-03",
+              "incidentes": 470,
+              "violacoes": 3,
+              "prevalencia": 0.006382978723404255,
+              "pr_auc": 0.2211309523809524,
+              "roc_auc": 0.8379728765167737
+            },
+            {
+              "fold": 2,
+              "mes_validacao": "2025-04",
+              "incidentes": 393,
+              "violacoes": 2,
+              "prevalencia": 0.005089058524173028,
+              "pr_auc": 0.3125,
+              "roc_auc": 0.9808184143222506
+            },
+            {
+              "fold": 3,
+              "mes_validacao": "2025-05",
+              "incidentes": 375,
+              "violacoes": 6,
+              "prevalencia": 0.016,
+              "pr_auc": 0.1307675425421488,
+              "roc_auc": 0.6897018970189701
+            },
+            {
+              "fold": 4,
+              "mes_validacao": "2025-06",
+              "incidentes": 409,
+              "violacoes": 3,
+              "prevalencia": 0.007334963325183374,
+              "pr_auc": 0.014676953117774977,
+              "roc_auc": 0.6428571428571428
+            }
+          ],
+          "incidentes_oof": 1647,
+          "violacoes_oof": 14,
+          "pr_auc_oof": 0.06860908486861415,
+          "roc_auc_oof": 0.7358061411949961,
+          "pr_auc_media_folds": 0.16976886201021904,
+          "pr_auc_std_folds": 0.11020985119677587,
+          "roc_auc_media_folds": 0.7878375826787843,
+          "score_robusto": 0.14221639921102508
+        },
+        "candidates": [
+          {
+            "nome": "xgboost_optuna",
+            "kind": "xgboost",
+            "balance": "weighted",
+            "pr_auc_oof": 0.06860908486861415,
+            "pr_auc_media_folds": 0.16976886201021904,
+            "pr_auc_std_folds": 0.11020985119677587,
+            "score_robusto": 0.14221639921102508
+          },
+          {
+            "nome": "logistic_balanced_c1",
+            "kind": "logistic",
+            "balance": "balanced",
+            "pr_auc_oof": 0.02112401770113039,
+            "pr_auc_media_folds": 0.13014894243750447,
+            "pr_auc_std_folds": 0.165077247539557,
+            "score_robusto": 0.08887963055261522
+          },
+          {
+            "nome": "logistic_balanced_c0.1",
+            "kind": "logistic",
+            "balance": "balanced",
+            "pr_auc_oof": 0.016317374965656488,
+            "pr_auc_media_folds": 0.12395250290460265,
+            "pr_auc_std_folds": 0.14153755852788882,
+            "score_robusto": 0.08856811327263045
+          },
+          {
+            "nome": "logistic_balanced_c10",
+            "kind": "logistic",
+            "balance": "balanced",
+            "pr_auc_oof": 0.05123368900357601,
+            "pr_auc_media_folds": 0.0751955045003639,
+            "pr_auc_std_folds": 0.0751369119481546,
+            "score_robusto": 0.056411276513325254
+          },
+          {
+            "nome": "logistic_unweighted_c10",
+            "kind": "logistic",
+            "balance": "unweighted",
+            "pr_auc_oof": 0.02220245660129488,
+            "pr_auc_media_folds": 0.0654828849654652,
+            "pr_auc_std_folds": 0.04874848751053291,
+            "score_robusto": 0.053295763087831974
+          },
+          {
+            "nome": "logistic_balanced_c0.01",
+            "kind": "logistic",
+            "balance": "balanced",
+            "pr_auc_oof": 0.01797475872948802,
+            "pr_auc_media_folds": 0.05769479720633401,
+            "pr_auc_std_folds": 0.03542547496533775,
+            "score_robusto": 0.04883842846499957
+          },
+          {
+            "nome": "logistic_unweighted_c1",
+            "kind": "logistic",
+            "balance": "unweighted",
+            "pr_auc_oof": 0.015467972280428973,
+            "pr_auc_media_folds": 0.05058057297219289,
+            "pr_auc_std_folds": 0.027948519007182246,
+            "score_robusto": 0.043593443220397335
+          },
+          {
+            "nome": "logistic_unweighted_c0.1",
+            "kind": "logistic",
+            "balance": "unweighted",
+            "pr_auc_oof": 0.016638710062334444,
+            "pr_auc_media_folds": 0.04896664227821923,
+            "pr_auc_std_folds": 0.03144727565081963,
+            "score_robusto": 0.041104823365514326
+          },
+          {
+            "nome": "logistic_unweighted_c0.01",
+            "kind": "logistic",
+            "balance": "unweighted",
+            "pr_auc_oof": 0.015704275716258723,
+            "pr_auc_media_folds": 0.04263000475371707,
+            "pr_auc_std_folds": 0.02271994534975207,
+            "score_robusto": 0.03695001841627905
+          }
+        ],
+        "optuna": {
+          "n_trials": 30,
+          "best_value": 0.14221639921102508,
+          "best_xgb_spec": {
+            "kind": "xgboost",
+            "balance": "weighted",
+            "params": {
+              "n_estimators": 400,
+              "max_depth": 2,
+              "learning_rate": 0.00988840273518348,
+              "subsample": 0.926095514887866,
+              "colsample_bytree": 0.6754859109378029,
+              "min_child_weight": 19,
+              "gamma": 0.5788577496722647,
+              "max_delta_step": 5,
+              "reg_alpha": 0.016148718257799875,
+              "reg_lambda": 24.0899557624612
+            }
+          }
+        }
+      },
+      "avaliacao_especialista": {
+        "threshold_selected_q3": 0.5366242527961731,
+        "train": {
+          "inicio": "2025-01-01T00:04:47",
+          "fim": "2025-06-30T23:08:03",
+          "incidentes": 2669,
+          "violacoes": 22,
+          "prevalencia": 0.008242787560884226
+        },
+        "validation_q3": {
+          "ranking": {
+            "incidentes": 1242,
+            "violacoes": 11,
+            "prevalencia": 0.008856682769726247,
+            "pr_auc": 0.034144185885684096,
+            "roc_auc": 0.8511188243113508,
+            "lift_pr_auc": 3.8551889881836043,
+            "top_k": [
+              {
+                "share": 0.01,
+                "k": 12,
+                "violacoes_encontradas": 0,
+                "precision_at_k": 0.0,
+                "recall_at_k": 0.0,
+                "lift_at_k": 0.0
+              },
+              {
+                "share": 0.05,
+                "k": 62,
+                "violacoes_encontradas": 1,
+                "precision_at_k": 0.016129032258064516,
+                "recall_at_k": 0.09090909090909091,
+                "lift_at_k": 1.8211143695014664
+              },
+              {
+                "share": 0.1,
+                "k": 124,
+                "violacoes_encontradas": 5,
+                "precision_at_k": 0.04032258064516129,
+                "recall_at_k": 0.45454545454545453,
+                "lift_at_k": 4.552785923753666
+              }
+            ]
+          },
+          "threshold": {
+            "threshold": 0.5366242527961731,
+            "alertas": 122,
+            "tp": 5,
+            "fp": 117,
+            "fn": 6,
+            "tn": 1114,
+            "precision": 0.040983606557377046,
+            "recall": 0.45454545454545453,
+            "f1": 0.07518796992481203,
+            "incidentes_por_acerto": 24.4
+          }
+        },
+        "test_q4": {
+          "ranking": {
+            "incidentes": 1248,
+            "violacoes": 9,
+            "prevalencia": 0.007211538461538462,
+            "pr_auc": 0.02934323927675105,
+            "roc_auc": 0.8430634023854363,
+            "lift_pr_auc": 4.068929179709478,
+            "top_k": [
+              {
+                "share": 0.01,
+                "k": 12,
+                "violacoes_encontradas": 0,
+                "precision_at_k": 0.0,
+                "recall_at_k": 0.0,
+                "lift_at_k": 0.0
+              },
+              {
+                "share": 0.05,
+                "k": 62,
+                "violacoes_encontradas": 1,
+                "precision_at_k": 0.016129032258064516,
+                "recall_at_k": 0.1111111111111111,
+                "lift_at_k": 2.236559139784946
+              },
+              {
+                "share": 0.1,
+                "k": 125,
+                "violacoes_encontradas": 4,
+                "precision_at_k": 0.032,
+                "recall_at_k": 0.4444444444444444,
+                "lift_at_k": 4.437333333333333
+              }
+            ]
+          },
+          "threshold": {
+            "threshold": 0.5366242527961731,
+            "alertas": 161,
+            "tp": 5,
+            "fp": 156,
+            "fn": 4,
+            "tn": 1083,
+            "precision": 0.031055900621118012,
+            "recall": 0.5555555555555556,
+            "f1": 0.058823529411764705,
+            "incidentes_por_acerto": 32.2
+          }
+        }
+      },
+      "baseline_generalista_no_segmento": {
+        "cv": {
+          "folds": [
+            {
+              "fold": 1,
+              "mes_validacao": "2025-03",
+              "incidentes": 470,
+              "violacoes": 3,
+              "prevalencia": 0.006382978723404255,
+              "pr_auc": 0.2035531466425775,
+              "roc_auc": 0.925053533190578
+            },
+            {
+              "fold": 2,
+              "mes_validacao": "2025-04",
+              "incidentes": 393,
+              "violacoes": 2,
+              "prevalencia": 0.005089058524173028,
+              "pr_auc": 0.14090909090909093,
+              "roc_auc": 0.9769820971867007
+            },
+            {
+              "fold": 3,
+              "mes_validacao": "2025-05",
+              "incidentes": 375,
+              "violacoes": 6,
+              "prevalencia": 0.016,
+              "pr_auc": 0.0583392177295143,
+              "roc_auc": 0.8342366757000904
+            },
+            {
+              "fold": 4,
+              "mes_validacao": "2025-06",
+              "incidentes": 409,
+              "violacoes": 3,
+              "prevalencia": 0.007334963325183374,
+              "pr_auc": 0.012637088095116076,
+              "roc_auc": 0.5722495894909687
+            }
+          ],
+          "incidentes_oof": 1647,
+          "violacoes_oof": 14,
+          "pr_auc_oof": 0.05668618833034085,
+          "roc_auc_oof": 0.7952060187210217,
+          "pr_auc_media_folds": 0.1038596358440747,
+          "pr_auc_std_folds": 0.07366328783573485,
+          "roc_auc_media_folds": 0.8271304738920845,
+          "score_robusto": 0.085443813885141
+        },
+        "avaliacao": {
+          "threshold_selected_q3": 0.12460144609212875,
+          "train": {
+            "inicio": "2023-02-02T15:52:32",
+            "fim": "2025-06-30T23:08:03",
+            "incidentes": 13625,
+            "violacoes": 141,
+            "prevalencia": 0.01034862385321101
+          },
+          "validation_q3": {
+            "ranking": {
+              "incidentes": 1242,
+              "violacoes": 11,
+              "prevalencia": 0.008856682769726247,
+              "pr_auc": 0.07478204525004084,
+              "roc_auc": 0.8626393914777344,
+              "lift_pr_auc": 8.443572745504612,
+              "top_k": [
+                {
+                  "share": 0.01,
+                  "k": 12,
+                  "violacoes_encontradas": 1,
+                  "precision_at_k": 0.08333333333333333,
+                  "recall_at_k": 0.09090909090909091,
+                  "lift_at_k": 9.409090909090908
+                },
+                {
+                  "share": 0.05,
+                  "k": 62,
+                  "violacoes_encontradas": 1,
+                  "precision_at_k": 0.016129032258064516,
+                  "recall_at_k": 0.09090909090909091,
+                  "lift_at_k": 1.8211143695014664
+                },
+                {
+                  "share": 0.1,
+                  "k": 124,
+                  "violacoes_encontradas": 3,
+                  "precision_at_k": 0.024193548387096774,
+                  "recall_at_k": 0.2727272727272727,
+                  "lift_at_k": 2.7316715542521997
+                }
+              ]
+            },
+            "threshold": {
+              "threshold": 0.12460144609212875,
+              "alertas": 2,
+              "tp": 1,
+              "fp": 1,
+              "fn": 10,
+              "tn": 1230,
+              "precision": 0.5,
+              "recall": 0.09090909090909091,
+              "f1": 0.15384615384615385,
+              "incidentes_por_acerto": 2.0
+            }
+          },
+          "test_q4": {
+            "ranking": {
+              "incidentes": 1248,
+              "violacoes": 9,
+              "prevalencia": 0.007211538461538462,
+              "pr_auc": 0.027591671968852045,
+              "roc_auc": 0.8007353600573939,
+              "lift_pr_auc": 3.8260451796808166,
+              "top_k": [
+                {
+                  "share": 0.01,
+                  "k": 12,
+                  "violacoes_encontradas": 0,
+                  "precision_at_k": 0.0,
+                  "recall_at_k": 0.0,
+                  "lift_at_k": 0.0
+                },
+                {
+                  "share": 0.05,
+                  "k": 62,
+                  "violacoes_encontradas": 2,
+                  "precision_at_k": 0.03225806451612903,
+                  "recall_at_k": 0.2222222222222222,
+                  "lift_at_k": 4.473118279569892
+                },
+                {
+                  "share": 0.1,
+                  "k": 125,
+                  "violacoes_encontradas": 4,
+                  "precision_at_k": 0.032,
+                  "recall_at_k": 0.4444444444444444,
+                  "lift_at_k": 4.437333333333333
+                }
+              ]
+            },
+            "threshold": {
+              "threshold": 0.12460144609212875,
+              "alertas": 0,
+              "tp": 0,
+              "fp": 0,
+              "fn": 9,
+              "tn": 1239,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "incidentes_por_acerto": null
+            }
+          }
+        }
+      },
+      "decisao": {
+        "status": "challenger_experimental_amostra_insuficiente",
+        "motivo": "P2 possui apenas 22 violações no treino; promoção automática bloqueada.",
+        "deltas_especialista_menos_generalista": {
+          "cv_score_robusto": 0.056772585325884084,
+          "q3_pr_auc": -0.040637859364356745,
+          "q4_pr_auc": 0.001751567307899004,
+          "q4_f1": 0.058823529411764705
+        },
+        "gates_vencidos": {
+          "cv_score_robusto": true,
+          "q3_pr_auc": false,
+          "q4_pr_auc": true,
+          "q4_f1": true
+        }
+      },
+      "artefato_avaliacao": "models_saved/xgboost_specialists/p2_evaluation_through_june.json"
+    },
+    "P3": {
+      "amostra": {
+        "total_incidentes": 20429,
+        "total_violacoes": 206,
+        "violacoes_treino": 119
+      },
+      "tuning": {
+        "winner_name": "xgboost_optuna",
+        "winner_spec": {
+          "kind": "xgboost",
+          "balance": "weighted",
+          "params": {
+            "n_estimators": 400,
+            "max_depth": 7,
+            "learning_rate": 0.02561392479614966,
+            "subsample": 0.7767862101750618,
+            "colsample_bytree": 0.9694603021187654,
+            "min_child_weight": 22,
+            "gamma": 1.446466932357561,
+            "max_delta_step": 5,
+            "reg_alpha": 0.9691645324495868,
+            "reg_lambda": 2.6835033625167677
+          }
+        },
+        "winner_cv": {
+          "folds": [
+            {
+              "fold": 1,
+              "mes_validacao": "2025-03",
+              "incidentes": 1660,
+              "violacoes": 16,
+              "prevalencia": 0.00963855421686747,
+              "pr_auc": 0.066354425433168,
+              "roc_auc": 0.7677539537712896
+            },
+            {
+              "fold": 2,
+              "mes_validacao": "2025-04",
+              "incidentes": 1679,
+              "violacoes": 10,
+              "prevalencia": 0.005955926146515783,
+              "pr_auc": 0.013736153225465666,
+              "roc_auc": 0.6436189334931096
+            },
+            {
+              "fold": 3,
+              "mes_validacao": "2025-05",
+              "incidentes": 1872,
+              "violacoes": 15,
+              "prevalencia": 0.008012820512820512,
+              "pr_auc": 0.11086646259649624,
+              "roc_auc": 0.8344282893555914
+            },
+            {
+              "fold": 4,
+              "mes_validacao": "2025-06",
+              "incidentes": 1696,
+              "violacoes": 28,
+              "prevalencia": 0.01650943396226415,
+              "pr_auc": 0.17578389494457383,
+              "roc_auc": 0.7317360397396369
+            }
+          ],
+          "incidentes_oof": 6907,
+          "violacoes_oof": 69,
+          "pr_auc_oof": 0.05251747854684719,
+          "roc_auc_oof": 0.7340670846208952,
+          "pr_auc_media_folds": 0.09168523404992593,
+          "pr_auc_std_folds": 0.059494145424961356,
+          "roc_auc_media_folds": 0.744384304089907,
+          "score_robusto": 0.0768116976936856
+        },
+        "candidates": [
+          {
+            "nome": "xgboost_optuna",
+            "kind": "xgboost",
+            "balance": "weighted",
+            "pr_auc_oof": 0.05251747854684719,
+            "pr_auc_media_folds": 0.09168523404992593,
+            "pr_auc_std_folds": 0.059494145424961356,
+            "score_robusto": 0.0768116976936856
+          },
+          {
+            "nome": "logistic_balanced_c0.01",
+            "kind": "logistic",
+            "balance": "balanced",
+            "pr_auc_oof": 0.026924100136473332,
+            "pr_auc_media_folds": 0.03864339608450483,
+            "pr_auc_std_folds": 0.017988389017793607,
+            "score_robusto": 0.03414629883005643
+          },
+          {
+            "nome": "logistic_unweighted_c1",
+            "kind": "logistic",
+            "balance": "unweighted",
+            "pr_auc_oof": 0.023492269999776775,
+            "pr_auc_media_folds": 0.04090396140029563,
+            "pr_auc_std_folds": 0.027857434931929218,
+            "score_robusto": 0.03393960266731333
+          },
+          {
+            "nome": "logistic_balanced_c0.1",
+            "kind": "logistic",
+            "balance": "balanced",
+            "pr_auc_oof": 0.025319755661011113,
+            "pr_auc_media_folds": 0.03810030424180978,
+            "pr_auc_std_folds": 0.018728610462516244,
+            "score_robusto": 0.03341815162618072
+          },
+          {
+            "nome": "logistic_unweighted_c10",
+            "kind": "logistic",
+            "balance": "unweighted",
+            "pr_auc_oof": 0.021786051194310437,
+            "pr_auc_media_folds": 0.03994134439121648,
+            "pr_auc_std_folds": 0.027760745611527367,
+            "score_robusto": 0.03300115798833464
+          },
+          {
+            "nome": "logistic_balanced_c1",
+            "kind": "logistic",
+            "balance": "balanced",
+            "pr_auc_oof": 0.02364890801027506,
+            "pr_auc_media_folds": 0.03726847824034234,
+            "pr_auc_std_folds": 0.017997248548128234,
+            "score_robusto": 0.03276916610331028
+          },
+          {
+            "nome": "logistic_balanced_c10",
+            "kind": "logistic",
+            "balance": "balanced",
+            "pr_auc_oof": 0.02331268568719122,
+            "pr_auc_media_folds": 0.03566446129000283,
+            "pr_auc_std_folds": 0.017332945345508225,
+            "score_robusto": 0.03133122495362577
+          },
+          {
+            "nome": "logistic_unweighted_c0.01",
+            "kind": "logistic",
+            "balance": "unweighted",
+            "pr_auc_oof": 0.019291404821200377,
+            "pr_auc_media_folds": 0.03444109815052015,
+            "pr_auc_std_folds": 0.015462307677841403,
+            "score_robusto": 0.030575521231059798
+          },
+          {
+            "nome": "logistic_unweighted_c0.1",
+            "kind": "logistic",
+            "balance": "unweighted",
+            "pr_auc_oof": 0.022742102047240864,
+            "pr_auc_media_folds": 0.0346958477363921,
+            "pr_auc_std_folds": 0.018248920756148545,
+            "score_robusto": 0.030133617547354965
+          }
+        ],
+        "optuna": {
+          "n_trials": 30,
+          "best_value": 0.0768116976936856,
+          "best_xgb_spec": {
+            "kind": "xgboost",
+            "balance": "weighted",
+            "params": {
+              "n_estimators": 400,
+              "max_depth": 7,
+              "learning_rate": 0.02561392479614966,
+              "subsample": 0.7767862101750618,
+              "colsample_bytree": 0.9694603021187654,
+              "min_child_weight": 22,
+              "gamma": 1.446466932357561,
+              "max_delta_step": 5,
+              "reg_alpha": 0.9691645324495868,
+              "reg_lambda": 2.6835033625167677
+            }
+          }
+        }
+      },
+      "avaliacao_especialista": {
+        "threshold_selected_q3": 0.44162479043006897,
+        "train": {
+          "inicio": "2023-02-02T15:52:32",
+          "fim": "2025-06-30T22:33:33",
+          "incidentes": 10956,
+          "violacoes": 119,
+          "prevalencia": 0.010861628331507849
+        },
+        "validation_q3": {
+          "ranking": {
+            "incidentes": 5538,
+            "violacoes": 46,
+            "prevalencia": 0.008306247742867461,
+            "pr_auc": 0.10106061132730722,
+            "roc_auc": 0.7465720890465182,
+            "lift_pr_auc": 12.166818815883204,
+            "top_k": [
+              {
+                "share": 0.01,
+                "k": 55,
+                "violacoes_encontradas": 8,
+                "precision_at_k": 0.14545454545454545,
+                "recall_at_k": 0.17391304347826086,
+                "lift_at_k": 17.511462450592884
+              },
+              {
+                "share": 0.05,
+                "k": 277,
+                "violacoes_encontradas": 14,
+                "precision_at_k": 0.05054151624548736,
+                "recall_at_k": 0.30434782608695654,
+                "lift_at_k": 6.084759064511065
+              },
+              {
+                "share": 0.1,
+                "k": 554,
+                "violacoes_encontradas": 16,
+                "precision_at_k": 0.02888086642599278,
+                "recall_at_k": 0.34782608695652173,
+                "lift_at_k": 3.477005179720609
+              }
+            ]
+          },
+          "threshold": {
+            "threshold": 0.44162479043006897,
+            "alertas": 77,
+            "tp": 11,
+            "fp": 66,
+            "fn": 35,
+            "tn": 5426,
+            "precision": 0.14285714285714285,
+            "recall": 0.2391304347826087,
+            "f1": 0.17886178861788618,
+            "incidentes_por_acerto": 7.0
+          }
+        },
+        "test_q4": {
+          "ranking": {
+            "incidentes": 3935,
+            "violacoes": 41,
+            "prevalencia": 0.010419313850063533,
+            "pr_auc": 0.17103477626178817,
+            "roc_auc": 0.8807389730291756,
+            "lift_pr_auc": 16.41516694122284,
+            "top_k": [
+              {
+                "share": 0.01,
+                "k": 39,
+                "violacoes_encontradas": 11,
+                "precision_at_k": 0.28205128205128205,
+                "recall_at_k": 0.2682926829268293,
+                "lift_at_k": 27.070043777360848
+              },
+              {
+                "share": 0.05,
+                "k": 197,
+                "violacoes_encontradas": 22,
+                "precision_at_k": 0.1116751269035533,
+                "recall_at_k": 0.5365853658536586,
+                "lift_at_k": 10.718088399158104
+              },
+              {
+                "share": 0.1,
+                "k": 394,
+                "violacoes_encontradas": 25,
+                "precision_at_k": 0.06345177664974619,
+                "recall_at_k": 0.6097560975609756,
+                "lift_at_k": 6.089822954067103
+              }
+            ]
+          },
+          "threshold": {
+            "threshold": 0.44162479043006897,
+            "alertas": 62,
+            "tp": 13,
+            "fp": 49,
+            "fn": 28,
+            "tn": 3845,
+            "precision": 0.20967741935483872,
+            "recall": 0.3170731707317073,
+            "f1": 0.2524271844660194,
+            "incidentes_por_acerto": 4.769230769230769
+          }
+        }
+      },
+      "baseline_generalista_no_segmento": {
+        "cv": {
+          "folds": [
+            {
+              "fold": 1,
+              "mes_validacao": "2025-03",
+              "incidentes": 1660,
+              "violacoes": 16,
+              "prevalencia": 0.00963855421686747,
+              "pr_auc": 0.06908451589873721,
+              "roc_auc": 0.817404197080292
+            },
+            {
+              "fold": 2,
+              "mes_validacao": "2025-04",
+              "incidentes": 1679,
+              "violacoes": 10,
+              "prevalencia": 0.005955926146515783,
+              "pr_auc": 0.021704272340183805,
+              "roc_auc": 0.6584182144997004
+            },
+            {
+              "fold": 3,
+              "mes_validacao": "2025-05",
+              "incidentes": 1872,
+              "violacoes": 15,
+              "prevalencia": 0.008012820512820512,
+              "pr_auc": 0.05028834247399243,
+              "roc_auc": 0.774905761981691
+            },
+            {
+              "fold": 4,
+              "mes_validacao": "2025-06",
+              "incidentes": 1696,
+              "violacoes": 28,
+              "prevalencia": 0.01650943396226415,
+              "pr_auc": 0.14372763259857316,
+              "roc_auc": 0.7193816375471052
+            }
+          ],
+          "incidentes_oof": 6907,
+          "violacoes_oof": 69,
+          "pr_auc_oof": 0.055489726675191,
+          "roc_auc_oof": 0.7313054499366286,
+          "pr_auc_media_folds": 0.07120119082787166,
+          "pr_auc_std_folds": 0.04514381805608534,
+          "roc_auc_media_folds": 0.7425274527771971,
+          "score_robusto": 0.059915236313850324
+        },
+        "avaliacao": {
+          "threshold_selected_q3": 0.04892110452055931,
+          "train": {
+            "inicio": "2023-02-02T15:52:32",
+            "fim": "2025-06-30T23:08:03",
+            "incidentes": 13625,
+            "violacoes": 141,
+            "prevalencia": 0.01034862385321101
+          },
+          "validation_q3": {
+            "ranking": {
+              "incidentes": 5538,
+              "violacoes": 46,
+              "prevalencia": 0.008306247742867461,
+              "pr_auc": 0.09932263194614357,
+              "roc_auc": 0.7541780138699768,
+              "lift_pr_auc": 11.957581211255285,
+              "top_k": [
+                {
+                  "share": 0.01,
+                  "k": 55,
+                  "violacoes_encontradas": 9,
+                  "precision_at_k": 0.16363636363636364,
+                  "recall_at_k": 0.1956521739130435,
+                  "lift_at_k": 19.700395256916995
+                },
+                {
+                  "share": 0.05,
+                  "k": 277,
+                  "violacoes_encontradas": 15,
+                  "precision_at_k": 0.05415162454873646,
+                  "recall_at_k": 0.32608695652173914,
+                  "lift_at_k": 6.519384711976142
+                },
+                {
+                  "share": 0.1,
+                  "k": 554,
+                  "violacoes_encontradas": 19,
+                  "precision_at_k": 0.03429602888086643,
+                  "recall_at_k": 0.41304347826086957,
+                  "lift_at_k": 4.128943650918224
+                }
+              ]
+            },
+            "threshold": {
+              "threshold": 0.04892110452055931,
+              "alertas": 47,
+              "tp": 9,
+              "fp": 38,
+              "fn": 37,
+              "tn": 5454,
+              "precision": 0.19148936170212766,
+              "recall": 0.1956521739130435,
+              "f1": 0.1935483870967742,
+              "incidentes_por_acerto": 5.222222222222222
+            }
+          },
+          "test_q4": {
+            "ranking": {
+              "incidentes": 3935,
+              "violacoes": 41,
+              "prevalencia": 0.010419313850063533,
+              "pr_auc": 0.26335456388810125,
+              "roc_auc": 0.8883992884612977,
+              "lift_pr_auc": 25.275614851211667,
+              "top_k": [
+                {
+                  "share": 0.01,
+                  "k": 39,
+                  "violacoes_encontradas": 13,
+                  "precision_at_k": 0.3333333333333333,
+                  "recall_at_k": 0.3170731707317073,
+                  "lift_at_k": 31.991869918699184
+                },
+                {
+                  "share": 0.05,
+                  "k": 197,
+                  "violacoes_encontradas": 23,
+                  "precision_at_k": 0.116751269035533,
+                  "recall_at_k": 0.5609756097560976,
+                  "lift_at_k": 11.205274235483472
+                },
+                {
+                  "share": 0.1,
+                  "k": 394,
+                  "violacoes_encontradas": 26,
+                  "precision_at_k": 0.06598984771573604,
+                  "recall_at_k": 0.6341463414634146,
+                  "lift_at_k": 6.333415872229788
+                }
+              ]
+            },
+            "threshold": {
+              "threshold": 0.04892110452055931,
+              "alertas": 87,
+              "tp": 19,
+              "fp": 68,
+              "fn": 22,
+              "tn": 3826,
+              "precision": 0.21839080459770116,
+              "recall": 0.4634146341463415,
+              "f1": 0.296875,
+              "incidentes_por_acerto": 4.578947368421052
+            }
+          }
+        }
+      },
+      "decisao": {
+        "status": "manter_generalista",
+        "motivo": "Especialista não venceu o generalista em todos os gates predefinidos.",
+        "deltas_especialista_menos_generalista": {
+          "cv_score_robusto": 0.01689646137983527,
+          "q3_pr_auc": 0.001737979381163643,
+          "q4_pr_auc": -0.09231978762631307,
+          "q4_f1": -0.044447815533980584
+        },
+        "gates_vencidos": {
+          "cv_score_robusto": true,
+          "q3_pr_auc": true,
+          "q4_pr_auc": false,
+          "q4_f1": false
+        }
+      },
+      "artefato_avaliacao": "models_saved/xgboost_specialists/p3_evaluation_through_june.json"
+    }
+  },
+  "roteador_recomendado": {
+    "P2": {
+      "modelo_ativo": "nenhum_modelo_preditivo_promovido",
+      "modo_operacional": "regra_ola_e_triagem_humana",
+      "modelo_shadow": "especialista_p2",
+      "status_especialista": "challenger_experimental_amostra_insuficiente",
+      "fallback_analitico": "generalista_apenas_como_ranking_experimental"
+    },
+    "P3": {
+      "modelo_ativo": "generalista",
+      "modo_operacional": "triagem_humana_por_score",
+      "status_especialista": "manter_generalista",
+      "fallback": "generalista"
+    }
+  },
+  "duracao_segundos": 77.99638604198117
+}

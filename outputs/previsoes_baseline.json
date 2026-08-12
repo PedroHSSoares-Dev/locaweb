@@ -1,0 +1,183 @@
+{
+  "modelo": "baseline_sazonal_7d",
+  "gerado_em": "2026-08-10",
+  "protocolo_validacao": "rolling_origin_2025Q4_D1_D7",
+  "metodologia": "mediana das três semanas anteriores para o mesmo dia da semana",
+  "holdout": "2025-10-01 a 2025-12-31 (rolling origin 100% real)",
+  "metricas_holdout_comum": {
+    "total": {
+      "protocolo": "rolling_origin_2025Q4_D1_D7",
+      "inicio": "2025-10-01",
+      "fim": "2025-12-31",
+      "horizontes": {
+        "D1": {
+          "mae": 12.7,
+          "n_previsoes": 92
+        },
+        "D2": {
+          "mae": 12.59,
+          "n_previsoes": 91
+        },
+        "D3": {
+          "mae": 12.51,
+          "n_previsoes": 90
+        },
+        "D4": {
+          "mae": 12.46,
+          "n_previsoes": 89
+        },
+        "D5": {
+          "mae": 12.41,
+          "n_previsoes": 88
+        },
+        "D6": {
+          "mae": 12.37,
+          "n_previsoes": 87
+        },
+        "D7": {
+          "mae": 12.19,
+          "n_previsoes": 86
+        }
+      },
+      "mae_medio_d1_d7": 12.46
+    },
+    "p2": {
+      "protocolo": "rolling_origin_2025Q4_D1_D7",
+      "inicio": "2025-10-01",
+      "fim": "2025-12-31",
+      "horizontes": {
+        "D1": {
+          "mae": 4.36,
+          "n_previsoes": 92
+        },
+        "D2": {
+          "mae": 4.34,
+          "n_previsoes": 91
+        },
+        "D3": {
+          "mae": 4.28,
+          "n_previsoes": 90
+        },
+        "D4": {
+          "mae": 4.25,
+          "n_previsoes": 89
+        },
+        "D5": {
+          "mae": 4.26,
+          "n_previsoes": 88
+        },
+        "D6": {
+          "mae": 4.29,
+          "n_previsoes": 87
+        },
+        "D7": {
+          "mae": 4.21,
+          "n_previsoes": 86
+        }
+      },
+      "mae_medio_d1_d7": 4.28
+    },
+    "p3": {
+      "protocolo": "rolling_origin_2025Q4_D1_D7",
+      "inicio": "2025-10-01",
+      "fim": "2025-12-31",
+      "horizontes": {
+        "D1": {
+          "mae": 11.43,
+          "n_previsoes": 92
+        },
+        "D2": {
+          "mae": 11.38,
+          "n_previsoes": 91
+        },
+        "D3": {
+          "mae": 11.4,
+          "n_previsoes": 90
+        },
+        "D4": {
+          "mae": 11.42,
+          "n_previsoes": 89
+        },
+        "D5": {
+          "mae": 11.4,
+          "n_previsoes": 88
+        },
+        "D6": {
+          "mae": 11.32,
+          "n_previsoes": 87
+        },
+        "D7": {
+          "mae": 11.26,
+          "n_previsoes": 86
+        }
+      },
+      "mae_medio_d1_d7": 11.37
+    }
+  },
+  "mae_holdout_92_dias": {
+    "total": 12.7,
+    "p2": 4.36,
+    "p3": 11.43
+  },
+  "d1": {
+    "total": 44.0,
+    "p2": 8.0,
+    "p3": 36.0
+  },
+  "d7": {
+    "total": 40.0,
+    "p2": 9.0,
+    "p3": 32.0
+  },
+  "serie": [
+    {
+      "ds": "2026-01-01",
+      "horizonte": "D+1",
+      "total": 44.0,
+      "P2": 8.0,
+      "P3": 36.0
+    },
+    {
+      "ds": "2026-01-02",
+      "horizonte": "D+2",
+      "total": 50.0,
+      "P2": 9.0,
+      "P3": 42.0
+    },
+    {
+      "ds": "2026-01-03",
+      "horizonte": "D+3",
+      "total": 30.0,
+      "P2": 10.0,
+      "P3": 22.0
+    },
+    {
+      "ds": "2026-01-04",
+      "horizonte": "D+4",
+      "total": 25.0,
+      "P2": 10.0,
+      "P3": 15.0
+    },
+    {
+      "ds": "2026-01-05",
+      "horizonte": "D+5",
+      "total": 50.0,
+      "P2": 19.0,
+      "P3": 34.0
+    },
+    {
+      "ds": "2026-01-06",
+      "horizonte": "D+6",
+      "total": 53.0,
+      "P2": 13.0,
+      "P3": 40.0
+    },
+    {
+      "ds": "2026-01-07",
+      "horizonte": "D+7",
+      "total": 40.0,
+      "P2": 9.0,
+      "P3": 32.0
+    }
+  ]
+}

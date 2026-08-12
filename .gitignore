@@ -28,6 +28,9 @@ venv/
 frontend/node_modules/
 frontend/dist/
 frontend/.env.local
+frontend/test-results/
+frontend/playwright-report/
+frontend/blob-report/
 
 # ── Sistema ───────────────────────────────────────────────
 .DS_Store

@@ -62,6 +62,10 @@ def build_features(raw_path: Path = RAW_PATH) -> pd.DataFrame:
     df = pd.read_excel(raw_path)
 
     kpi = df[df["Entrou para KPI?"] == "SIM"].copy()
+    # O arquivo ITSM chega do mais recente para o mais antigo. Todos os splits
+    # downstream assumem ordem temporal crescente; manter a ordem de origem
+    # faria o modelo aprender com o futuro para avaliar o passado.
+    kpi = kpi.sort_values("Aberto", kind="stable").reset_index(drop=True)
 
     prioridades = set(kpi["Prioridade"].unique())
     assert prioridades <= {"2 - Alta", "3 - Média"}, f"Prioridades inesperadas: {prioridades}"
@@ -100,8 +104,11 @@ def build_features(raw_path: Path = RAW_PATH) -> pd.DataFrame:
 
     vol["lag_1d"] = vol["vol_dia"].shift(1)
     vol["lag_7d"] = vol["vol_dia"].shift(7)
-    vol["rolling_7d"] = vol["vol_dia"].rolling(7, min_periods=1).mean().round(2)
-    vol["rolling_30d"] = vol["vol_dia"].rolling(30, min_periods=1).mean().round(2)
+    # Médias disponíveis na abertura: nunca incluem o volume completo do dia
+    # corrente, que só seria conhecido no fim do dia.
+    volume_passado = vol["vol_dia"].shift(1)
+    vol["rolling_7d"] = volume_passado.rolling(7, min_periods=1).mean().round(2)
+    vol["rolling_30d"] = volume_passado.rolling(30, min_periods=1).mean().round(2)
 
     # Lags por prioridade
     for prio_label, prio_name in [("2 - Alta", "p2"), ("3 - Média", "p3")]:
@@ -146,6 +153,8 @@ def build_features(raw_path: Path = RAW_PATH) -> pd.DataFrame:
         kpi[freq_col] = kpi[col].map(freq_map).round(6)
 
     df_model = kpi[FEATURES + [TARGET]].copy()
+    # Coluna de auditoria/split; não entra como feature do modelo.
+    df_model.insert(0, "data_abertura", pd.to_datetime(kpi["Aberto"]).to_numpy())
     for c in ["lag_1d_p2", "lag_1d_p3"]:
         df_model[c] = df_model[c].fillna(0)
 

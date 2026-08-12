@@ -1,18 +1,19 @@
 {
+  "protocolo_validacao": "rolling_origin_2025Q4_D1_D7",
   "total": {
     "modelo": "prophet_ensemble_total",
-    "gerado_em": "2026-05-09",
-    "abordagem": "ensemble v5+v6 — melhor modelo por horizonte",
+    "gerado_em": "2026-08-10",
+    "abordagem": "v5/v6 selecionado por horizonte antes do holdout comum",
     "D1": {
-      "yhat": 64,
-      "lower": 0.0,
-      "upper": 64,
+      "yhat": 20.4,
+      "lower": 3.3,
+      "upper": 37.3,
       "modelo_usado": "v6"
     },
     "D7": {
-      "yhat": 49.0,
-      "lower": 35.0,
-      "upper": 63.8,
+      "yhat": 57.0,
+      "lower": 41.2,
+      "upper": 74.4,
       "modelo_usado": "v6"
     },
     "serie_7d": [
@@ -21,93 +22,141 @@
         "ds": "2026-01-01",
         "horizonte": "D+1",
         "modelo": "v6",
-        "mae_usado": 12.43,
-        "yhat": 64,
-        "yhat_lower": 0.0,
-        "yhat_upper": 64
+        "mae_usado": 40.39,
+        "yhat": 20.4,
+        "yhat_lower": 3.3,
+        "yhat_upper": 37.3
       },
       {
         "dia": "02/01",
         "ds": "2026-01-02",
         "horizonte": "D+2",
-        "modelo": "v5",
-        "mae_usado": 10.5,
-        "yhat": 56,
-        "yhat_lower": 21.0,
-        "yhat_upper": 56
+        "modelo": "v6",
+        "mae_usado": 51.91,
+        "yhat": 36.0,
+        "yhat_lower": 18.4,
+        "yhat_upper": 53.9
       },
       {
         "dia": "03/01",
         "ds": "2026-01-03",
         "horizonte": "D+3",
-        "modelo": "v5",
-        "mae_usado": 10.29,
-        "yhat": 29,
+        "modelo": "v6",
+        "mae_usado": 53.38,
+        "yhat": 11.8,
         "yhat_lower": 0.0,
-        "yhat_upper": 29
+        "yhat_upper": 28.0
       },
       {
         "dia": "04/01",
         "ds": "2026-01-04",
         "horizonte": "D+4",
-        "modelo": "v5",
-        "mae_usado": 13.36,
-        "yhat": 21,
+        "modelo": "v6",
+        "mae_usado": 51.51,
+        "yhat": 3.0,
         "yhat_lower": 0.0,
-        "yhat_upper": 21
+        "yhat_upper": 21.2
       },
       {
         "dia": "05/01",
         "ds": "2026-01-05",
         "horizonte": "D+5",
         "modelo": "v6",
-        "mae_usado": 13.05,
-        "yhat": 79,
-        "yhat_lower": 31.7,
-        "yhat_upper": 79
+        "mae_usado": 48.64,
+        "yhat": 52.9,
+        "yhat_lower": 36.5,
+        "yhat_upper": 70.6
       },
       {
         "dia": "06/01",
         "ds": "2026-01-06",
         "horizonte": "D+6",
         "modelo": "v6",
-        "mae_usado": 11.09,
-        "yhat": 70,
-        "yhat_lower": 35.0,
-        "yhat_upper": 70
+        "mae_usado": 45.5,
+        "yhat": 58.6,
+        "yhat_lower": 42.3,
+        "yhat_upper": 76.1
       },
       {
         "dia": "07/01",
         "ds": "2026-01-07",
         "horizonte": "D+7",
         "modelo": "v6",
-        "mae_usado": 10.58,
-        "yhat": 49.0,
-        "yhat_lower": 35.0,
-        "yhat_upper": 63.8
+        "mae_usado": 42.31,
+        "yhat": 57.0,
+        "yhat_lower": 41.2,
+        "yhat_upper": 74.4
       }
     ],
     "metricas": {
-      "mae_d1": 12.43,
-      "mae_d7": 10.58,
-      "nota": "MAE mínimo entre v5 e v6 por horizonte — CV initial=180d"
+      "protocolo": "rolling_origin_2025Q4_D1_D7",
+      "inicio": "2025-10-01",
+      "fim": "2025-12-31",
+      "mae_d1": 40.39,
+      "mae_d7": 42.31,
+      "mae_medio_d1_d7": 47.66,
+      "por_horizonte": {
+        "D1": {
+          "mae": 40.39,
+          "n_previsoes": 92,
+          "modelo_selecionado": "v6",
+          "selecao_mae_validacao": 35.68
+        },
+        "D2": {
+          "mae": 51.91,
+          "n_previsoes": 91,
+          "modelo_selecionado": "v6",
+          "selecao_mae_validacao": 44.79
+        },
+        "D3": {
+          "mae": 53.38,
+          "n_previsoes": 90,
+          "modelo_selecionado": "v6",
+          "selecao_mae_validacao": 45.33
+        },
+        "D4": {
+          "mae": 51.51,
+          "n_previsoes": 89,
+          "modelo_selecionado": "v6",
+          "selecao_mae_validacao": 42.77
+        },
+        "D5": {
+          "mae": 48.64,
+          "n_previsoes": 88,
+          "modelo_selecionado": "v6",
+          "selecao_mae_validacao": 39.54
+        },
+        "D6": {
+          "mae": 45.5,
+          "n_previsoes": 87,
+          "modelo_selecionado": "v6",
+          "selecao_mae_validacao": 36.51
+        },
+        "D7": {
+          "mae": 42.31,
+          "n_previsoes": 86,
+          "modelo_selecionado": "v6",
+          "selecao_mae_validacao": 33.59
+        }
+      },
+      "nota": "Variante escolhida em Jul–Set; métricas reportadas no holdout posterior Out–Dez."
     }
   },
   "p2": {
     "modelo": "prophet_ensemble_p2",
-    "gerado_em": "2026-05-09",
-    "abordagem": "ensemble v5+v6 — melhor modelo por horizonte",
+    "gerado_em": "2026-08-10",
+    "abordagem": "v5/v6 selecionado por horizonte antes do holdout comum",
     "D1": {
-      "yhat": 12.7,
-      "lower": 6.8,
-      "upper": 18.3,
+      "yhat": 13.6,
+      "lower": 7.2,
+      "upper": 20.2,
       "modelo_usado": "v6"
     },
     "D7": {
-      "yhat": 16.0,
-      "lower": 10.1,
-      "upper": 21.6,
-      "modelo_usado": "v5"
+      "yhat": 17.6,
+      "lower": 12.0,
+      "upper": 23.6,
+      "modelo_usado": "v6"
     },
     "serie_7d": [
       {
@@ -115,49 +164,49 @@
         "ds": "2026-01-01",
         "horizonte": "D+1",
         "modelo": "v6",
-        "mae_usado": 7.7,
-        "yhat": 12.7,
-        "yhat_lower": 6.8,
-        "yhat_upper": 18.3
+        "mae_usado": 5.0,
+        "yhat": 13.6,
+        "yhat_lower": 7.2,
+        "yhat_upper": 20.2
       },
       {
         "dia": "02/01",
         "ds": "2026-01-02",
         "horizonte": "D+2",
         "modelo": "v6",
-        "mae_usado": 6.19,
-        "yhat": 11.8,
-        "yhat_lower": 5.6,
-        "yhat_upper": 17.4
+        "mae_usado": 5.29,
+        "yhat": 12.8,
+        "yhat_lower": 7.2,
+        "yhat_upper": 18.7
       },
       {
         "dia": "03/01",
         "ds": "2026-01-03",
         "horizonte": "D+3",
-        "modelo": "v5",
-        "mae_usado": 5.04,
-        "yhat": 11,
-        "yhat_lower": 4.0,
-        "yhat_upper": 14.8
+        "modelo": "v6",
+        "mae_usado": 5.25,
+        "yhat": 10.0,
+        "yhat_lower": 4.3,
+        "yhat_upper": 16.1
       },
       {
         "dia": "04/01",
         "ds": "2026-01-04",
         "horizonte": "D+4",
         "modelo": "v6",
-        "mae_usado": 5.96,
-        "yhat": 10,
-        "yhat_lower": 2.3,
-        "yhat_upper": 14.0
+        "mae_usado": 5.2,
+        "yhat": 9.6,
+        "yhat_lower": 3.7,
+        "yhat_upper": 15.7
       },
       {
         "dia": "05/01",
         "ds": "2026-01-05",
         "horizonte": "D+5",
-        "modelo": "v5",
-        "mae_usado": 2.13,
-        "yhat": 17,
-        "yhat_lower": 10.4,
+        "modelo": "v6",
+        "mae_usado": 5.14,
+        "yhat": 16.7,
+        "yhat_lower": 10.7,
         "yhat_upper": 22.4
       },
       {
@@ -165,42 +214,90 @@
         "ds": "2026-01-06",
         "horizonte": "D+6",
         "modelo": "v6",
-        "mae_usado": 7.04,
-        "yhat": 15.9,
-        "yhat_lower": 9.8,
-        "yhat_upper": 21.8
+        "mae_usado": 5.06,
+        "yhat": 18.5,
+        "yhat_lower": 12.5,
+        "yhat_upper": 23.9
       },
       {
         "dia": "07/01",
         "ds": "2026-01-07",
         "horizonte": "D+7",
-        "modelo": "v5",
-        "mae_usado": 4.7,
-        "yhat": 16.0,
-        "yhat_lower": 10.1,
-        "yhat_upper": 21.6
+        "modelo": "v6",
+        "mae_usado": 4.91,
+        "yhat": 17.6,
+        "yhat_lower": 12.0,
+        "yhat_upper": 23.6
       }
     ],
     "metricas": {
-      "mae_d1": 7.7,
-      "mae_d7": 4.7,
-      "nota": "MAE mínimo entre v5 e v6 por horizonte — CV initial=180d"
+      "protocolo": "rolling_origin_2025Q4_D1_D7",
+      "inicio": "2025-10-01",
+      "fim": "2025-12-31",
+      "mae_d1": 5.0,
+      "mae_d7": 4.91,
+      "mae_medio_d1_d7": 5.12,
+      "por_horizonte": {
+        "D1": {
+          "mae": 5.0,
+          "n_previsoes": 92,
+          "modelo_selecionado": "v6",
+          "selecao_mae_validacao": 9.92
+        },
+        "D2": {
+          "mae": 5.29,
+          "n_previsoes": 91,
+          "modelo_selecionado": "v6",
+          "selecao_mae_validacao": 11.44
+        },
+        "D3": {
+          "mae": 5.25,
+          "n_previsoes": 90,
+          "modelo_selecionado": "v6",
+          "selecao_mae_validacao": 11.58
+        },
+        "D4": {
+          "mae": 5.2,
+          "n_previsoes": 89,
+          "modelo_selecionado": "v6",
+          "selecao_mae_validacao": 11.46
+        },
+        "D5": {
+          "mae": 5.14,
+          "n_previsoes": 88,
+          "modelo_selecionado": "v6",
+          "selecao_mae_validacao": 11.31
+        },
+        "D6": {
+          "mae": 5.06,
+          "n_previsoes": 87,
+          "modelo_selecionado": "v6",
+          "selecao_mae_validacao": 11.0
+        },
+        "D7": {
+          "mae": 4.91,
+          "n_previsoes": 86,
+          "modelo_selecionado": "v6",
+          "selecao_mae_validacao": 10.8
+        }
+      },
+      "nota": "Variante escolhida em Jul–Set; métricas reportadas no holdout posterior Out–Dez."
     }
   },
   "p3": {
     "modelo": "prophet_ensemble_p3",
-    "gerado_em": "2026-05-09",
-    "abordagem": "ensemble v5+v6 — melhor modelo por horizonte",
+    "gerado_em": "2026-08-10",
+    "abordagem": "v5/v6 selecionado por horizonte antes do holdout comum",
     "D1": {
-      "yhat": 49,
-      "lower": 0.0,
-      "upper": 49,
+      "yhat": 17.3,
+      "lower": 0.8,
+      "upper": 32.2,
       "modelo_usado": "v6"
     },
     "D7": {
-      "yhat": 31.9,
-      "lower": 17.7,
-      "upper": 44.8,
+      "yhat": 45.3,
+      "lower": 27.9,
+      "upper": 62.8,
       "modelo_usado": "v5"
     },
     "serie_7d": [
@@ -209,76 +306,124 @@
         "ds": "2026-01-01",
         "horizonte": "D+1",
         "modelo": "v6",
-        "mae_usado": 9.98,
-        "yhat": 49,
-        "yhat_lower": 0.0,
-        "yhat_upper": 49
+        "mae_usado": 36.41,
+        "yhat": 17.3,
+        "yhat_lower": 0.8,
+        "yhat_upper": 32.2
       },
       {
         "dia": "02/01",
         "ds": "2026-01-02",
         "horizonte": "D+2",
         "modelo": "v6",
-        "mae_usado": 9.87,
-        "yhat": 46,
-        "yhat_lower": 10.8,
-        "yhat_upper": 46
+        "mae_usado": 45.22,
+        "yhat": 29.9,
+        "yhat_lower": 14.0,
+        "yhat_upper": 46.3
       },
       {
         "dia": "03/01",
         "ds": "2026-01-03",
         "horizonte": "D+3",
-        "modelo": "v5",
-        "mae_usado": 8.28,
-        "yhat": 16,
+        "modelo": "v6",
+        "mae_usado": 45.79,
+        "yhat": 6.3,
         "yhat_lower": 0.0,
-        "yhat_upper": 16
+        "yhat_upper": 22.1
       },
       {
         "dia": "04/01",
         "ds": "2026-01-04",
         "horizonte": "D+4",
-        "modelo": "v5",
-        "mae_usado": 10.34,
-        "yhat": 10,
+        "modelo": "v6",
+        "mae_usado": 43.97,
+        "yhat": 0.0,
         "yhat_lower": 0.0,
-        "yhat_upper": 10
+        "yhat_upper": 12.7
       },
       {
         "dia": "05/01",
         "ds": "2026-01-05",
         "horizonte": "D+5",
         "modelo": "v6",
-        "mae_usado": 10.2,
-        "yhat": 55,
-        "yhat_lower": 19.5,
-        "yhat_upper": 55
+        "mae_usado": 41.63,
+        "yhat": 42.3,
+        "yhat_lower": 26.4,
+        "yhat_upper": 56.7
       },
       {
         "dia": "06/01",
         "ds": "2026-01-06",
         "horizonte": "D+6",
-        "modelo": "v5",
-        "mae_usado": 10.34,
-        "yhat": 54,
-        "yhat_lower": 19.4,
-        "yhat_upper": 54
+        "modelo": "v6",
+        "mae_usado": 39.2,
+        "yhat": 47.1,
+        "yhat_lower": 31.6,
+        "yhat_upper": 62.4
       },
       {
         "dia": "07/01",
         "ds": "2026-01-07",
         "horizonte": "D+7",
         "modelo": "v5",
-        "mae_usado": 9.77,
-        "yhat": 31.9,
-        "yhat_lower": 17.7,
-        "yhat_upper": 44.8
+        "mae_usado": 24.4,
+        "yhat": 45.3,
+        "yhat_lower": 27.9,
+        "yhat_upper": 62.8
       }
     ],
     "metricas": {
-      "mae_d1": 9.98,
-      "mae_d7": 9.77,
-      "nota": "MAE mínimo entre v5 e v6 por horizonte — CV initial=180d"
+      "protocolo": "rolling_origin_2025Q4_D1_D7",
+      "inicio": "2025-10-01",
+      "fim": "2025-12-31",
+      "mae_d1": 36.41,
+      "mae_d7": 24.4,
+      "mae_medio_d1_d7": 39.52,
+      "por_horizonte": {
+        "D1": {
+          "mae": 36.41,
+          "n_previsoes": 92,
+          "modelo_selecionado": "v6",
+          "selecao_mae_validacao": 27.57
+        },
+        "D2": {
+          "mae": 45.22,
+          "n_previsoes": 91,
+          "modelo_selecionado": "v6",
+          "selecao_mae_validacao": 34.46
+        },
+        "D3": {
+          "mae": 45.79,
+          "n_previsoes": 90,
+          "modelo_selecionado": "v6",
+          "selecao_mae_validacao": 34.6
+        },
+        "D4": {
+          "mae": 43.97,
+          "n_previsoes": 89,
+          "modelo_selecionado": "v6",
+          "selecao_mae_validacao": 32.27
+        },
+        "D5": {
+          "mae": 41.63,
+          "n_previsoes": 88,
+          "modelo_selecionado": "v6",
+          "selecao_mae_validacao": 29.5
+        },
+        "D6": {
+          "mae": 39.2,
+          "n_previsoes": 87,
+          "modelo_selecionado": "v6",
+          "selecao_mae_validacao": 26.89
+        },
+        "D7": {
+          "mae": 24.4,
+          "n_previsoes": 86,
+          "modelo_selecionado": "v5",
+          "selecao_mae_validacao": 24.04
+        }
+      },
+      "nota": "Variante escolhida em Jul–Set; métricas reportadas no holdout posterior Out–Dez."
     }
   }
 }

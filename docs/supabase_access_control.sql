@@ -7,9 +7,13 @@
 
 alter table if exists public.app_users enable row level security;
 alter table if exists public.user_access_audit enable row level security;
+alter table if exists public.operational_alerts enable row level security;
+alter table if exists public.operational_alert_audit enable row level security;
 
 revoke all on table public.app_users from anon, authenticated;
 revoke all on table public.user_access_audit from anon, authenticated;
+revoke all on table public.operational_alerts from anon, authenticated;
+revoke all on table public.operational_alert_audit from anon, authenticated;
 
 -- Não crie policies para anon/authenticated. Sem policies, a Data API não
 -- devolve nem altera linhas. A conexão privada do backend continua sendo a

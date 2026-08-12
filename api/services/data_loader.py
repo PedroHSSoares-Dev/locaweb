@@ -56,10 +56,13 @@ _MODEL_FILES = [
     "previsoes_volume.json",         # Prophet original — baseline
     "previsoes_volume_mc.json",      # Prophet Monte Carlo ensemble adaptativo
     "previsoes_lstm.json",           # LSTM v2 — modelo principal
+    "previsoes_baseline.json",       # baseline sazonal semanal auditável
     "previsoes_horizonte_prophet.json",  # Prophet D+1..D+365 — planejamento exploratório
     "risco_ola.json",
     "clusters.json",
     "kpi_atingimento.json",
+    "comparacao_modelos.json",
+    "segmentos_ola.json",
 ]
 
 

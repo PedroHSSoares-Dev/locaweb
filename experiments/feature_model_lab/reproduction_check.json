@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "clean_child_processes": true,
+  "generated_at": "2026-08-10T22:26:26.784554-03:00",
+  "tracks": {
+    "risk": {
+      "passed": true,
+      "check_file": "experiments/feature_model_lab/workstreams/risk/reproduction_check.json"
+    },
+    "forecasting": {
+      "passed": true,
+      "check_file": "experiments/feature_model_lab/workstreams/forecasting/reproduction_check.json"
+    },
+    "operational": {
+      "passed": true,
+      "check_file": "experiments/feature_model_lab/workstreams/operational/reproduction_check.json"
+    }
+  }
+}

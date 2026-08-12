@@ -37,10 +37,13 @@ outputs/  (JSONs estáticos consumidos pelo frontend)
   ├── previsoes_volume.json      Prophet ensemble 2025-only
   ├── previsoes_volume_mc.json   Prophet Monte Carlo 2023-2025
   ├── previsoes_lstm.json        LSTM v2 early stopping
+  ├── previsoes_baseline.json    baseline sazonal semanal ativo
   ├── previsoes_horizonte_prophet.json  Prophet D+1..D+365 para cenários
   ├── risco_ola.json             XGBoost + SHAP
   ├── clusters.json              K-Means K=5
-  └── kpi_atingimento.json       Projeção orçamento mensal
+  ├── kpi_atingimento.json       Projeção orçamento mensal
+  ├── comparacao_modelos.json    Holdout comum LSTM × Prophet
+  └── segmentos_ola.json         Agregados de grupo/produto com supressão
        ↓
   ┌────────────────────┬──────────────┐
   │  Dashboard React   │   Power BI   │
@@ -60,7 +63,7 @@ outputs/  (JSONs estáticos consumidos pelo frontend)
 | Dados | pandas · numpy · openpyxl · pyarrow |
 | Frontend | React + Vite · Recharts · react-router-dom · lucide-react |
 | Chatbot | Respostas determinísticas · GPT-5.6 Luna/OpenAI · Ollama fallback · streaming NDJSON |
-| Deploy | Vercel (frontend) · GitHub Actions (pipeline ML) |
+| Deploy | Vercel (frontend) · Render (API) · GitHub Actions (CI/CD e contratos ML) |
 | Entregável FIAP | Power BI |
 
 ---
@@ -88,12 +91,15 @@ locaweb/
 │   │   └── feriados.py                # feriados nacionais BR (Carnaval e Corpus Christi via Páscoa)
 │   ├── models/
 │   │   ├── prophet_model.py           # ensemble v5+v6, Block Bootstrap Monte Carlo
-│   │   ├── lstm_model.py              # LSTM 2 camadas, early stopping, Monte Carlo
+│   │   ├── lstm_model.py              # LSTM 2 camadas, early stopping, série real
 │   │   ├── xgboost_model.py           # classificação risco OLA + SHAP
 │   │   ├── long_horizon_projection.py # inferência Prophet D+1..D+365 para planejamento
 │   │   ├── kmeans_model.py            # segmentação K-Means
-│   │   └── kpi_projection.py          # projeção orçamento mensal dinâmico
-│   └── pipeline.py                    # orquestrador — 8 etapas
+│   │   ├── kpi_projection.py          # projeção orçamento mensal dinâmico
+│   │   ├── model_comparison.py        # comparação temporal no mesmo holdout
+│   │   └── operational_aggregates.py  # grupos/produtos com limiar de privacidade
+│   ├── validation/artifacts.py        # gate deployável dos JSONs
+│   └── pipeline.py                    # orquestrador — 10 etapas
 ├── api/                               # FastAPI
 │   ├── main.py
 │   ├── routers/                       # previsoes · risco · clusters · kpi · historico · context · chat
@@ -147,7 +153,7 @@ data/raw/LW-DATASET.xlsx   ← arquivo fornecido pela Locaweb
 ### 4. Executar o pipeline de ML
 
 ```bash
-# Pipeline completo (~2 min)
+# Pipeline completo (inclui os treinos Prophet; vários minutos)
 python src/pipeline.py
 
 # Etapas individuais
@@ -158,7 +164,11 @@ python src/pipeline.py --step kpi         # projeção KPI (~2s)
 python src/pipeline.py --step prophet     # Prophet 2025-only (~36s)
 python src/pipeline.py --step prophet-mc  # Prophet Monte Carlo (~5min)
 python src/pipeline.py --step lstm        # LSTM v2 (~25s)
+python src/pipeline.py --step baseline    # baseline sazonal semanal
 python src/pipeline.py --step horizon     # Prophet D+1..D+365 exploratório (~2s)
+python src/pipeline.py --step compare     # comparação no holdout temporal comum
+python src/pipeline.py --step segments    # agregados operacionais anonimizados
+python -m src.validation.artifacts        # valida contratos antes do deploy
 ```
 
 Todos os JSONs são gerados em `outputs/` e os modelos serializados em `models_saved/`.
@@ -200,10 +210,12 @@ npm run dev
 
 | Modelo | Objetivo | Métricas de referência |
 |--------|----------|----------------------|
-| **Prophet** (ensemble v5+v6) | Volume de incidentes D+1 a D+7 | MAE D+1: Total=12.4, P2=7.7, P3=10.0 |
-| **LSTM v2** (early stopping) | Volume de incidentes D+1 a D+7 | MAE holdout 92 dias: Total=14.7, P2=4.2, P3=13.3 |
-| **XGBoost** (Optuna 80 trials) | Risco de violação de OLA por incidente | PR-AUC=0.070, Recall=13.8%, Precision=29.6%, F1=18.8% |
-| **K-Means** (K=5) | Segmentação de padrões de incidentes | Silhouette=0.199, CH=3890, DB=1.504 |
+| **Prophet** (ensemble v5+v6) | Volume D+1 a D+7 | MAE médio D1–D7=47,66; holdout comum Out–Dez/2025 |
+| **Prophet MC** | Volume D+1 a D+7 | MAE médio D1–D7=25,61; base sintética não toca seleção/holdout |
+| **Baseline sazonal** | Volume D+1 a D+7 | **MAE médio D1–D7=12,46**; vencedor Total/P2/P3; mediana de três semanas |
+| **LSTM v2** (early stopping) | Volume D+1 a D+7 | MAE médio D1–D7=21,19; treino/holdout reais |
+| **XGBoost** | Triagem de risco OLA | PR-AUC teste=0,1290; Recall=82,0%; Precision=2,86%; F1=5,53% |
+| **K-Means** (K=5) | Segmentação de padrões | Silhouette=0,2001; CH=3882,2; DB=1,5056 |
 
 ### Regras anti-leakage
 
@@ -252,7 +264,7 @@ As features a seguir nunca podem entrar nos modelos — são conhecidas apenas a
 O frontend espera `VITE_API_URL=http://localhost:8000/api`. A chave da OpenAI permanece somente no backend. Se a API for executada no Docker com fallback Ollama no macOS, `host.docker.internal:11434` já está configurado.
 
 Em produção, configure `CORS_ALLOWED_ORIGINS` na API com a origem exata do frontend, por exemplo `https://predictfy-locaweb.vercel.app`.
-O arquivo `render.yaml` descreve a API e o workflow `.github/workflows/ci.yml` valida backend e frontend antes do auto-deploy no Render.
+O arquivo `render.yaml` descreve a API. O workflow `.github/workflows/ci.yml` executa testes de API/segurança, lint/build do frontend e valida dez contratos de artefatos ML; com o deploy automático configurado para aguardar os checks, Render só publica um commit aprovado e o build da Vercel continua protegido pelo gate do frontend.
 
 ---
 

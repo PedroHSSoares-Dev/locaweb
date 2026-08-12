@@ -7,6 +7,7 @@ from datetime import date, datetime, timezone
 from typing import Any
 
 from api.services.data_loader import load_json
+from api.services.model_registry import ModelRegistryError, get_model_registry, reconcile_forecast_point
 
 
 OLA_TARGETS = {"P2": "4h", "P3": "12h"}
@@ -47,15 +48,38 @@ def _forecast_point(source: dict[str, Any], index: int, values: dict[str, Any]) 
             stale = date.fromisoformat(target) < _application_current_date()
         except ValueError:
             target = None
-    return {**values, "data_alvo": target, "status_stale": stale}
+    reconciled = reconcile_forecast_point(
+        values.get("total"), values.get("p2"), values.get("p3")
+    )
+    return {**reconciled, "data_alvo": target, "status_stale": stale}
 
 
 def _build_forecasts() -> dict[str, Any]:
+    baseline = load_json("previsoes_baseline.json")
     lstm = load_json("previsoes_lstm.json")
     monte_carlo = load_json("previsoes_volume_mc.json")
     prophet = load_json("previsoes_volume.json")
+    comparison = load_json("comparacao_modelos.json")
+    winner = comparison.get("series", {}).get("total", {}).get("vencedor_geral") if comparison else None
 
-    if lstm:
+    if baseline and (winner == "baseline_sazonal" or not winner):
+        mae_raw = baseline.get("mae_holdout_92_dias", {})
+        return {
+            "disponivel": True,
+            "modelo_ativo": "baseline_sazonal_7d",
+            "mae_92_dias": mae_raw.get("total"),
+            "gerado_em": baseline.get("gerado_em"),
+            "D1": _forecast_point(
+                baseline, 0,
+                {key: _round_positive(baseline.get("d1", {}).get(key)) for key in ("total", "p2", "p3")},
+            ),
+            "D7": _forecast_point(
+                baseline, -1,
+                {key: _round_positive(baseline.get("d7", {}).get(key)) for key in ("total", "p2", "p3")},
+            ),
+        }
+
+    if lstm and (winner == "lstm" or winner not in {"prophet", "prophet_mc", "baseline_sazonal"}):
         mae_raw = lstm.get("mae_holdout_92_dias")
         mae = mae_raw.get("total") if isinstance(mae_raw, dict) else mae_raw
         return {
@@ -75,6 +99,23 @@ def _build_forecasts() -> dict[str, Any]:
             ),
         }
 
+    if prophet and winner != "prophet_mc":
+        metadata = {"serie": prophet.get("total", {}).get("serie_7d", [])}
+        return {
+            "disponivel": True,
+            "modelo_ativo": "prophet_original",
+            "mae_92_dias": prophet.get("total", {}).get("metricas", {}).get("mae_d1"),
+            "gerado_em": prophet.get("total", {}).get("gerado_em"),
+            "D1": _forecast_point(metadata, 0, {
+                key: _round_positive(prophet.get(key, {}).get("D1", {}).get("yhat"))
+                for key in ("total", "p2", "p3")
+            }),
+            "D7": _forecast_point(metadata, -1, {
+                key: _round_positive(prophet.get(key, {}).get("D7", {}).get("yhat"))
+                for key in ("total", "p2", "p3")
+            }),
+        }
+
     if monte_carlo:
         metadata = {"serie": monte_carlo.get("total", {}).get("serie_7d", [])}
         return {
@@ -88,23 +129,6 @@ def _build_forecasts() -> dict[str, Any]:
             }),
             "D7": _forecast_point(metadata, -1, {
                 key: _round_positive(monte_carlo.get(key, {}).get("D7", {}).get("yhat"))
-                for key in ("total", "p2", "p3")
-            }),
-        }
-
-    if prophet:
-        metadata = {"serie": prophet.get("total", {}).get("serie_7d", [])}
-        return {
-            "disponivel": True,
-            "modelo_ativo": "prophet_original",
-            "mae_92_dias": None,
-            "gerado_em": prophet.get("total", {}).get("gerado_em"),
-            "D1": _forecast_point(metadata, 0, {
-                key: _round_positive(prophet.get(key, {}).get("D1", {}).get("yhat"))
-                for key in ("total", "p2", "p3")
-            }),
-            "D7": _forecast_point(metadata, -1, {
-                key: _round_positive(prophet.get(key, {}).get("D7", {}).get("yhat"))
                 for key in ("total", "p2", "p3")
             }),
         }
@@ -223,6 +247,13 @@ def _build_model_catalog() -> dict[str, Any]:
     lstm = load_json("previsoes_lstm.json")
     prophet = load_json("previsoes_volume.json")
     prophet_mc = load_json("previsoes_volume_mc.json")
+    baseline = load_json("previsoes_baseline.json")
+    comparison = load_json("comparacao_modelos.json")
+    active = _build_forecasts().get("modelo_ativo", "indisponivel")
+    try:
+        registry = get_model_registry()
+    except ModelRegistryError:
+        registry = {"models": [], "governance": {}}
 
     lstm_context: dict[str, Any] = {"disponivel": False}
     if lstm:
@@ -231,30 +262,43 @@ def _build_model_catalog() -> dict[str, Any]:
             "nome": lstm.get("modelo"),
             "arquitetura": lstm.get("arquitetura"),
             "treino": lstm.get("treino"),
-            "protocolo_validacao": lstm.get("holdout"),
+            "protocolo_validacao": lstm.get("protocolo_validacao"),
+            "janela_validacao": lstm.get("holdout"),
             "mae_holdout_92_dias": lstm.get("mae_holdout_92_dias"),
-            "comparacao_prophet_no_holdout_validada": False,
+            "comparacao_prophet_no_holdout_validada": bool(comparison and comparison.get("comparaveis")),
         }
 
     return {
+        "registro_canonico": {
+            "gerado_em": registry.get("generated_at"),
+            "data_referencia": registry.get("reference_date"),
+            "governanca": registry.get("governance", {}),
+            "modelos": registry.get("models", []),
+        },
         "volume_incidentes": {
-            "modelo_ativo": "lstm_v2" if lstm else "fallback_por_disponibilidade",
+            "modelo_ativo": active,
+            "comparacao_holdout_comum": comparison,
+            "baseline_sazonal": {
+                "disponivel": bool(baseline),
+                "protocolo_validacao": baseline.get("protocolo_validacao") if baseline else None,
+                "metricas": baseline.get("metricas_holdout_comum") if baseline else None,
+            },
             "lstm": lstm_context,
             "prophet_original": {
                 "disponivel": bool(prophet),
-                "protocolo_validacao": "cross-validation temporal, janela inicial de 180 dias",
+                "protocolo_validacao": prophet.get("protocolo_validacao") if prophet else None,
                 "metricas": _metricas_prophet(prophet),
             },
             "prophet_monte_carlo": {
                 "disponivel": bool(prophet_mc),
-                "protocolo_validacao": "cross-validation temporal, janela inicial de 180 dias",
+                "protocolo_validacao": prophet_mc.get("protocolo_validacao") if prophet_mc else None,
                 "metricas": _metricas_prophet(prophet_mc),
             },
             "regras_comparacao": [
                 "MAE só pode ser comparado no mesmo horizonte, série e conjunto de validação.",
-                "O holdout de 92 dias do LSTM não é diretamente comparável à CV do Prophet original.",
-                "Modelo ativo é uma decisão operacional de fallback, não prova de superioridade geral.",
-                "D+7 do LSTM é recursivo e exige validação específica para esse horizonte.",
+                "A comparação publicada usa rolling origin Out–Dez/2025 para ambos.",
+                "Modelo ativo é o vencedor da série Total; P2/P3 podem ter vencedores diferentes.",
+                "Cada D+1…D+7 possui métrica própria e deve ser lido no horizonte solicitado.",
             ],
         },
     }
@@ -344,7 +388,7 @@ def build_operational_context() -> dict[str, Any]:
             "KPI Violado? é o ground truth; duração não substitui as regras de negócio.",
             "Métricas de modelos só devem ser comparadas quando usam o mesmo protocolo de validação.",
             "D+7 do LSTM é recursivo e não deve ser apresentado como causal ou garantido.",
-            "As séries total, P2 e P3 são modeladas independentemente e podem não fechar por soma.",
+            "As séries são treinadas independentemente; a API preserva o Total e reconcilia P2/P3 proporcionalmente.",
             "Score do XGBoost não é probabilidade calibrada nem chance real de violação.",
             "O threshold do XGBoost serve para priorização humana; a baixa precisão impede automação de ações.",
             "Previsões vencidas devem ser chamadas de snapshots históricos e sempre exibir a data-alvo.",

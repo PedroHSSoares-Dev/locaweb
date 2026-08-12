@@ -1,4 +1,4 @@
-name: Quality gates
+name: CI/CD quality gates
 
 on:
   push:
@@ -8,7 +8,24 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  artifacts:
+    name: ML artifact contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Validate deployable model artifacts
+        run: |
+          python -m src.validation.artifacts
+          python -m src.validation.release_preflight
+
   api:
     name: API tests
     runs-on: ubuntu-latest
@@ -43,3 +60,7 @@ jobs:
         run: npm run lint
       - name: Build
         run: npm run build
+      - name: Install browser for responsive smoke test
+        run: npx playwright install --with-deps chromium
+      - name: Verify mobile chat and route transition
+        run: npm run test:e2e

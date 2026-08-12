@@ -1,0 +1,89 @@
+{
+  "weekly_aligned_lags": {
+    "mechanism": "same target weekday at t-7/t-14/t-21 plus origin and long lags",
+    "source": [
+      "data",
+      "y"
+    ],
+    "availability": "target calendar plus y values at or before origin",
+    "leakage": "all referenced timestamps are asserted <= origin",
+    "missing_behavior": "rolling 28-day median fallback before sufficient history",
+    "track": "daily total volume",
+    "ablation_cycle": "F14",
+    "ablation_mae": 39.2794902187822,
+    "compute": "low"
+  },
+  "rolling_distribution": {
+    "mechanism": "past-only mean/median/std/quantiles/range/EWMA over 7-56 days",
+    "source": [
+      "data",
+      "y"
+    ],
+    "availability": "through origin close",
+    "leakage": "slices terminate at origin",
+    "missing_behavior": "short prefix accepted",
+    "track": "daily total volume",
+    "ablation_cycle": "F12",
+    "ablation_mae": 25.064886637081575,
+    "compute": "low"
+  },
+  "trend_residual": {
+    "mechanism": "past slopes, changes, and seasonal-baseline residual summaries",
+    "source": [
+      "data",
+      "y"
+    ],
+    "availability": "through origin close",
+    "leakage": "residual baselines use only dates before each residual target",
+    "missing_behavior": "zero until support exists",
+    "track": "daily total volume",
+    "ablation_cycle": "F13",
+    "ablation_mae": 38.545038252282225,
+    "compute": "low"
+  },
+  "calendar_fourier": {
+    "mechanism": "weekday/month/week cycles, month-end, weekend and known holiday flags",
+    "source": [
+      "data"
+    ],
+    "availability": "known before target date",
+    "leakage": "no observed target outcome",
+    "missing_behavior": "not applicable",
+    "track": "daily total volume",
+    "ablation_cycle": "F11",
+    "ablation_mae": 14.628138401380767,
+    "compute": "negligible"
+  },
+  "fold_safe_synthetic_augmentation": {
+    "mechanism": "aligned seven-day block bootstrap of training-prefix real totals with 8% multiplicative noise",
+    "source": [
+      "data",
+      "y"
+    ],
+    "availability": "regenerated after train cutoff",
+    "leakage": "source restricted to real prefix; supplied synthetic rows excluded",
+    "missing_behavior": "unseen target months fall back to aligned blocks from available months",
+    "track": "daily total volume",
+    "ablation_cycles": [
+      "F06",
+      "F07",
+      "F08",
+      "F09"
+    ],
+    "compute": "moderate"
+  },
+  "year_end_operational_window": {
+    "mechanism": "Dec 24-31 weekdays share the causally learned earlier-weekday-holiday volume factor",
+    "source": [
+      "data",
+      "y",
+      "calendar"
+    ],
+    "availability": "window known; factor uses holidays observed by origin",
+    "leakage": "no future actual enters factor; operational assumption is explicit",
+    "missing_behavior": "factor 1.0 until a past weekday holiday exists; factor guarded to [0.35, 0.75]",
+    "track": "daily total volume",
+    "ablation_cycle": "F01",
+    "compute": "negligible"
+  }
+}

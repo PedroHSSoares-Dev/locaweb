@@ -1,90 +1,90 @@
 {
   "modelo": "kmeans_segmentacao",
-  "gerado_em": "2026-05-14",
+  "gerado_em": "2026-08-10",
   "metodologia": "K-Means K=5 — seleção por voto majoritário (Silhouette, CH, DB), K ímpar ≥ 5",
   "k": 5,
-  "silhouette": 0.1994,
+  "silhouette": 0.2001,
   "k_min_utilizado": 5,
   "metricas": {
-    "inertia": 190928.76,
-    "silhouette_score": 0.1994,
-    "calinski_harabasz": 3890.04,
-    "davies_bouldin": 1.5043,
+    "inertia": 191074.27,
+    "silhouette_score": 0.2001,
+    "calinski_harabasz": 3882.21,
+    "davies_bouldin": 1.5056,
     "features_usadas": 12,
     "total_incidentes": 25588,
-    "pca_variancia_2d": 0.3214
+    "pca_variancia_2d": 0.3182
   },
   "comparacao_k": [
     {
       "k": 2,
-      "inertia": 269612.63,
-      "silhouette": 0.2008,
-      "calinski_harabasz": 3553.35,
-      "davies_bouldin": 2.392,
+      "inertia": 268309.92,
+      "silhouette": 0.2444,
+      "calinski_harabasz": 3694.82,
+      "davies_bouldin": 1.7642,
       "selecionado": false
     },
     {
       "k": 3,
-      "inertia": 240001.92,
-      "silhouette": 0.1429,
-      "calinski_harabasz": 3574.09,
-      "davies_bouldin": 2.1998,
+      "inertia": 239494.93,
+      "silhouette": 0.1791,
+      "calinski_harabasz": 3608.74,
+      "davies_bouldin": 2.0341,
       "selecionado": false
     },
     {
       "k": 4,
-      "inertia": 214968.01,
-      "silhouette": 0.1914,
-      "calinski_harabasz": 3653.22,
-      "davies_bouldin": 1.754,
+      "inertia": 214967.77,
+      "silhouette": 0.1885,
+      "calinski_harabasz": 3653.24,
+      "davies_bouldin": 1.7548,
       "selecionado": false
     },
     {
       "k": 5,
-      "inertia": 190928.76,
-      "silhouette": 0.1965,
-      "calinski_harabasz": 3890.04,
-      "davies_bouldin": 1.5043,
+      "inertia": 191074.27,
+      "silhouette": 0.1937,
+      "calinski_harabasz": 3882.21,
+      "davies_bouldin": 1.5056,
       "selecionado": true
     },
     {
       "k": 6,
-      "inertia": 173392.74,
-      "silhouette": 0.1856,
-      "calinski_harabasz": 3944.08,
-      "davies_bouldin": 1.5537,
+      "inertia": 173705.99,
+      "silhouette": 0.1906,
+      "calinski_harabasz": 3927.74,
+      "davies_bouldin": 1.5598,
       "selecionado": false
     },
     {
       "k": 7,
-      "inertia": 163867.92,
-      "silhouette": 0.1887,
-      "calinski_harabasz": 3725.45,
-      "davies_bouldin": 1.4902,
+      "inertia": 163989.29,
+      "silhouette": 0.1671,
+      "calinski_harabasz": 3719.55,
+      "davies_bouldin": 1.5374,
       "selecionado": false
     },
     {
       "k": 8,
-      "inertia": 155156.98,
-      "silhouette": 0.1783,
-      "calinski_harabasz": 3577.56,
-      "davies_bouldin": 1.4777,
+      "inertia": 154924.82,
+      "silhouette": 0.1781,
+      "calinski_harabasz": 3588.39,
+      "davies_bouldin": 1.4835,
       "selecionado": false
     },
     {
       "k": 9,
-      "inertia": 147037.16,
-      "silhouette": 0.1713,
-      "calinski_harabasz": 3479.67,
-      "davies_bouldin": 1.4307,
+      "inertia": 147107.01,
+      "silhouette": 0.1694,
+      "calinski_harabasz": 3476.5,
+      "davies_bouldin": 1.4287,
       "selecionado": false
     },
     {
       "k": 10,
-      "inertia": 141024.85,
-      "silhouette": 0.1695,
-      "calinski_harabasz": 3345.94,
-      "davies_bouldin": 1.3869,
+      "inertia": 142119.87,
+      "silhouette": 0.1668,
+      "calinski_harabasz": 3298.26,
+      "davies_bouldin": 1.495,
       "selecionado": false
     }
   ],
@@ -105,6 +105,31 @@
   "clusters": [
     {
       "id": 0,
+      "nome": "Fim de Semana / Noturno",
+      "label": "Fim de Semana / Noturno",
+      "descricao": "Incidentes concentrados nos fins de semana e horários noturnos. Cobertura de equipe é uma hipótese a validar.",
+      "tamanho": 3497,
+      "pct_total": 13.67,
+      "taxaViolacao": 1.601,
+      "taxa_violacao_pct": 1.601,
+      "total_violacoes": 56,
+      "score_T": 4.76,
+      "score_G": 2.89,
+      "score_V": 10.0,
+      "perfil": {
+        "horaMedia": 11,
+        "diasCriticos": [
+          "Sáb"
+        ],
+        "produtos": [],
+        "grupo": "",
+        "pctP2": 28.9,
+        "duracaoMediana": null,
+        "pctFds": 100.0
+      }
+    },
+    {
+      "id": 1,
       "nome": "Fora do Horário Comercial",
       "label": "Fora do Horário Comercial",
       "descricao": "Incidentes abertos fora do horário comercial (antes das 8h ou após 18h).",
@@ -124,31 +149,6 @@
         "produtos": [],
         "grupo": "",
         "pctP2": 21.1,
-        "duracaoMediana": null,
-        "pctFds": 0.0
-      }
-    },
-    {
-      "id": 1,
-      "nome": "Operação Normal — Tarde",
-      "label": "Operação Normal — Tarde",
-      "descricao": "Incidentes com perfil tarde. Padrão operacional identificado por clustering.",
-      "tamanho": 14241,
-      "pct_total": 55.65,
-      "taxaViolacao": 0.829,
-      "taxa_violacao_pct": 0.829,
-      "total_violacoes": 118,
-      "score_T": 5.37,
-      "score_G": 1.48,
-      "score_V": 8.29,
-      "perfil": {
-        "horaMedia": 13,
-        "diasCriticos": [
-          "Qua"
-        ],
-        "produtos": [],
-        "grupo": "",
-        "pctP2": 14.8,
         "duracaoMediana": null,
         "pctFds": 0.0
       }
@@ -205,27 +205,27 @@
     },
     {
       "id": 4,
-      "nome": "Fim de Semana / Noturno",
-      "label": "Fim de Semana / Noturno",
-      "descricao": "Incidentes concentrados nos fins de semana e horários noturnos. Cobertura de equipe é uma hipótese a validar.",
-      "tamanho": 3497,
-      "pct_total": 13.67,
-      "taxaViolacao": 1.601,
-      "taxa_violacao_pct": 1.601,
-      "total_violacoes": 56,
-      "score_T": 4.76,
-      "score_G": 2.89,
-      "score_V": 10.0,
+      "nome": "Operação Normal — Tarde",
+      "label": "Operação Normal — Tarde",
+      "descricao": "Incidentes com perfil tarde. Padrão operacional identificado por clustering.",
+      "tamanho": 14241,
+      "pct_total": 55.65,
+      "taxaViolacao": 0.829,
+      "taxa_violacao_pct": 0.829,
+      "total_violacoes": 118,
+      "score_T": 5.37,
+      "score_G": 1.48,
+      "score_V": 8.29,
       "perfil": {
-        "horaMedia": 11,
+        "horaMedia": 13,
         "diasCriticos": [
-          "Sáb"
+          "Qua"
         ],
         "produtos": [],
         "grupo": "",
-        "pctP2": 28.9,
+        "pctP2": 14.8,
         "duracaoMediana": null,
-        "pctFds": 100.0
+        "pctFds": 0.0
       }
     }
   ]

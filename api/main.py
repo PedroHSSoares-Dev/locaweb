@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 # Must run before router imports because the local LLM provider is configured at import time.
 load_dotenv()
 
-from api.routers import previsoes, risco, clusters, kpi, historico, context, admin
+from api.routers import previsoes, risco, clusters, kpi, historico, context, admin, models, operations
 from api.routers.chat import router as chat_router
 from api.schemas import HealthResponse
 from api.services.data_loader import available_models
@@ -35,19 +35,17 @@ API AIOps para previsão de incidentes e monitoramento de OLA em operações ITS
 ### Modelos disponíveis
 | Modelo | Status | MAE holdout | Origem |
 |---|---|---|---|
-| **LSTM v2** (early stopping) — Volume D+1 a D+7 | ✅ Disponível | 14.67 | `src/models/lstm_model.py` |
-| **Prophet MC** (ensemble adaptativo) — Volume D+1 a D+7 | ✅ Disponível | 23.80 | `src/models/prophet_model.py` |
-| **Prophet original** (ensemble v5+v6) — Volume D+1 a D+7 | ✅ Disponível | 12.43 (CV D+1) | `src/models/prophet_model.py` |
+| **Baseline sazonal** — Volume D+1 a D+7 | ✅ Ativo | 12.46 | `src/models/seasonal_baseline.py` |
+| **LSTM v2** (early stopping) — Volume D+1 a D+7 | ✅ Disponível | 21.19 | `src/models/lstm_model.py` |
+| **Prophet MC** (ensemble adaptativo) — Volume D+1 a D+7 | ✅ Disponível | 25.61 | `src/models/prophet_model.py` |
+| **Prophet original** (ensemble v5+v6) — Volume D+1 a D+7 | ✅ Disponível | 47.66 | `src/models/prophet_model.py` |
 | **XGBoost** — Risco de violação de OLA | ✅ Disponível | — | `src/models/xgboost_model.py` |
 | **K-Means** — Segmentação de incidentes | ✅ Disponível | — | `src/models/kmeans_model.py` |
 | **KPI OLA** — Consumo das metas de negócio | ✅ Disponível | — | `src/models/kpi_projection.py` |
 
-### Fallback de disponibilidade
-Os endpoints `/previsoes/*` usam o primeiro artefato disponível nesta ordem operacional:
-
-**LSTM v2 → Prophet MC Ensemble → Prophet Original**
-
-Essa ordem não representa um ranking direto: as métricas só podem ser comparadas quando usam o mesmo protocolo de validação.
+### Seleção auditável
+Os endpoints `/previsoes/*` usam o vencedor para a série Total no holdout comum
+Out–Dez/2025. Fallback por disponibilidade só é usado se a comparação estiver ausente.
 
 Use `GET /api/previsoes/modelos` para verificar qual modelo está ativo e quais estão disponíveis.
 
@@ -126,6 +124,8 @@ app.include_router(clusters.router,  prefix="/api")
 app.include_router(kpi.router,       prefix="/api")
 app.include_router(historico.router, prefix="/api")
 app.include_router(context.router,   prefix="/api")
+app.include_router(models.router,    prefix="/api")
+app.include_router(operations.router, prefix="/api")
 app.include_router(chat_router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
 

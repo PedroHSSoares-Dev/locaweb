@@ -1,153 +1,179 @@
 {
   "modelo": "xgboost_ola_risk",
-  "gerado_em": "2026-05-14",
-  "versao": "v3",
-  "abordagem": "XGBoost + Base + threshold recall≥70% + CV validado",
-  "threshold_otimizado": 0.0526,
-  "threshold_f1_referencia": 0.4241,
+  "gerado_em": "2026-08-10",
+  "versao": "v4",
+  "abordagem": "XGBoost + Base selecionado em validação temporal; threshold recall≥70%; teste posterior intocado",
+  "protocolo_validacao": "treino_ate_jun_validacao_q3_teste_q4_sem_embaralhamento",
+  "split_temporal": {
+    "treino": {
+      "inicio": "2023-02-02T15:52:32",
+      "fim": "2025-06-30T23:08:03",
+      "incidentes": 13625,
+      "violacoes": 141
+    },
+    "validacao": {
+      "inicio": "2025-07-01T00:30:46",
+      "fim": "2025-09-30T22:25:22",
+      "incidentes": 6780,
+      "violacoes": 57
+    },
+    "teste": {
+      "inicio": "2025-10-01T00:11:30",
+      "fim": "2025-12-31T18:06:15",
+      "incidentes": 5183,
+      "violacoes": 50
+    }
+  },
+  "selecao_validacao": {
+    "pr_auc_base": 0.1111,
+    "pr_auc_smote": 0.0538
+  },
+  "threshold_otimizado": 0.0645,
+  "threshold_f1_referencia": 0.4978,
   "recall_target": 0.7,
-  "scale_pos_weight": 102,
+  "scale_pos_weight": 96,
   "metricas": {
-    "recall_violacao": 0.7069,
-    "precision_violacao": 0.031,
-    "f1_violacao": 0.0594,
-    "roc_auc": 0.7767,
-    "pr_auc": 0.0694,
-    "roc_auc_cv_mean": 0.8407,
-    "roc_auc_cv_std": 0.0219,
-    "pr_auc_cv_mean": 0.1279,
-    "pr_auc_cv_std": 0.0019,
+    "recall_violacao": 0.82,
+    "precision_violacao": 0.0286,
+    "f1_violacao": 0.0553,
+    "roc_auc": 0.8599,
+    "pr_auc": 0.129,
+    "roc_auc_cv_mean": 0.6885,
+    "roc_auc_cv_std": 0.167,
+    "pr_auc_cv_mean": 0.056,
+    "pr_auc_cv_std": 0.0479,
+    "cv_folds_temporais": 5,
     "tp": 41,
-    "fp": 1281,
-    "fn": 17,
-    "tn": 3779,
-    "total_teste": 5118,
-    "violacoes_reais": 58,
+    "fp": 1392,
+    "fn": 9,
+    "tn": 3741,
+    "total_teste": 5183,
+    "violacoes_reais": 50,
     "violacoes_capturadas": 41
   },
   "metricas_f1_referencia": {
-    "threshold": 0.4241,
-    "recall_violacao": 0.1379,
-    "precision_violacao": 0.2759,
-    "f1_violacao": 0.1839,
-    "tp": 8,
-    "fp": 21,
-    "fn": 50,
-    "tn": 5039,
-    "violacoes_capturadas": 8
+    "threshold": 0.4978,
+    "recall_violacao": 0.18,
+    "precision_violacao": 0.2308,
+    "f1_violacao": 0.2022,
+    "tp": 9,
+    "fp": 30,
+    "fn": 41,
+    "tn": 5103,
+    "violacoes_capturadas": 9
   },
   "feature_importance_shap": [
     {
       "rank": 1,
       "feature": "grupo_viol_rate",
-      "shap_mean_abs": 0.899304
+      "shap_mean_abs": 1.204926
     },
     {
       "rank": 2,
-      "feature": "rolling_30d",
-      "shap_mean_abs": 0.332794
+      "feature": "rolling_7d",
+      "shap_mean_abs": 0.310736
     },
     {
       "rank": 3,
-      "feature": "rolling_7d",
-      "shap_mean_abs": 0.284553
+      "feature": "produto_enc",
+      "shap_mean_abs": 0.258914
     },
     {
       "rank": 4,
-      "feature": "aberto_por_enc",
-      "shap_mean_abs": 0.2495
+      "feature": "subcategoria_enc",
+      "shap_mean_abs": 0.254335
     },
     {
       "rank": 5,
-      "feature": "produto_freq",
-      "shap_mean_abs": 0.243816
+      "feature": "hora",
+      "shap_mean_abs": 0.244696
     },
     {
       "rank": 6,
-      "feature": "produto_enc",
-      "shap_mean_abs": 0.217159
+      "feature": "aberto_por_enc",
+      "shap_mean_abs": 0.22972
     },
     {
       "rank": 7,
       "feature": "categoria_enc",
-      "shap_mean_abs": 0.211987
+      "shap_mean_abs": 0.209208
     },
     {
       "rank": 8,
-      "feature": "lag_7d",
-      "shap_mean_abs": 0.193143
+      "feature": "grupo_enc",
+      "shap_mean_abs": 0.202173
     },
     {
       "rank": 9,
-      "feature": "hora",
-      "shap_mean_abs": 0.186029
+      "feature": "rolling_30d",
+      "shap_mean_abs": 0.193211
     },
     {
       "rank": 10,
       "feature": "semana_ano",
-      "shap_mean_abs": 0.170605
+      "shap_mean_abs": 0.17031
     },
     {
       "rank": 11,
-      "feature": "subcategoria_enc",
-      "shap_mean_abs": 0.149761
+      "feature": "dia_semana",
+      "shap_mean_abs": 0.170142
     },
     {
       "rank": 12,
-      "feature": "grupo_freq",
-      "shap_mean_abs": 0.137532
+      "feature": "dia_mes",
+      "shap_mean_abs": 0.142561
     },
     {
       "rank": 13,
-      "feature": "dia_mes",
-      "shap_mean_abs": 0.134236
+      "feature": "lag_1d_p3",
+      "shap_mean_abs": 0.136395
     },
     {
       "rank": 14,
-      "feature": "lag_1d_p3",
-      "shap_mean_abs": 0.112308
+      "feature": "lag_7d",
+      "shap_mean_abs": 0.132768
     },
     {
       "rank": 15,
-      "feature": "grupo_enc",
-      "shap_mean_abs": 0.111453
+      "feature": "lag_1d",
+      "shap_mean_abs": 0.121688
     }
   ],
   "risco_por_prioridade": {
     "P3": {
-      "media_prob": 0.0526,
-      "pct_alto_risco": 28.57,
-      "n_incidentes": 4081,
-      "taxa_violacao_real": 1.23
+      "media_prob": 0.0692,
+      "pct_alto_risco": 0.89,
+      "n_incidentes": 3935,
+      "taxa_violacao_real": 1.04
     },
     "P2": {
-      "media_prob": 0.0304,
-      "pct_alto_risco": 15.04,
-      "n_incidentes": 1037,
-      "taxa_violacao_real": 0.77
+      "media_prob": 0.0495,
+      "pct_alto_risco": 0.32,
+      "n_incidentes": 1248,
+      "taxa_violacao_real": 0.72
     }
   },
   "distribuicao_risco": {
     "baixo": {
-      "count": 4909,
-      "pct": 95.92,
+      "count": 3750,
+      "pct": 72.35,
       "limite_inferior": 0.0,
-      "limite_superior": 0.2,
-      "violacoes_reais": 44
+      "limite_superior": 0.064453,
+      "violacoes_reais": 9
     },
     "medio": {
-      "count": 0,
-      "pct": 0.0,
-      "limite_inferior": 0.2,
-      "limite_superior": 0.05260102078318596,
-      "violacoes_reais": 0
+      "count": 1394,
+      "pct": 26.9,
+      "limite_inferior": 0.064453,
+      "limite_superior": 0.497821,
+      "violacoes_reais": 32
     },
     "alto": {
-      "count": 1322,
-      "pct": 25.83,
-      "limite_inferior": 0.05260102078318596,
+      "count": 39,
+      "pct": 0.75,
+      "limite_inferior": 0.497821,
       "limite_superior": 1.0,
-      "violacoes_reais": 41
+      "violacoes_reais": 9
     }
   }
 }

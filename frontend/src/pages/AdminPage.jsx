@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useChatAuth } from '../hooks/useChatAuth';
 import AdminUsagePanel from '../components/AdminUsagePanel';
+import AdminPreflightPanel from '../components/AdminPreflightPanel';
 import {
   createAdminUser,
   deleteAdminUser,
@@ -502,6 +503,8 @@ export default function AdminPage() {
             </div>
           )}
         </section>
+
+        <AdminPreflightPanel token={sessionUser.token} onUnauthorized={logout} />
 
         <AdminUsagePanel token={sessionUser.token} onUnauthorized={logout} />
 

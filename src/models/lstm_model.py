@@ -2,7 +2,7 @@
 LSTM v2 — previsão de volume de incidentes (D+1 a D+7).
 
 Arquitetura: 2 camadas LSTM, hidden=128, dropout=0.3, lookback=30 dias.
-Treino: série Monte Carlo 2023-2025 com early stopping (patience=10).
+Treino: série real de 2025 com early stopping (patience=10).
 Holdout: 2025-10-01 a 2025-12-31 (92 dias 100% real).
 
 Saídas:
@@ -24,7 +24,6 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
-from sklearn.metrics import mean_absolute_error
 from sklearn.preprocessing import MinMaxScaler
 from torch.utils.data import DataLoader, TensorDataset
 
@@ -43,6 +42,8 @@ MAX_EPOCHS = 100
 PATIENCE = 10
 LR = 0.001
 HOLDOUT_START = pd.Timestamp("2025-10-01")
+HOLDOUT_END = pd.Timestamp("2025-12-31")
+COMMON_HOLDOUT_PROTOCOL = "rolling_origin_2025Q4_D1_D7"
 
 device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
@@ -162,34 +163,68 @@ def _predict_rollout(
 
 def _run_serie(
     serie_mc: pd.DataFrame, nome: str, seed: int = 42
-) -> tuple[LSTMForecaster, MinMaxScaler, float, np.ndarray]:
-    """Normaliza, treina, avalia no holdout e retorna previsão D+7."""
+) -> tuple[LSTMForecaster, MinMaxScaler, dict, np.ndarray]:
+    """Evaluate on Q4 without leakage, then train the deployable full-series model."""
     vals = serie_mc.sort_values("ds")["y"].values.astype(float)
     datas = pd.to_datetime(serie_mc.sort_values("ds")["ds"].values)
-
-    scaler = MinMaxScaler(feature_range=(0, 1))
-    vals_scaled = scaler.fit_transform(vals.reshape(-1, 1)).flatten()
-
     split_idx = int(np.where(datas >= HOLDOUT_START)[0][0])
-    treino_sc = vals_scaled[:split_idx]
-    holdout_sc = vals_scaled[split_idx:]
-    datas_holdout = datas[split_idx:]
+    holdout_end_idx = int(np.searchsorted(datas, np.datetime64(HOLDOUT_END), side="right"))
+    train_values = vals[:split_idx]
 
-    print(f"  [{nome}] treinando — {len(treino_sc)} dias treino | {len(holdout_sc)} holdout...")
-    model = _treinar(treino_sc, seed=seed)
+    evaluation_scaler = MinMaxScaler(feature_range=(0, 1))
+    train_scaled = evaluation_scaler.fit_transform(train_values.reshape(-1, 1)).flatten()
+    print(
+        f"  [{nome}] avaliação — {len(train_values)} dias treino | "
+        f"{holdout_end_idx - split_idx} dias holdout..."
+    )
+    evaluation_model = _treinar(train_scaled, seed=seed)
 
-    # Avaliação no holdout (one-step-ahead)
-    preds_holdout_sc = _predict_rollout(model, list(treino_sc), len(holdout_sc), real_values=holdout_sc)
-    preds_holdout = np.maximum(0, scaler.inverse_transform(preds_holdout_sc.reshape(-1, 1)).flatten())
-    reais_holdout = scaler.inverse_transform(holdout_sc.reshape(-1, 1)).flatten()
-    mae = float(mean_absolute_error(reais_holdout, preds_holdout))
-    print(f"  [{nome}] MAE holdout 92 dias: {mae:.2f}")
+    absolute_errors: dict[int, list[float]] = {horizon: [] for horizon in range(1, 8)}
+    for origin_idx in range(split_idx - 1, holdout_end_idx - 1):
+        horizon = min(7, holdout_end_idx - origin_idx - 1)
+        history = vals[:origin_idx + 1]
+        history_scaled = evaluation_scaler.transform(history.reshape(-1, 1)).flatten()
+        predicted_scaled = _predict_rollout(evaluation_model, list(history_scaled), horizon)
+        predicted = np.maximum(
+            0,
+            evaluation_scaler.inverse_transform(predicted_scaled.reshape(-1, 1)).flatten(),
+        )
+        actual = vals[origin_idx + 1:origin_idx + 1 + horizon]
+        for offset in range(horizon):
+            absolute_errors[offset + 1].append(abs(float(actual[offset] - predicted[offset])))
 
-    # Previsão D+1..D+7 (autoregressive)
-    preds_7d_sc = _predict_rollout(model, list(treino_sc), 7)
-    preds_7d = np.maximum(0, scaler.inverse_transform(preds_7d_sc.reshape(-1, 1)).flatten())
+    horizon_metrics = {
+        f"D{horizon}": {
+            "mae": round(float(np.mean(errors)), 2),
+            "n_previsoes": len(errors),
+        }
+        for horizon, errors in absolute_errors.items()
+    }
+    metrics = {
+        "protocolo": COMMON_HOLDOUT_PROTOCOL,
+        "inicio": HOLDOUT_START.strftime("%Y-%m-%d"),
+        "fim": HOLDOUT_END.strftime("%Y-%m-%d"),
+        "horizontes": horizon_metrics,
+        "mae_medio_d1_d7": round(
+            float(np.mean([item["mae"] for item in horizon_metrics.values()])), 2,
+        ),
+    }
+    print(
+        f"  [{nome}] MAE comum: D+1={horizon_metrics['D1']['mae']:.2f} | "
+        f"D+7={horizon_metrics['D7']['mae']:.2f}"
+    )
 
-    return model, scaler, mae, preds_7d
+    # O modelo publicado é treinado novamente com toda a série e recebe o
+    # histórico real até 31/12 como seed da previsão de janeiro.
+    final_scaler = MinMaxScaler(feature_range=(0, 1))
+    all_scaled = final_scaler.fit_transform(vals.reshape(-1, 1)).flatten()
+    final_model = _treinar(all_scaled, seed=seed)
+    predicted_7d_scaled = _predict_rollout(final_model, list(all_scaled), 7)
+    predicted_7d = np.maximum(
+        0,
+        final_scaler.inverse_transform(predicted_7d_scaled.reshape(-1, 1)).flatten(),
+    )
+    return final_model, final_scaler, metrics, predicted_7d
 
 
 # ── Carga de dados (Monte Carlo) ──────────────────────────────────────────────
@@ -230,89 +265,82 @@ def _gerar_ano_sintetico_lstm(
     return pd.DataFrame(resultado).sort_values("ds").reset_index(drop=True)
 
 
-def _load_mc_series() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """
-    Constrói séries Monte Carlo 2023-2025 a partir de 2025 real (nb03b).
-    Retorna (total, p2, p3) cada com colunas {ds, y}.
-    """
+def load_real_series() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Load complete real 2025 daily series; no synthetic holdout information."""
     if not RAW_PATH.exists():
         raise FileNotFoundError(f"{RAW_PATH} não encontrado.")
 
     raw = pd.read_excel(RAW_PATH)
     kpi = raw[raw["Entrou para KPI?"] == "SIM"].copy()
     kpi["data"] = pd.to_datetime(kpi["Aberto"]).dt.normalize()
+    kpi = kpi[kpi["data"].dt.year == 2025]
+    calendar = pd.DataFrame({"ds": pd.date_range("2025-01-01", "2025-12-31", freq="D")})
 
-    ano_2025 = kpi[kpi["data"].dt.year == 2025]
+    def _series(mask: pd.Series | None = None) -> pd.DataFrame:
+        subset = kpi if mask is None else kpi[mask]
+        grouped = subset.groupby("data").size().rename("y").rename_axis("ds").reset_index()
+        result = calendar.merge(grouped, on="ds", how="left").fillna({"y": 0.0})
+        result["y"] = result["y"].astype(float)
+        return result
 
-    def _serie_2025(mask=None) -> pd.DataFrame:
-        sub = ano_2025 if mask is None else ano_2025[mask]
-        return (
-            sub.groupby("data").size()
-            .reset_index(name="y")
-            .rename(columns={"data": "ds"})
-            .assign(semana=lambda d: d["ds"].dt.isocalendar().week.astype(int),
-                    mes=lambda d: d["ds"].dt.month)
-        )
-
-    s_total = _serie_2025()
-    s_p2 = _serie_2025(ano_2025["Prioridade"] == "2 - Alta")
-    s_p3 = _serie_2025(ano_2025["Prioridade"] == "3 - Média")
-
-    def _extend(serie_2025: pd.DataFrame) -> pd.DataFrame:
-        rng = np.random.default_rng(42)
-        sint_2023 = _gerar_ano_sintetico_lstm(2023, serie_2025, rng)
-        rng2 = np.random.default_rng(123)
-        sint_2024 = _gerar_ano_sintetico_lstm(2024, serie_2025, rng2)
-        real_2025 = serie_2025[["ds", "y"]].copy()
-
-        completa = pd.concat([sint_2023, sint_2024, real_2025], ignore_index=True)
-        # Preencher dias ausentes na série real 2025
-        cal = pd.DataFrame({"ds": pd.date_range("2023-01-01", "2025-12-31", freq="D")})
-        completa = cal.merge(completa, on="ds", how="left").fillna({"y": 0.0})
-        completa["y"] = completa["y"].astype(float)
-        return completa.sort_values("ds").reset_index(drop=True)
-
-    return _extend(s_total), _extend(s_p2), _extend(s_p3)
+    return (
+        _series(),
+        _series(kpi["Prioridade"].eq("2 - Alta")),
+        _series(kpi["Prioridade"].eq("3 - Média")),
+    )
 
 
 # ── Entrypoint público ────────────────────────────────────────────────────────
 
 def train() -> dict:
     """Treina LSTM para total, P2 e P3. Retorna resultados e modelos."""
-    print("Gerando séries Monte Carlo (2023-2025)...")
-    mc_total, mc_p2, mc_p3 = _load_mc_series()
+    print("Carregando séries reais de 2025...")
+    mc_total, mc_p2, mc_p3 = load_real_series()
 
     ultima_data = pd.to_datetime(mc_total.sort_values("ds")["ds"].values[-1])
     datas_futuro = pd.date_range(ultima_data + pd.Timedelta(days=1), periods=7, freq="D")
 
     modelos: dict[str, LSTMForecaster] = {}
     scalers: dict[str, MinMaxScaler] = {}
-    maes: dict[str, float] = {}
+    holdout_metrics: dict[str, dict] = {}
     previsoes_7d: dict[str, np.ndarray] = {}
 
     for nome, mc in [("total", mc_total), ("p2", mc_p2), ("p3", mc_p3)]:
-        model, scaler, mae, preds = _run_serie(mc, nome, seed=42)
+        model, scaler, metrics, preds = _run_serie(mc, nome, seed=42)
         modelos[nome] = model
         scalers[nome] = scaler
-        maes[nome] = mae
+        holdout_metrics[nome] = metrics
         previsoes_7d[nome] = preds
 
-    mae_prophet_92 = 23.80
-    melhora_pct = round((mae_prophet_92 - maes["total"]) / mae_prophet_92 * 100, 1)
+    prophet_d1 = None
+    prophet_path = PROJECT_ROOT / "outputs" / "previsoes_volume.json"
+    if prophet_path.exists():
+        prophet_data = json.loads(prophet_path.read_text(encoding="utf-8"))
+        if prophet_data.get("protocolo_validacao") == COMMON_HOLDOUT_PROTOCOL:
+            prophet_d1 = prophet_data.get("total", {}).get("metricas", {}).get("mae_d1")
+    lstm_d1 = holdout_metrics["total"]["horizontes"]["D1"]["mae"]
+    improvement = (
+        round((float(prophet_d1) - lstm_d1) / float(prophet_d1) * 100, 1)
+        if isinstance(prophet_d1, (int, float)) and prophet_d1 > 0
+        else None
+    )
 
     resultados = {
         "modelo": "lstm_v2_early_stopping",
         "gerado_em": date.today().strftime("%Y-%m-%d"),
         "arquitetura": f"LSTM {NUM_LAYERS} camadas hidden={HIDDEN_SIZE} dropout={DROPOUT} lookback={LOOKBACK}",
-        "treino": "2023-01-01 a 2025-09-30 (Monte Carlo + real)",
+        "treino": "2025-01-01 a 2025-09-30 (100% real; avaliação) / até 31-12 no modelo publicado",
         "holdout": "2025-10-01 a 2025-12-31 (92 dias 100% real)",
+        "protocolo_validacao": COMMON_HOLDOUT_PROTOCOL,
+        "metricas_holdout_comum": holdout_metrics,
+        # Compatibilidade: este campo agora representa MAE D+1 no mesmo
+        # holdout temporal para todas as séries.
         "mae_holdout_92_dias": {
-            "total": round(maes["total"], 2),
-            "p2": round(maes["p2"], 2),
-            "p3": round(maes["p3"], 2),
+            key: value["horizontes"]["D1"]["mae"]
+            for key, value in holdout_metrics.items()
         },
-        "mae_prophet_92_dias": mae_prophet_92,
-        "melhora_pct_vs_prophet": melhora_pct,
+        "mae_prophet_holdout_comum": prophet_d1,
+        "melhora_pct_vs_prophet": improvement,
         "d1": {
             "total": round(float(previsoes_7d["total"][0]), 1),
             "p2": round(float(previsoes_7d["p2"][0]), 1),
@@ -363,5 +391,5 @@ if __name__ == "__main__":
     save_models(out["modelos"], out["scalers"])
 
     mae = out["resultados"]["mae_holdout_92_dias"]
-    print(f"\nMAE holdout — Total: {mae['total']} | P2: {mae['p2']} | P3: {mae['p3']}")
+    print(f"\nMAE D+1 no holdout comum — Total: {mae['total']} | P2: {mae['p2']} | P3: {mae['p3']}")
     print("Concluído.")
