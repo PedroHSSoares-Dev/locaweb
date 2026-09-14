@@ -56,6 +56,7 @@ class ChatSession:
     session_version: int = 1
     is_owner: bool = False
     token_id: str = ""
+    auth_mode: str = "entra-rbac"
 
 
 def _secret() -> bytes:
@@ -81,6 +82,29 @@ def _allowed_emails() -> set[str]:
 
 def local_access_enabled() -> bool:
     return os.getenv("CHAT_ALLOW_LOCAL_DEV", "true").lower() in {"1", "true", "yes", "on"}
+
+
+def local_auth_bypass_enabled() -> bool:
+    """Return whether the explicit, loopback-only development login is enabled."""
+    return os.getenv("CHAT_LOCAL_AUTH_BYPASS", "false").lower() in {"1", "true", "yes", "on"}
+
+
+def _signed_token(session: ChatSession, *, version: int = 3, dev: bool = False) -> str:
+    payload_data = {
+        "email": session.email,
+        "exp": session.expires_at,
+        "oid": session.object_id,
+        "tid": session.tenant_id,
+        "uid": session.user_id,
+        "sv": session.session_version,
+        "jti": session.token_id,
+        "v": version,
+    }
+    if dev:
+        payload_data["dev"] = True
+    payload = _encode(json.dumps(payload_data, separators=(",", ":")).encode())
+    signature = _encode(hmac.new(_secret(), payload.encode(), hashlib.sha256).digest())
+    return f"{payload}.{signature}"
 
 
 def _session_from_access(access: UserAccess, expires_at: int, token_id: str = "") -> ChatSession:
@@ -131,18 +155,34 @@ def create_session(
         int(time.time()) + ttl_minutes * 60,
         token_id=str(uuid.uuid4()),
     )
-    payload = _encode(json.dumps({
-        "email": session.email,
-        "exp": session.expires_at,
-        "oid": session.object_id,
-        "tid": session.tenant_id,
-        "uid": session.user_id,
-        "sv": session.session_version,
-        "jti": session.token_id,
-        "v": 3,
-    }, separators=(",", ":")).encode())
-    signature = _encode(hmac.new(_secret(), payload.encode(), hashlib.sha256).digest())
-    return f"{payload}.{signature}", session
+    return _signed_token(session), session
+
+
+def create_local_dev_session() -> tuple[str, ChatSession]:
+    """Create a DB-independent admin session for an explicitly enabled local server."""
+    if not local_auth_bypass_enabled():
+        raise SessionError("Bypass local desativado.")
+
+    configured_email = os.getenv("CHAT_LOCAL_AUTH_EMAIL", "pedrohssoares@live.com")
+    email = configured_email.strip().lower()
+    if not EMAIL_RE.fullmatch(email):
+        raise SessionError("CHAT_LOCAL_AUTH_EMAIL inválido.")
+
+    ttl_minutes = max(5, min(120, int(os.getenv("CHAT_LOCAL_AUTH_TTL_MINUTES", "60"))))
+    session = ChatSession(
+        email=email,
+        expires_at=int(time.time()) + ttl_minutes * 60,
+        object_id="predictfy-local-bypass",
+        tenant_id="local-development",
+        user_id=f"local-dev:{email}",
+        role="admin",
+        permissions=("chat:use", "users:read", "users:write", "usage:read"),
+        session_version=1,
+        is_owner=True,
+        token_id=str(uuid.uuid4()),
+        auth_mode="local-bypass",
+    )
+    return _signed_token(session, version=4, dev=True), session
 
 
 def verify_session(token: str) -> ChatSession:
@@ -152,7 +192,9 @@ def verify_session(token: str) -> ChatSession:
         if not hmac.compare_digest(supplied_signature, expected_signature):
             raise SessionError("Sessão inválida.")
         raw = json.loads(_decode(payload))
-        if raw.get("v") != 3:
+        version = int(raw.get("v", 0))
+        is_local_bypass = version == 4 and raw.get("dev") is True
+        if version != 3 and not is_local_bypass:
             raise SessionError("Sessão anterior ao SSO não é mais válida.")
         email = str(raw["email"])
         expires_at = int(raw["exp"])
@@ -170,6 +212,24 @@ def verify_session(token: str) -> ChatSession:
         raise SessionError("Sessão expirada.")
     if not object_id or not tenant_id or not user_id or not token_id:
         raise SessionError("Sessão sem identidade Microsoft.")
+    if is_local_bypass:
+        if not local_auth_bypass_enabled():
+            raise SessionError("Bypass local desativado.")
+        if not EMAIL_RE.fullmatch(email) or user_id != f"local-dev:{email}":
+            raise SessionError("Sessão local inválida.")
+        return ChatSession(
+            email=email,
+            expires_at=expires_at,
+            object_id=object_id,
+            tenant_id=tenant_id,
+            user_id=user_id,
+            role="admin",
+            permissions=("chat:use", "users:read", "users:write", "usage:read"),
+            session_version=session_version,
+            is_owner=True,
+            token_id=token_id,
+            auth_mode="local-bypass",
+        )
     try:
         access = user_store.authorize_session(
             user_id,
@@ -188,6 +248,8 @@ def verify_session(token: str) -> ChatSession:
 
 
 def revoke_session(session: ChatSession) -> None:
+    if session.auth_mode == "local-bypass":
+        return
     try:
         user_store.revoke_session(
             session.user_id,
@@ -214,6 +276,8 @@ def record_session_usage(
     cache_hit: bool,
 ) -> bool:
     """Associate content-free model counters with the authenticated app user."""
+    if session.auth_mode == "local-bypass":
+        return False
     return user_store.record_usage(
         response_id=response_id,
         user_id=session.user_id,

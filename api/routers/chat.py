@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import ipaddress
 import json
 import logging
 import re
@@ -20,9 +21,11 @@ from api.services.chat_auth import (
     RateLimitError,
     SessionBackendError,
     SessionError,
+    create_local_dev_session,
     create_session,
     enforce_rate_limit,
     local_access_enabled,
+    local_auth_bypass_enabled,
     record_session_usage,
     revoke_session,
     verify_session,
@@ -437,22 +440,7 @@ async def _remember_and_register(
         logger.error("chat_usage_persist_failed backend=database")
 
 
-@router.post("/session")
-async def start_session(
-    identity: Annotated[EntraIdentity, Depends(require_entra_identity)],
-):
-    """Exchange a validated Entra identity for a short Predictfy session."""
-    try:
-        token, session = create_session(
-            identity.email,
-            object_id=identity.object_id,
-            tenant_id=identity.tenant_id,
-        )
-    except SessionBackendError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
-    except SessionError as exc:
-        raise HTTPException(status_code=403, detail=str(exc)) from exc
-
+async def _session_payload(token: str, session: ChatSession, access_mode: str) -> dict[str, Any]:
     try:
         llm_status = await provider.acquire_session()
     except ProviderError as exc:
@@ -476,7 +464,7 @@ async def start_session(
         "is_owner": session.is_owner,
         "token": token,
         "expires_at": session.expires_at,
-        "access_mode": "local-dev" if local_access_enabled() and not session.is_owner else "entra-rbac",
+        "access_mode": access_mode,
         "llm_status": llm_status,
         "welcome": (
             f"SYSTEM READY. Monitorando {cluster_summary.get('n_clusters', 0)} clusters · "
@@ -484,6 +472,48 @@ async def start_session(
             "Contexto 2023–2025 carregado. Como posso ajudar?"
         ).replace(",", "."),
     }
+
+
+@router.post("/session")
+async def start_session(
+    identity: Annotated[EntraIdentity, Depends(require_entra_identity)],
+):
+    """Exchange a validated Entra identity for a short Predictfy session."""
+    try:
+        token, session = create_session(
+            identity.email,
+            object_id=identity.object_id,
+            tenant_id=identity.tenant_id,
+        )
+    except SessionBackendError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except SessionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+    access_mode = "local-dev" if local_access_enabled() and not session.is_owner else "entra-rbac"
+    return await _session_payload(token, session, access_mode)
+
+
+def _is_loopback_request(request: Request) -> bool:
+    hostname = (request.url.hostname or "").strip().lower()
+    client_host = (request.client.host if request.client else "").strip()
+    if hostname not in {"localhost", "127.0.0.1", "::1"}:
+        return False
+    try:
+        return ipaddress.ip_address(client_host).is_loopback
+    except ValueError:
+        return client_host.lower() == "localhost"
+
+
+@router.post("/dev-session")
+async def start_local_dev_session(request: Request):
+    """Issue a local-only admin session without contacting Microsoft Entra ID."""
+    if not local_auth_bypass_enabled() or not _is_loopback_request(request):
+        raise HTTPException(status_code=404, detail="Recurso não encontrado.")
+    try:
+        token, session = create_local_dev_session()
+    except SessionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+    return await _session_payload(token, session, "local-bypass")
 
 
 @router.get("/session")

@@ -94,7 +94,7 @@ async def protect_predictfy_api(request: Request, call_next):
     public_request = (
         request.method == "OPTIONS"
         or (path == "/api/health" and request.method == "GET")
-        or (path == "/api/chat/session" and request.method == "POST")
+        or (path in {"/api/chat/session", "/api/chat/dev-session"} and request.method == "POST")
     )
     if path.startswith("/api") and not public_request:
         authorization = request.headers.get("authorization", "")
