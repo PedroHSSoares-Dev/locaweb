@@ -4,7 +4,6 @@ import {
   Activity,
   ClipboardCheck,
   EyeOff,
-  FlaskConical,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -26,7 +25,6 @@ const NAV = [
   { to: '/monitoramento', label: 'MONITORAMENTO', icon: <Activity size={18} strokeWidth={1.7} /> },
   { to: '/operacoes', label: 'FILA OPERACIONAL', icon: <ClipboardCheck size={18} strokeWidth={1.7} /> },
   { to: '/tecnico', label: 'TÉCNICO', icon: <Server size={18} strokeWidth={1.7} /> },
-  { to: '/modelos', label: 'MODELOS', icon: <FlaskConical size={18} strokeWidth={1.7} /> },
 ];
 
 const ADMIN_NAV = {

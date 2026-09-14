@@ -94,6 +94,7 @@ test('compact sidebar hides KPI label and Luna status stays inside its badge', a
 
   await sidebar.hover();
   await expect(kpiLabel).toHaveCSS('opacity', '1');
+  await expect(page.getByRole('link', { name: 'MODELOS' })).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Abrir assistente Predictfy' }).click();
   const provider = page.getByRole('button', { name: 'Assistente online' });
