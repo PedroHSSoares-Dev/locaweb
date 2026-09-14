@@ -59,14 +59,7 @@ function AppInner() {
 }
 
 function LoginScreen() {
-  const {
-    status,
-    error,
-    signIn,
-    signInLocally,
-    entraConfigured,
-    localBypassAvailable,
-  } = useChatAuth();
+  const { status, error, signIn, entraConfigured } = useChatAuth();
   const loading = status === 'verifying' || status === 'checking';
   return (
     <main className="login-screen">
@@ -79,16 +72,6 @@ function LoginScreen() {
           <span className="microsoft-login__logo" aria-hidden="true"><i /><i /><i /><i /></span>
           {loading ? 'VALIDANDO IDENTIDADE…' : 'ENTRAR COM MICROSOFT'}
         </button>
-        {localBypassAvailable ? (
-          <div className="local-login">
-            <div className="local-login__divider"><span>AMBIENTE LOCAL</span></div>
-            <button type="button" onClick={signInLocally} disabled={loading}>
-              <span aria-hidden="true">DEV</span>
-              {loading ? 'INICIANDO SESSÃO…' : 'ENTRAR SEM ENTRA ID'}
-            </button>
-            <small>Bypass disponível somente neste localhost. Produção continua protegida pelo Microsoft Entra ID.</small>
-          </div>
-        ) : null}
         <aside className="login-card__evaluator" aria-label="Orientação para professores avaliadores">
           <span aria-hidden="true">FIAP</span>
           <p>

@@ -13,12 +13,7 @@ from fastapi.testclient import TestClient
 
 from api.main import app
 from api.routers.chat import ChatRequest, _history
-from api.services.chat_auth import (
-    SessionError,
-    create_local_dev_session,
-    create_session,
-    verify_session,
-)
+from api.services.chat_auth import SessionError, create_session, verify_session
 from api.services.entra_auth import (
     EntraAuthError,
     EntraIdentity,
@@ -554,22 +549,6 @@ class SessionTests(unittest.TestCase):
             os.environ["ALLOWED_EMAILS"] = "outro@example.com"
             self.assertEqual(verify_session(token).email, "pedrohssoares@live.com")
 
-    def test_local_bypass_session_requires_explicit_flag_and_expires_with_it(self):
-        with patch.dict(os.environ, {
-            "CHAT_LOCAL_AUTH_BYPASS": "true",
-            "CHAT_LOCAL_AUTH_EMAIL": "local-admin@example.com",
-        }):
-            token, session = create_local_dev_session()
-            verified = verify_session(token)
-            self.assertEqual(verified.email, "local-admin@example.com")
-            self.assertEqual(verified.role, "admin")
-            self.assertEqual(verified.auth_mode, "local-bypass")
-            self.assertTrue(verified.is_owner)
-
-            os.environ["CHAT_LOCAL_AUTH_BYPASS"] = "false"
-            with self.assertRaises(SessionError):
-                verify_session(token)
-
 
 class EntraAuthTests(unittest.TestCase):
     @classmethod
@@ -1039,38 +1018,19 @@ class ChatApiTests(unittest.TestCase):
         self.assertFalse(response.json()["llm_status"]["available"])
         self.assertIn("indisponível", response.json()["llm_status"]["detail"])
 
-    def test_local_bypass_endpoint_issues_a_db_independent_admin_session(self):
-        with (
-            patch.dict(os.environ, {
-                "CHAT_LOCAL_AUTH_BYPASS": "true",
-                "CHAT_LOCAL_AUTH_EMAIL": "local-admin@example.com",
-            }),
-            patch("api.routers.chat._is_loopback_request", return_value=True),
-        ):
-            response = self.client.post("/api/chat/dev-session")
-            self.assertEqual(response.status_code, 200)
-            data = response.json()
-            self.assertEqual(data["access_mode"], "local-bypass")
-            self.assertEqual(data["role"], "admin")
-
-            current = self.client.get(
-                "/api/chat/session",
-                headers={"Authorization": f"Bearer {data['token']}"},
-            )
-            self.assertEqual(current.status_code, 200)
-            self.assertEqual(current.json()["email"], "local-admin@example.com")
-
-    def test_local_bypass_endpoint_is_hidden_when_disabled(self):
-        with (
-            patch.dict(os.environ, {"CHAT_LOCAL_AUTH_BYPASS": "false"}),
-            patch("api.routers.chat._is_loopback_request", return_value=True),
-        ):
-            response = self.client.post("/api/chat/dev-session")
-            self.assertEqual(response.status_code, 404)
-
     def test_chat_requires_session(self):
         response = self.client.post("/api/chat", json={"message": "Previsão amanhã"})
         self.assertEqual(response.status_code, 401)
+
+    def test_development_auth_bypass_is_not_part_of_the_api(self):
+        token = self._token()
+        with patch.dict(os.environ, {"CHAT_LOCAL_AUTH_BYPASS": "true"}):
+            response = self.client.post(
+                "/api/chat/dev-session",
+                headers={"Authorization": f"Bearer {token}"},
+            )
+
+        self.assertEqual(response.status_code, 404)
 
     def test_cors_allows_local_frontend_and_rejects_unknown_origin(self):
         allowed = self.client.options(

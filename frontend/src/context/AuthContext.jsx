@@ -6,10 +6,6 @@ import { API_BASE, AuthContext } from '../auth/auth-context';
 
 const STORAGE_KEY = 'predictfy_chat_session';
 const PENDING_LOGIN_KEY = 'predictfy_entra_login_pending';
-const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1']);
-const localBypassAvailable = import.meta.env.DEV
-  && import.meta.env.VITE_LOCAL_AUTH_BYPASS === 'true'
-  && LOCAL_HOSTS.has(window.location.hostname);
 function readStoredSession() {
   try {
     // The application token is intentionally tab-scoped. Conversations remain
@@ -64,25 +60,6 @@ export function AuthProvider({ children }) {
     setStatus('idle');
   }, []);
 
-  const authorizeFromPayload = useCallback((data) => {
-    if (!data.allowed) throw new Error(data.detail || 'Acesso não autorizado.');
-    const session = {
-      email: data.email,
-      token: data.token,
-      expiresAt: data.expires_at,
-      accessMode: data.access_mode,
-      llmStatus: data.llm_status,
-      welcome: data.welcome,
-      role: data.role || 'member',
-      permissions: Array.isArray(data.permissions) ? data.permissions : [],
-      isOwner: Boolean(data.is_owner),
-    };
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(session));
-    sessionStorage.removeItem(PENDING_LOGIN_KEY);
-    setUser(session);
-    setStatus('authorized');
-  }, []);
-
   useEffect(() => {
     if (!initialSession?.token) return undefined;
     const controller = new AbortController();
@@ -115,9 +92,24 @@ export function AuthProvider({ children }) {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.detail || 'Email não autorizado.');
-    authorizeFromPayload(data);
-  }, [authorizeFromPayload]);
+    if (!response.ok || !data.allowed) throw new Error(data.detail || 'Email não autorizado.');
+
+    const session = {
+      email: data.email,
+      token: data.token,
+      expiresAt: data.expires_at,
+      accessMode: data.access_mode,
+      llmStatus: data.llm_status,
+      welcome: data.welcome,
+      role: data.role || 'member',
+      permissions: Array.isArray(data.permissions) ? data.permissions : [],
+      isOwner: Boolean(data.is_owner),
+    };
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+    sessionStorage.removeItem(PENDING_LOGIN_KEY);
+    setUser(session);
+    setStatus('authorized');
+  }, []);
 
   const signIn = useCallback(async () => {
     if (!entraConfigured) {
@@ -136,21 +128,6 @@ export function AuthProvider({ children }) {
       setError(errorMessage(requestError));
     }
   }, [instance]);
-
-  const signInLocally = useCallback(async () => {
-    if (!localBypassAvailable) return;
-    setStatus('verifying');
-    setError('');
-    try {
-      const response = await fetch(`${API_BASE}/chat/dev-session`, { method: 'POST' });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.detail || 'Bypass local indisponível.');
-      authorizeFromPayload(data);
-    } catch (requestError) {
-      setStatus('denied');
-      setError(requestError.message || 'Não foi possível iniciar a sessão local.');
-    }
-  }, [authorizeFromPayload]);
 
   useEffect(() => {
     const loginPending = sessionStorage.getItem(PENDING_LOGIN_KEY) === 'true';
@@ -224,11 +201,9 @@ export function AuthProvider({ children }) {
     status,
     error,
     signIn,
-    signInLocally,
     logout,
     entraConfigured,
-    localBypassAvailable,
-  }), [error, logout, signIn, signInLocally, status, user]);
+  }), [error, logout, signIn, status, user]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

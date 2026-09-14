@@ -147,7 +147,6 @@ function ConfirmDialog({ action, busy, onCancel, onConfirm, streamerMode }) {
 export default function AdminPage() {
   const { user: sessionUser, logout } = useChatAuth();
   const { streamerMode, setStreamerMode } = useStreamerMode(sessionUser.email);
-  const isLocalBypass = sessionUser.accessMode === 'local-bypass';
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -312,9 +311,7 @@ export default function AdminPage() {
         <div className="admin-header__identity">
           <span>OPERADOR AUTORIZADO</span>
           <strong>{visibleIdentity(sessionUser.email)}</strong>
-          <small className={isLocalBypass ? 'admin-header__local' : undefined}>
-            <ShieldCheck size={11} /> {isLocalBypass ? 'LOCAL BYPASS' : 'ADMIN'}
-          </small>
+          <small><ShieldCheck size={11} /> ADMIN</small>
         </div>
       </header>
 
@@ -539,11 +536,7 @@ export default function AdminPage() {
 
         <footer className="admin-footnote">
           <ShieldCheck size={13} />
-          <span>
-            {isLocalBypass
-              ? 'Sessão local de desenvolvimento ativa. Nenhum vínculo Microsoft foi criado ou alterado.'
-              : 'A autenticação permanece no Microsoft Entra ID. Este diretório controla somente quem pode acessar o Predictfy e com qual privilégio.'}
-          </span>
+          <span>A autenticação permanece no Microsoft Entra ID. Este diretório controla somente quem pode acessar o Predictfy e com qual privilégio.</span>
         </footer>
       </div>
 

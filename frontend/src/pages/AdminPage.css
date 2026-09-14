@@ -76,7 +76,6 @@
 .admin-header__identity > span { grid-column: 1 / -1; color: var(--text-muted); font: 700 8px var(--font-mono); letter-spacing: 0.13em; }
 .admin-header__identity strong { min-width: 0; overflow: hidden; color: var(--text-sec); font: 500 10px var(--font-mono); text-overflow: ellipsis; white-space: nowrap; }
 .admin-header__identity small { display: flex; align-items: center; gap: 5px; color: var(--purple); font: 700 8px var(--font-mono); letter-spacing: 0.1em; }
-.admin-header__identity .admin-header__local { color: var(--orange); }
 
 .admin-content {
   position: relative;

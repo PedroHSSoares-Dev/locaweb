@@ -85,15 +85,6 @@
 .microsoft-login__logo i:nth-child(3) { background: #05a6f0; }
 .microsoft-login__logo i:nth-child(4) { background: #ffba08; }
 
-.local-login { margin-top: 14px; }
-.local-login__divider { display: flex; align-items: center; gap: 10px; color: var(--text-muted); font: 700 7px var(--font-mono); letter-spacing: 0.13em; }
-.local-login__divider::before, .local-login__divider::after { content: ''; height: 1px; flex: 1; background: var(--border); }
-.local-login > button { width: 100%; min-height: 42px; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 12px; color: var(--orange); background: rgba(255,159,10,0.04); border: 1px dashed rgba(255,159,10,0.3); border-radius: 5px; font: 700 9px var(--font-mono); letter-spacing: 0.08em; transition: color 150ms ease, background 150ms ease, border-color 150ms ease; }
-.local-login > button > span { padding: 3px 5px; color: #090909; background: var(--orange); border-radius: 2px; font-size: 7px; }
-.local-login > button:hover:not(:disabled), .local-login > button:focus-visible { color: var(--text-pri); background: rgba(255,159,10,0.08); border-color: var(--orange); outline: none; }
-.local-login > button:disabled { cursor: not-allowed; opacity: 0.48; }
-.local-login > small { display: block; margin-top: 8px; color: var(--text-muted); font: 8px/1.45 var(--font-mono); text-align: center; }
-
 .login-card__evaluator {
   display: grid;
   grid-template-columns: 42px 1fr;
