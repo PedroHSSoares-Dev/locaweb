@@ -11,7 +11,6 @@ import {
   YAxis,
 } from 'recharts';
 import { AlertTriangle, Clock3, Layers3, Users } from 'lucide-react';
-import RiscoUnificado from '../components/RiscoUnificado';
 import SemDados from '../components/SemDados';
 import { grupos } from '../data/mockData';
 import { useApi } from '../hooks/useApi';
@@ -83,7 +82,6 @@ export default function TecnicoPage() {
   const { isMobile } = useBreakpoint();
   const [selectedCluster, setSelectedCluster] = useState(null);
   const { data: clusters, loading: clustersLoading, disponivel: clustersAvailable } = useApi('/clusters');
-  const { disponivel: riskAvailable } = useApi('/risco');
   const rankedGroups = [...grupos].sort((left, right) => right.taxaViolacao - left.taxaViolacao);
   const clusterList = clustersAvailable ? clusters?.clusters ?? [] : [];
   const topCluster = clusterList.toSorted((left, right) => right.taxaViolacao - left.taxaViolacao)[0];
@@ -93,7 +91,7 @@ export default function TecnicoPage() {
       <header className="dashboard-page-header">
         <div>
           <h1>Investigação Técnica</h1>
-          {!isMobile && <p>Equipes · triagem de risco · perfis operacionais</p>}
+          {!isMobile && <p>Equipes · histórico de violações · perfis operacionais</p>}
         </div>
       </header>
 
@@ -103,10 +101,10 @@ export default function TecnicoPage() {
           <section>
             <span>FOCO DA INVESTIGAÇÃO</span>
             <h2>{topCluster ? `${topCluster.label} concentra a maior taxa entre os clusters` : 'Aguardando perfis operacionais'}</h2>
-            <p>Use os clusters como associação estatística e o XGBoost apenas para ordenar a triagem. Nenhum dos dois comprova causa raiz.</p>
+            <p>Use as taxas históricas e os clusters para orientar a investigação. Os perfis representam associações estatísticas e não comprovam causa raiz.</p>
           </section>
           <aside>
-            <strong>{riskAvailable ? 'XGBOOST DISPONÍVEL' : 'RISCO INDISPONÍVEL'}</strong>
+            <strong>{clustersAvailable ? 'CLUSTERS DISPONÍVEIS' : 'CLUSTERS INDISPONÍVEIS'}</strong>
             <span>{clustersAvailable ? `K=${clusters?.k} · silhouette ${clusters?.silhouette?.toFixed(4)}` : 'clusters indisponíveis'}</span>
           </aside>
         </section>
@@ -134,12 +132,8 @@ export default function TecnicoPage() {
           </div>
         </Module>
 
-        <Module n={2} title="Triagem preditiva XGBoost" sub="Score não calibrado · SHAP global · conjunto de teste temporal histórico">
-          <RiscoUnificado />
-        </Module>
-
         <Module
-          n={3}
+          n={2}
           title="Perfis operacionais K-Means"
           sub={clustersAvailable
             ? `K=${clusters?.k} · silhouette ${clusters?.silhouette?.toFixed(4)} · ${clusters?.metricas?.total_incidentes?.toLocaleString('pt-BR')} incidentes`

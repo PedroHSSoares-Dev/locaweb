@@ -110,3 +110,15 @@ test('compact sidebar hides KPI label and Luna status stays inside its badge', a
   expect(bounds.scrollWidth).toBeLessThanOrEqual(bounds.clientWidth + 1);
   expect(bounds.scrollHeight).toBeLessThanOrEqual(bounds.clientHeight + 1);
 });
+
+test('technical page omits the predictive risk module from the presentation', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await mockApi(page);
+  await page.goto('/tecnico');
+
+  await expect(page.getByRole('heading', { name: 'Investigação Técnica' })).toBeVisible();
+  await expect(page.getByText('Triagem preditiva XGBoost')).toHaveCount(0);
+  await expect(page.locator('.dashboard-module')).toHaveCount(2);
+  await expect(page.locator('.dashboard-module').nth(1)).toContainText('MÓDULO 02');
+  await expect(page.locator('.dashboard-module').nth(1)).toContainText('Perfis operacionais K-Means');
+});
