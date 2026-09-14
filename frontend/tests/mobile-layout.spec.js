@@ -83,6 +83,9 @@ test('compact sidebar hides KPI label and Luna status stays inside its badge', a
   await page.setViewportSize({ width: 1440, height: 900 });
   await mockApi(page);
   await page.goto('/gestao');
+  // Chromium starts at (0, 0) in some CI runners, which is inside the sidebar
+  // and legitimately activates its hover expansion before the first assertion.
+  await page.mouse.move(1200, 800);
 
   const sidebar = page.locator('.sidebar');
   const kpiLabel = page.locator('.sidebar-kpi small');
