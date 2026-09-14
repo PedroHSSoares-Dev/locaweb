@@ -68,3 +68,42 @@ test('mobile dashboard keeps full width after chat and route transition', async 
   expect(dimensions.main).toBeGreaterThanOrEqual(380);
   expect(dimensions.root).toBeLessThanOrEqual(dimensions.viewport);
 });
+
+test('login guides FIAP evaluators to use their institutional email', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/gestao');
+
+  const evaluatorNote = page.getByLabel('Orientação para professores avaliadores');
+  await expect(evaluatorNote).toBeVisible();
+  await expect(evaluatorNote).toContainText('Professor(a) avaliador(a)?');
+  await expect(evaluatorNote).toContainText('e-mail institucional da FIAP');
+});
+
+test('compact sidebar hides KPI label and Luna status stays inside its badge', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await mockApi(page);
+  await page.goto('/gestao');
+
+  const sidebar = page.locator('.sidebar');
+  const kpiLabel = page.locator('.sidebar-kpi small');
+  await expect(sidebar).toHaveCSS('width', '60px');
+  await expect(kpiLabel).toHaveCSS('opacity', '0');
+
+  await sidebar.hover();
+  await expect(kpiLabel).toHaveCSS('opacity', '1');
+
+  await page.getByRole('button', { name: 'Abrir assistente Predictfy' }).click();
+  const provider = page.getByRole('button', { name: 'Assistente online' });
+  await expect(provider).toBeVisible();
+  await expect(provider).toContainText('LUNA ONLINE');
+
+  await expect.poll(() => provider.evaluate((element) => element.clientWidth)).toBeGreaterThan(70);
+  const bounds = await provider.evaluate((element) => ({
+    clientWidth: element.clientWidth,
+    scrollWidth: element.scrollWidth,
+    clientHeight: element.clientHeight,
+    scrollHeight: element.scrollHeight,
+  }));
+  expect(bounds.scrollWidth).toBeLessThanOrEqual(bounds.clientWidth + 1);
+  expect(bounds.scrollHeight).toBeLessThanOrEqual(bounds.clientHeight + 1);
+});

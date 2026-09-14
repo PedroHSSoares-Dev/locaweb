@@ -72,6 +72,13 @@ function LoginScreen() {
           <span className="microsoft-login__logo" aria-hidden="true"><i /><i /><i /><i /></span>
           {loading ? 'VALIDANDO IDENTIDADE…' : 'ENTRAR COM MICROSOFT'}
         </button>
+        <aside className="login-card__evaluator" aria-label="Orientação para professores avaliadores">
+          <span aria-hidden="true">FIAP</span>
+          <p>
+            <strong>Professor(a) avaliador(a)?</strong>
+            Entre com seu e-mail institucional da FIAP para acessar e avaliar o projeto.
+          </p>
+        </aside>
         {error && <div className="login-card__error" role="alert">{error}</div>}
         {!entraConfigured && <small>Configuração local pendente: IDs públicos do Entra ainda não informados.</small>}
         <div className="login-card__security">

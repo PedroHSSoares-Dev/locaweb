@@ -65,6 +65,7 @@
 .sidebar-brand__copy,
 .sidebar-nav__label,
 .sidebar-telemetry__copy,
+.sidebar-kpi small,
 .sidebar-session__copy,
 .sidebar-session__logout-label {
   min-width: 0;
@@ -76,11 +77,13 @@
 .sidebar--expanded .sidebar-brand__copy,
 .sidebar--expanded .sidebar-nav__label,
 .sidebar--expanded .sidebar-telemetry__copy,
+.sidebar--expanded .sidebar-kpi small,
 .sidebar--expanded .sidebar-session__copy,
 .sidebar--expanded .sidebar-session__logout-label,
 .sidebar--mobile .sidebar-brand__copy,
 .sidebar--mobile .sidebar-nav__label,
 .sidebar--mobile .sidebar-telemetry__copy,
+.sidebar--mobile .sidebar-kpi small,
 .sidebar--mobile .sidebar-session__copy,
 .sidebar--mobile .sidebar-session__logout-label {
   opacity: 1;

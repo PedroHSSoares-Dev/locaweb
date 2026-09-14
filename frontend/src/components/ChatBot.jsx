@@ -46,8 +46,10 @@ function panelPreferenceKey(email, preference) {
 
 function readPanelWidth(email) {
   try {
-    const stored = Number(localStorage.getItem(panelPreferenceKey(email, 'width')));
-    return Number.isFinite(stored)
+    const preference = localStorage.getItem(panelPreferenceKey(email, 'width'));
+    if (preference == null) return PANEL_DEFAULT_WIDTH;
+    const stored = Number(preference);
+    return Number.isFinite(stored) && stored > 0
       ? clamp(stored, PANEL_MIN_WIDTH, PANEL_MAX_WIDTH)
       : PANEL_DEFAULT_WIDTH;
   } catch {

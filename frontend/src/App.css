@@ -85,6 +85,44 @@
 .microsoft-login__logo i:nth-child(3) { background: #05a6f0; }
 .microsoft-login__logo i:nth-child(4) { background: #ffba08; }
 
+.login-card__evaluator {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 12px;
+  background: rgba(191, 90, 242, 0.045);
+  border: 1px solid rgba(191, 90, 242, 0.18);
+  border-radius: 6px;
+}
+
+.login-card__evaluator > span {
+  min-height: 30px;
+  display: grid;
+  place-items: center;
+  color: var(--purple);
+  background: rgba(191, 90, 242, 0.08);
+  border: 1px solid rgba(191, 90, 242, 0.28);
+  border-radius: 4px;
+  font: 750 9px/1 var(--font-mono);
+  letter-spacing: 0.1em;
+}
+
+.login-card__evaluator p {
+  color: var(--text-sec);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.login-card__evaluator strong {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--text-pri);
+  font-size: 11px;
+  font-weight: 650;
+}
+
 .login-card__error {
   margin-top: 12px;
   padding: 10px 12px;
@@ -101,6 +139,7 @@
 @media (max-width: 520px) {
   .login-card { padding: 30px 22px; }
   .login-card h1 { font-size: 25px; }
+  .login-card__evaluator { grid-template-columns: 38px 1fr; }
   .login-card__security { flex-direction: column; }
 }
 
