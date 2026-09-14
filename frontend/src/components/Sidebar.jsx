@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import {
   Activity,
   ClipboardCheck,
+  EyeOff,
   FlaskConical,
   LayoutDashboard,
   LogOut,
@@ -15,6 +16,8 @@ import { isAdminUser } from '../auth/authorization';
 import { useApi } from '../hooks/useApi';
 import { useBreakpoint } from '../hooks/useBreakpoint';
 import { useChatAuth } from '../hooks/useChatAuth';
+import { useStreamerMode } from '../hooks/useStreamerMode';
+import { protectedIdentity } from '../utils/privacy';
 import LogoPredictfy from './LogoPredictfy';
 import './Sidebar.css';
 
@@ -45,10 +48,14 @@ function SidebarInner({
   p2Critical,
   p3Critical,
   kpiDisponivel,
+  streamerMode,
+  onToggleStreamerMode,
   onLogout,
   onNavClick,
 }) {
   const visibleNav = isAdminUser({ role, permissions }) ? [...NAV, ADMIN_NAV] : NAV;
+  const canManagePrivacy = isAdminUser({ role, permissions });
+  const visibleEmail = streamerMode ? protectedIdentity(email) : email;
   let kpiLabel = 'KPIS SINCRONIZANDO';
   let kpiTone = 'neutral';
   if (p2Critical) {
@@ -113,13 +120,30 @@ function SidebarInner({
       </div>
 
       <div className="sidebar-session">
-        <div className="sidebar-session__identity" title={expanded ? undefined : email}>
+        {canManagePrivacy ? (
+          <button
+            type="button"
+            className={`sidebar-streamer${streamerMode ? ' sidebar-streamer--active' : ''}`}
+            onClick={onToggleStreamerMode}
+            aria-pressed={streamerMode}
+            aria-label={`${streamerMode ? 'Desativar' : 'Ativar'} modo streamer`}
+            title={expanded ? undefined : `${streamerMode ? 'Desativar' : 'Ativar'} modo streamer`}
+          >
+            <span className="sidebar-streamer__icon" aria-hidden="true"><EyeOff size={17} strokeWidth={1.7} /></span>
+            <span className="sidebar-streamer__copy" aria-hidden={!expanded}>
+              <strong>MODO STREAMER</strong>
+              <small>{streamerMode ? 'IDENTIDADES OCULTAS' : 'PROTEÇÃO DESATIVADA'}</small>
+            </span>
+            <span className="sidebar-streamer__state" aria-hidden="true">{streamerMode ? 'ON' : 'OFF'}</span>
+          </button>
+        ) : null}
+        <div className="sidebar-session__identity" title={expanded ? undefined : visibleEmail}>
           <span className="sidebar-session__avatar" aria-hidden="true">
-            {email?.slice(0, 1).toUpperCase() || 'P'}
+            {streamerMode ? '#' : email?.slice(0, 1).toUpperCase() || 'P'}
           </span>
           <span className="sidebar-session__copy" aria-hidden={!expanded}>
             <small>SESSÃO ATIVA</small>
-            <strong>{email}</strong>
+            <strong>{visibleEmail}</strong>
           </span>
         </div>
         <button
@@ -146,6 +170,7 @@ function SidebarInner({
 export default function Sidebar() {
   const { isMobile, isTablet } = useBreakpoint();
   const { user, logout } = useChatAuth();
+  const { streamerMode, toggleStreamerMode } = useStreamerMode(user.email);
   const [clock, setClock] = useState('');
   const [hovered, setHovered] = useState(false);
   const [focusWithin, setFocusWithin] = useState(false);
@@ -186,6 +211,8 @@ export default function Sidebar() {
     p2Critical,
     p3Critical,
     kpiDisponivel,
+    streamerMode,
+    onToggleStreamerMode: toggleStreamerMode,
     onLogout: logout,
   };
 

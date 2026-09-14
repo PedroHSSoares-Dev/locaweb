@@ -67,7 +67,9 @@
 .sidebar-telemetry__copy,
 .sidebar-kpi small,
 .sidebar-session__copy,
-.sidebar-session__logout-label {
+.sidebar-session__logout-label,
+.sidebar-streamer__copy,
+.sidebar-streamer__state {
   min-width: 0;
   opacity: 0;
   transform: translateX(-7px);
@@ -80,12 +82,16 @@
 .sidebar--expanded .sidebar-kpi small,
 .sidebar--expanded .sidebar-session__copy,
 .sidebar--expanded .sidebar-session__logout-label,
+.sidebar--expanded .sidebar-streamer__copy,
+.sidebar--expanded .sidebar-streamer__state,
 .sidebar--mobile .sidebar-brand__copy,
 .sidebar--mobile .sidebar-nav__label,
 .sidebar--mobile .sidebar-telemetry__copy,
 .sidebar--mobile .sidebar-kpi small,
 .sidebar--mobile .sidebar-session__copy,
-.sidebar--mobile .sidebar-session__logout-label {
+.sidebar--mobile .sidebar-session__logout-label,
+.sidebar--mobile .sidebar-streamer__copy,
+.sidebar--mobile .sidebar-streamer__state {
   opacity: 1;
   transform: translateX(0);
 }
@@ -243,7 +249,8 @@
 }
 
 .sidebar-session__identity,
-.sidebar-session__logout {
+.sidebar-session__logout,
+.sidebar-streamer {
   min-height: 42px;
   display: flex;
   align-items: center;
@@ -253,6 +260,50 @@
   border-radius: 7px;
   white-space: nowrap;
 }
+
+.sidebar-streamer {
+  width: 100%;
+  margin-bottom: 3px;
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  text-align: left;
+  transition: color 150ms ease, background 150ms ease, border-color 150ms ease;
+}
+
+.sidebar-streamer:hover,
+.sidebar-streamer:focus-visible {
+  color: var(--text-pri);
+  background: rgba(255, 255, 255, 0.035);
+  border-color: var(--border);
+  outline: none;
+}
+
+.sidebar-streamer--active {
+  color: var(--purple);
+  background: rgba(191, 90, 242, 0.075);
+  border-color: rgba(191, 90, 242, 0.22);
+}
+
+.sidebar-streamer__icon {
+  width: 25px;
+  min-width: 25px;
+  display: grid;
+  place-items: center;
+}
+
+.sidebar-streamer__copy {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow: hidden;
+}
+
+.sidebar-streamer__copy strong { color: currentColor; font: 600 8px var(--font-mono); letter-spacing: 0.09em; }
+.sidebar-streamer__copy small { overflow: hidden; color: var(--text-muted); font: 6px var(--font-mono); letter-spacing: 0.06em; text-overflow: ellipsis; }
+.sidebar-streamer__state { color: var(--text-muted); font: 700 7px var(--font-mono); letter-spacing: 0.06em; }
+.sidebar-streamer--active .sidebar-streamer__state { color: var(--purple); }
 
 .sidebar-session__avatar {
   width: 25px;

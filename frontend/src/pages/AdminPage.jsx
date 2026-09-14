@@ -4,6 +4,7 @@ import {
   Check,
   ChevronDown,
   Clock3,
+  EyeOff,
   KeyRound,
   LoaderCircle,
   MailPlus,
@@ -17,6 +18,8 @@ import {
   X,
 } from 'lucide-react';
 import { useChatAuth } from '../hooks/useChatAuth';
+import { useStreamerMode } from '../hooks/useStreamerMode';
+import { protectedIdentity } from '../utils/privacy';
 import AdminUsagePanel from '../components/AdminUsagePanel';
 import AdminPreflightPanel from '../components/AdminPreflightPanel';
 import {
@@ -79,7 +82,7 @@ function SummaryTile({ icon, value, label, tone = 'neutral', delay }) {
   );
 }
 
-function ConfirmDialog({ action, busy, onCancel, onConfirm }) {
+function ConfirmDialog({ action, busy, onCancel, onConfirm, streamerMode }) {
   const confirmRef = useRef(null);
 
   useEffect(() => {
@@ -120,7 +123,7 @@ function ConfirmDialog({ action, busy, onCancel, onConfirm }) {
               ? 'Sessões válidas desse usuário deixarão de autorizar novos acessos.'
               : 'O usuário voltará a conseguir entrar com a identidade Microsoft vinculada.'}
         </p>
-        <code>{action.user.email}</code>
+        <code>{streamerMode ? protectedIdentity(action.user.email) : action.user.email}</code>
         <div className="admin-dialog__actions">
           <button type="button" className="admin-button admin-button--quiet" onClick={onCancel} disabled={busy}>
             CANCELAR
@@ -143,6 +146,8 @@ function ConfirmDialog({ action, busy, onCancel, onConfirm }) {
 
 export default function AdminPage() {
   const { user: sessionUser, logout } = useChatAuth();
+  const { streamerMode, setStreamerMode } = useStreamerMode(sessionUser.email);
+  const isLocalBypass = sessionUser.accessMode === 'local-bypass';
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -164,6 +169,10 @@ export default function AdminPage() {
     setNotice({ message, tone });
     noticeTimer.current = window.setTimeout(() => setNotice(null), 5_000);
   }, []);
+
+  const visibleIdentity = useCallback((value) => (
+    streamerMode ? protectedIdentity(value) : value
+  ), [streamerMode]);
 
   useEffect(() => () => window.clearTimeout(noticeTimer.current), []);
 
@@ -235,7 +244,7 @@ export default function AdminPage() {
       await createAdminUser(sessionUser.token, { email: normalizedEmail, role: newRole });
       setEmail('');
       setNewRole('member');
-      showNotice(`Acesso preparado para ${normalizedEmail}.`);
+      showNotice(`Acesso preparado para ${visibleIdentity(normalizedEmail)}.`);
       await loadUsers({ silent: true });
     } catch (error) {
       if (error.status === 401) logout();
@@ -253,7 +262,7 @@ export default function AdminPage() {
       setUsers((current) => current.map((entry) => (
         entry.id === item.id ? normalizeUser(updated.user || updated) : entry
       )));
-      showNotice(`${item.email} agora é ${ROLE_LABEL[role].toLowerCase()}.`);
+      showNotice(`${visibleIdentity(item.email)} agora é ${ROLE_LABEL[role].toLowerCase()}.`);
     } catch (error) {
       if (error.status === 409) await loadUsers({ silent: true });
       handleApiError(error, 'Não foi possível alterar a permissão.');
@@ -272,14 +281,14 @@ export default function AdminPage() {
         setUsers((current) => current.map((entry) => (
           entry.id === item.id ? normalizeUser(updated.user || { ...entry, status: 'disabled' }) : entry
         )));
-        showNotice(`Acesso de ${item.email} removido; histórico preservado.`);
+        showNotice(`Acesso de ${visibleIdentity(item.email)} removido; histórico preservado.`);
       } else {
         const status = type === 'disable' ? 'disabled' : 'active';
         const updated = await updateAdminUser(sessionUser.token, item.id, { status, version: item.version });
         setUsers((current) => current.map((entry) => (
           entry.id === item.id ? normalizeUser(updated.user || updated) : entry
         )));
-        showNotice(`${item.email} foi ${status === 'active' ? 'reativado' : 'desativado'}.`);
+        showNotice(`${visibleIdentity(item.email)} foi ${status === 'active' ? 'reativado' : 'desativado'}.`);
       }
       setConfirmAction(null);
     } catch (error) {
@@ -302,12 +311,25 @@ export default function AdminPage() {
         </div>
         <div className="admin-header__identity">
           <span>OPERADOR AUTORIZADO</span>
-          <strong>{sessionUser.email}</strong>
-          <small><ShieldCheck size={11} /> ADMIN</small>
+          <strong>{visibleIdentity(sessionUser.email)}</strong>
+          <small className={isLocalBypass ? 'admin-header__local' : undefined}>
+            <ShieldCheck size={11} /> {isLocalBypass ? 'LOCAL BYPASS' : 'ADMIN'}
+          </small>
         </div>
       </header>
 
       <div className="admin-content">
+        {streamerMode ? (
+          <aside className="admin-streamer-banner" aria-label="Modo streamer ativo">
+            <span className="admin-streamer-banner__icon" aria-hidden="true"><EyeOff size={18} /></span>
+            <div>
+              <strong>MODO STREAMER ATIVO</strong>
+              <span>E-mails e identificadores pessoais estão protegidos nesta tela e na barra lateral.</span>
+            </div>
+            <button type="button" onClick={() => setStreamerMode(false)}>DESATIVAR</button>
+          </aside>
+        ) : null}
+
         <section className="admin-summaries" aria-label="Resumo dos acessos">
           <SummaryTile icon={<Users size={19} />} value={users.length} label="IDENTIDADES" delay="0ms" />
           <SummaryTile icon={<UserCheck size={19} />} value={counts.active} label="ACESSOS ATIVOS" tone="healthy" delay="45ms" />
@@ -324,19 +346,19 @@ export default function AdminPage() {
             </div>
           </div>
           <form className="admin-invite__form" onSubmit={handleCreate} noValidate>
-            <label className="admin-field admin-field--email">
+            <label className={`admin-field admin-field--email${streamerMode ? ' admin-field--private' : ''}`}>
               <span>E-MAIL MICROSOFT AUTORIZADO</span>
               <div>
                 <MailPlus size={16} aria-hidden="true" />
                 <input
-                  type="email"
+                  type={streamerMode ? 'password' : 'email'}
                   value={email}
                   onChange={(event) => {
                     setEmail(event.target.value);
                     setFormError('');
                   }}
-                  placeholder="usuario@empresa.com"
-                  autoComplete="email"
+                  placeholder={streamerMode ? 'IDENTIDADE OCULTA DURANTE A TRANSMISSÃO' : 'usuario@empresa.com'}
+                  autoComplete={streamerMode ? 'off' : 'email'}
                   aria-invalid={Boolean(formError)}
                   aria-describedby={formError ? 'admin-form-error' : undefined}
                 />
@@ -383,10 +405,16 @@ export default function AdminPage() {
           </div>
 
           <div className="admin-filters">
-            <label className="admin-search">
+            <label className={`admin-search${streamerMode ? ' admin-search--private' : ''}`}>
               <span className="sr-only">Buscar por e-mail</span>
               <Search size={15} aria-hidden="true" />
-              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="BUSCAR POR E-MAIL…" />
+              <input
+                type={streamerMode ? 'password' : 'text'}
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder={streamerMode ? 'BUSCAR IDENTIDADE (ENTRADA OCULTA)…' : 'BUSCAR POR E-MAIL…'}
+                autoComplete="off"
+              />
               {query ? <button type="button" onClick={() => setQuery('')} aria-label="Limpar busca"><X size={14} /></button> : null}
             </label>
             <label className="admin-select">
@@ -445,19 +473,20 @@ export default function AdminPage() {
                     const isSelf = item.email === sessionUser.email.toLowerCase();
                     const protectedAccount = isSelf || item.isOwner;
                     const mutating = activeMutation.endsWith(`:${item.id}`);
+                    const displayIdentity = visibleIdentity(item.email);
                     return (
                       <tr key={item.id}>
                         <td data-label="IDENTIDADE">
                           <div className="admin-identity-cell">
-                            <span>{item.email.slice(0, 1).toUpperCase()}</span>
-                            <div><strong>{item.email}</strong><small>CRIADO {formatDate(item.createdAt, '—')}</small></div>
+                            <span>{streamerMode ? '#' : item.email.slice(0, 1).toUpperCase()}</span>
+                            <div><strong>{displayIdentity}</strong><small>CRIADO {formatDate(item.createdAt, '—')}</small></div>
                             {item.isOwner ? <em className="admin-owner-badge">PROPRIETÁRIO</em> : isSelf ? <em>VOCÊ</em> : null}
                           </div>
                         </td>
                         <td data-label="STATUS"><StatusBadge status={item.status} /></td>
                         <td data-label="PERMISSÃO">
                           <label className="admin-inline-select">
-                            <span className="sr-only">Permissão de {item.email}</span>
+                            <span className="sr-only">Permissão de {displayIdentity}</span>
                             <select
                               value={item.role}
                               onChange={(event) => handleRoleChange(item, event.target.value)}
@@ -479,7 +508,7 @@ export default function AdminPage() {
                               onClick={() => setConfirmAction({ type: item.status === 'disabled' ? 'enable' : 'disable', user: item })}
                               disabled={mutating || protectedAccount}
                               title={item.isOwner ? 'O proprietário principal não pode ser desativado' : isSelf ? 'Você não pode desativar seu próprio acesso' : item.status === 'disabled' ? 'Reativar acesso' : 'Desativar acesso'}
-                              aria-label={`${item.status === 'disabled' ? 'Reativar' : 'Desativar'} acesso de ${item.email}`}
+                              aria-label={`${item.status === 'disabled' ? 'Reativar' : 'Desativar'} acesso de ${displayIdentity}`}
                             >
                               {item.status === 'disabled' ? <Check size={15} /> : <ShieldOff size={15} />}
                             </button>
@@ -489,7 +518,7 @@ export default function AdminPage() {
                               onClick={() => setConfirmAction({ type: 'remove', user: item })}
                               disabled={mutating || protectedAccount}
                               title={item.isOwner ? 'O proprietário principal não pode ser removido' : isSelf ? 'Você não pode remover seu próprio acesso' : 'Remover acesso'}
-                              aria-label={`Remover acesso de ${item.email}`}
+                              aria-label={`Remover acesso de ${displayIdentity}`}
                             >
                               <Trash2 size={15} />
                             </button>
@@ -506,11 +535,15 @@ export default function AdminPage() {
 
         <AdminPreflightPanel token={sessionUser.token} onUnauthorized={logout} />
 
-        <AdminUsagePanel token={sessionUser.token} onUnauthorized={logout} />
+        <AdminUsagePanel token={sessionUser.token} onUnauthorized={logout} streamerMode={streamerMode} />
 
         <footer className="admin-footnote">
           <ShieldCheck size={13} />
-          <span>A autenticação permanece no Microsoft Entra ID. Este diretório controla somente quem pode acessar o Predictfy e com qual privilégio.</span>
+          <span>
+            {isLocalBypass
+              ? 'Sessão local de desenvolvimento ativa. Nenhum vínculo Microsoft foi criado ou alterado.'
+              : 'A autenticação permanece no Microsoft Entra ID. Este diretório controla somente quem pode acessar o Predictfy e com qual privilégio.'}
+          </span>
         </footer>
       </div>
 
@@ -527,6 +560,7 @@ export default function AdminPage() {
         busy={Boolean(activeMutation)}
         onCancel={() => setConfirmAction(null)}
         onConfirm={handleConfirmedAction}
+        streamerMode={streamerMode}
       />
     </main>
   );

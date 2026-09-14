@@ -10,6 +10,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { getAdminUsage } from '../services/adminUsage';
+import { protectedIdentity } from '../utils/privacy';
 
 const PERIODS = [
   { value: 7, label: '7D' },
@@ -64,7 +65,7 @@ function UsageMetric({ icon, value, label, detail, tone = 'teal' }) {
   );
 }
 
-export default function AdminUsagePanel({ token, onUnauthorized }) {
+export default function AdminUsagePanel({ token, onUnauthorized, streamerMode = false }) {
   const [days, setDays] = useState(30);
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -202,12 +203,14 @@ export default function AdminUsagePanel({ token, onUnauthorized }) {
                 </tr>
               </thead>
               <tbody>
-                {users.map((item) => (
+                {users.map((item) => {
+                  const visibleIdentity = streamerMode ? protectedIdentity(item.email) : item.email;
+                  return (
                   <tr key={item.id}>
                     <td data-label="IDENTIDADE">
                       <div className="admin-usage-identity">
-                        <span>{item.email.slice(0, 1).toUpperCase()}</span>
-                        <div><strong>{item.email}</strong><small>{item.role === 'admin' ? 'ADMINISTRADOR' : 'MEMBRO'} · {STATUS_LABELS[item.status] || item.status.toUpperCase()}</small></div>
+                        <span>{streamerMode ? '#' : item.email.slice(0, 1).toUpperCase()}</span>
+                        <div><strong>{visibleIdentity}</strong><small>{item.role === 'admin' ? 'ADMINISTRADOR' : 'MEMBRO'} · {STATUS_LABELS[item.status] || item.status.toUpperCase()}</small></div>
                       </div>
                     </td>
                     <td data-label="TOTAL"><strong className="admin-token-total">{formatNumber(item.total_tokens)}</strong></td>
@@ -217,7 +220,8 @@ export default function AdminUsagePanel({ token, onUnauthorized }) {
                     <td data-label="CACHE HIT">{formatNumber(item.cache_hits)}</td>
                     <td data-label="POUPADOS" className="admin-token-saved">{formatNumber(item.saved_tokens)}</td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
