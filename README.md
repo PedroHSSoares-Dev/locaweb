@@ -342,8 +342,8 @@ O arquivo `render.yaml` descreve a API. O workflow `.github/workflows/ci.yml` ex
 |--------|---------|------|
 | Sprint 1 | Apresentação executiva | 12/04/2026 |
 | Sprint 2 | Arquitetura + EDA + protótipos | 17/05/2026 |
-| Sprint 3 | MVP funcional (link da aplicação) | A definir |
-| Sprint 4 | Apresentação final + pitch (NEXT 2026) | A definir |
+| Sprint 3 | MVP funcional (link da aplicação) | 23/05/2026 |
+| Sprint 4 | Apresentação final + pitch (NEXT 2026) | 14/09/2026 |
 
 ---
 
